@@ -24,7 +24,12 @@
 
 #include <stddef.h>
 #include <assert.h>
+#ifdef HAVE_WCTYPE_H
 #include <wctype.h>
+#endif
+#ifdef HAVE_WCHAR_H
+#include <wchar.h>
+#endif
 
 #include "MathMLAttribute.hh"
 #include "StringTokenizer.hh"

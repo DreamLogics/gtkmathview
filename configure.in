@@ -105,8 +105,9 @@ AC_CHECK_PROG(HAVE_GLIB_CONFIG, glib-config, yes, no)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADER(wctype.h,,AC_MSG_ERROR(could not find required header file `wctype.h'))
-AC_CHECK_HEADER(iconv.h,,AC_MSG_ERROR(could not find required header file `iconv.h'))
+AC_CHECK_HEADERS(wctype.h,,AC_MSG_WARN(could not find required header file wctype.h))
+AC_CHECK_HEADERS(wchar.h,,AC_MSG_WARN(could not find required header file wchar.h))
+AC_CHECK_HEADER(iconv.h,,AC_MSG_ERROR(could not find required header file iconv.h))
 AC_CHECK_HEADERS(getopt.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.

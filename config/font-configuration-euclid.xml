@@ -129,12 +129,10 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x2288" index="224"/>
     <single code="0x2289" index="219"/>
     <single code="0x2289" index="225"/>
-    <single code="0x22E8" index="200"/>
+    <single code="0x22E8" index="0xc6"/>
     <single code="0x2AB5" index="196"/>
-    <single code="0x22E8" index="198"/>
-    <single code="0x22E9" index="201"/>
+    <single code="0x22E9" index="0xc7"/>
     <single code="0x2AB6" index="197"/>
-    <single code="0x22E9" index="199"/>
     <single code="0x228A" index="214"/>
     <single code="0x228A" index="220"/>
     <single code="0x228B" index="215"/>

@@ -20,10 +20,13 @@
 // http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
+// WARNING! the following #include has been moved here because otherwise
+// there's a compilation problem on HPUX systems (Stephanie Nile)
+#include <stdlib.h>
+// WARNING!
 #include <config.h>
 #include <assert.h>
 #include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 
 #include "minidom.h"

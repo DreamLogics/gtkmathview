@@ -23,7 +23,12 @@
 #include <config.h>
 #include <assert.h>
 #include <stdio.h>
+#ifdef HAVE_WCTYPE_H
 #include <wctype.h>
+#endif
+#ifdef HAVE_WCHAR_H
+#include <wchar.h>
+#endif
 
 #include "AFont.hh"
 #include "Layout.hh"

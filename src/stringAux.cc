@@ -23,7 +23,12 @@
 #include <config.h>
 #include <assert.h>
 #include <iconv.h>
+#ifdef HAVE_WCTYPE_H
 #include <wctype.h>
+#endif
+#ifdef HAVE_WCHAR_H
+#include <wchar.h>
+#endif
 #include <string.h>
 #include <malloc.h>
 
