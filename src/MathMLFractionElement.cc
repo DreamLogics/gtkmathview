@@ -241,6 +241,8 @@ MathMLFractionElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	    denomShift + denomBox.descent);
     box.tAscent = numShift + numBox.tAscent;
     box.tDescent = denomShift + denomBox.tDescent;
+    box.rBearing = scaledMax(numBox.rBearing, denomBox.rBearing);
+    box.width = scaledMax(box.width, box.rBearing);
   }
 
   ConfirmLayout(id);
@@ -272,7 +274,7 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
     scaled numXOffset = 0;
     switch (numAlign) {
     case FRAC_ALIGN_CENTER:
-      numXOffset = (box.width - numBox.width) / 2;
+      numXOffset = (box.width - scaledMax(numBox.width, numBox.rBearing)) / 2;
       break;
     case FRAC_ALIGN_RIGHT:
       numXOffset = box.width - numBox.width;
@@ -285,7 +287,7 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
     scaled denomXOffset = 0;
     switch (denomAlign) {
     case FRAC_ALIGN_CENTER:
-      denomXOffset = (box.width - denomBox.width) / 2;
+      denomXOffset = (box.width - scaledMax(denomBox.width, denomBox.rBearing)) / 2;
       break;
     case FRAC_ALIGN_RIGHT:
       denomXOffset = box.width - denomBox.width;

@@ -56,6 +56,7 @@ protected:
   void DoHorizontalStretchyLayoutAux(scaled, bool);
   void RenderVerticalStretchyChar(const DrawingArea&, const GraphicsContext*, scaled, scaled);
   void RenderHorizontalStretchyChar(const DrawingArea&, const GraphicsContext*, scaled, scaled);
+  void RenderMissingCharacter(const DrawingArea&, const GraphicsContext*);
 
   FontifiedChar fChar;
   Char          ch;

@@ -11,4 +11,8 @@
  <operator name="/" form="infix" stretchy="true" lspace="veryverythinmathspace" rspace="veryverythinmathspace"/>
  
  <operator name="&Sqrt;" form="prefix" stretchy="false" symmetric="false"/>
+
+ <operator name="&dd;" form="prefix" lspace="0em" rspace="0em"/>
+ <operator name="&DD;" form="prefix" lspace="0em" rspace="0em"/>
+ <operator name="&PartialD;" form="prefix" lspace="0em" rspace="0em"/>
 </dictionary>

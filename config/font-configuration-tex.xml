@@ -642,11 +642,11 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 
   <map id="tex-cmex">
     <stretchy code="(" direction="vertical">
-      <simple index="0000 0020 0040"/>
+      <simple index="0000 0020 0022 0040"/>
       <compound index="0060 -1 0100 0102"/>
     </stretchy>
     <stretchy code=")" direction="vertical">
-      <simple index="0001 0021 0041"/>
+      <simple index="0001 0021 0023 0041"/>
       <compound index="0061 -1 0101 0103"/>
     </stretchy> 
     <stretchy code="[" direction="vertical">

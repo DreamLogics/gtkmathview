@@ -76,7 +76,7 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
   } else {
     // no glyph found
     scaled sppex = env->GetScaledPointsPerEx();
-    box.Set(sppex, sppex, 0);
+    box.Set(sppex, (2 * sppex) / 3, sppex / 3);
   }
 }
 
@@ -327,7 +327,7 @@ MathMLCharNode::Render(const DrawingArea& area)
 
   if (IsStretchyFontified() && (layout->simple != NULLCHAR || layout->n > 0)) {
 #ifdef DEBUG
-    MathEngine::logger(LOG_DEBUG, "rendering stretchy char U+%04X with simple %02x and n %d\n", ch, layout->simple, layout->n);
+    MathEngine::logger(LOG_DEBUG, "rendering stretchy char U+%04X with simple %02x and n %d", ch, layout->simple, layout->n);
 #endif // DEBUG
     if (layout->sChar.charMap->GetStretch() == STRETCH_VERTICAL)
       RenderVerticalStretchyChar(area, gc, GetX(), GetY() + box.descent);
@@ -338,7 +338,7 @@ MathMLCharNode::Render(const DrawingArea& area)
   } else {
     // no glyph available
     if (MathEngine::DrawMissingCharacter())
-      area.DrawBoundingBox(gc, GetX(), GetY(), box);
+      RenderMissingCharacter(area, gc);
   }
 
   // area.DrawBoundingBox(gc, GetX(), GetY(), box);
@@ -467,6 +467,16 @@ MathMLCharNode::RenderHorizontalStretchyChar(const DrawingArea& area,
   if (nch[SC_LAST] != NULLCHAR) {
     area.DrawChar(gc, font, x, y, nch[SC_LAST]);
   }
+}
+
+void
+MathMLCharNode::RenderMissingCharacter(const DrawingArea& area, const GraphicsContext* gc)
+{
+  assert(gc != NULL);
+  area.MoveTo(GetX(), GetY());
+  area.DrawLineToDelta(gc, 0, box.descent / 2);
+  area.DrawLineToDelta(gc, box.width, 0);
+  area.DrawLineToDelta(gc, 0, - box.descent / 2);
 }
 
 bool
