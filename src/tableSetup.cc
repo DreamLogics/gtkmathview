@@ -32,6 +32,7 @@
 #include "MathMLTableElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLTableCellElement.hh"
+#include "MathMLLabeledTableRowElement.hh"
 
 void
 MathMLTableElement::Setup(RenderingEnvironment* env)
@@ -75,7 +76,7 @@ MathMLTableElement::SetupCellSpanning(RenderingEnvironment* env)
   for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
       assert(i() != 0);
-      assert(i()->IsA() == TAG_MTR || i()->IsA() == TAG_MLABELEDTR);
+      assert(is_a<MathMLTableRowElement>(i()));
 
       Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(i());
       assert(mtr != 0);
@@ -146,13 +147,13 @@ MathMLTableElement::CalcTableSize()
   for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
     {
       assert(p() != 0);
-      assert(p()->IsA() == TAG_MTR || p()->IsA() == TAG_MLABELEDTR);
+      assert(is_a<MathMLTableRowElement>(p()));
 
       Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(p());
       assert(mtr != 0);
 
       Iterator< Ptr<MathMLElement> > q(mtr->content);
-      if (mtr->IsA() == TAG_MLABELEDTR)
+      if (is_a<MathMLLabeledTableRowElement>(mtr))
 	{
 	  assert(q.More());
 	  q.Next();
@@ -161,7 +162,7 @@ MathMLTableElement::CalcTableSize()
       while (q.More())
 	{
 	  assert(q() != 0);
-	  assert(q()->IsA() == TAG_MTD);
+	  assert(is_a<MathMLTableCellElement>(q()));
 
 	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(q());
 	  assert(mtd != 0);
@@ -209,13 +210,13 @@ MathMLTableElement::SetupCells()
   for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
     {
       assert(p() != 0);
-      assert(p()->IsA() == TAG_MTR || p()->IsA() == TAG_MLABELEDTR);
+      assert(is_a<MathMLTableRowElement>(p()));
 
       Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(p());
       assert(mtr != 0);
 
       Iterator< Ptr<MathMLElement> > q(mtr->content);
-      if (mtr->IsA() == TAG_MLABELEDTR)
+      if (is_a<MathMLLabeledTableRowElement>(mtr))
 	{
 	  assert(q.More());
 	  q.Next();
@@ -224,7 +225,7 @@ MathMLTableElement::SetupCells()
       while (q.More())
 	{
 	  assert(q() != 0);
-	  assert(q()->IsA() == TAG_MTD);
+	  assert(is_a<MathMLTableCellElement>(q()));
 
 	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(q());
 	  assert(mtd != 0);
@@ -396,7 +397,7 @@ MathMLTableElement::SetupRows(RenderingEnvironment* env)
   for (Iterator< Ptr<MathMLElement> > rowElem(content); rowElem.More(); rowElem.Next())
     {
       assert(i < nRows);
-      assert(rowElem()->IsA() == TAG_MTR || rowElem()->IsA() == TAG_MLABELEDTR);
+      assert(is_a<MathMLTableRowElement>(rowElem()));
 
       Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(rowElem());
       assert(mtr != 0);
@@ -474,7 +475,7 @@ MathMLTableElement::SetupLabels()
   bool hasLabels = false;
   for (i = 0; i < nRows && !hasLabels; i++) {
     assert(row[i].mtr != NULL);
-    hasLabels = (row[i].mtr->IsA() == TAG_MLABELEDTR);
+    hasLabels = is_a<MathMLLabeledTableRowElement>(row[i].mtr);
   }
 
   if (!hasLabels) return;
