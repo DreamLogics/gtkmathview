@@ -61,6 +61,7 @@ libgtkmathview_la_SOURCES = \
   MathMLActionElement.cc \
   MathMLAlignGroupElement.cc \
   MathMLAlignMarkElement.cc \
+  MathMLApplyFunctionNode.cc \
   MathMLAttribute.cc \
   MathMLAttributeList.cc \
   MathMLCharNode.cc \
@@ -77,6 +78,7 @@ libgtkmathview_la_SOURCES = \
   MathMLFrame.cc \
   MathMLGlyphNode.cc \
   MathMLHorizBarNode.cc \
+  MathMLInvisibleTimesNode.cc \
   MathMLMarkNode.cc \
   MathMLMultiScriptsElement.cc \
   MathMLNode.cc \
@@ -167,6 +169,7 @@ noinst_HEADERS = \
   MathMLActionElement.hh \
   MathMLAlignGroupElement.hh \
   MathMLAlignMarkElement.hh \
+  MathMLApplyFunctionNode.hh \
   MathMLAttribute.hh \
   MathMLAttributeList.hh \
   MathMLCharNode.hh \
@@ -183,6 +186,7 @@ noinst_HEADERS = \
   MathMLFrame.hh \
   MathMLGlyphNode.hh \
   MathMLHorizBarNode.hh \
+  MathMLInvisibleTimesNode.hh \
   MathMLMarkNode.hh \
   MathMLMultiScriptsElement.hh \
   MathMLNode.hh \

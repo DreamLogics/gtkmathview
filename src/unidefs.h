@@ -23,7 +23,10 @@
 #ifndef unidefs_h
 #define unidefs_h
 
-#define U_OVERLINE  0x0305
-#define U_UNDERLINE 0x0332
+#define U_OVERLINE       0x0305
+#define U_UNDERLINE      0x0332
+
+#define U_APPLYFUNCTION  0x2061
+#define U_INVISIBLETIMES 0x2062
 
 #endif // unidefs_h

@@ -20,22 +20,20 @@
 // http://www.cs.unibo.it/helm/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#ifndef traverseAux_hh
-#define traverseAux_hh
+#ifndef MathMLInvisibleTimesNode_hh
+#define MathMLInvisibleTimesNode_hh
 
-#include <minidom.h>
+#include "MathMLSpaceNode.hh"
 
-#include "CharMap.hh"
+class MathMLInvisibleTimesNode: public MathMLSpaceNode {
+public:
+  MathMLInvisibleTimesNode(void);
+  virtual void Setup(class RenderingEnvironment*);
+  virtual void DoLayout(void);
+  virtual ~MathMLInvisibleTimesNode();
 
-class MathMLElement*         findEmbellishedOperatorRoot(class MathMLElement*);
-class MathMLOperatorElement* findCoreOperator(class MathMLElement*);
-class MathMLOperatorElement* findStretchyOperator(class MathMLElement*);
-class MathMLOperatorElement* findStretchyOperator(class MathMLElement*, StretchId);
-class MathMLElement*         findCommonAncestor(class MathMLElement*, class MathMLElement*);
-class MathMLActionElement*   findActionElement(class MathMLElement*);
-mDOMNodeRef                  findDOMNode(class MathMLElement*);
-class MathMLElement*         findMathMLElement(mDOMNodeRef);
-class MathMLElement*         findRightSibling(class MathMLElement*);
-class MathMLElement*         findLeftSibling(class MathMLElement*);
+protected:
+  scaled sppm;
+};
 
-#endif // traverseAux_hh
+#endif // MathMLInvisibleTimesNode_hh

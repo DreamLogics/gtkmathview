@@ -226,3 +226,29 @@ findMathMLElement(mDOMNodeRef node)
 
   return elem;
 }
+
+MathMLElement*
+findRightSibling(MathMLElement* elem)
+{
+  mDOMNodeRef p = findDOMNode(elem);
+  if (p == NULL) return NULL;
+
+  for (p = mdom_node_get_next_sibling(p);
+       p != NULL && mdom_node_get_user_data(p) == NULL;
+       p = mdom_node_get_next_sibling(p)) ;
+
+  return (p != NULL) ? findMathMLElement(p) : NULL;
+}
+
+MathMLElement*
+findLeftSibling(MathMLElement* elem)
+{
+  mDOMNodeRef p = findDOMNode(elem);
+  if (p == NULL) return NULL;
+
+  for (p = mdom_node_get_prev_sibling(p);
+       p != NULL && mdom_node_get_user_data(p) == NULL;
+       p = mdom_node_get_prev_sibling(p)) ;
+
+  return (p != NULL) ? findMathMLElement(p) : NULL;
+}

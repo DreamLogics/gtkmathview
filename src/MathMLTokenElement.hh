@@ -57,6 +57,7 @@ public:
   RGBValue       GetColor(void) const { return color; }
 
   const Container<class MathMLTextNode*>& GetContent(void) const { return content; }
+  unsigned       GetRawContentLength(void) const { return rawContentLength; }
 
 protected:
   void Free(void);

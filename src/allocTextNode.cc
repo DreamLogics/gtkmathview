@@ -31,15 +31,27 @@
 #include "MathMLCharNode.hh"
 #include "MathMLHorizBarNode.hh"
 #include "MathMLCombinedCharNode.hh"
+#include "MathMLApplyFunctionNode.hh"
+#include "MathMLInvisibleTimesNode.hh"
 #include "MathMLStringNode.hh"
 
 MathMLTextNode*
 allocCharNode(Char ch)
 {
-  if (ch == U_UNDERLINE || ch == U_OVERLINE)
+  switch (ch) {
+  case U_APPLYFUNCTION:
+    return new MathMLApplyFunctionNode();
+   
+  case U_INVISIBLETIMES:
+    return new MathMLInvisibleTimesNode();
+
+  case U_UNDERLINE:
+  case U_OVERLINE:
     return new MathMLHorizBarNode(ch);
-  else
+
+  default:
     return new MathMLCharNode(ch);
+  }
 }
 
 MathMLTextNode*
