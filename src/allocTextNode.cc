@@ -40,24 +40,24 @@ allocCharNode(Char ch)
 {
   switch (ch) {
   case U_APPLYFUNCTION:
-    return new MathMLApplyFunctionNode();
+    return MathMLApplyFunctionNode::create();
    
   case U_INVISIBLETIMES:
-    return new MathMLInvisibleTimesNode();
+    return MathMLInvisibleTimesNode::create();
 
   case U_UNDERLINE:
   case U_OVERLINE:
-    return new MathMLHorizBarNode(ch);
+    return MathMLHorizBarNode::create(ch);
 
   default:
-    return new MathMLCharNode(ch);
+    return MathMLCharNode::create(ch);
   }
 }
 
 MathMLTextNode*
 allocCombinedCharNode(Char ch, Char cch)
 {
-  return new MathMLCombinedCharNode(ch, cch);
+  return MathMLCombinedCharNode::create(ch, cch);
 }
 
 MathMLTextNode*
@@ -76,7 +76,7 @@ allocTextNode(const String** str)
     node = allocCharNode(s->GetChar(0));
     delete s;
     *str = NULL;
-  } else if (len > 1) node = new MathMLStringNode(s);
+  } else if (len > 1) node = MathMLStringNode::create(s);
 
   return node;
 }

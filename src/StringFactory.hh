@@ -25,13 +25,16 @@
 
 #include "Container.hh"
 
-class StringFactory {
+class StringFactory
+{
 public:
   StringFactory(void);
   ~StringFactory();
 
-  void    Append(const class String*);
-  String* Pack(void) const;
+  void     Append(Char);
+  void     Append(const class String*);
+  unsigned GetLength(void) const;
+  String*  Pack(void) const;
 
 private:
   Container<const class String*> content;

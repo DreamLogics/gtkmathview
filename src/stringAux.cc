@@ -188,3 +188,17 @@ allocString(const String& str, unsigned offset, unsigned length)
 
   return sValue;
 }
+
+String*
+allocString(const Char* s, unsigned length)
+{
+  assert(length >= 1);
+
+  String* sValue = NULL;
+  Char big = getBiggestChar(s, length);
+  if      (isPlain(big)) sValue = new StringU<Char8>(s, length);
+  else if (isUnicode16(big)) sValue = new StringU<Char16>(s, length);
+  else sValue = new StringU<Char32>(s, length);
+
+  return sValue;
+}

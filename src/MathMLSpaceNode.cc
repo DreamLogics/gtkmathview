@@ -60,3 +60,14 @@ MathMLSpaceNode::IsSpace() const
   return true;
 }
 
+unsigned
+MathMLSpaceNode::GetLogicalContentLength() const
+{
+  return 0;
+}
+
+String*
+MathMLSpaceNode::GetRawContent() const
+{
+  return NULL;
+}

@@ -26,7 +26,8 @@
 #include "defs.h"
 #include "Char.hh"
 
-class String {
+class String
+{
 public:
   String(void);
   virtual ~String();

@@ -23,8 +23,9 @@
 #include <config.h>
 #include <assert.h>
 
-#include "CharMapper.hh"
 #include "Globals.hh"
+#include "stringAux.hh"
+#include "CharMapper.hh"
 #include "MathMLElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLCombinedCharNode.hh"
@@ -32,12 +33,13 @@
 MathMLCombinedCharNode::MathMLCombinedCharNode(Char c, Char cc) :
   MathMLCharNode(c)
 {
-  cChar = new MathMLCharNode(cc);
+  cChar = MathMLCharNode::create(cc);
 }
 
 MathMLCombinedCharNode::~MathMLCombinedCharNode()
 {
-  delete cChar;
+  assert(cChar !=  NULL);
+  cChar->Release();
   cChar = NULL;
 }
 
@@ -114,4 +116,17 @@ bool
 MathMLCombinedCharNode::IsCombinedChar() const
 {
   return true;
+}
+
+String*
+MathMLCombinedCharNode::GetRawContent() const
+{
+  assert(cChar != NULL);
+
+  Char c[2];
+
+  c[0] = ch;
+  c[1] = cChar->GetChar();
+
+  return allocString(c, 2);
 }

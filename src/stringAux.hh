@@ -38,6 +38,7 @@ String* allocString(const GMetaDOM::DOMString&);
 #endif
 
 String* allocString(const String&, unsigned, unsigned);
+String* allocString(const Char*, unsigned);
 
 #endif // stringAux_hh
 

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "unidefs.h"
+#include "stringAux.hh"
 #include "traverseAux.hh"
 #include "BoundingBox.hh"
 #include "MathMLElement.hh"
@@ -71,7 +72,7 @@ MathMLInvisibleTimesNode::DoLayout()
     MathMLTokenElement* nextToken = TO_TOKEN(next);
     assert(prevToken != NULL && nextToken != NULL);
     
-    if (prevToken->GetRawContentLength() <= 1 && nextToken->GetRawContentLength() <= 1) return;
+    if (prevToken->GetLogicalContentLength() <= 1 && nextToken->GetLogicalContentLength() <= 1) return;
     
     // FIXME: the following constants should be defined somewhere
     box.Set((sppm * 5) / 18, 0, 0);
@@ -80,4 +81,17 @@ MathMLInvisibleTimesNode::DoLayout()
   } else if (prev->IsA() == TAG_MFRAC || next->IsA() == TAG_MFRAC) {
     box.Set((sppm * 4) / 18, 0, 0);
   }
+}
+
+unsigned
+MathMLInvisibleTimesNode::GetLogicalContentLength() const
+{
+  return 1;
+}
+
+String*
+MathMLInvisibleTimesNode::GetRawContent() const
+{
+  Char ch = U_APPLYFUNCTION;
+  return allocString(&ch, 1);
 }

@@ -55,7 +55,7 @@ public:
   virtual void 	 Freeze(void);
   virtual void 	 Render(const class DrawingArea&);
 
-  virtual void   Append(const String*);
+  void           Append(const String*);
   void           Append(class MathMLTextNode*);
 
   virtual bool   IsLast(void) const;
@@ -71,10 +71,11 @@ public:
   scaled         GetDecimalPointEdge(void) const;
 
   RGBValue       GetColor(void) const { return color; }
-  virtual const class MathMLCharNode* GetCharNode(void) const;
 
+  virtual const class MathMLCharNode* GetCharNode(void) const;
   const Container<class MathMLTextNode*>& GetContent(void) const { return content; }
-  unsigned       GetRawContentLength(void) const { return rawContentLength; }
+  String*        GetRawContent(void) const;
+  unsigned       GetLogicalContentLength(void) const;
 
 protected:
   static class MathMLTextNode* SubstituteMGlyphElement(const GMetaDOM::Element&);
@@ -87,7 +88,6 @@ protected:
   // use the Append methods. For read-only operations there is
   // the access method GetContent
   Container<class MathMLTextNode*> content;
-  unsigned rawContentLength;
   scaled   sppm;
   RGBValue color;
 };

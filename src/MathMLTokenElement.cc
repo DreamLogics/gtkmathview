@@ -40,6 +40,7 @@
 #include "Globals.hh"
 #include "traverseAux.hh"
 #include "ShapeFactory.hh"
+#include "StringFactory.hh"
 #include "allocTextNode.hh"
 #include "StringUnicode.hh"
 #include "MathMLMarkNode.hh"
@@ -57,14 +58,12 @@
 
 MathMLTokenElement::MathMLTokenElement()
 {
-  rawContentLength = 0;
 }
 
 #if defined(HAVE_GMETADOM)
 MathMLTokenElement::MathMLTokenElement(const GMetaDOM::Element& node)
   : MathMLElement(node)
 {
-  rawContentLength = 0;
 }
 #endif
 
@@ -76,7 +75,12 @@ MathMLTokenElement::~MathMLTokenElement()
 void
 MathMLTokenElement::Free()
 {
-  for (Iterator<MathMLTextNode*> i(content); i.More(); i.Next()) delete i();
+  while (content.GetSize() > 0)
+    {
+      MathMLTextNode* node = content.RemoveFirst();
+      assert(node != NULL);
+      node->Release();
+    }
 }
 
 const AttributeSignature*
@@ -131,24 +135,19 @@ MathMLTokenElement::Append(const String* s)
 	last->AddSpacing(spacing);
 	last->AddBreakability(bid);
       } else
-	node = new MathMLSpaceNode(spacing, bid);
+	node = MathMLSpaceNode::create(spacing, bid);
       i += len;
-      rawContentLength += len;
       lastBreak = true;
     } else if (i + 1 < sLength && isCombining(s->GetChar(i + 1))) {
       node = allocCombinedCharNode(s->GetChar(i), s->GetChar(i + 1));
       i += 2;
-      rawContentLength++;
 
       if (last != NULL && !lastBreak) last->SetBreakability(BREAK_NO);
       lastBreak = false;
 #if 0
     } else if (iswalnum(s->GetChar(i))) {
       unsigned start = i;
-      while (i < sLength && iswalnum(s->GetChar(i))) {
-	i++;
-	rawContentLength++;
-      }
+      while (i < sLength && iswalnum(s->GetChar(i))) i++;
       assert(start < i);
 
       const String* sText = allocString(*s, start, i - start);
@@ -160,14 +159,12 @@ MathMLTokenElement::Append(const String* s)
     } else if (!isVariant(s->GetChar(i))) {
       node = allocCharNode(s->GetChar(i));
       i++;
-      rawContentLength++;
 
       if (last != NULL && !lastBreak) last->SetBreakability(BREAK_NO);
       lastBreak = false;
     } else {
       Globals::logger(LOG_WARNING, "ignoring variant modifier char U+%04x", s->GetChar(i));
       i++;
-      rawContentLength++;
     }
     
     if (node != NULL) {
@@ -329,7 +326,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
       Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
       env->SetFontStyle(ToFontStyleId(value));
     } else if (IsA() == TAG_MI) {
-      if (rawContentLength == 1) {
+      if (GetLogicalContentLength() == 1) {
 	MathMLTextNode* node = content.GetFirst();
 	assert(node != NULL);
 
@@ -639,7 +636,7 @@ MathMLTokenElement::SubstituteMGlyphElement(const GMetaDOM::Element& node)
 
   if (alt.isEmpty() || fontFamily.isEmpty() || index.isEmpty()) {
     Globals::logger(LOG_WARNING, "malformed `mglyph' element (some required attribute is missing)\n");
-    return new MathMLCharNode('?');
+    return MathMLCharNode::create('?');
   }
 
   char* s_index = index.toC();
@@ -676,11 +673,44 @@ MathMLTokenElement::SubstituteAlignMarkElement(const GMetaDOM::Element& node)
     else {
       char* s_edge = edge.toC();
       Globals::logger(LOG_WARNING,
-			 "malformed `malignmark' element, attribute `edge' has invalid value `%s' (ignored)",
-			 s_edge);
+		      "malformed `malignmark' element, attribute `edge' has invalid value `%s' (ignored)",
+		      s_edge);
       delete [] s_edge;
     }
   }
 
-  return new MathMLMarkNode(align);
+  return MathMLMarkNode::create(align);
+}
+
+String*
+MathMLTokenElement::GetRawContent() const
+{
+  StringFactory c;
+
+  for (Iterator<MathMLTextNode*> i(content); i.More(); i.Next())
+    {
+      assert(i() != NULL);
+      String* s = i()->GetRawContent();
+      if (s != NULL)
+	{
+	  c.Append(s);
+	  delete s;
+	}
+    }
+
+  return c.Pack();
+}
+
+unsigned
+MathMLTokenElement::GetLogicalContentLength() const
+{
+  unsigned len = 0;
+
+  for (Iterator<MathMLTextNode*> i(content); i.More(); i.Next())
+    {
+      assert(i() != NULL);
+      len += i()->GetLogicalContentLength();
+    }
+
+  return len;
 }

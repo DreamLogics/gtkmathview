@@ -27,11 +27,18 @@
 
 class MathMLInvisibleTimesNode: public MathMLSpaceNode
 {
-public:
+protected:
   MathMLInvisibleTimesNode(void);
-  virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(void);
   virtual ~MathMLInvisibleTimesNode();
+
+public:
+  static MathMLInvisibleTimesNode* create(void) { return new MathMLInvisibleTimesNode(); }
+
+  virtual void     Setup(class RenderingEnvironment*);
+  virtual void     DoLayout(void);
+
+  virtual unsigned GetLogicalContentLength(void) const;
+  virtual String*  GetRawContent(void) const;
 
 protected:
   scaled sppm;

@@ -25,6 +25,7 @@
 
 #include "String.hh"
 #include "Iterator.hh"
+#include "stringAux.hh"
 #include "StringFactory.hh"
 #include "StringUnicode.hh"
 
@@ -34,10 +35,17 @@ StringFactory::StringFactory()
 
 StringFactory::~StringFactory()
 {
-  while (content.GetSize() > 0) {
-    const String* s = content.RemoveFirst();
-    delete s;
-  }
+  while (content.GetSize() > 0)
+    {
+      const String* s = content.RemoveFirst();
+      delete s;
+    }
+}
+
+void
+StringFactory::Append(Char ch)
+{
+  content.Append(allocString(&ch, 1));
 }
 
 void
@@ -48,18 +56,33 @@ StringFactory::Append(const String* s)
   content.Append(s->Clone());
 }
 
+unsigned
+StringFactory::GetLength() const
+{
+  unsigned len = 0;
+
+  for (Iterator<const String*> s(content); s.More(); s.Next())
+    {
+      assert(s() != NULL);
+      len += s()->GetLength();
+    }  
+  
+  return len;
+}
+
 String*
 StringFactory::Pack() const
 {
   Char big = 0;
   unsigned len = 0;
 
-  for (Iterator<const String*> s1(content); s1.More(); s1.Next()) {
-    assert(s1() != NULL);
-    Char sBig = s1()->GetBiggestChar();
-    if (sBig > big) big = sBig;
-    len += s1()->GetLength();
-  }
+  for (Iterator<const String*> s1(content); s1.More(); s1.Next())
+    {
+      assert(s1() != NULL);
+      Char sBig = s1()->GetBiggestChar();
+      if (sBig > big) big = sBig;
+      len += s1()->GetLength();
+    }
 
   String* res = NULL;
   if (isPlain(big)) res = new StringU<Char8>(len);
@@ -68,13 +91,15 @@ StringFactory::Pack() const
 
   unsigned offset = 0;
 
-  for (Iterator<const String*> s2(content); s2.More(); s2.Next()) {
-    assert(s2() != NULL);
-    for (unsigned i = 0; i < s2()->GetLength(); i++) {
-      res->SetChar(offset, s2()->GetChar(i));
-      offset++;
+  for (Iterator<const String*> s2(content); s2.More(); s2.Next())
+    {
+      assert(s2() != NULL);
+      for (unsigned i = 0; i < s2()->GetLength(); i++)
+	{
+	  res->SetChar(offset, s2()->GetChar(i));
+	  offset++;
+	}
     }
-  }
    
   return res;
 }

@@ -91,3 +91,15 @@ MathMLGlyphNode::Render(const DrawingArea& area)
 
   ResetDirty();
 }
+
+unsigned
+MathMLGlyphNode::GetLogicalContentLength() const
+{
+  return 1;
+}
+
+String*
+MathMLGlyphNode::GetRawContent() const
+{
+  return NULL;
+}

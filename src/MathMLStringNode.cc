@@ -109,3 +109,17 @@ MathMLStringNode::GetDecimalPointEdge() const
 
   return GetX() + fContent->WidthTo(i);
 }
+
+unsigned
+MathMLStringNode::GetLogicalContentLength() const
+{
+  assert(content != NULL);
+  return content->GetLength();
+}
+
+String*
+MathMLStringNode::GetRawContent() const
+{
+  assert(content != NULL);
+  return content->Clone();
+}

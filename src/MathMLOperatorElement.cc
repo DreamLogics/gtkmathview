@@ -58,8 +58,6 @@ MathMLOperatorElement::Init()
 {
   eOp = NULL;
   defaults = NULL;
-  nameFactory = new StringFactory;
-  operatorName = NULL;
 
   fence = separator = stretchy = symmetric = infiniteMaxSize = accent = movableLimits = 0;
   forcedFence = forcedSeparator = forcedSymmetric = 0;
@@ -67,7 +65,11 @@ MathMLOperatorElement::Init()
 
 MathMLOperatorElement::~MathMLOperatorElement()
 {
-  delete operatorName;
+  if (eOp != NULL)
+    {
+      eOp->Release();
+      eOp = NULL;
+    }
 }
 
 const AttributeSignature*
@@ -100,50 +102,38 @@ MathMLOperatorElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLOperatorElement::Append(const String* s)
-{
-  assert(s != NULL);
-  assert(nameFactory != NULL);
-
-  if (s->GetLength() == 0) return;
-
-  nameFactory->Append(s);
-  MathMLTokenElement::Append(s);
-}
-
-void
 MathMLOperatorElement::Normalize()
 {
-  MathMLElement* root = findEmbellishedOperatorRoot(this);
-  assert(root != NULL);
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+      MathMLElement* root = findEmbellishedOperatorRoot(this);
+      assert(root != NULL);
 
-  MathMLElement* p = root->GetParent();
-  assert(p != NULL);
+      MathMLElement* p = root->GetParent();
+      assert(p != NULL);
 
-  // at the normalization step it is assumed that the content of this
-  // operator is fixed. The StringFactory is packed into a single string
-  // and no further Append is allowed
-  assert(nameFactory != NULL);
-  operatorName = nameFactory->Pack();
-  delete nameFactory;
-  nameFactory = NULL;
+      if (eOp == NULL)
+	{
+	  MathMLElement* op = MathMLEmbellishedOperatorElement::create(this);
+	  assert(op != NULL);
+	  eOp = TO_EMBELLISHED_OPERATOR(op);
+	}
+      assert(eOp != NULL);
 
-  MathMLEmbellishedOperatorElement* op = MathMLEmbellishedOperatorElement::create(this);
-  op->SetParent(p);
-  op->SetChild(root);
-  eOp = op;
+      eOp->SetChild(root);
 
-  // now we have to substitute the root of the embellished operator
-  // with the embellished operator object just created
-  assert(p->IsContainer());
-  MathMLContainerElement* pContainer = TO_CONTAINER(p);
-  assert(pContainer != NULL);
-  pContainer->Replace(root, eOp);
-  // Important!!! The root of the embellished operator now has
-  // the "embellishment" as parent
-  root->SetParent(eOp);
+      // now we have to substitute the root of the embellished operator
+      // with the embellished operator object just created
+      assert(p->IsContainer());
+      MathMLContainerElement* pContainer = TO_CONTAINER(p);
+      assert(pContainer != NULL);
+      pContainer->Replace(root, eOp);
 
-  MathMLTokenElement::Normalize();
+      root->Release();
+      p->Release();
+
+      MathMLTokenElement::Normalize();
+    }
 }
 
 void
@@ -164,9 +154,13 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
   const MathMLAttributeList* prefix  = NULL;
   const MathMLAttributeList* infix   = NULL;
   const MathMLAttributeList* postfix = NULL;
-  
+
+  String* operatorName = GetRawContent();
   if (operatorName != NULL)
-    Globals::dictionary.Search(operatorName, &prefix, &infix, &postfix);
+    {
+      Globals::dictionary.Search(operatorName, &prefix, &infix, &postfix);
+      delete operatorName;
+    }
 
   if      (form == OP_FORM_PREFIX && prefix != NULL) defaults = prefix;
   else if (form == OP_FORM_INFIX && infix != NULL) defaults = infix;
@@ -311,10 +305,13 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
-  if (!content.GetFirst()->IsStretchyChar()) {
-    Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", operatorName->GetChar(0));
-    return;
-  }
+  if (!content.GetFirst()->IsStretchyChar())
+    {
+      MathMLCharNode* cNode = TO_CHAR(content.GetFirst());
+      assert(cNode != NULL);
+      Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
+      return;
+    }
 
   MathMLCharNode* sNode = TO_CHAR(content.GetFirst());
   assert(sNode != NULL);
@@ -369,10 +366,13 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
-  if (!content.GetFirst()->IsStretchyChar()) {
-    Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", operatorName->GetChar(0));
-    return;
-  }
+  if (!content.GetFirst()->IsStretchyChar())
+    {
+      MathMLCharNode* cNode = TO_CHAR(content.GetFirst());
+      assert(cNode != NULL);
+      Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
+      return;
+    }
 
   MathMLCharNode* sNode = TO_CHAR(content.GetFirst());
   assert(sNode != NULL);

@@ -35,9 +35,12 @@ public:
   static MathMLGlyphNode* create(const char* alt, const char* family, char ch)
   { return new MathMLGlyphNode(alt, family, ch); }
 
-  virtual void 	 Setup(class RenderingEnvironment*);
-  virtual void 	 DoLayout(void);
-  virtual void 	 Render(const DrawingArea&);
+  virtual void 	   Setup(class RenderingEnvironment*);
+  virtual void 	   DoLayout(void);
+  virtual void 	   Render(const DrawingArea&);
+
+  virtual String*  GetRawContent(void) const;
+  virtual unsigned GetLogicalContentLength(void) const;
 
 protected:
   char*        name;

@@ -26,30 +26,38 @@
 #include "CharMap.hh"
 #include "MathMLTextNode.hh"
 
-class MathMLCharNode: public MathMLTextNode {
-public:
+class MathMLCharNode: public MathMLTextNode
+{
+protected:
   MathMLCharNode(Char);
-  virtual void 	 Setup(class RenderingEnvironment*);
-  virtual void 	 DoLayout(void);
-  virtual void 	 Render(const DrawingArea&);
   virtual ~MathMLCharNode();
 
-  virtual bool   IsChar(void) const;
-  virtual bool   IsStretchyChar(void) const;
-  virtual bool   HasDecimalPoint(void) const;
-  virtual scaled GetDecimalPointEdge(void) const;
+public:
+  static MathMLCharNode* create(Char c) { return new MathMLCharNode(c); }
 
-  bool           IsFontified(void) const;
-  bool           IsStretchyFontified(void) const;
+  virtual void 	   Setup(class RenderingEnvironment*);
+  virtual void 	   DoLayout(void);
+  virtual void 	   Render(const DrawingArea&);
 
-  virtual void   SetDefaultLargeGlyph(bool);
-  virtual void   DoVerticalStretchyLayout(scaled, scaled, scaled, bool);
-  virtual void   DoHorizontalStretchyLayout(scaled, bool);
+  Char             GetChar(void) const { return ch; }
+  virtual String*  GetRawContent(void) const;
+  virtual unsigned GetLogicalContentLength(void) const;
+
+  virtual bool     IsChar(void) const;
+  virtual bool     IsStretchyChar(void) const;
+  virtual bool     HasDecimalPoint(void) const;
+  virtual scaled   GetDecimalPointEdge(void) const;
+
+  bool             IsFontified(void) const;
+  bool             IsStretchyFontified(void) const;
+
+  virtual void     SetDefaultLargeGlyph(bool);
+  virtual void     DoVerticalStretchyLayout(scaled, scaled, scaled, bool);
+  virtual void     DoHorizontalStretchyLayout(scaled, bool);
   virtual StretchId GetStretch(void) const;
-  Char           GetChar(void) const { return ch; }
-  const AFont*   GetFont(void) const { return fChar.font; }
+  const AFont*     GetFont(void) const { return fChar.font; }
 
-  bool           CombineWith(const MathMLCharNode*, scaled&, scaled&) const;
+  bool             CombineWith(const MathMLCharNode*, scaled&, scaled&) const;
 
 protected:
   void DoVerticalStretchyLayoutAux(scaled, bool);

@@ -52,8 +52,6 @@ public:
   virtual void Setup(class RenderingEnvironment*);
   virtual void Normalize(void);
 
-  virtual void Append(const String*);
-
   virtual bool IsOperator(void) const;
   virtual bool IsBreakable(void) const;
   bool         IsStretchy(void) const { return stretchy != 0; }
@@ -80,7 +78,6 @@ public:
   void         HorizontalStretchTo(scaled, bool = false);
   void         VerticalStretchTo(scaled, scaled, bool = false);
 
-  const String* GetOperatorName(void) const { return operatorName; }
   virtual MathMLOperatorElement* GetCoreOperator(void);
 
 private:
@@ -89,12 +86,9 @@ private:
 					 const class RenderingEnvironment*) const;
   void ParseLimitValue(const Value*, const class RenderingEnvironment*, float&, scaled&);
 
-  MathMLElement*          eOp; // ptr to the root of the embellished operator
+  class MathMLEmbellishedOperatorElement* eOp; // ptr to the root of the embellished operator
 
-  class StringFactory*    nameFactory;
-  const String*           operatorName;
-
-  OperatorFormId          form;
+  OperatorFormId form;
   const class MathMLAttributeList* defaults;
 
   scaled axis;

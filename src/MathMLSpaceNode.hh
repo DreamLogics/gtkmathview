@@ -27,14 +27,22 @@
 
 class MathMLSpaceNode: public MathMLTextNode
 {
-public:
-  MathMLSpaceNode(int = 0, BreakId = BREAK_AUTO);
-  virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(void);
-  virtual void Render(const DrawingArea&);
+protected:
+  MathMLSpaceNode(int, BreakId);
   virtual ~MathMLSpaceNode();
 
-  virtual bool IsSpace(void) const;
+public:
+  static MathMLSpaceNode* create(int s = 0, BreakId bid = BREAK_AUTO)
+  { return new MathMLSpaceNode(s, bid); }
+
+  virtual void     Setup(class RenderingEnvironment*);
+  virtual void     DoLayout(void);
+  virtual void     Render(const DrawingArea&);
+
+  virtual unsigned GetLogicalContentLength(void) const;
+  virtual String*  GetRawContent(void) const;
+
+  virtual bool     IsSpace(void) const;
 };
 
 #endif // MathMLSpaceNode_hh

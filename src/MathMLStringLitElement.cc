@@ -47,6 +47,17 @@ MathMLStringLitElement::MathMLStringLitElement(const GMetaDOM::Element& node)
 
 MathMLStringLitElement::~MathMLStringLitElement()
 {
+  if (lQuote != NULL)
+    {
+      lQuote->Release();
+      lQuote = NULL;
+    }
+
+  if (rQuote != NULL)
+    {
+      rQuote->Release();
+      rQuote = NULL;
+    }
 }
 
 const AttributeSignature*
@@ -80,16 +91,16 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
 
   s = GetAttribute(ATTR_LQUOTE, env);
   assert(s != NULL);
-  if (s->GetLength() == 1) lQuote = new MathMLCharNode(s->GetChar(0));
-  else if (s->GetLength() > 1) lQuote = new MathMLStringNode(s->Clone());
+  if (s->GetLength() == 1) lQuote = MathMLCharNode::create(s->GetChar(0));
+  else if (s->GetLength() > 1) lQuote = MathMLStringNode::create(s->Clone());
   assert(lQuote != NULL);
   lQuote->SetParent(this);
   content.AddFirst(lQuote);
 
   s = GetAttribute(ATTR_RQUOTE, env);
   assert(s != NULL);
-  if (s->GetLength() == 1) rQuote = new MathMLCharNode(s->GetChar(0));
-  else if (s->GetLength() > 0) rQuote = new MathMLStringNode(s->Clone());
+  if (s->GetLength() == 1) rQuote = MathMLCharNode::create(s->GetChar(0));
+  else if (s->GetLength() > 0) rQuote = MathMLStringNode::create(s->Clone());
   assert(rQuote != NULL);
   rQuote->SetParent(this);
   content.AddLast(rQuote);

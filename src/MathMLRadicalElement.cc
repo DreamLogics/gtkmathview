@@ -51,10 +51,11 @@ MathMLRadicalElement::MathMLRadicalElement(const GMetaDOM::Element& node)
 
 MathMLRadicalElement::~MathMLRadicalElement()
 {
-  if (radical != NULL) {
-    radical->Release();
-    radical = NULL;
-  }
+  if (radical != NULL)
+    {
+      radical->Release();
+      radical = NULL;
+    }
 }
 
 void
@@ -79,8 +80,9 @@ MathMLRadicalElement::Normalize()
     MathMLLinearContainerElement::Normalize();
   }
 
-  if (radical != NULL) delete radical;
-  radical = new MathMLCharNode(U_SQRT);
+  if (radical != NULL) radical->Release();
+  radical = MathMLCharNode::create(U_SQRT);
+  assert(radical != NULL);
   radical->SetParent(this);
 }
 

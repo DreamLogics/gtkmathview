@@ -26,6 +26,7 @@
 #include <math.h>
 
 #include "Globals.hh"
+#include "stringAux.hh"
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
 #include "MathMLCharNode.hh"
@@ -601,4 +602,16 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
   }
 
   return true;
+}
+
+String*
+MathMLCharNode::GetRawContent() const
+{
+  return allocString(&ch, 1);
+}
+
+unsigned
+MathMLCharNode::GetLogicalContentLength() const
+{
+  return 1;
 }

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "unidefs.h"
+#include "stringAux.hh"
 #include "traverseAux.hh"
 #include "BoundingBox.hh"
 #include "MathMLElement.hh"
@@ -94,4 +95,17 @@ MathMLApplyFunctionNode::DoLayout()
       box.Set((sppm * 5) / 18, 0, 0);
     }
   }
+}
+
+unsigned
+MathMLApplyFunctionNode::GetLogicalContentLength() const
+{
+  return 1;
+}
+
+String*
+MathMLApplyFunctionNode::GetRawContent() const
+{
+  Char ch = U_APPLYFUNCTION;
+  return allocString(&ch, 1);
 }

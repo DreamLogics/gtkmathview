@@ -28,12 +28,16 @@
 
 class MathMLHorizBarNode: public MathMLCharNode
 {
-public:
+protected:
   MathMLHorizBarNode(Char);
+  virtual ~MathMLHorizBarNode();
+
+public:
+  static MathMLHorizBarNode* create(Char c) { return new MathMLHorizBarNode(c); }
+
   virtual void 	 Setup(class RenderingEnvironment*);
   virtual void 	 DoLayout(void);
   virtual void 	 Render(const DrawingArea&);
-  virtual ~MathMLHorizBarNode();
 
   virtual bool   IsStretchyChar(void) const;
   virtual bool   HasDecimalPoint(void) const;

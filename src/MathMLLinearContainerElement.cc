@@ -84,6 +84,7 @@ MathMLLinearContainerElement::Normalize()
       for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next())
 	{
 	  assert(elem() != 0);
+	  printf("normalize %p\n", elem());
 	  elem()->Normalize();
 	}
 
@@ -414,7 +415,6 @@ MathMLLinearContainerElement::SetChild(unsigned i, MathMLElement* elem)
       if (oldElem != elem)
 	{
 	  elem->AddRef();
-	  oldElem->SetParent(0);
 	  elem->SetParent(this);
 	  oldElem->Release();
 	  content.Set(i, elem);
@@ -439,7 +439,6 @@ MathMLLinearContainerElement::Remove(MathMLElement* elem)
   assert(elem != 0);
   assert(content.Contains(elem));
   content.Remove(elem);
-  elem->SetParent(0);
   elem->Release();
   SetDirtyStructure();
 }

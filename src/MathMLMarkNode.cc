@@ -79,3 +79,15 @@ MathMLMarkNode::IsMark() const
 {
   return true;
 }
+
+unsigned
+MathMLMarkNode::GetLogicalContentLength() const
+{
+  return 1;
+}
+
+String*
+MathMLMarkNode::GetRawContent() const
+{
+  return NULL;
+}

@@ -27,7 +27,8 @@
 #include "Char.hh"
 
 template <typename CharX>
-class StringU : public String {
+class StringU : public String
+{
 public:
   StringU(void);
   StringU(unsigned);
