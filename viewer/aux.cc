@@ -23,9 +23,12 @@
 #include <config.h>
 #include <assert.h>
 
+#include <sstream>
+
 #include <gdome.h>
 #include <gdome-util.h>
 
+#include "defs.h"
 #include "gmetadom.hh"
 
 static unsigned
@@ -187,15 +190,36 @@ find_common_ancestor(GdomeElement* first, GdomeElement* last)
 {
   DOM::Element p(first);
   DOM::Element q(last);
-  if (GdomeElement* res = gdome_cast_el(findCommonAncestor(p, q).gdome_object()))
-    {
-      GdomeException exc = 0;
-      gdome_el_ref(res, &exc);
-      assert(exc == 0);
-      return res;
-    }
-  else
-    return 0;
+  return gdome_cast_el(findCommonAncestor(p, q).gdome_object());
+}
+
+extern "C" GdomeElement*
+find_self_or_ancestor(GdomeElement* elem, const char* uri, const char* name)
+{
+  DOM::Element el(elem);
+
+  while (el && (el.get_namespaceURI() != uri || el.get_localName() != name))
+    el = el.get_parentNode();
+
+  return gdome_cast_el(el.gdome_object());
+}
+
+extern "C" void
+action_toggle(GdomeElement* elem)
+{
+  DOM::Element el(elem);
+  if (el.get_namespaceURI() != MATHML_NS_URI || el.get_localName() != "maction") return;
+
+  guint idx;
+  if (el.hasAttribute("selection"))
+    idx = atoi(std::string(el.getAttribute("selection")).c_str());
+  else idx = 1;
+
+  idx++;
+
+  std::ostringstream os;
+  os << idx;
+  el.setAttribute("selection", os.str());
 }
 
 extern "C" void
@@ -209,6 +233,15 @@ find_common_siblings(GdomeElement* first, GdomeElement* last,
 
   if (firstS != NULL) *firstS = gdome_cast_el(fs.gdome_object());
   if (lastS != NULL) *lastS = gdome_cast_el(ls.gdome_object());
+}
+
+extern "C" GdomeDOMString*
+find_hyperlink(GdomeElement* elem, const char* ns_uri, const char* name)
+{
+  DOM::Element el(elem);
+  while (el && !el.hasAttributeNS(ns_uri, name)) el = el.get_parentNode();
+  if (el) return el.getAttributeNS(ns_uri, name).gdome_str();
+  else return NULL;
 }
 
 extern "C" void

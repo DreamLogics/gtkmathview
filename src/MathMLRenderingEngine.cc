@@ -269,10 +269,8 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 void
 MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 {
-  /*
   if (elem) elem->SetSelected();
-  else */
-  if (document) document->SetSelected();
+  else if (document) document->SetSelected();
 }
 
 void

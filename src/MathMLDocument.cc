@@ -162,7 +162,7 @@ MathMLDocument::DOMAttrModifiedListener::handleEvent(const DOM::Event& ev)
   const DOM::MutationEvent& me(ev);
   assert(me);
   assert(doc);
-  doc->notifyAttributeModified(me.get_relatedNode());
+  doc->notifyAttributeModified(me.get_target());
 }
 
 void

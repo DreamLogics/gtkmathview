@@ -637,7 +637,6 @@ MathMLTableElement::ScaleColumnsLayout(const FormattingContext& ctxt)
 void
 MathMLTableElement::SpannedCellsLayout(const FormattingContext& ctxt)
 {
-  cout << "doing spanned cells layout " << endl;
   for (unsigned i = 0; i < nRows; i++) {
     for (unsigned j = 0; j < nColumns; j++) {
       if (cell[i][j].mtd &&
@@ -669,7 +668,6 @@ MathMLTableElement::StretchyCellsLayout()
 	      Ptr<MathMLElement> cellElem = cell[i][j].mtd->GetChild();
 	      assert(cellElem);
 	      Ptr<MathMLOperatorElement> op = findStretchyOperator(cellElem);
-	      //cout << " core operator? " << (op != 0) << endl;
 	      if (op)
 		{
 		  scaled width = GetColumnWidth(j, cell[i][j].colSpan);

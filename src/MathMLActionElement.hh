@@ -61,6 +61,7 @@ public:
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
 #endif
+
   virtual void SetFlagDown(Flags);
   virtual void ResetFlagDown(Flags);
 

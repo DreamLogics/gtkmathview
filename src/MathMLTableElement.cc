@@ -108,8 +108,6 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  unsigned n = children.get_length();
 
-	  cout << "redoing table normalize with " << n << " children" << endl;
-
 	  std::vector< Ptr<MathMLElement> > newContent;
 	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
@@ -135,8 +133,6 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 	Append(smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create()));
 
       std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
-
-      cout << "the table has dirty layout " << DirtyLayout() << endl;
 
       ResetDirtyStructure();
     }

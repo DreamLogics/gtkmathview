@@ -286,8 +286,6 @@ MathMLTableCellElement::SetupCell(TableCell* p)
 void
 MathMLTableCellElement::DoLayout(const FormattingContext& ctxt)
 {
-  cout << "redoing layout of cell " << this << " available " << sp2ipx(ctxt.GetAvailableWidth()) << endl;
-
   if (GetChild())
     {
       GetChild()->DoLayout(ctxt);
@@ -295,8 +293,6 @@ MathMLTableCellElement::DoLayout(const FormattingContext& ctxt)
     }
   else
     box.Null();
-
-  cout << "cell " << this << " layout end: width = " << sp2ipx(box.width) << endl;
 
   if (ctxt.GetLayoutType() == LAYOUT_MIN) minWidth = box.width;
 

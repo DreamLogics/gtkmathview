@@ -76,12 +76,10 @@ MathMLActionElement::Setup(RenderingEnvironment& env)
 	Globals::logger(LOG_WARNING, "no action specified for `maction' element");
 
       const Value* value = GetAttributeValue(ATTR_SELECTION, env);
-      if (value != NULL) {
-	selection = value->ToInteger() - 1;
-	if (selection >= content.size()) selection = content.size() - 1;
-      }
+      if (value != NULL) SetSelectedIndex(value->ToInteger());
 
-      MathMLLinearContainerElement::Setup(env);
+      if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->Setup(env);
+      //MathMLLinearContainerElement::Setup(env);
 
       ResetDirtyAttribute();
     }
@@ -156,11 +154,13 @@ MathMLActionElement::GetSelectedElement() const
 void
 MathMLActionElement::SetSelectedIndex(unsigned i)
 {
-  assert(i > 0 && i <= content.size());
-  if (selection != i - 1)
+  if (content.size() > 0 && selection != (i - 1) % content.size())
     {
-      selection = i - 1;
+      selection = (i - 1) % content.size();
       if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->SetDirtyLayout();
+      // has to set DirtyLayout itself because if the children hasn't been visited yet
+      // then its Dirtylayout flag is still set and it won't be propagated up
+      SetDirtyLayout();
     }
 }
 
