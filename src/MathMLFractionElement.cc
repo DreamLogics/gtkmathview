@@ -79,7 +79,11 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 
   const Value* value = NULL;
 
+#ifdef TEXISH_MATHML
   defaultRuleThickness = env->GetRuleThickness();
+#else
+  scaled defaultRuleThickness = env->GetRuleThickness();
+#endif // TEXISH_MATHML
 
   value = GetAttributeValue(ATTR_LINETHICKNESS, env, true);
   if (value != NULL) {
@@ -150,6 +154,7 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 
   displayStyle = env->GetDisplayStyle();
 
+#ifdef TEXISH_MATHML
   if (displayStyle) {
     numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.676508);
     denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.685951);
@@ -157,6 +162,9 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
     numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * (lineThickness > 0 ? 0.393732 : 0.443731));
     denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.344841);
   }
+#else
+  minShift = env->GetScaledPointsPerEx();
+#endif // TEXISH_MATHML
 
   env->Push();
   if (!displayStyle) env->AddScriptLevel(1);
@@ -195,11 +203,20 @@ MathMLFractionElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
     const BoundingBox& numBox   = num->GetBoundingBox();
     const BoundingBox& denomBox = denom->GetBoundingBox();
 
+#ifdef TEXISH_MATHML
     scaled u = numMinShift;
     scaled v = denomMinShift;
+#else
+    scaled u = minShift;
+    scaled v = minShift;
+#endif // TEXISH_MATHML
 
     if (lineThickness < EPSILON) {
+#ifdef TEXISH_MATHML
       scaled psi = (displayStyle ? 7 : 3) * defaultRuleThickness;
+#else
+      scaled psi = displayStyle ? 3 * lineThickness : lineThickness;
+#endif // TEXISH_MATHML
       scaled phi = (u - numBox.descent) - (denomBox.ascent - v);
 
       if (psi < phi) {

@@ -65,6 +65,7 @@ dump(const char* fileName)
   return true;
 }
 
+int
 main(int argc, char* argv[])
 {
   if (argc != 2) {
@@ -73,4 +74,6 @@ main(int argc, char* argv[])
   }
 
   dump(argv[1]);
+
+  return 0;
 }

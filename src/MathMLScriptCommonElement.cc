@@ -65,11 +65,16 @@ void
 MathMLScriptCommonElement::Setup(RenderingEnvironment* env)
 {
   ruleThickness = env->GetRuleThickness();
+#ifdef TEXISH_MATHML
   sppex = env->GetScaledPointsPerEx();
   subMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.247217);
   superMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.362892);
-  scriptAxis    = env->GetAxis();
   scriptSpacing = pt2sp(0); //pt2sp(1); // taken from the TeXbook
+#else
+  sppex = subMinShift = superMinShift = env->GetAxis();
+  scriptSpacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_VERYVERYTHIN));
+#endif // TEXISH_MATHML
+  scriptAxis    = env->GetAxis();
   background    = env->GetBackgroundColor();
 }
 

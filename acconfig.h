@@ -50,10 +50,15 @@
 #define G_DISABLE_CHECKS
 #endif
 
-/* If defined teh widget will collect some information
+/* If defined the widget will collect some information
  * for profiling purposes
  */
 #undef ENABLE_PROFILE
+
+/* If defined some layout is done using TeX algorithm,
+ * when possible
+ */
+#undef TEXISH_MATHML
 
 /* Define to compile with libxml 2.x (recommended) */
 #undef HAVE_LIBXML2

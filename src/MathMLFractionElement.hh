@@ -40,12 +40,15 @@ public:
 
 private:
   scaled          axis;
-  scaled          numMinShift;
-  scaled          denomMinShift;
   scaled          numShift;
   scaled          denomShift;
-
+#ifdef TEXISH_MATHML
+  scaled          numMinShift;
+  scaled          denomMinShift;
   scaled          defaultRuleThickness;
+#else
+  scaled          minShift;
+#endif // TEXISH_MATHML
   scaled          lineThickness;
 
   FractionAlignId numAlign;
