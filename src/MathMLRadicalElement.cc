@@ -122,8 +122,8 @@ MathMLRadicalElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
   radical->DoVerticalStretchyLayout(box.ascent + lineThickness, box.descent, 0, false);
   const BoundingBox& radBox = radical->GetBoundingBox();
 
-  box.width += radBox.width + spacing;
-  box.rBearing += radBox.width + spacing;
+  box.width += radBox.width;
+  box.rBearing += radBox.width;
   box.ascent = scaledMax(box.ascent + spacing, radBox.ascent);
   box.tAscent = scaledMax(box.tAscent, box.ascent);
   box.descent = scaledMax(box.descent, radBox.descent);
@@ -170,10 +170,10 @@ MathMLRadicalElement::SetPosition(scaled x, scaled y)
 
     script->SetPosition(x, y + (baseBox.GetHeight() / 2 - baseBox.ascent) - scriptBox.descent);
     radical->SetPosition(x + scriptBox.width, y);
-    base->SetPosition(x + scriptBox.width + radBox.width + spacing, y);
+    base->SetPosition(x + scriptBox.width + radBox.width, y);
   } else {
     radical->SetPosition(x, y - box.ascent + radBox.ascent);
-    base->SetPosition(x + radBox.width + spacing, y);
+    base->SetPosition(x + radBox.width, y);
   }
 }
 
@@ -202,7 +202,7 @@ MathMLRadicalElement::Render(const DrawingArea& area)
   const BoundingBox& radBox = radical->GetBoundingBox();
 
   area.MoveTo(radical->GetX() + radBox.width, radical->GetY() - radBox.ascent + lineThickness / 2);
-  area.DrawLineToDelta(fGC[IsSelected()], base->GetBoundingBox().width + spacing, 0);
+  area.DrawLineToDelta(fGC[IsSelected()], base->GetBoundingBox().width, 0);
 
   ResetDirty();
 }

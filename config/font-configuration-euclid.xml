@@ -117,11 +117,12 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x22D2" index="211"/>
     <single code="0x22D3" index="210"/>
     <single code="0x22BB" index="169"/>
-    <single code="0x2269" index="145"/>
     <single code="0x2269" index="153"/>
+    <single code="0x22E6" index="0x9e"/>
     <single code="0x22E7" index="159"/>
     <single code="0x0000" index="155"/>
     <single code="0x2A89" index="161"/>
+    <single code="0x2A8A" index="162"/>
     <single code="0x2268" index="152"/>
     <single code="0x2268" index="152"/>
     <single code="0x0000" index="154"/>

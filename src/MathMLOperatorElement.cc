@@ -252,8 +252,10 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   desiredSize = symmetric ? (2 * scaledMax(height, depth)) : (height + depth);
 
   // actually a slightly smaller fence is usually enough when symmetric is true
+  MathEngine::logger(LOG_DEBUG, "request for stretch to %d...", sp2ipx(desiredSize));
   if (symmetric)
     desiredSize = scaledMax(desiredSize - pt2sp(5), ((desiredSize * 901) / 1000));
+  MathEngine::logger(LOG_DEBUG, "%d will be enough!", sp2ipx(desiredSize));
 
   desiredSize = scaledMax(SP_EPSILON, desiredSize);
 
