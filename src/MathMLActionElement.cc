@@ -142,13 +142,6 @@ MathMLActionElement::SetDirty(const Rectangle* rect)
   }
 }
 
-bool
-MathMLActionElement::IsExpanding() const
-{
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return elem ? elem->IsExpanding() : false;
-}
-
 Ptr<MathMLElement>
 MathMLActionElement::GetSelectedElement() const
 {

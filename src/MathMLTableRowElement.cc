@@ -21,10 +21,14 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
+#include <algorithm>
+
 #include <assert.h>
 #include <stddef.h>
 
-#include "Iterator.hh"
+#include "Adaptors.hh"
+#include "ChildList.hh"
 #include "Globals.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
@@ -74,29 +78,24 @@ MathMLTableRowElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      MathMLLinearContainerElement::Normalize();
-
-      for (unsigned i = 0; i < content.GetSize(); i++)
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
 	{
-	  Ptr<MathMLElement> elem = content.RemoveFirst();
-	  assert(elem);
-	  
-	  // if this is a labeled row, then the first child is always the label
-	  // because of normalization (see above)
-	  if (!is_a<MathMLTableCellElement>(elem) &&
-	      (is_a<MathMLLabeledTableRowElement>(Ptr<MathMLElement>(this)) || i > 0))
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "mtd");
+	  unsigned n = children.get_length();
+	  content.reserve(n);
+	  for (unsigned i = 0; i < n; i++)
 	    {
-	      Ptr<MathMLTableCellElement> inferredTableCell =
-		smart_cast<MathMLTableCellElement>(MathMLTableCellElement::create());
-	      assert(inferredTableCell);
-	      inferredTableCell->SetParent(this);
-	      inferredTableCell->SetChild(elem);
-	      elem = inferredTableCell;
+	      GMetaDOM::Node node = children.item(i);
+	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	      assert(elem);
+	      SetChild(i, elem);
 	    }
-	  elem->Normalize();
-
-	  content.Append(elem);
+	  SetSize(n); // this should be noop
 	}
+#endif
+      
+      std::for_each(content.begin(), content.end(), NormalizeAdaptor());
 
       ResetDirtyStructure();
     }
@@ -111,19 +110,14 @@ MathMLTableRowElement::SetupRowIndex(unsigned i)
 void
 MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 {
-  for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
+  for (std::vector< Ptr<MathMLElement> >::iterator p = content.begin();
+       p < content.end();
+       p++)
     {
-      assert(p());
-
-      if (IsA() == TAG_MTR || p() != content.GetFirst())
-	{
-	  assert(p()->IsA() == TAG_MTD);
-
-	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(p());
-	  assert(mtd);
-
-	  mtd->SetupCellSpanning(env);
-	}
+      assert(is_a<MathMLTableCellElement>(*p));
+      Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(*p);
+      assert(mtd);
+      mtd->SetupCellSpanning(env);
     }
 }
 
@@ -151,24 +145,22 @@ MathMLTableRowElement::Setup(RenderingEnvironment* env)
 void
 MathMLTableRowElement::SetDirty(const Rectangle* rect)
 {
-  // this function is needed because a table row does not have a
+  // this method is needed because a table row does not have a
   // valid shape, its sole purpose is to call recursively SetDirty on
   // its children
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->SetDirty(rect);
-    }
+  std::for_each(content.begin(), content.end(), std::bind2nd(SetDirtyAdaptor(), rect));
 }
 
 bool
 MathMLTableRowElement::IsInside(scaled x, scaled y) const
 {
   // same arguments as for the SetDirty method above
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+  for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
+       elem < content.end();
+       elem++)
     {
-      assert(elem());
-      if (elem()->IsInside(x, y)) return true;
+      assert(*elem);
+      if ((*elem)->IsInside(x, y)) return true;
     }
 
   return false;

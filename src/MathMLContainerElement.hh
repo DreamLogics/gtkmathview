@@ -44,7 +44,6 @@ public:
   virtual void ReleaseGCs(void) = 0;
   virtual Ptr<class MathMLElement> Inside(scaled, scaled) = 0;
 
-  virtual bool IsExpanding(void) const = 0;
   virtual scaled GetLeftEdge(void) const = 0;
   virtual scaled GetRightEdge(void) const = 0;
 

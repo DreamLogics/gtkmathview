@@ -82,7 +82,6 @@ public:
   static Ptr<MathMLElement> getRenderingInterface(const GMetaDOM::Element&);
 #endif
   virtual bool 	 IsSpaceLike(void) const;
-  virtual bool 	 IsExpanding(void) const;
   virtual bool 	 IsInside(scaled, scaled) const;
   bool           HasLink(void) const;
   RGBValue     	 GetBackgroundColor(void) const { return background; }
@@ -124,7 +123,7 @@ protected:
 
 private:
 #if defined(HAVE_GMETADOM)
-  GMetaDOM::Element node; // reference to the DOM node
+  const GMetaDOM::Element node; // reference to the DOM node
 #endif
 };
 

@@ -52,7 +52,6 @@ public:
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsSpaceLike(void) const;
-  virtual bool IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 

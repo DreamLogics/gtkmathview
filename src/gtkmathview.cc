@@ -1104,7 +1104,7 @@ gtk_math_view_action_toggle(GtkMathView* math_view, GdomeElement* elem)
   if (!action_element) return;
 
   guint idx = action_element->GetSelectedIndex();
-  if (idx < action_element->GetContent().GetSize())
+  if (idx < action_element->GetSize())
     idx++;
   else
     idx = 1;

@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "Iterator.hh"
+#include "ChildList.hh"
 #include "Globals.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
@@ -56,17 +56,23 @@ MathMLLabeledTableRowElement::Normalize()
     {
       MathMLTableRowElement::Normalize();
 
-      if (content.GetSize() == 0 ||
-	  (content.GetSize() > 0 &&
-	   content.GetFirst() &&
-	   is_a<MathMLTableCellElement>(content.GetFirst())))
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
 	{
-	  Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-	  assert(mdummy);
-	  mdummy->SetParent(this);
-	  content.AddFirst(mdummy);
-	  Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	  if (children.item(0) && children.item(0).get_nodeName() != "mtr")
+	    {
+	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(children.item(0));
+	      assert(elem);
+	      SetLabel(elem);
+	    }
+	  else if (!is_a<MathMLDummyElement>(label))
+	    SetLabel(0);
 	}
+#endif // HAVE_GMETADOM
+
+      if (!label) SetLabel(MathMLDummyElement::create());
+      label->Normalize();
 
       ResetDirtyStructure();
     }
@@ -75,10 +81,17 @@ MathMLLabeledTableRowElement::Normalize()
 Ptr<MathMLElement>
 MathMLLabeledTableRowElement::GetLabel(void) const
 {
-  assert(content.GetSize() > 0);
-  assert(content.GetFirst());
-  assert(!is_a<MathMLTableCellElement>(content.GetFirst()));
-
-  return content.GetFirst();
+  return label;
 }
 
+void
+MathMLLabeledTableRowElement::SetLabel(const Ptr<MathMLElement>& elem)
+{
+  if (elem != label)
+    {
+      if (label) label->SetParent(0);
+      if (elem) elem->SetParent(this);
+      label = elem;
+      SetDirtyLayout();
+    }
+}

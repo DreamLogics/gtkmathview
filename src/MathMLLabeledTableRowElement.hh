@@ -46,11 +46,17 @@ public:
   { return Ptr<MathMLElement>(new MathMLLabeledTableRowElement(el)); }
 #endif
 
-  virtual void Normalize(void);
-
+  void SetLabel(const Ptr<MathMLElement>&);
   virtual Ptr<MathMLElement> GetLabel(void) const;
 
+  virtual void Normalize(void);
+  virtual void SetDirty(const Rectangle*);
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
+
   friend class MathMLTableElement;
+
+private:
+  Ptr<MathMLElement> label;
 };
 
 #endif // MathMLLabeledTableRowElement_hh

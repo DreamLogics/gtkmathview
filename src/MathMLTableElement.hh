@@ -128,7 +128,8 @@ struct RowLabel {
   ColumnAlignId  columnAlign;
 };
 
-class MathMLTableElement: public MathMLLinearContainerElement
+class MathMLTableElement
+  : public MathMLLinearContainerElement
 {
 protected:
   MathMLTableElement(void);
@@ -156,6 +157,8 @@ public:
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
 
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
   virtual Ptr<MathMLElement> Inside(scaled x, scaled y);
 
   void 	       SetupColumnAlignAux(const Value*, unsigned, unsigned, bool = false);
@@ -163,7 +166,6 @@ public:
   void 	       SetupGroupAlignAux(const Value*, unsigned, unsigned);
 
   virtual void SetDirty(const Rectangle* rect);
-  virtual bool IsExpanding(void) const;
   bool         HasLabels(void) const { return rowLabel != NULL; }
 
 protected:

@@ -23,6 +23,10 @@
 #ifndef MathMLDocument_hh
 #define MathMLDocument_hh
 
+// !!! BEGIN WARNING: hash_map is not part of the STL !!!
+#include <hash_map>
+// !!! END WARNING: hash_map is not part of the STL !!!
+
 #if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
@@ -54,6 +58,9 @@ public:
 
   Ptr<MathMLElement> GetRoot(void) const { return GetChild(); }
 
+  //void RegisterElement(const Ptr<MathMLElement>&);
+  //void UnregisterElement(const Ptr<MathMLElement>&);
+
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
   const GMetaDOM::Element& GetDOMRoot(void) const { return DOMroot; }
@@ -77,6 +84,8 @@ protected:
 
   GMetaDOM::Document DOMdoc;  // can be 0
   GMetaDOM::Element  DOMroot; // can be 0
+
+  //std::hash_map< void*, Ptr<MathMLElement> > nodeMap;
 #endif
 };
 

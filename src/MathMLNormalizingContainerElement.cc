@@ -112,13 +112,6 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
   ResetDirty();
 }
 
-bool
-MathMLNormalizingContainerElement::IsExpanding() const
-{
-  assert(child);
-  return child->IsExpanding();
-}
-
 Ptr<class MathMLOperatorElement>
 MathMLNormalizingContainerElement::GetCoreOperator()
 {

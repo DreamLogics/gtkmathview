@@ -56,9 +56,11 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
       Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(rootParent);
       assert(row);
 
-      for (Iterator< Ptr<MathMLElement> > i(row->GetContent()); i.More(); i.Next())
+      for (std::vector< Ptr<MathMLElement> >::const_iterator i = row->GetContent().begin();
+	   i != row->GetContent().end();
+	   i++)
 	{
-	  Ptr<MathMLElement> elem = i();
+	  Ptr<MathMLElement> elem = *i;
 	  assert(elem);
 	  if (!elem->IsSpaceLike() && root != elem) return root;
 	}
@@ -74,8 +76,7 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
       Ptr<MathMLLinearContainerElement> cont = smart_cast<MathMLLinearContainerElement>(rootParent);
       assert(cont);
 
-      if (cont->GetContent().GetSize() > 0 &&
-	  cont->GetContent().GetFirst() != root) return root;
+      if (cont->GetSize() > 0 && cont->GetChild(0) != root) return root;
       else return findEmbellishedOperatorRoot(rootParent);
     }
   else if (is_a<MathMLStyleElement>(rootParent) ||
@@ -195,12 +196,8 @@ void
 setRenderingInterface(const GMetaDOM::Element& node, const Ptr<MathMLElement>& elem)
 {
   assert(node);
-  // WARNING: this will allow to decrement the counter of the element whose
-  // pointer is currently stored inside node as soon as oldElem goes
-  // out of scope
-  Ptr<MathMLElement> oldElem(0);
-  oldElem.set(node.get_userData());
-  node.set_userData(elem.get());
+  assert(elem);
+  node.set_userData(elem);
 }
 
 Ptr<MathMLElement>
@@ -209,12 +206,10 @@ findMathMLElement(const GMetaDOM::Element& node)
   Ptr<MathMLElement> elem = ::getRenderingInterface(node);
   assert(elem);
 
-  while (elem->IsA() == TAG_MROW &&
-	 smart_cast<MathMLRowElement>(elem)->GetContent().GetSize() == 1)
+  while (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))
     {
-      Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-      assert(row);
-      elem = row->GetContent().GetFirst();
+      if (row->GetSize() != 1) break;
+      elem = row->GetChild(0);
     }
 
   return elem;
@@ -229,9 +224,9 @@ findRightmostChild(const Ptr<MathMLElement>& elem)
 
   Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
   assert(row);
-  if (row->GetContent().GetSize() == 0) return elem;
+  if (row->GetSize() == 0) return elem;
 
-  return findRightmostChild(row->GetContent().GetLast());
+  return findRightmostChild(row->GetChild(row->GetSize() - 1));
 }
 
 Ptr<MathMLElement>
@@ -241,9 +236,9 @@ findLeftmostChild(const Ptr<MathMLElement>& elem)
 
   Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
   assert(row);
-  if (row->GetContent().GetSize() == 0) return elem;
+  if (row->GetSize() == 0) return elem;
 
-  return findLeftmostChild(row->GetContent().GetFirst());
+  return findLeftmostChild(row->GetChild(0));
 }
 
 #if defined(HAVE_MINIDOM)

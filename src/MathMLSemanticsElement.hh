@@ -27,9 +27,9 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLBinContainerElement.hh"
 
-class MathMLSemanticsElement: public MathMLLinearContainerElement
+class MathMLSemanticsElement : public MathMLBinContainerElement
 {
 protected:
   MathMLSemanticsElement(void);
@@ -48,7 +48,6 @@ public:
 
   virtual void Normalize(void);
 
-  virtual bool IsExpanding(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 };
 

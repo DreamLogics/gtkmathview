@@ -21,10 +21,15 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
+#include <algorithm>
+#include <functional>
+
 #include <assert.h>
 #include <stddef.h>
 
-#include "Iterator.hh"
+#include "Adaptors.hh"
+#include "ChildList.hh"
 #include "StringUnicode.hh"
 #include "MathMLTableElement.hh"
 #include "MathMLTableCellElement.hh"
@@ -96,39 +101,37 @@ MathMLTableElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      MathMLLinearContainerElement::Normalize();
-
-      if (content.GetSize() == 0)
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
 	{
-	  Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
-	  mtr->SetParent(this);
-	  content.Append(mtr);
-
-	  Ptr<MathMLElement> mtd = MathMLTableCellElement::create();
-	  mtd->SetParent(mtr);
-	  mtr->content.Append(mtd);
-	}
-
-      for (unsigned i = 0; i < content.GetSize(); i++)
-	{
-	  Ptr<MathMLElement> elem = content.RemoveFirst();
-	  assert(elem);
-
-	  if (!is_a<MathMLTableRowElement>(elem))
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	  unsigned n = children.get_length();
+	  unsigned idx = 0;
+	  content.reserve(n);
+	  for (unsigned i = 0; i < n; i++)
 	    {
-	      Ptr<MathMLTableRowElement> inferredTableRow = 
-		smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
-	      inferredTableRow->content.Append(elem);
-
-	      elem->SetParent(inferredTableRow);
-	      inferredTableRow->SetParent(this);
-	      elem = inferredTableRow;
+	      GMetaDOM::Node node = children.item(i);
+	      if (node.get_nodeName() == "mtr" || node.get_nodeName() == "mlabeledtr")
+		{
+		  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+		  assert(elem);
+		  SetChild(idx++, elem);
+		}
+	      else
+		{
+		  // ISSUE WARNING
+		}
 	    }
 
-	  elem->Normalize();
-	  content.Append(elem);
+	  SetSize(idx);
 	}
+#endif // HAVE_GMETADOM
 
+      if (content.size() == 0)
+	Append(smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create()));
+
+      std::for_each(content.begin(), content.end(), NormalizeAdaptor());
+      
       ResetDirtyStructure();
     }
 }
@@ -372,12 +375,6 @@ MathMLTableElement::Inside(scaled x, scaled y)
   return MathMLLinearContainerElement::Inside(x, y);
 }
 
-bool
-MathMLTableElement::IsExpanding() const
-{
-  return nFit > 0;
-}
-
 // SetDirty: Tables redefine this method for optimization. In fact,
 // if the table has no lines it behaves just as a container, and
 // only the cells covered by "rect" are effectively rendered again,
@@ -404,11 +401,8 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
     SetDirtyChildren();
   }
 
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->SetDirty(rect);
-    }  
+  std::for_each(content.begin(), content.end(),
+		std::bind2nd(SetDirtyAdaptor(), rect));
 }
 
 void

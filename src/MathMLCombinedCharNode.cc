@@ -77,8 +77,6 @@ MathMLCombinedCharNode::DoLayout(const FormattingContext& ctxt)
 
     box.ascent = scaledMax(charBox.ascent, cBox.ascent + shiftY);
     box.descent = scaledMax(charBox.descent, cBox.descent - shiftY);
-    box.tAscent = scaledMax(charBox.tAscent, cBox.tAscent + shiftY);
-    box.tDescent = scaledMax(charBox.tDescent, cBox.tDescent - shiftY);
     box.width = scaledMax(charBox.width, cBox.width + scaledAbs(shiftX));
     box.lBearing = scaledMin(charBox.lBearing, cBox.lBearing + shiftX);
     box.rBearing = scaledMax(charBox.rBearing, cBox.rBearing + shiftX);

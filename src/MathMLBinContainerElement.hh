@@ -54,7 +54,6 @@ public:
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
 
-  virtual bool IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 

@@ -29,7 +29,8 @@
 
 #include "MathMLLinearContainerElement.hh"
 
-class MathMLTableRowElement: public MathMLLinearContainerElement
+class MathMLTableRowElement
+  : public MathMLLinearContainerElement
 {
 protected:
   MathMLTableRowElement(void);
@@ -50,6 +51,8 @@ public:
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
 
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;  
   virtual void SetDirty(const Rectangle*);
   virtual bool IsInside(scaled, scaled) const;
 

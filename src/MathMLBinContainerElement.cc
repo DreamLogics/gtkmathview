@@ -182,13 +182,6 @@ MathMLBinContainerElement::ResetSelected()
   selected = 0;
 }
 
-bool
-MathMLBinContainerElement::IsExpanding() const
-{
-  if (child) return child->IsExpanding();
-  return false;
-}
-
 scaled
 MathMLBinContainerElement::GetLeftEdge() const
 {

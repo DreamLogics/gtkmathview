@@ -241,15 +241,10 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
 
   MathMLTokenElement::Setup(env);
 
-  if (content.GetSize() == 1 && largeOp && env->GetDisplayStyle())
+  if (GetSize() == 1 && largeOp && env->GetDisplayStyle())
     {
-      assert(content.GetFirst());
-      if (is_a<MathMLCharNode>(content.GetFirst()))
-	{
-	  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
-	  assert(sNode);
-	  if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
-	}
+      if (Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0)))
+	if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
     }
 }
 
@@ -304,12 +299,9 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 
   adjustedSize = scaledMax(0, adjustedSize);
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst());
-  if (is_a<MathMLCharNode>(content.GetFirst()))
+  assert(GetSize() == 1);
+  if (Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(GetChild(0)))
     {
-      Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
-      assert(cNode);
       if (!cNode->IsStretchyChar())
 	{
 	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
@@ -317,7 +309,7 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 	}
     }
 
-  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
+  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0));
   assert(sNode);
 
   scaled adjustedHeight = 0;
@@ -371,12 +363,9 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 
   adjustedSize = scaledMax(0, adjustedSize);
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst());
-  if (is_a<MathMLCharNode>(content.GetFirst()))
+  assert(GetSize() == 1);
+  if (Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(GetChild(0)))
     {
-      Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
-      assert(cNode);
       if (!cNode->IsStretchyChar())
 	{
 	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
@@ -384,7 +373,7 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 	}
     }
 
-  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
+  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0));
   assert(sNode);
 
   // now we do the stretchy layout. fontAttributes will be used to find the
@@ -509,11 +498,9 @@ MathMLOperatorElement::GetStretch() const
 {
   if (!IsStretchy()) return STRETCH_NO;
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst());
-
-  if (!is_a<MathMLCharNode>(content.GetFirst())) return STRETCH_NO;
-  Ptr<MathMLCharNode> sChar = smart_cast<MathMLCharNode>(content.GetFirst());
+  assert(GetSize() == 1);
+  if (!is_a<MathMLCharNode>(GetChild(0))) return STRETCH_NO;
+  Ptr<MathMLCharNode> sChar = smart_cast<MathMLCharNode>(GetChild(0));
   assert(sChar);
 
   if (!sChar->IsStretchyChar()) return STRETCH_NO;

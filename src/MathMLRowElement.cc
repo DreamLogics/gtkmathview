@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "Adaptors.hh"
 #include "Layout.hh"
 #include "CharMap.hh"
 #include "operatorAux.hh"
@@ -38,17 +39,6 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
-
-/////// START OF ADAPTORS ///////
-
-struct IsSpaceLikePredicate
-  : public std::unary_function<Ptr<MathMLElement>,bool>
-{
-  bool operator()(const Ptr<MathMLElement>& elem) const
-  { return elem->IsSpaceLike(); }
-};
-
-/////// END OF ADAPTORS ///////
 
 MathMLRowElement::MathMLRowElement()
 {
@@ -208,7 +198,7 @@ MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
 
       if (!p->IsSpaceLike())
 	{
-	  if (p == Ptr<const MathMLElement>(eOp)) position = rowLength;
+	  if (p == eOp) position = rowLength;
 	  rowLength++;
 	}
     }

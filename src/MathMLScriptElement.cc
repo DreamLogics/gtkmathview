@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "ChildList.hh"
 #include "traverseAux.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLScriptElement.hh"
@@ -38,7 +39,7 @@ MathMLScriptElement::MathMLScriptElement()
 
 #if defined(HAVE_GMETADOM)
 MathMLScriptElement::MathMLScriptElement(const GMetaDOM::Element& node)
-  : MathMLLinearContainerElement(node)
+  : MathMLContainerElement(node)
 {
   subScript = superScript = 0;
 }
@@ -67,40 +68,101 @@ MathMLScriptElement::GetAttributeSignature(AttributeId id) const
   if ((IsA() == TAG_MSUP || IsA() == TAG_MSUBSUP || IsA() == TAG_MMULTISCRIPTS) && signature == NULL)
     signature = GetAttributeSignatureAux(id, supSig);
 
-  if (signature == NULL) signature = MathMLLinearContainerElement::GetAttributeSignature(id);
+  if (signature == NULL) signature = MathMLContainerElement::GetAttributeSignature(id);
 
   return signature;
 }
 
 void
+MathMLScriptElement::SetBase(const Ptr<MathMLElement>& elem)
+{
+  if (elem != base)
+    {
+      if (base) base->SetParent(0);
+      if (elem) elem->SetParent(this);
+      base = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLScriptElement::SetSubScript(const Ptr<MathMLElement>& elem)
+{
+  if (elem != subScript)
+    {
+      if (subScript) subScript->SetParent(0);
+      if (elem) elem->SetParent(this);
+      subScript = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLScriptElement::SetSuperScript(const Ptr<MathMLElement>& elem)
+{
+  if (elem != superScript)
+    {
+      if (superScript) superScript->SetParent(0);
+      if (elem) elem->SetParent(this);
+      superScript = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
 MathMLScriptElement::Normalize()
 {
-  unsigned n = (IsA() == TAG_MSUBSUP) ? 3 : 2;
-
-  while (content.GetSize() > n)
-    content.RemoveLast();
-
-  while (content.GetSize() < n)
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy);
-      mdummy->SetParent(this);
-      content.Append(mdummy);
-    }
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
+	{
+	  assert(IsA() == TAG_MSUB || IsA() == TAG_MSUP || IsA() == TAG_MSUBSUP);
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	  
+	  if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+	    SetBase(e);
+	  else if (!is_a<MathMLDummyElement>(GetBase()))
+	    SetBase(MathMLDummyElement::create());
 
-  // BEWARE: normalization has to be done here, since it may
-  // change the content!!!
-  MathMLLinearContainerElement::Normalize();
+	  switch (IsA())
+	    {
+	    case TAG_MSUB:
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetSubScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetSubScript()))
+		SetSubScript(MathMLDummyElement::create());
+	      SetSuperScript(0);
+	      break;
+	    case TAG_MSUP:
+	      SetSubScript(0);
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetSuperScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetSuperScript()))
+		SetSuperScript(MathMLDummyElement::create());
+	      break;
+	    case TAG_MSUBSUP:
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetSubScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetSubScript()))
+		SetSubScript(MathMLDummyElement::create());
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetSuperScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetSuperScript()))
+		SetSuperScript(MathMLDummyElement::create());
+	      break;
+	    default:
+	      assert(0);
+	    }
+	}
+#endif
 
-  base = content.GetFirst();
-  assert(base);
+      assert(base);
+      base->Normalize();
+      if (subScript) subScript->Normalize();
+      if (superScript) superScript->Normalize();
 
-  if (IsA() == TAG_MSUB) subScript = content.GetLast();
-  else if (IsA() == TAG_MSUP) superScript = content.GetLast();
-  else
-    {
-      subScript   = content.Get(1);
-      superScript = content.Get(2);
+      ResetDirtyStructure();
     }
 }
 
@@ -201,17 +263,13 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
   if (subScript)
     {
       box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
-      box.tAscent  = scaledMax(box.tAscent, subScriptBox.tAscent - subShiftY);
       box.descent  = scaledMax(box.descent, subScriptBox.descent + subShiftY);
-      box.tDescent = scaledMax(box.tDescent, subScriptBox.tDescent + subShiftY);
     }
 
   if (superScript)
     {
       box.ascent   = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
-      box.tAscent  = scaledMax(box.tAscent, superScriptBox.tAscent + superShiftY);
       box.descent  = scaledMax(box.descent, superScriptBox.descent - superShiftY);
-      box.tDescent = scaledMax(box.tDescent, superScriptBox.tDescent - superShiftY);
     }
 
   ResetDirtyLayout(ctxt.GetLayoutType());
@@ -232,6 +290,30 @@ MathMLScriptElement::SetPosition(scaled x, scaled y)
 
   if (superScript)
     superScript->SetPosition(x + superShiftX, y - superShiftY);
+}
+
+void
+MathMLScriptElement::Render(const DrawingArea& area)
+{
+  if (HasDirtyChildren())
+    {
+      RenderBackground(area);
+      assert(base);
+      base->Render(area);
+      if (subScript) subScript->Render(area);
+      if (superScript) superScript->Render(area);
+      ResetDirty();
+    }
+}
+
+void
+MathMLScriptElement::ReleaseGCs()
+{
+  MathMLElement::ReleaseGCs();
+  assert(base);
+  base->ReleaseGCs();
+  if (subScript) subScript->ReleaseGCs();
+  if (superScript) superScript->ReleaseGCs();
 }
 
 Ptr<class MathMLOperatorElement>

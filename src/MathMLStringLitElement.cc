@@ -71,8 +71,9 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
 
   if (setupDone)
     {
-      content.RemoveFirst();
-      content.RemoveLast();
+      assert(GetSize() >= 2);
+      RemoveChild(GetSize() - 1);
+      RemoveChild(0);
     }
 
   s = GetAttribute(ATTR_LQUOTE, env);
@@ -80,16 +81,14 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
   if (s->GetLength() == 1) lQuote = MathMLCharNode::create(s->GetChar(0));
   else if (s->GetLength() > 1) lQuote = MathMLStringNode::create(s->Clone());
   assert(lQuote);
-  lQuote->SetParent(this);
-  content.AddFirst(lQuote);
+  InsertChild(0, lQuote);
 
   s = GetAttribute(ATTR_RQUOTE, env);
   assert(s != NULL);
   if (s->GetLength() == 1) rQuote = MathMLCharNode::create(s->GetChar(0));
   else if (s->GetLength() > 0) rQuote = MathMLStringNode::create(s->Clone());
   assert(rQuote);
-  rQuote->SetParent(this);
-  content.AddLast(rQuote);
+  InsertChild(GetSize(), rQuote);
 
   MathMLTokenElement::Setup(env);
 

@@ -27,6 +27,8 @@
 #include "gmetadom.hh"
 #endif
 
+#include <vector>
+
 #include "RGBValue.hh"
 #include "FontAttributes.hh"
 #include "MathMLContainerElement.hh"
@@ -50,15 +52,21 @@ public:
   { return Ptr<MathMLElement>(new MathMLTokenElement(el)); }
 #endif
 
+  unsigned       GetSize(void) const { return content.size(); }
+  void           SetSize(unsigned);
+  Ptr<class MathMLTextNode> GetChild(unsigned) const;
+  void           SetChild(unsigned, const Ptr<MathMLTextNode>&);
+  void           RemoveChild(unsigned);
+  void           InsertChild(unsigned, const Ptr<MathMLTextNode>&);
+  void           AppendChild(const Ptr<class MathMLTextNode>&);
+  void           Append(const String*);
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void   Normalize(void);
   virtual void 	 Setup(class RenderingEnvironment*);
   virtual void 	 DoLayout(const class FormattingContext&);
   virtual void   SetPosition(scaled, scaled);
   virtual void 	 Render(const class DrawingArea&);
-
-  void           Append(const String*);
-  void           Append(const Ptr<class MathMLTextNode>&);
 
   bool           IsNonMarking(void) const;
   virtual void 	 SetDirty(const Rectangle* = NULL);
@@ -70,9 +78,12 @@ public:
   RGBValue       GetColor(void) const { return color; }
 
   virtual Ptr<class MathMLCharNode> GetCharNode(void) const;
-  const Container< Ptr<class MathMLTextNode> >& GetContent(void) const { return content; }
+  const std::vector< Ptr<class MathMLTextNode> >& GetContent(void) const { return content; }
   String*        GetRawContent(void) const;
   unsigned       GetLogicalContentLength(void) const;
+
+private:
+  std::vector< Ptr<class MathMLTextNode> > content;
 
 protected:
   static Ptr<class MathMLTextNode> SubstituteMGlyphElement(const GMetaDOM::Element&);
@@ -80,10 +91,6 @@ protected:
   
   void AddItalicCorrection(void);
 
-  // for tokens the content is protected so that users have to
-  // use the Append methods. For read-only operations there is
-  // the access method GetContent
-  Container< Ptr<class MathMLTextNode> > content;
   scaled   sppm;
   RGBValue color;
 };

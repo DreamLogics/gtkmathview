@@ -59,7 +59,6 @@ public:
 
   virtual void   Replace(const Ptr<class MathMLElement>&, const Ptr<class MathMLElement>&);
 
-  virtual bool   IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
   virtual void   ReleaseGCs(void);

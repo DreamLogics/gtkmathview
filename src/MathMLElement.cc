@@ -420,12 +420,6 @@ MathMLElement::IsSpaceLike() const
 }
 
 bool
-MathMLElement::IsExpanding() const
-{
-  return false;
-}
-
-bool
 MathMLElement::IsInside(scaled x, scaled y) const
 {
   return GetRectangle().IsInside(x, y);

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "Globals.hh"
+#include "ChildList.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
 #include "MathMLCharNode.hh"
@@ -41,7 +42,7 @@ MathMLUnderOverElement::MathMLUnderOverElement()
 
 #if defined(HAVE_GMETADOM)
 MathMLUnderOverElement::MathMLUnderOverElement(const GMetaDOM::Element& node)
-  : MathMLLinearContainerElement(node)
+  : MathMLContainerElement(node)
 {
 }
 #endif
@@ -69,39 +70,101 @@ MathMLUnderOverElement::GetAttributeSignature(AttributeId id) const
   if (signature == NULL && (IsA() == TAG_MOVER || IsA() == TAG_MUNDEROVER))
     signature = GetAttributeSignatureAux(id, overSig);    
   if (signature == NULL)
-    signature = MathMLLinearContainerElement::GetAttributeSignature(id);
+    signature = MathMLContainerElement::GetAttributeSignature(id);
   
   return signature;
 }
 
 void
+MathMLUnderOverElement::SetBase(const Ptr<MathMLElement>& elem)
+{
+  if (elem != base)
+    {
+      if (base) base->SetParent(0);
+      if (elem) elem->SetParent(this);
+      base = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLUnderOverElement::SetUnderScript(const Ptr<MathMLElement>& elem)
+{
+  if (elem != underScript)
+    {
+      if (underScript) underScript->SetParent(0);
+      if (elem) elem->SetParent(this);
+      underScript = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLUnderOverElement::SetOverScript(const Ptr<MathMLElement>& elem)
+{
+  if (elem != overScript)
+    {
+      if (overScript) overScript->SetParent(0);
+      if (elem) elem->SetParent(this);
+      overScript = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
 MathMLUnderOverElement::Normalize()
 {
-  unsigned n = (IsA() == TAG_MUNDEROVER) ? 3 : 2;
-
-  while (content.GetSize() > n)
-    content.RemoveLast();
-
-  while (content.GetSize() < n)
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy);
-      Append(mdummy);
-    }
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
+	{
+	  assert(IsA() == TAG_MUNDER || IsA() == TAG_MOVER || IsA() == TAG_MUNDEROVER);
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	  
+	  if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+	    SetBase(e);
+	  else if (!is_a<MathMLDummyElement>(GetBase()))
+	    SetBase(MathMLDummyElement::create());
 
-  // BEWARE: normalization has to be done here, since it may
-  // change the content!!!
-  MathMLLinearContainerElement::Normalize();
+	  switch (IsA())
+	    {
+	    case TAG_MUNDER:
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetUnderScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetUnderScript()))
+		SetUnderScript(MathMLDummyElement::create());
+	      SetOverScript(0);
+	      break;
+	    case TAG_MOVER:
+	      SetUnderScript(0);
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetOverScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetOverScript()))
+		SetOverScript(MathMLDummyElement::create());
+	      break;
+	    case TAG_MSUBSUP:
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetUnderScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetUnderScript()))
+		SetUnderScript(MathMLDummyElement::create());
+	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+		SetOverScript(e);
+	      else if (!is_a<MathMLDummyElement>(GetOverScript()))
+		SetOverScript(MathMLDummyElement::create());
+	      break;
+	    default:
+	      assert(0);
+	    }
+	}
+#endif // HAVE_GMETADOM
 
-  base = content.GetFirst();
-  assert(base);
+      assert(base);
+      base->Normalize();
+      if (underScript) underScript->Normalize();
+      if (overScript) overScript->Normalize();
 
-  if (IsA() == TAG_MUNDER) underScript = content.GetLast();
-  else if (IsA() == TAG_MOVER) overScript = content.GetLast();
-  else
-    {
-      underScript = content.Get(1);
-      overScript  = content.Get(2);
+      ResetDirtyStructure();
     }
 }
 
@@ -396,9 +459,7 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
       box.rBearing = scaledMax(box.rBearing, underShiftX + scriptBox.rBearing);
       box.lBearing = scaledMin(box.lBearing, underShiftX + scriptBox.lBearing);
       box.ascent   = scaledMax(box.ascent, scriptBox.ascent - underShiftY);
-      box.tAscent  = scaledMax(box.tAscent, scriptBox.tAscent - underShiftY);
       box.descent  = scaledMax(box.descent, scriptBox.descent + underShiftY);
-      box.tDescent = scaledMax(box.tDescent, scriptBox.tDescent + underShiftY);
       box.descent += underClearance;
     }
 
@@ -410,9 +471,7 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
       box.rBearing = scaledMax(box.rBearing, overShiftX + scriptBox.rBearing);
       box.lBearing = scaledMin(box.lBearing, overShiftX + scriptBox.lBearing);
       box.ascent   = scaledMax(box.ascent, scriptBox.ascent + overShiftY);
-      box.tAscent  = scaledMax(box.tAscent, scriptBox.tAscent + overShiftY);
       box.descent  = scaledMax(box.descent, scriptBox.descent - overShiftY);
-      box.tDescent = scaledMax(box.tDescent, scriptBox.tDescent - overShiftY);
       box.ascent += overClearance;
     }
   
@@ -436,11 +495,18 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
     overScript->SetPosition(x + overShiftX, y - overShiftY);
 }
 
-bool
-MathMLUnderOverElement::IsExpanding() const
+void
+MathMLUnderOverElement::Render(const DrawingArea& area)
 {
-  assert(base);
-  return base->IsExpanding();
+  if (HasDirtyChildren())
+    {
+      RenderBackground(area);
+      assert(base);
+      base->Render(area);
+      if (underScript) underScript->Render(area);
+      if (overScript) overScript->Render(area);
+      ResetDirty();
+    }
 }
 
 Ptr<class MathMLOperatorElement>

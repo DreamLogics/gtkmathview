@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "ChildList.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLSemanticsElement.hh"
@@ -33,7 +34,7 @@ MathMLSemanticsElement::MathMLSemanticsElement()
 
 #if defined(HAVE_GMETADOM)
 MathMLSemanticsElement::MathMLSemanticsElement(const GMetaDOM::Element& node)
-  : MathMLLinearContainerElement(node)
+  : MathMLBinContainerElement(node)
 {
 }
 #endif
@@ -45,22 +46,46 @@ MathMLSemanticsElement::~MathMLSemanticsElement()
 void
 MathMLSemanticsElement::Normalize()
 {
-  while (content.GetSize() > 1)
-    content.RemoveLast();
-
-  if (content.GetSize() == 0)
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy);
-      mdummy->SetParent(this);
-      content.Append(mdummy);
-    }
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
+	{
+	  assert(IsA() == TAG_SEMANTICS);
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst());
-  content.GetFirst()->Normalize();
+	  if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+	    SetChild(e);
+	  else
+	    {
+	      ChildList children(GetDOMElement(), MATHML_NS_URI, "annotation-xml");
+	      for (unsigned i = 0; i < children.get_length(); i++)
+		{
+		  GMetaDOM::Element elem = children.item(i);
+		  assert(elem);
+		  if (elem.getAttribute("encoding") == "MathML-Presentation")
+		    {
+		      ChildList children(elem, MATHML_NS_URI, "*");
+		      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+			SetChild(e);
+		      else if (!is_a<MathMLDummyElement>(GetChild()))
+			SetChild(MathMLDummyElement::create());
+		      break;
+		    }
+		}
+	      if (!is_a<MathMLDummyElement>(GetChild()))
+		SetChild(MathMLDummyElement::create());
+	    }
+	}
+#endif
+
+      if (GetChild()) GetChild()->Normalize();
+
+      ResetDirtyStructure();
+    }
 }
 
+#if 0
 bool
 MathMLSemanticsElement::IsExpanding() const
 {
@@ -76,3 +101,4 @@ MathMLSemanticsElement::GetCoreOperator()
   assert(content.GetFirst());
   return content.GetFirst()->GetCoreOperator();
 }
+#endif

@@ -100,6 +100,36 @@ MathMLTokenElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
+MathMLTokenElement::SetSize(unsigned i)
+{
+  assert(i <= content.size());
+  while (i < content.size()) RemoveChild(content.size() - 1);
+  content.reserve(i);
+}
+
+Ptr<MathMLTextNode>
+MathMLTokenElement::GetChild(unsigned i) const
+{
+  assert(i < content.size());
+  return content[i];
+}
+
+void
+MathMLTokenElement::SetChild(unsigned i, const Ptr<MathMLTextNode>& child)
+{
+  assert(i < content.size());
+  assert(child);
+  if (content[i] != child)
+    {
+      assert(!child->GetParent());
+      content[i]->SetParent(0);
+      child->SetParent(this);
+      content[i] = child;
+      SetDirtyLayout();
+    }
+}
+
+void
 MathMLTokenElement::Append(const String* s)
 {
   assert(s != NULL);
@@ -107,11 +137,9 @@ MathMLTokenElement::Append(const String* s)
   if (s->GetLength() == 0) return;
 
   Ptr<MathMLTextNode> last = 0;
-  if (content.GetSize() > 0 &&
-      content.GetLast() &&
-      content.GetLast()->IsText())
+  if (GetSize() > 0 && GetChild(GetSize() - 1)->IsText())
     {
-      last = smart_cast<MathMLTextNode>(content.GetLast());
+      last = smart_cast<MathMLTextNode>(GetChild(GetSize() - 1));
       assert(last);
     }
 
@@ -157,18 +185,40 @@ MathMLTokenElement::Append(const String* s)
     
       if (node)
 	{
-	  Append(node);
+	  AppendChild(node);
 	  last = node;
 	}
     }
 }
 
 void
-MathMLTokenElement::Append(const Ptr<MathMLTextNode>& node)
+MathMLTokenElement::AppendChild(const Ptr<MathMLTextNode>& node)
 {
   assert(node);
+  assert(!node->GetParent());
   node->SetParent(this);
-  content.Append(node);
+  content.push_back(node);
+  SetDirtyLayout();
+}
+
+void
+MathMLTokenElement::RemoveChild(unsigned i)
+{
+  assert(i < content.size());
+  content[i]->SetParent(0);
+  content.erase(content.begin() + i);
+  SetDirtyLayout();
+}
+
+void
+MathMLTokenElement::InsertChild(unsigned i, const Ptr<MathMLTextNode>& node)
+{
+  assert(i <= content.size());
+  assert(node);
+  assert(!node->GetParent());
+  node->SetParent(0);
+  content.insert(content.begin() + i, node);
+  SetDirtyLayout();
 }
 
 void
@@ -218,12 +268,12 @@ MathMLTokenElement::Normalize()
 		    if (p.get_nodeName() == "mglyph")
 		      {
 			Ptr<MathMLTextNode> text = SubstituteMGlyphElement(p);
-			if (text) Append(text);
+			if (text) AppendChild(text);
 		      }
 		    else if (p.get_nodeName() == "malignmark")
 		      {
 			Ptr<MathMLTextNode> text = SubstituteAlignMarkElement(p);
-			if (text) Append(text);
+			if (text) AppendChild(text);
 		      }
 		    else
 		      {
@@ -313,7 +363,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
       env->SetFontStyle(ToFontStyleId(value));
     } else if (is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this))) {
       if (GetLogicalContentLength() == 1) {
-	Ptr<MathMLTextNode> node = content.GetFirst();
+	Ptr<MathMLTextNode> node = GetChild(0);
 	assert(node);
 
 	if (is_a<MathMLCharNode>(node)) {
@@ -356,10 +406,12 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
   background = env->GetBackgroundColor();
   sppm       = env->GetScaledPointsPerEm();
 
-  for (Iterator< Ptr<MathMLTextNode> > p(content); p.More(); p.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator p = GetContent().begin();
+       p != GetContent().end();
+       p++)
     {
-      assert(p());
-      p()->Setup(env);
+      assert(*p);
+      (*p)->Setup(env);
     }
 
   env->Drop();
@@ -371,20 +423,22 @@ MathMLTokenElement::DoLayout(const class FormattingContext& ctxt)
   if (!HasDirtyLayout()) return;
 
   box.Null();
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
+      assert(*text);
 
       // as the minimum layout, that we have previously done,
       // so we save some work.
-      if (ctxt.GetLayoutType() == LAYOUT_MIN) text()->DoLayout(ctxt);
+      if (ctxt.GetLayoutType() == LAYOUT_MIN) (*text)->DoLayout(ctxt);
 
       // if we do not insert MathMLSpaceNodes in the layout, they will not be
       // positioned correctly, since positioning is done thru the layout.
       // In such way, If a space node is the first inside a token, it will produce
       // a zero-origin rectangle which is obviously incorrect
-      box.Append(text()->GetBoundingBox());
-      box.Append((sppm * text()->GetSpacing()) / 18);
+      box.Append((*text)->GetBoundingBox());
+      box.Append((sppm * (*text)->GetSpacing()) / 18);
     }
 
   AddItalicCorrection();
@@ -396,12 +450,14 @@ void
 MathMLTokenElement::SetPosition(scaled x, scaled y)
 {
   MathMLElement::SetPosition(x, y);
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin(); 
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      text()->SetPosition(x, y);
-      x += text()->GetBoundingBox().width;
-      x += (sppm * text()->GetSpacing()) / 18;
+      assert(*text);
+      (*text)->SetPosition(x, y);
+      x += (*text)->GetBoundingBox().width;
+      x += (sppm * (*text)->GetSpacing()) / 18;
     }
 }
 
@@ -421,10 +477,12 @@ MathMLTokenElement::Render(const DrawingArea& area)
       fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
     }
 
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      text()->Render(area);
+      assert(*text);
+      (*text)->Render(area);
     }
 
   //area.DrawRectangle(fGC[0], *shape);
@@ -446,10 +504,12 @@ MathMLTokenElement::SetDirty(const Rectangle* rect)
   dirty = 1;
   SetDirtyChildren();
 
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      text()->SetDirty(rect);
+      assert(*text);
+      (*text)->SetDirty(rect);
     }
 }
 
@@ -458,11 +518,13 @@ MathMLTokenElement::GetLeftEdge() const
 {
   scaled edge = 0;
 
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      if (text.IsFirst()) edge = text()->GetLeftEdge();
-      else edge = scaledMin(edge, text()->GetLeftEdge());
+      assert(*text);
+      if (text == GetContent().begin()) edge = (*text)->GetLeftEdge();
+      else edge = scaledMin(edge, (*text)->GetLeftEdge());
     }
 
   return edge;
@@ -473,11 +535,13 @@ MathMLTokenElement::GetRightEdge() const
 {
   scaled edge = 0;
 
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      if (text.IsFirst()) edge = text()->GetRightEdge();
-      else edge = scaledMax(edge, text()->GetRightEdge());
+      assert(*text);
+      if (text == GetContent().begin()) edge = (*text)->GetRightEdge();
+      else edge = scaledMax(edge, (*text)->GetRightEdge());
     }
 
   return edge;
@@ -486,10 +550,12 @@ MathMLTokenElement::GetRightEdge() const
 scaled
 MathMLTokenElement::GetDecimalPointEdge() const
 {
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      if (text()->HasDecimalPoint()) return text()->GetDecimalPointEdge();
+      assert(*text);
+      if ((*text)->HasDecimalPoint()) return (*text)->GetDecimalPointEdge();
     }
 
   return GetRightEdge();
@@ -498,10 +564,12 @@ MathMLTokenElement::GetDecimalPointEdge() const
 bool
 MathMLTokenElement::IsNonMarking() const
 {
-  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+       text != GetContent().end();
+       text++)
     {
-      assert(text());
-      if (!is_a<MathMLSpaceNode>(text())) return false;
+      assert(*text);
+      if (!is_a<MathMLSpaceNode>(*text)) return false;
     }
 
   return true;
@@ -510,9 +578,9 @@ MathMLTokenElement::IsNonMarking() const
 Ptr<MathMLCharNode>
 MathMLTokenElement::GetCharNode() const
 {
-  if (content.GetSize() != 1) return 0;
+  if (GetSize() != 1) return 0;
 
-  Ptr<MathMLTextNode> node = content.GetFirst();
+  Ptr<MathMLTextNode> node = GetChild(0);
   assert(node);
   if (!is_a<MathMLCharNode>(node) || is_a<MathMLCombinedCharNode>(node)) return 0;
 
@@ -526,9 +594,9 @@ MathMLTokenElement::AddItalicCorrection()
       !is_a<MathMLNumberElement>(Ptr<MathMLElement>(this)) &&
       !is_a<MathMLTextElement>(Ptr<MathMLElement>(this))) return;
   
-  if (content.GetSize() == 0) return;
+  if (GetSize() == 0) return;
 
-  Ptr<MathMLTextNode> lastNode = content.GetLast();
+  Ptr<MathMLTextNode> lastNode = GetChild(GetSize() - 1);
   assert(lastNode);
 
   Ptr<MathMLElement> next = findRightSibling(this);
@@ -606,10 +674,12 @@ MathMLTokenElement::GetRawContent() const
 {
   StringFactory c;
 
-  for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator i = GetContent().begin();
+       i != GetContent().end();
+       i++)
     {
-      assert(i());
-      String* s = i()->GetRawContent();
+      assert(*i);
+      String* s = (*i)->GetRawContent();
       if (s != NULL)
 	{
 	  c.Append(s);
@@ -625,10 +695,12 @@ MathMLTokenElement::GetLogicalContentLength() const
 {
   unsigned len = 0;
 
-  for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator i = GetContent().begin();
+       i != GetContent().end();
+       i++)
     {
-      assert(i());
-      len += i()->GetLogicalContentLength();
+      assert(*i);
+      len += (*i)->GetLogicalContentLength();
     }
 
   return len;

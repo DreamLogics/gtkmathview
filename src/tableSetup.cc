@@ -27,7 +27,6 @@
 #include <stdio.h>
 
 #include "Array.hh"
-#include "Iterator.hh"
 #include "ValueConversion.hh"
 #include "MathMLTableElement.hh"
 #include "RenderingEnvironment.hh"
@@ -73,12 +72,14 @@ MathMLTableElement::Setup(RenderingEnvironment* env)
 void
 MathMLTableElement::SetupCellSpanning(RenderingEnvironment* env)
 {
-  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+  for (std::vector< Ptr<MathMLElement> >::const_iterator i = GetContent().begin();
+       i != GetContent().end();
+       i++)
     {
-      assert(i());
-      assert(is_a<MathMLTableRowElement>(i()));
+      assert(*i);
+      assert(is_a<MathMLTableRowElement>(*i));
 
-      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(i());
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(*i);
       assert(mtr);
 
       mtr->SetupCellSpanning(env);
@@ -92,7 +93,7 @@ MathMLTableElement::CalcTableSize()
 {
   unsigned i;
 
-  nRows = content.GetSize();
+  nRows = GetSize();
   nColumns = 0;
 
   if (nRows == 0) return;
@@ -140,31 +141,32 @@ MathMLTableElement::CalcTableSize()
     Array<bool> content;
   };
 
-
   TempRow* r = new TempRow[nRows];
 
   i = 0;
-  for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
+  for (std::vector< Ptr<MathMLElement> >::const_iterator p = GetContent().begin();
+       p != GetContent().end();
+       p++)
     {
-      assert(p());
-      assert(is_a<MathMLTableRowElement>(p()));
+      assert(*p);
+      assert(is_a<MathMLTableRowElement>(*p));
 
-      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(p());
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(*p);
       assert(mtr);
 
-      Iterator< Ptr<MathMLElement> > q(mtr->content);
+      std::vector< Ptr<MathMLElement> >::const_iterator q = mtr->GetContent().begin();
       if (is_a<MathMLLabeledTableRowElement>(mtr))
 	{
-	  assert(q.More());
-	  q.Next();
+	  assert(q != mtr->GetContent().end());
+	  q++;
 	}
 
-      while (q.More())
+      while (q != mtr->GetContent().end())
 	{
-	  assert(q());
-	  assert(is_a<MathMLTableCellElement>(q()));
+	  assert(*q);
+	  assert(is_a<MathMLTableCellElement>(*q));
 
-	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(q());
+	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(*q);
 	  assert(mtd);
 
 	  unsigned j = r[i].AddCell(mtd->GetColumnSpan());
@@ -176,7 +178,7 @@ MathMLTableElement::CalcTableSize()
 
 	  mtd->SetupCellPosition(i, j, nRows);
 
-	  q.Next();
+	  q++;
 	}
 
       i++;
@@ -207,27 +209,29 @@ MathMLTableElement::SetupCells()
     }
   }
 
-  for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
+  for (std::vector< Ptr<MathMLElement> >::const_iterator p = GetContent().begin();
+       p != GetContent().end();
+       p++)
     {
-      assert(p());
-      assert(is_a<MathMLTableRowElement>(p()));
+      assert(*p);
+      assert(is_a<MathMLTableRowElement>(*p));
 
-      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(p());
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(*p);
       assert(mtr);
 
-      Iterator< Ptr<MathMLElement> > q(mtr->content);
+      std::vector< Ptr<MathMLElement> >::const_iterator q = mtr->GetContent().begin();
       if (is_a<MathMLLabeledTableRowElement>(mtr))
 	{
-	  assert(q.More());
-	  q.Next();
+	  assert(q != mtr->GetContent().end());
+	  q++;
 	}
 
-      while (q.More())
+      while (q != mtr->GetContent().end())
 	{
-	  assert(q());
-	  assert(is_a<MathMLTableCellElement>(q()));
+	  assert(*q);
+	  assert(is_a<MathMLTableCellElement>(*q));
 
-	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(q());
+	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(*q);
 	  assert(mtd);
 
 	  unsigned i0 = mtd->GetRowIndex();
@@ -247,7 +251,7 @@ MathMLTableElement::SetupCells()
 		cell[i0 + i][j0 + j].spanned = (i > 0) || (j > 0);
 	      }
 
-	  q.Next();
+	  q++;
 	}
     }
 }
@@ -394,12 +398,14 @@ MathMLTableElement::SetupRows(RenderingEnvironment* env)
   }
 
   i = 0;
-  for (Iterator< Ptr<MathMLElement> > rowElem(content); rowElem.More(); rowElem.Next())
+  for (std::vector< Ptr<MathMLElement> >::const_iterator rowElem = GetContent().begin();
+       rowElem != GetContent().end();
+       rowElem++)
     {
       assert(i < nRows);
-      assert(is_a<MathMLTableRowElement>(rowElem()));
+      assert(is_a<MathMLTableRowElement>(*rowElem));
 
-      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(rowElem());
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(*rowElem);
       assert(mtr);
 
       row[i].mtr = mtr;

@@ -34,8 +34,6 @@ public:
   Ptr<class MathMLElement> GetBase(void) const { return base; }
   void SetBase(const Ptr<class MathMLElement>&);
 
-  virtual bool IsExpanding(void) const;
-
 protected:
   void DoScriptLayout(const BoundingBox&,
 		      const BoundingBox&, const BoundingBox&,

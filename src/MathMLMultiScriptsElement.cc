@@ -21,10 +21,14 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
+#include <algorithm>
+#include <functional>
+
 #include <assert.h>
 #include <stddef.h>
 
-#include "Iterator.hh"
+#include "Adaptors.hh"
 #include "ChildList.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
@@ -38,7 +42,7 @@ MathMLMultiScriptsElement::MathMLMultiScriptsElement()
 
 #if defined(HAVE_GMETADOM)
 MathMLMultiScriptsElement::MathMLMultiScriptsElement(const GMetaDOM::Element& node)
-  : MathMLLinearContainerElement(node)
+  : MathMLContainerElement(node)
 {
 }
 #endif
@@ -62,15 +66,17 @@ MathMLMultiScriptsElement::SetBase(const Ptr<MathMLElement>& elem)
 void
 MathMLMultiScriptsElement::SetScriptsSize(unsigned size)
 {
-  assert(size <= scripts.size());
-  if (size != scripts.size())
+  assert(size <= subScript.size());
+  if (size != subScript.size())
     {
-      for (unsigned i = size; i < scripts.size(); i++)
+      assert(subScript.size() == superScript.size());
+      for (unsigned i = size; i < subScript.size(); i++)
 	{
 	  SetSubScript(i, 0);
 	  SetSuperScript(i, 0);
 	}
-      scripts.resize(size);
+      subScript.resize(size);
+      superScript.resize(size);
       SetDirtyLayout();
     }
 }
@@ -78,29 +84,50 @@ MathMLMultiScriptsElement::SetScriptsSize(unsigned size)
 void
 MathMLMultiScriptsElement::SetPreScriptsSize(unsigned size)
 {
-  assert(size <= preScripts.size());
-  if (size != preScripts.size())
+  assert(size <= preSubScript.size());
+  if (size != preSubScript.size())
     {
-      for (unsigned i = size; i < preScripts.size(); i++)
+      assert(preSubScript.size() == preSuperScript.size());
+      for (unsigned i = size; i < preSubScript.size(); i++)
 	{
 	  SetPreSubScript(i, 0);
 	  SetPreSuperScript(i, 0);
 	}
-      preScripts.resize(size);
+      preSubScript.resize(size);
+      preSuperScript.resize(size);
       SetDirtyLayout();
     }
+}
+
+Ptr<MathMLElement>
+MathMLMultiScriptsElement::GetSubScript(unsigned i) const
+{
+  assert(i < subScript.size());
+  return subScript[i];
+}
+
+Ptr<MathMLElement>
+MathMLMultiScriptsElement::GetSuperScript(unsigned i) const
+{
+  assert(i < superScript.size());
+  return superScript[i];
 }
 
 void
 MathMLMultiScriptsElement::SetSubScript(unsigned i, const Ptr<MathMLElement>& elem)
 {
-  assert(i <= script.size());
-  if (i == script.size()) AppendScripts(elem, 0);
-  else if (elem != script[i].first)
+  assert(i <= subScript.size());
+  if (i == subScript.size())
     {
-      if (script[i].first) script[i].first->SetParent(0);
+      assert(subScript.size() == superScript.size());
+      subScript.push_back(elem);
+      superScript.push_back(0);
+    }
+  else if (elem != subScript[i])
+    {
+      if (subScript[i]) subScript[i]->SetParent(0);
       elem->SetParent(this);
-      script[i].first = elem;
+      subScript[i] = elem;
       SetDirtyLayout();
     }
 }
@@ -108,33 +135,51 @@ MathMLMultiScriptsElement::SetSubScript(unsigned i, const Ptr<MathMLElement>& el
 void
 MathMLMultiScriptsElement::SetSuperScript(unsigned i, const Ptr<MathMLElement>& elem)
 {
-  assert(i <= script.size());
-  if (i == script.size()) AppendScripts(0, elem);
-  else if (elem != script[i].second)
+  assert(i <= superScript.size());
+  if (i == superScript.size())
     {
-      if (script[i].second) script[i].second->SetParent(0);
+      assert(superScript.size() == subScript.size());
+      subScript.push_back(0);
+      superScript.push_back(elem);
+    }
+  else if (elem != superScript[i])
+    {
+      if (superScript[i]) superScript[i]->SetParent(0);
       elem->SetParent(this);
-      script[i].second = elem;
+      superScript[i] = elem;
       SetDirtyLayout();
     }
 }
 
-void
-MathMLMultiScriptsElement::AppendScripts(const Ptr<MathMLElement>& sub, const Ptr<MathMLElement>& sup)
+Ptr<MathMLElement>
+MathMLMultiScriptsElement::GetPreSubScript(unsigned i) const
 {
-  script.push_back(std::pair< Ptr<MathMLElement>,Ptr<MathMLElement> >(sub, sup));
+  assert(i < preSubScript.size());
+  return preSubScript[i];
+}
+
+Ptr<MathMLElement>
+MathMLMultiScriptsElement::GetPreSuperScript(unsigned i) const
+{
+  assert(i < preSuperScript.size());
+  return preSuperScript[i];
 }
 
 void
 MathMLMultiScriptsElement::SetPreSubScript(unsigned i, const Ptr<MathMLElement>& elem)
 {
-  assert(i <= preScript.size());
-  if (i == preScript.size()) AppendPreScripts(elem, 0);
-  else if (elem != preScript[i].first)
+  assert(i <= preSubScript.size());
+  if (i == preSubScript.size())
     {
-      if (preScript[i].first) preScript[i].first->SetParent(0);
+      assert(preSubScript.size() == preSuperScript.size());
+      preSubScript.push_back(elem);
+      preSuperScript.push_back(0);
+    }
+  else if (elem != preSubScript[i])
+    {
+      if (preSubScript[i]) preSubScript[i]->SetParent(0);
       elem->SetParent(this);
-      preScript[i].first = elem;
+      preSubScript[i] = elem;
       SetDirtyLayout();
     }
 }
@@ -142,21 +187,20 @@ MathMLMultiScriptsElement::SetPreSubScript(unsigned i, const Ptr<MathMLElement>&
 void
 MathMLMultiScriptsElement::SetPreSuperScript(unsigned i, const Ptr<MathMLElement>& elem)
 {
-  assert(i <= preScript.size());
-  if (i == preScript.size()) AppendPreScripts(0, elem);
-  else if (elem != preScript[i].second)
+  assert(i <= preSuperScript.size());
+  if (i == preSuperScript.size())
     {
-      if (preScript[i].second) preScript[i].second->SetParent(0);
+      assert(preSubScript.size() == preSuperScript.size());
+      preSubScript.push_back(0);
+      preSuperScript.push_back(elem);
+    }
+  else if (elem != preSuperScript[i])
+    {
+      if (preSuperScript[i]) preSuperScript[i]->SetParent(0);
       elem->SetParent(this);
-      preScript[i].second = elem;
+      preSuperScript[i] = elem;
       SetDirtyLayout();
     }
-}
-
-void
-MathMLMultiScriptsElement::AppendPreScripts(const Ptr<MathMLElement>& sub, const Ptr<MathMLElement>& sup)
-{
-  preScript.push_back(std::pair< Ptr<MathMLElement>,Ptr<MathMLElement> >(sub, sup));
 }
 
 void
@@ -166,88 +210,110 @@ MathMLMultiScriptsElement::Normalize()
     {
 #if defined(HAVE_GMETADOM)
       ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
-      for (unsigned i = 0; i < children.get_length(); i++)
+      unsigned i = 0;
+      unsigned nScripts = 0;
+      unsigned nPreScripts = 0;
+      unsigned n = children.get_length();
+      bool preScripts = false;
+
+      while (i < n)
 	{
 	  GMetaDOM::Node node = children.item(i);
-	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-	  if (i == 0 &&
-	      (node.get_nodeName() == "none" || node.get_nodeName() == "mprescripts"))
+	  if (i == 0)
 	    {
-	      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-	      assert(mdummy);
-	      SetChild(0, mdummy);
+	      Ptr<MathMLElement> elem;
+	      if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
+		{
+		  elem = MathMLElement::getRenderingInterface(node);
+		  i++;
+		}
+	      if (elem) SetBase(elem);
+	      else if (!is_a<MathMLDummyElement>(base)) SetBase(MathMLDummyElement::create());
+	    }
+	  else if (node.get_nodeName() == "mprescripts")
+	    {
+	      // FIXME: issue warning if preScripts is already set
+	      preScripts = true;
+	      i++;
+	    }
+	  else if (!preScripts)
+	    {
+	      Ptr<MathMLElement> sub;
+	      Ptr<MathMLElement> sup;
+
+	      if (node.get_nodeName() != "none")
+		sub = MathMLElement::getRenderingInterface(node);
+	      i++;
+	      
+	      if (i < n)
+		{
+		  node = children.item(i);
+		  if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
+		    sup = MathMLElement::getRenderingInterface(node);
+		  if (node.get_nodeName() != "mprescripts") i++;
+		}
+
+	      if (sub || sup)
+		{
+		  SetSubScript(nScripts, sub);
+		  SetSuperScript(nScripts, sup);
+		  nScripts++;
+		}
 	    }
 	  else
 	    {
-	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-	      // it might be that we get a NULL. In that case it would probably make
-	      // sense to create a dummy element, because we filtered MathML
-	      // elements only
-	      assert(elem);
-	      SetChild(i, elem);
+	      Ptr<MathMLElement> sub;
+	      Ptr<MathMLElement> sup;
+
+	      if (node.get_nodeName() != "none")
+		sub = MathMLElement::getRenderingInterface(node);
+	      i++;
+	      
+	      if (i < n)
+		{
+		  node = children.item(i);
+		  if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
+		    sup = MathMLElement::getRenderingInterface(node);
+		  if (node.get_nodeName() != "mprescripts") i++;
+		}
+
+	      if (sub || sup)
+		{
+		  SetPreSubScript(nScripts, sub);
+		  SetPreSuperScript(nScripts, sup);
+		  nScripts++;
+		}
 	    }
 	}
-
-      // the following is to be sure that no spurious elements remain at the
-      // end of the container
-      SetSize(children.get_length());
+      
+      if (n == 0 && !is_a<MathMLDummyElement>(base)) base = MathMLDummyElement::create();
+      SetScriptsSize(nScripts);
+      SetPreScriptsSize(nPreScripts);
 #endif // HAVE_GMETADOM
-    }
 
-  if (content.GetSize() == 0 ||
-      (content.GetFirst() && content.GetFirst()->IsA() == TAG_NONE) ||
-      (content.GetFirst() && content.GetFirst()->IsA() == TAG_MPRESCRIPTS))
-    {
-    }
-
-  base = content.GetFirst();
-  assert(base);
-
-  unsigned i = 0;
-  bool     preScripts = false;
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next(), i++)
-    {
-      assert(elem());
-      if (elem()->IsA() == TAG_MPRESCRIPTS) 
-	{
-	  preScripts = true;
-	  break;
-	}
-    }
-
-  if (preScripts)
-    {
-      nPre  = content.GetSize() - i - 1;
-      nPost = content.GetSize() - nPre - 2;
-    }
-  else
-    {
-      nPre  = 0;
-      nPost = content.GetSize() - 1;
+      if (base) base->Normalize();
+      std::for_each(subScript.begin(), subScript.end(), NormalizeAdaptor());
+      std::for_each(superScript.begin(), superScript.end(), NormalizeAdaptor());
+      std::for_each(preSubScript.begin(), preSubScript.end(), NormalizeAdaptor());
+      std::for_each(preSuperScript.begin(), preSuperScript.end(), NormalizeAdaptor());
     }
 }
 
 void
 MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 {
-  assert(content.GetSize() > 0);
-  assert(content.GetFirst());
+  assert(base);
+  base->Setup(env);
 
-  content.GetFirst()->Setup(env);
-  
   env->Push();
   env->AddScriptLevel(1);
   env->SetDisplayStyle(false);
 
-  Iterator< Ptr<MathMLElement> > elem(content);
-  elem.Next();
-  while (elem.More())
-    {
-      if (elem()) elem()->Setup(env);
-      elem.Next();
-    }
+  std::for_each(subScript.begin(), subScript.end(), std::bind2nd(SetupAdaptor(), env));
+  std::for_each(superScript.begin(), superScript.end(), std::bind2nd(SetupAdaptor(), env));
+  std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(SetupAdaptor(), env));
+  std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(SetupAdaptor(), env));
 
   ScriptSetup(env);
 
@@ -257,78 +323,87 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 void
 MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  assert(base);
-
-  unsigned n = 1 + nPre / 2 + nPost / 2;
-  assert(n > 0);
-
-  base->DoLayout(ctxt);
-
-  BoundingBox subScriptBox;
-  BoundingBox superScriptBox;
-
-  subScriptBox.Null();
-  superScriptBox.Null();
-
-  scaled totalWidth = 0;
-  scaled subScriptWidth = 0;
-  bool preScript = false;
-  unsigned i = 0;
-  Iterator< Ptr<MathMLElement> > elem(content);
-  elem.Next();
-
-  while (elem.More())
+  if (HasDirtyLayout())
     {
-      assert(elem());
+      assert(base);
+      base->DoLayout(ctxt);
 
-      elem()->DoLayout(ctxt);
+      BoundingBox subScriptBox;
+      BoundingBox superScriptBox;
+      scaled scriptsWidth = 0;
+      scaled preScriptsWidth = 0;
 
-      if (!preScript && elem()->IsA() == TAG_MPRESCRIPTS)
+      std::vector< Ptr<MathMLElement> >::const_iterator pSub;
+      std::vector< Ptr<MathMLElement> >::const_iterator pSup;
+
+      for (pSub = subScript.begin(), pSup = superScript.begin();
+	   pSub != subScript.end();
+	   pSub++, pSup++)
 	{
-	  preScript = true;
-	  i = 0;
-	}
-      else
-	{
-	  if (i % 2 == 0)
+	  assert(pSup != superScript.end());
+	  BoundingBox subBox;
+	  BoundingBox supBox;
+
+	  if (*pSub)
 	    {
-	      const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	      subScriptBox.Append(scriptBox);
-	      subScriptWidth = scriptBox.width;
-	    } 
-	  else
+	      (*pSub)->DoLayout(ctxt);
+	      subBox = (*pSub)->GetBoundingBox();
+	    }
+	  if (*pSup)
 	    {
-	      const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	      superScriptBox.Append(scriptBox);
-	      totalWidth += scaledMax(subScriptWidth, scriptBox.width);
+	      (*pSup)->DoLayout(ctxt);
+	      supBox = (*pSup)->GetBoundingBox();
 	    }
 
-	  i++;
+	  subScriptBox.Append(subBox);
+	  superScriptBox.Append(supBox);
+	  scriptsWidth = scaledMax(scriptsWidth, scaledMax(subBox.width, supBox.width));
 	}
 
-      elem.Next();
+      for (pSub = preSubScript.begin(), pSup = preSuperScript.begin();
+	   pSub != preSubScript.end();
+	   pSub++, pSup++)
+	{
+	  assert(pSup != preSuperScript.end());
+	  BoundingBox subBox;
+	  BoundingBox supBox;
+
+	  if (*pSub)
+	    {
+	      (*pSub)->DoLayout(ctxt);
+	      subBox = (*pSub)->GetBoundingBox();
+	    }
+	  if (*pSup)
+	    {
+	      (*pSup)->DoLayout(ctxt);
+	      supBox = (*pSup)->GetBoundingBox();
+	    }
+
+	  subScriptBox.Append(subBox);
+	  superScriptBox.Append(supBox);
+	  preScriptsWidth = scaledMax(preScriptsWidth, scaledMax(subBox.width, supBox.width));
+	}
+
+      DoScriptLayout(base->GetBoundingBox(), subScriptBox, superScriptBox,
+		     subShiftX, subShiftY, superShiftX, superShiftY);
+  
+      box = base->GetBoundingBox();
+      box.Append(preScriptsWidth + scriptsWidth);
+
+      if (!subScriptBox.IsNull())
+	{
+	  box.ascent  = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
+	  box.descent = scaledMax(box.descent, subScriptBox.descent + subShiftY);
+	}
+
+      if (!superScriptBox.IsNull())
+	{
+	  box.ascent  = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
+	  box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
+	}
+
+      ResetDirtyLayout(ctxt.GetLayoutType());
     }
-
-  DoScriptLayout(base->GetBoundingBox(), subScriptBox, superScriptBox,
-		 subShiftX, subShiftY, superShiftX, superShiftY);
-
-  box = base->GetBoundingBox();
-
-  if (!subScriptBox.IsNull())
-    {
-      box.ascent  = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
-      box.descent = scaledMax(box.descent, subScriptBox.descent + subShiftY);
-    }
-
-  if (!superScriptBox.IsNull())
-    {
-      box.ascent  = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
-      box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
-    }
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void
@@ -337,84 +412,135 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  Iterator< Ptr<MathMLElement> > elem(content);
-  elem.More();
+  std::vector< Ptr<MathMLElement> >::reverse_iterator preSub;
+  std::vector< Ptr<MathMLElement> >::reverse_iterator preSup;
 
-  scaled subScriptWidth = 0;
-  bool preScript = false;
-  unsigned i = 0;
-
-  if (nPre > 0)
+  for (preSub = preSubScript.rbegin(), preSup = preSuperScript.rbegin();
+       preSub != preSubScript.rend();
+       preSub++, preSup++)
     {
-      while (elem.More())
+      assert(preSup != preSuperScript.rend());
+      scaled scriptW = 0;
+      if (*preSub) 
 	{
-	  assert(elem());
-
-	  if (preScript)
-	    {
-	      if (i % 2 == 0)
-		{
-		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-		  subScriptWidth = scriptBox.width;
-		  elem()->SetPosition(x, y + subShiftY);
-		} 
-	      else
-		{
-		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-		  elem()->SetPosition(x, y - superShiftY);
-		  x += scaledMax(subScriptWidth, scriptBox.width);
-		}
-
-	      i++;
-	    } 
-	  else if (elem()->IsA() == TAG_MPRESCRIPTS)
-	    {
-	      preScript = true;
-	      i = 0;
-	    }
-
-	  elem.Next();
+	  (*preSub)->SetPosition(x, y + subShiftY);
+	  scriptW = (*preSub)->GetBoundingBox().GetWidth();
 	}
+      if (*preSup)
+	{
+	  (*preSup)->SetPosition(x, y - superShiftY);
+	  scriptW = scaledMax(scriptW, (*preSup)->GetBoundingBox().GetWidth());
+	}
+
+      x += scriptW;
     }
 
+  assert(base);
   base->SetPosition(x, y);
 
-  if (nPost > 0)
+  std::vector< Ptr<MathMLElement> >::iterator pSub;
+  std::vector< Ptr<MathMLElement> >::iterator pSup;
+
+  for (pSub = subScript.begin(), pSup = superScript.begin();
+       pSub != subScript.end();
+       pSub++, pSup++)
     {
-      x += scaledMax(subShiftX, superShiftX);
-
-      elem.ResetFirst();
-      elem.Next();
-
-      subScriptWidth = 0;
-      preScript = false;
-      i = 0;
-    
-      while (elem.More() && !preScript)
+      assert(pSup != superScript.end());
+      scaled scriptW = 0;
+      if (*pSub) 
 	{
-	  assert(elem());
-
-	  if (elem()->IsA() == TAG_MPRESCRIPTS) preScript = true;
-	  else
-	    {
-	      if (i % 2 == 0)
-		{
-		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-		  subScriptWidth = scriptBox.width;
-		  elem()->SetPosition(x, y + subShiftY);
-		} 
-	      else
-		{
-		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-		  elem()->SetPosition(x, y - superShiftY);
-		  x += scaledMax(subScriptWidth, scriptBox.width);
-		}
-
-	      i++;
-	    }
-
-	  elem.Next();
+	  (*pSub)->SetPosition(x + subShiftX, y + subShiftY);
+	  scriptW = (*pSub)->GetBoundingBox().GetWidth();
 	}
+      if (*pSup)
+	{
+	  (*pSup)->SetPosition(x + superShiftX, y - superShiftY);
+	  scriptW = scaledMax(scriptW, (*pSup)->GetBoundingBox().GetWidth());
+	}
+
+      x += scriptW;
+    }
+}
+
+void
+MathMLMultiScriptsElement::Render(const DrawingArea& area)
+{
+  if (HasDirtyChildren())
+    {
+      RenderBackground(area);
+      assert(base);
+      base->Render(area);
+      std::for_each(subScript.begin(), subScript.end(), std::bind2nd(RenderAdaptor(), &area));
+      std::for_each(superScript.begin(), superScript.end(), std::bind2nd(RenderAdaptor(), &area));
+      std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(RenderAdaptor(), &area));
+      std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(RenderAdaptor(), &area));
+      ResetDirty();
+    }
+}
+
+void
+MathMLMultiScriptsElement::ReleaseGCs()
+{
+  MathMLElement::ReleaseGCs();
+  assert(base);
+  base->ReleaseGCs();
+  std::for_each(subScript.begin(), subScript.end(), ReleaseGCsAdaptor());
+  std::for_each(superScript.begin(), superScript.end(), ReleaseGCsAdaptor());
+  std::for_each(preSubScript.begin(), preSubScript.end(), ReleaseGCsAdaptor());
+  std::for_each(preSuperScript.begin(), preSuperScript.end(), ReleaseGCsAdaptor());
+}
+
+void
+MathMLMultiScriptsElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
+{
+  assert(0);
+}
+
+scaled
+MathMLMultiScriptsElement::GetLeftEdge() const
+{
+  if (preSubScript.size() > 0)
+    {
+      assert(preSuperScript.size() == preSubScript.size());
+      Ptr<MathMLElement> sub = GetPreSubScript(preSubScript.size() - 1);
+      Ptr<MathMLElement> sup = GetPreSuperScript(preSuperScript.size() - 1);
+      if (sub && sup)
+	return scaledMin(sub->GetLeftEdge(), sup->GetLeftEdge());
+      else if (sub)
+	return sub->GetLeftEdge();
+      else if (sup)
+	return sup->GetLeftEdge();
+      else
+	assert(0);
+    }
+  else
+    {
+      assert(base);
+      return base->GetLeftEdge();
+    }
+}
+
+scaled
+MathMLMultiScriptsElement::GetRightEdge() const
+{
+  if (subScript.size() > 0)
+    {
+      assert(subScript.size() == superScript.size());
+      Ptr<MathMLElement> sub = GetSubScript(subScript.size() - 1);
+      Ptr<MathMLElement> sup = GetSuperScript(superScript.size() - 1);
+      if (sub && sup)
+	return scaledMin(sub->GetLeftEdge(), sup->GetLeftEdge());
+      else if (sub)
+	return sub->GetLeftEdge();
+      else if (sup)
+	return sup->GetLeftEdge();
+      else
+	assert(0);      
+    }
+  else
+    {
+      assert(base);
+      return base->GetRightEdge();
     }
 }
 

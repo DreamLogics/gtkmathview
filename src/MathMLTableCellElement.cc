@@ -295,8 +295,8 @@ MathMLTableCellElement::CalcGroupsExtent()
       Ptr<MathMLAlignGroupElement> group = cell->aGroup[k].group;
       assert(group);
 
-      Ptr<MathMLFrame> leftSibling = getFrameLeftSibling(group);
-      Ptr<MathMLFrame> rightSibling = getFrameRightSibling(group);
+      Ptr<MathMLFrame> leftSibling = getLeftSibling(group);
+      Ptr<MathMLFrame> rightSibling = getRightSibling(group);
 
       if (k == 0) cell->aGroup[k].leftEdge = GetLeftEdge();
       else if (rightSibling) cell->aGroup[k].leftEdge = rightSibling->GetLeftEdge();
@@ -343,13 +343,13 @@ MathMLTableCellElement::CalcGroupsExtent()
       
 	  if (alignType == MARK_ALIGN_LEFT)
 	    {
-	      Ptr<MathMLFrame> frame = getFrameRightSibling(mark);
+	      Ptr<MathMLFrame> frame = getRightSibling(mark);
 	      if (frame) alignPoint = frame->GetLeftEdge();
 	      else alignPoint = alignPoint = mark->GetX();
 	    } 
 	  else
 	    {
-	      Ptr<MathMLFrame> frame = getFrameLeftSibling(mark);
+	      Ptr<MathMLFrame> frame = getLeftSibling(mark);
 	      if (frame) alignPoint = frame->GetRightEdge();
 	      else alignPoint = mark->GetX();
 	    }

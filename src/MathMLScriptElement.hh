@@ -30,7 +30,8 @@
 #include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLScriptElement: public MathMLContainerElement, public MathMLScriptCommonElement
+class MathMLScriptElement
+  : public MathMLContainerElement, public MathMLScriptCommonElement
 {
 protected:
   MathMLScriptElement(void);
@@ -53,6 +54,7 @@ public:
   Ptr<MathMLElement> GetBase(void) const { return base; }
   Ptr<MathMLElement> GetSubScript(void) const { return subScript; }
   Ptr<MathMLElement> GetSuperScript(void) const { return superScript; }
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);

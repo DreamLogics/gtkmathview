@@ -127,8 +127,8 @@ DrawingArea::DrawBoundingBox(const GraphicsContext* gc,
 			     bool drawExtra) const
 {
   scaled width = box.width;
-  scaled height = box.GetTotalHeight();
-  scaled ascent = box.tAscent;
+  scaled height = box.GetHeight();
+  scaled ascent = box.ascent;
   DrawRectangle(gc, x, y - ascent, width, height);
   if (drawExtra) {
     DrawLine(gc, x, y, x + box.width, y);

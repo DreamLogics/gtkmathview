@@ -41,10 +41,15 @@ protected:
   virtual ~MathMLLinearContainerElement();
 
 public:
-  unsigned GetSize(void) const { return content.size(); }
-  void     SetSize(unsigned);
+  unsigned     GetSize(void) const { return content.size(); }
+  void         SetSize(unsigned);
   Ptr<MathMLElement> GetChild(unsigned) const;
-  void     SetChild(unsigned, const Ptr<MathMLElement>&);
+  void         SetChild(unsigned, const Ptr<MathMLElement>&);
+  virtual void Append(const Ptr<MathMLElement>&);
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
+  void         Prepend(const Ptr<MathMLElement>&);
+  void         RemoveFirst(void);
+  void         RemoveLast(void);
 
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
@@ -59,7 +64,6 @@ public:
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
 
-  virtual bool IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const = 0;
   virtual scaled GetRightEdge(void) const = 0;
 
@@ -67,12 +71,6 @@ public:
   // way, because other operation involves SetParent and other
   // memory-management issues
   const std::vector< Ptr<MathMLElement> >& GetContent(void) const { return content; }
-
-  virtual void Append(const Ptr<MathMLElement>&);
-  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
-  void         Prepend(const Ptr<MathMLElement>&);
-  void         RemoveFirst(void);
-  void         RemoveLast(void);
 
 protected:
   std::vector< Ptr<MathMLElement> > content;

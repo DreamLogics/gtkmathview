@@ -117,4 +117,26 @@ MathMLDocument::DOMAttrModifiedListener::handleEvent(const GMetaDOM::Event& ev)
   printf("an attribute changed\n");
 }
 
+#if 0
+void
+MathMLDocument::RegisterElement(const Ptr<MathMLElement>& elem)
+{
+  assert(elem);
+  assert(elem->GetDOMElement());
+  std::pair<std::hash_map< void*, Ptr<MathMLElement> >::iterator, bool> res =
+    nodeMap.insert(elem->GetDOMElement().id());
+  assert(!res.second);
+  *(res.first) = elem;
+}
+
+void
+MathMLDocument::UnregisterElement(const Ptr<MathMLElement>& elem)
+{
+  assert(elem);
+  assert(elem->GetDOMElement());
+  unsigned res = nodeMap.erase(elem->GetDOMElement().id());
+  assert(res == 1);
+}
+#endif
+
 #endif // HAVE_GMETADOM

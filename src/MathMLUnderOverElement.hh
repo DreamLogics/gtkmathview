@@ -27,10 +27,11 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLUnderOverElement : public MathMLLinearContainerElement, public MathMLScriptCommonElement
+class MathMLUnderOverElement
+  : public MathMLContainerElement, public MathMLScriptCommonElement
 {
 protected:
   MathMLUnderOverElement(void);
@@ -47,13 +48,25 @@ public:
   { return Ptr<MathMLElement>(new MathMLUnderOverElement(el)); }
 #endif
 
+  void SetBase(const Ptr<MathMLElement>&);
+  void SetUnderScript(const Ptr<MathMLElement>&);
+  void SetOverScript(const Ptr<MathMLElement>&);
+  Ptr<MathMLElement> GetBase(void) const { return base; }
+  Ptr<MathMLElement> GetUnderScript(void) const { return underScript; }
+  Ptr<MathMLElement> GetOverScript(void) const { return overScript; }
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
+  virtual void Render(const class DrawingArea&);
+  virtual void ReleaseGCs(void);
 
-  virtual bool IsExpanding(void) const;
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 

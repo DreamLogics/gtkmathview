@@ -92,6 +92,13 @@ MathMLFractionElement::SetDenominator(const Ptr<MathMLElement>& elem)
 }
 
 void
+MathMLFractionElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
+{
+  assert(oldElem);
+  assert(0);
+}
+
+void
 MathMLFractionElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
@@ -282,8 +289,6 @@ MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
     box.Set(scaledMax(numBox.width, denomBox.width),
 	    numShift + numBox.ascent,
 	    denomShift + denomBox.descent);
-    box.tAscent = numShift + numBox.tAscent;
-    box.tDescent = denomShift + denomBox.tDescent;
     box.rBearing = scaledMax(numBox.rBearing, denomBox.rBearing);
     box.width = scaledMax(box.width, box.rBearing);
   }
@@ -386,15 +391,42 @@ MathMLFractionElement::Render(const DrawingArea& area)
   ResetDirty();
 }
 
-bool
-MathMLFractionElement::IsExpanding() const
+void
+MathMLFractionElement::SetDirty(const Rectangle* rect)
 {
-  assert(numerator && denominator);
+  if (!IsDirty() && !HasDirtyChildren())
+    {
+      MathMLElement::SetDirty(rect);
+      if (numerator) numerator->SetDirty(rect);
+      if (denominator) denominator->SetDirty(rect);
+    }
+}
 
-  if (numerator->IsExpanding()) return true;
-  if (denominator->IsExpanding()) return true;
+void
+MathMLFractionElement::SetDirtyLayout(bool children)
+{
+  MathMLElement::SetDirtyLayout(children);
+  if (children)
+    {
+      if (numerator) numerator->SetDirtyLayout(children);
+      if (denominator) denominator->SetDirtyLayout(children);
+    }
+}
 
-  return false;
+void
+MathMLFractionElement::SetSelected()
+{
+  MathMLContainerElement::SetSelected();
+  if (numerator) numerator->SetSelected();
+  if (denominator) denominator->SetSelected();
+}
+
+void
+MathMLFractionElement::ResetSelected()
+{
+  MathMLContainerElement::ResetSelected();
+  if (numerator) numerator->ResetSelected();
+  if (denominator) denominator->ResetSelected();
 }
 
 scaled

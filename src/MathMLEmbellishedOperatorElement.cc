@@ -130,6 +130,6 @@ MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
 Ptr<MathMLCharNode>
 MathMLEmbellishedOperatorElement::GetCharNode() const
 {
-  if (!coreOp || child != Ptr<MathMLElement>(coreOp)) return 0;
+  if (!coreOp || child != coreOp) return 0;
   return coreOp->GetCharNode();
 }

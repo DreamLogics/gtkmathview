@@ -191,9 +191,7 @@ MathMLRadicalElement::DoLayout(const class FormattingContext& ctxt)
   box.width += radBox.width;
   box.rBearing += radBox.width;
   box.ascent = scaledMax(box.ascent + spacing, radBox.ascent);
-  box.tAscent = scaledMax(box.tAscent, box.ascent);
   box.descent = scaledMax(box.descent, radBox.descent);
-  box.tDescent = scaledMax(box.tDescent, box.descent);
 
   if (index)
     {
@@ -203,10 +201,7 @@ MathMLRadicalElement::DoLayout(const class FormattingContext& ctxt)
       box.width += indexBox.width;
 
       if (box.GetHeight() / 2 < indexBox.GetHeight())
-	{
-	  box.ascent += indexBox.GetHeight() - box.GetHeight() / 2;
-	  box.tAscent += indexBox.descent + indexBox.tAscent - box.GetHeight() / 2;
-	}
+	box.ascent += indexBox.GetHeight() - box.GetHeight() / 2;
     }
 
   ResetDirtyLayout(ctxt.GetLayoutType());
@@ -240,16 +235,14 @@ MathMLRadicalElement::SetPosition(scaled x, scaled y)
 void
 MathMLRadicalElement::SetDirty(const Rectangle* rect)
 {
-  dirtyBackground =
-    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+  if (!IsDirty() && !HasDirtyChildren())
+    {
+      MathMLElement::SetDirty();
 
-  if (IsDirty() || HasDirtyChildren()) return;
-
-  MathMLElement::SetDirty();
-
-  if (radical) radical->SetDirty(rect);
-  if (radicand) radicand->SetDirty(rect);
-  if (index) index->SetDirty(rect);  
+      if (radical) radical->SetDirty(rect);
+      if (radicand) radicand->SetDirty(rect);
+      if (index) index->SetDirty(rect);  
+    }
 }
 
 void
@@ -321,13 +314,6 @@ MathMLRadicalElement::Render(const DrawingArea& area)
   ResetDirty();
 }
 
-bool
-MathMLRadicalElement::IsExpanding() const
-{
-  assert(radicand);
-  return radicand->IsExpanding();
-}
-
 scaled
 MathMLRadicalElement::GetLeftEdge() const
 {
@@ -346,12 +332,6 @@ MathMLRadicalElement::GetRightEdge() const
   scaled m = scaledMax(radicand->GetRightEdge(), radical->GetRightEdge());
   if (index) return scaledMax(m, index->GetRightEdge());
   else return m;
-}
-
-void
-MathMLRadicalElement::Remove(const Ptr<MathMLElement>&)
-{
-  assert(0);
 }
 
 void

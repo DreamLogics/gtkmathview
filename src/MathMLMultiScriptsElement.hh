@@ -24,7 +24,6 @@
 #define MathMLMultiScriptsElement_hh
 
 #include <vector>
-#include <utility>
 
 #if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
@@ -43,17 +42,15 @@ protected:
   virtual ~MathMLMultiScriptsElement();
 
 public:
-  unsigned GetScriptsSize(void) const { return script.size(); }
+  unsigned GetScriptsSize(void) const { return subScript.size(); }
   void     SetScriptsSize(unsigned);
-  unsigned GetPreScriptsSize(void) const { return preScript.size(); }
+  unsigned GetPreScriptsSize(void) const { return preSubScript.size(); }
   void     SetPreScriptsSize(unsigned);
   void     SetBase(const Ptr<MathMLElement>&);
   void     SetSubScript(unsigned, const Ptr<MathMLElement>&);
-  void     SetSupertScript(unsigned, const Ptr<MathMLElement>&);
-  void     AppendScripts(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
+  void     SetSuperScript(unsigned, const Ptr<MathMLElement>&);
   void     SetPreSubScript(unsigned, const Ptr<MathMLElement>&);
   void     SetPreSuperScript(unsigned, const Ptr<MathMLElement>&);
-  void     AppendPreScripts(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
   Ptr<MathMLElement> GetBase(void) const { return base; }
   Ptr<MathMLElement> GetSubScript(unsigned) const;
   Ptr<MathMLElement> GetSuperScript(unsigned) const;
@@ -74,7 +71,6 @@ public:
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
 
-  virtual bool IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
@@ -82,8 +78,10 @@ public:
   virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
 
 private:
-  std::vector< std::pair< Ptr<MathMLElement>, Ptr<MathMLElement> > > script;
-  std::vector< std::pair< Ptr<MathMLElement>, Ptr<MathMLElement> > > preScript;
+  std::vector< Ptr<MathMLElement> > subScript;
+  std::vector< Ptr<MathMLElement> > superScript;
+  std::vector< Ptr<MathMLElement> > preSubScript;
+  std::vector< Ptr<MathMLElement> > preSuperScript;
 
   scaled subShiftX;
   scaled subShiftY;

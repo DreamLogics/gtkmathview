@@ -128,10 +128,3 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
   subShiftY = v;
   subShiftX = baseBox.width;
 }
-
-bool
-MathMLScriptCommonElement::IsExpanding() const
-{
-  assert(base);
-  return base->IsExpanding();
-}

@@ -28,71 +28,12 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "Adaptors.hh"
 #include "Layout.hh"
 #include "ChildList.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLLinearContainerElement.hh"
 #include "FormattingContext.hh"
-
-/////// START OF ADAPTORS ///////
-
-struct NormalizeAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->Normalize(); }
-};
-
-struct DoStretchyLayoutAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->DoStretchyLayout(); }
-};
-
-struct SetDirtyAdaptor
-  : public std::binary_function<Ptr<MathMLElement>,const Rectangle*,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem, const Rectangle* rect) const
-  { elem->SetDirty(rect); }
-};
-
-struct SetDirtyLayoutAdaptor
-  : public std::binary_function<Ptr<MathMLElement>,bool,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem, bool children) const
-  { elem->SetDirtyLayout(children); }
-};
-
-struct SetSelectedAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->SetSelected(); }
-};
-
-struct ResetSelectedAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->ResetSelected(); }
-};
-
-struct ReleaseGCsAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->ReleaseGCs(); }
-};
-
-struct IsExpandingPredicate
-  : public std::unary_function<Ptr<MathMLElement>,bool>
-{
-  bool operator()(const Ptr<MathMLElement>& elem) const
-  { return elem->IsExpanding(); }
-};
-
-/////// END OF ADAPTORS ///////
 
 MathMLLinearContainerElement::MathMLLinearContainerElement()
 {
@@ -165,17 +106,15 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 void
 MathMLLinearContainerElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout())
+    {
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+	   elem != content.end();
+	   elem++)
+	(*elem)->DoLayout(ctxt);
 
-  // an unbreakable container element will have all of its
-  // children boxed, however the minimum box is to be called
-  // by the overriding method!
-  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end();
-       elem++)
-    (*elem)->DoLayout(ctxt);
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt.GetLayoutType());
+    }
 }
 
 void
@@ -257,12 +196,6 @@ MathMLLinearContainerElement::ResetSelected()
   SetDirty();
   std::for_each(content.begin(), content.end(), ResetSelectedAdaptor());
   selected = 0;
-}
-
-bool
-MathMLLinearContainerElement::IsExpanding() const
-{
-  return std::find_if(content.begin(), content.end(), IsExpandingPredicate()) != content.end();
 }
 
 void
