@@ -22,14 +22,14 @@ AC_ARG_ENABLE(
 )
 
 AC_ARG_ENABLE(
-	checks,
-	[  --enable-checks[=ARG]   include debugging checks [default=yes]],
+	debug,
+	[  --enable-debug[=ARG]    include debugging debug [default=yes]],
 	[
 		if test $enableval = yes; then
-			AC_DEFINE(ENABLE_CHECKS)
+			AC_DEFINE(ENABLE_DEBUG)
 		fi
 	],
-	AC_DEFINE(ENABLE_CHECKS)
+	AC_DEFINE(ENABLE_DEBUG)
 )
 
 AC_ARG_ENABLE(
@@ -233,6 +233,7 @@ fi
 
 if test $t1lib = "auto"; then
 	AC_CHECK_LIB(t1, T1_InitLib, t1lib="yes", t1lib="no")
+	AC_CHECK_HEADER(t1lib.h, , t1lib="no")
 fi
 
 if test $t1lib = "yes"; then

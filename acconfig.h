@@ -40,9 +40,9 @@
 /* If defined the widget will perform a huge amount
  * of validity checks while running
  */
-#undef ENABLE_CHECKS
+#undef ENABLE_DEBUG
 
-#ifdef ENABLE_CHECKS
+#ifdef ENABLE_DEBUG
 #define DEBUG
 #else
 #define NDEBUG
