@@ -341,24 +341,24 @@ if test $gmetadom = "yes"; then
 	DOM_CFLAGS=`gmetadom-config --module=gdome_cpp_smart --cflags`
 	DOM_LIBS=`gmetadom-config --module=gdome_cpp_smart --libs`
 	DOM_IMPLEMENTATION="GMETADOM"
-	AC_DEFINE(HAVE_GMETADOM,,[Define to 1 to compile with GMetaDOM (recommended)])
+	AC_DEFINE(HAVE_GMETADOM,1,[Define to 1 to compile with GMetaDOM (recommended)])
 else
 	DOM_CFLAGS="$GLIB_CFLAGS `minidom-config --cflags`"
 	DOM_LIBS="$GLIB_LIBS `minidom-config --libs`"
 	DOM_IMPLEMENTATION="MINIDOM"
-	AC_DEFINE(HAVE_MINIDOM,,[Define to 1 to compile with minidom (deprecated)])
+	AC_DEFINE(HAVE_MINIDOM,1,[Define to 1 to compile with minidom (deprecated)])
 fi
 AC_SUBST(DOM_CFLAGS)
 AC_SUBST(DOM_LIBS)
 AC_SUBST(DOM_IMPLEMENTATION)
 
 if test $t1lib = "auto"; then
-	AC_CHECK_LIB(t1, T1_InitLib, t1lib="yes", t1lib="no")
-	AC_CHECK_HEADER(t1lib.h, , t1lib="no")
+	AC_CHECK_LIB(t1, T1_InitLib, t1lib="yes", t1lib="no", -lm)
+	AC_CHECK_HEADER(t1lib.h,, t1lib="no")
 fi
 
 if test $t1lib = "yes"; then
-	AC_DEFINE(HAVE_LIBT1,,[Define to 1 to compile with t1lib for Type 1 fonts])
+	AC_DEFINE(HAVE_LIBT1,1,[Define to 1 to compile with t1lib for Type 1 fonts])
 
         if test $with_t1lib_prefix = "yes"; then
                 T1_CFLAGS="-I$T1LIB_PREFIX/include"
@@ -406,6 +406,7 @@ doc/Makefile
 viewer/Makefile
 randomath/Makefile
 mathml2ps/Makefile
-getopt/Makefile
 ])
 AC_OUTPUT
+
+dnl getopt/Makefile
