@@ -30,15 +30,15 @@
 class ChildList
 {
 public:
-  ChildList(const GMetaDOM::Element&, const GMetaDOM::DOMString&, const GMetaDOM::DOMString&);
+  ChildList(const GMetaDOM::Element&, const GMetaDOM::GdomeString&, const GMetaDOM::GdomeString&);
 
   unsigned long get_length(void) const;
   GMetaDOM::Node item(unsigned long) const;
 
 protected:
   const GMetaDOM::Element root;
-  const GMetaDOM::DOMString ns;
-  const GMetaDOM::DOMString name;
+  const GMetaDOM::GdomeString ns;
+  const GMetaDOM::GdomeString name;
 };
 
 #endif // HAVE_GMETADOM

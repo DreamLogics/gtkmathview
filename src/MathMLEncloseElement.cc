@@ -65,14 +65,14 @@ MathMLEncloseElement::NormalizeRadicalElement()
 {
   assert(child);
 
-  Ptr<MathMLLinearContainerElement> sqrt = smart_cast<MathMLLinearContainerElement>(MathMLRadicalElement::create());
+  Ptr<MathMLRadicalElement> sqrt =
+    smart_cast<MathMLRadicalElement>(MathMLRadicalElement::create());
   assert(sqrt);
-  sqrt->Append(child);
-  child->SetParent(sqrt);
-  sqrt->SetParent(this);
-  sqrt->Normalize();
 
+  sqrt->SetRadicand(child);
+  sqrt->SetParent(this);
   SetChild(sqrt);
+  sqrt->Normalize();
 }
 
 void

@@ -56,8 +56,8 @@ getAttribute(const GMetaDOM::Element& node, const char* attr, MathMLAttributeLis
 {
   assert(aList != NULL);
 
-  GMetaDOM::DOMString attrVal = node.getAttribute(attr);
-  if (attrVal.isEmpty()) return;
+  GMetaDOM::GdomeString attrVal = node.getAttribute(attr);
+  if (attrVal.empty()) return;
 
   MathMLAttribute* attribute =
     new MathMLAttribute(AttributeIdOfName(attr), allocString(attrVal));
@@ -159,7 +159,7 @@ OperatorDictionary::Load(const char* fileName)
     GMetaDOM::Document doc = MathMLParseFile(fileName, true);
 
     GMetaDOM::Element root = doc.get_documentElement();
-    if (root == 0) {
+    if (!root) {
       Globals::logger(LOG_WARNING, "operator dictionary `%s': parse error", fileName);
       return false;
     }
@@ -169,12 +169,12 @@ OperatorDictionary::Load(const char* fileName)
       return false;
     }
 
-    for (GMetaDOM::Node op = root.get_firstChild(); op != 0; op = op.get_nextSibling()) {
+    for (GMetaDOM::Node op = root.get_firstChild(); op; op = op.get_nextSibling()) {
       if (op.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE && op.get_nodeName() == "operator") {
 	GMetaDOM::Element elem = op;
-	GMetaDOM::DOMString opName = elem.getAttribute("name");
+	GMetaDOM::GdomeString opName = elem.getAttribute("name");
 
-	if (!opName.isEmpty()) {
+	if (!opName.empty()) {
 	  const String* opString = allocString(opName);
 	  MathMLAttributeList* def = new MathMLAttributeList;
 
@@ -209,9 +209,8 @@ OperatorDictionary::Load(const char* fileName)
 	  Globals::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
 	}
       } else if (!GMetaDOM::nodeIsBlank(op)) {
-	char* s_name = op.get_nodeName().toC();
-	Globals::logger(LOG_WARNING, "operator dictionary `%s': unknown element `%s'", fileName, s_name);
-	delete [] s_name;
+	std::string s_name = op.get_nodeName();
+	Globals::logger(LOG_WARNING, "operator dictionary `%s': unknown element `%s'", fileName, s_name.c_str());
       }
     }
 

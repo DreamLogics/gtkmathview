@@ -58,7 +58,7 @@ MathMLElement::MathMLElement()
 MathMLElement::MathMLElement(const GMetaDOM::Element& n)
   : node(n)
 {
-  if (node != 0)
+  if (node)
     {
       Ptr<MathMLElement> elem = ::getRenderingInterface(node);
       if (!elem) ::setRenderingInterface(node, this);
@@ -81,7 +81,7 @@ MathMLElement::Init()
 MathMLElement::~MathMLElement()
 {
 #if defined(HAVE_GMETADOM)
-  if (node != 0)
+  if (node)
     {
       Ptr<MathMLElement> elem = ::getRenderingInterface(node);
       if (elem == this) ::setRenderingInterface(node, 0);
@@ -95,19 +95,18 @@ MathMLElement::~MathMLElement()
 Ptr<MathMLElement>
 MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
 {
-  assert(el != 0);
+  assert(el);
 
   Ptr<MathMLElement> elem = ::getRenderingInterface(el);
   if (elem) return elem;
 
-  char* s_tag = NULL;
-  if (el.get_namespaceURI() == 0)
-    s_tag = el.get_nodeName().toC();
+  std::string s_tag;
+  if (!el.get_namespaceURI().null())
+    s_tag = el.get_nodeName();
   else
-    s_tag = el.get_localName().toC();
+    s_tag = el.get_localName();
 
-  TagId tag = TagIdOfName(s_tag);
-  delete [] s_tag;
+  TagId tag = TagIdOfName(s_tag.c_str());
 
   if (tag == TAG_NOTVALID)
     {
@@ -228,9 +227,9 @@ MathMLElement::GetAttribute(AttributeId id,
     }
   }
 #elif defined(HAVE_GMETADOM)
-  if (node != 0) {
-    GMetaDOM::DOMString value = node.getAttribute(NameOfAttributeId(id));
-    if (!value.isEmpty()) sValue = allocString(value);
+  if (node) {
+    GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
+    if (!value.empty()) sValue = allocString(value);
   }
 #endif // HAVE_GMETADOM
 
@@ -266,9 +265,9 @@ MathMLElement::GetAttributeValue(AttributeId id,
     }
   }
 #elif defined(HAVE_GMETADOM)
-  if (node != 0) {
-    GMetaDOM::DOMString value = node.getAttribute(NameOfAttributeId(id));
-    if (!value.isEmpty()) sValue = allocString(value);
+  if (node) {
+    GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
+    if (!value.empty()) sValue = allocString(value);
   }
 #endif // HAVE_GMETADOM
 
@@ -344,7 +343,7 @@ MathMLElement::IsSet(AttributeId id) const
 
   return false;
 #elif defined(HAVE_GMETADOM)
-  if (node == 0) return false;
+  if (!node) return false;
   return node.hasAttribute(NameOfAttributeId(id));
 #endif // HAVE_GMETADOM
 }
@@ -485,12 +484,12 @@ MathMLElement::HasLink() const
 #elif defined(HAVE_GMETADOM)
   GMetaDOM::Element p = GetDOMElement();
 
-  while (p != 0 && !p.hasAttribute("href")) {
+  while (p && !p.hasAttribute("href")) {
     GMetaDOM::Node parent = p.get_parentNode();
     p = parent;
   }
 
-  return p != 0;
+  return p;
 #endif // HAVE_GMETADOM
 }
 
@@ -505,13 +504,10 @@ MathMLElement::GetCoreOperator()
 TagId
 MathMLElement::IsA() const
 {
-  if (node == 0) return TAG_NOTVALID;
+  if (!node) return TAG_NOTVALID;
 
-  char* s_tag = node.get_nodeName().toC();
-  assert(s_tag != NULL);
-
-  TagId res = TagIdOfName(s_tag);
-  delete [] s_tag;
+  std::string s_tag = node.get_nodeName();
+  TagId res = TagIdOfName(s_tag.c_str());
 
   return res;
 }

@@ -47,19 +47,17 @@ public:
 #endif
 
   // virtual void Normalize(void);
-  virtual void Setup(class RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsSpaceLike(void) const;
   virtual bool IsExpanding(void) const;
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
 
   OperatorFormId GetOperatorForm(const Ptr<MathMLElement>&) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator();
-
-private:
-  Ptr<MathMLElement> lastElement;
 };
 
 #endif // MathMLRowElement_hh

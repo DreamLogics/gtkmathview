@@ -27,7 +27,7 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 
 class MathMLRadicalElement : public MathMLContainerElement
 {
@@ -52,9 +52,10 @@ public:
   virtual void SetPosition(scaled, scaled);
   virtual void SetDirtyLayout(bool = false);
   virtual void SetDirty(const Rectangle* = 0);
+  virtual void SetSelected(void);
+  virtual void ResetSelected(void);
   virtual void Render(const DrawingArea&);
 
-  virtual void Remove(const Ptr<class MathMLElement>&);
   virtual void Replace(const Ptr<class MathMLElement>&, const Ptr<class MathMLElement>&);
 
   virtual bool IsExpanding(void) const;

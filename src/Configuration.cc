@@ -220,7 +220,7 @@ Configuration::Load(const char* confPath)
     GMetaDOM::Document doc = MathMLParseFile(confPath, false);
 
     GMetaDOM::Element root = doc.get_documentElement();
-    if (root == 0) {
+    if (!root) {
       Globals::logger(LOG_WARNING, "configuration file `%s' has no root node", confPath);
       return false;
     }
@@ -241,65 +241,60 @@ Configuration::Load(const char* confPath)
 void
 Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 {
-  for (GMetaDOM::Node p = node.get_firstChild(); p != 0; p = p.get_nextSibling()) {
+  for (GMetaDOM::Node p = node.get_firstChild(); p; p = p.get_nextSibling()) {
     if (p.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE) {
       GMetaDOM::Element elem(p);
-      GMetaDOM::DOMString name = elem.get_nodeName();
+      GMetaDOM::GdomeString name = elem.get_nodeName();
     
       if (name == "dictionary-path") {
-	GMetaDOM::DOMString path = elementValue(elem);
-	if (!path.isEmpty()) {
-	  char* s_path = path.toC();
-	  Globals::logger(LOG_DEBUG, "found dictionary path `%s'", s_path);
-	  String* s = new StringC(s_path);
+	GMetaDOM::GdomeString path = elementValue(elem);
+	if (!path.empty()) {
+	  std::string s_path = path;
+	  Globals::logger(LOG_DEBUG, "found dictionary path `%s'", s_path.c_str());
+	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
 	  dictionaries.Append(s);
-	  delete [] s_path;
 	}
       } else if (name == "font-configuration-path") {
-	GMetaDOM::DOMString path = elementValue(elem);
-	if (!path.isEmpty()) {
-	  char* s_path = path.toC();
-	  Globals::logger(LOG_DEBUG, "found font configuration path `%s'", s_path);
-	  String* s = new StringC(s_path);
+	GMetaDOM::GdomeString path = elementValue(elem);
+	if (!path.empty()) {
+	  std::string s_path = path;
+	  Globals::logger(LOG_DEBUG, "found font configuration path `%s'", s_path.c_str());
+	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
 	  fonts.Append(s);
-	  delete [] s_path;
 	}
       } else if (name == "entities-table-path") {
-	GMetaDOM::DOMString path = elementValue(elem);
-	if (!path.isEmpty()) {
-	  char* s_path = path.toC();
-	  Globals::logger(LOG_DEBUG, "found entities table path `%s'", s_path);
-	  String* s = new StringC(s_path);
+	GMetaDOM::GdomeString path = elementValue(elem);
+	if (!path.empty()) {
+	  std::string s_path = path;
+	  Globals::logger(LOG_DEBUG, "found entities table path `%s'", s_path.c_str());
+	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
 	  entities.Append(s);
-	  delete [] s_path;
 	}
       } else if (name == "t1-config-path") {
-	GMetaDOM::DOMString path = elementValue(elem);
-	if (!path.isEmpty() && t1Configs.GetSize() == 0) {
-	  char* s_path = path.toC();
-	  Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", s_path);
-	  String* s = new StringC(s_path);
+	GMetaDOM::GdomeString path = elementValue(elem);
+	if (!path.empty() && t1Configs.GetSize() == 0) {
+	  std::string s_path = path;
+	  Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", s_path.c_str());
+	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
 	  t1Configs.Append(s);
-	  delete [] s_path;
 	}
       } else if (name == "font-size") {
-	GMetaDOM::DOMString attr = elem.getAttribute("size");
-	if (attr.isEmpty()) {
+	GMetaDOM::GdomeString attr = elem.getAttribute("size");
+	if (attr.empty()) {
 	  Globals::logger(LOG_WARNING, "malformed `font-size' element, cannot find `size' attribute");
 	} else {
-	  char* s_attr = attr.toC();
-	  fontSize = atoi(s_attr);
+	  std::string s_attr = attr;
+	  fontSize = atoi(s_attr.c_str());
 	  Globals::logger(LOG_DEBUG, "default font size set to %d points", fontSize);
 	  fontSizeSet = true;
-	  delete [] s_attr;
 	}
       } else if (name == "color") {
 	colorSet = ParseColor(elem, foreground, background);
@@ -314,9 +309,8 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	if (selectColorSet) Globals::logger(LOG_DEBUG, "default selection color set to %06x %06x", selectForeground, selectBackground);
 	else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
       } else {
-	char* s_name = name.toC();
-	Globals::logger(LOG_WARNING, "unrecognized element `%s' in configuration file (ignored)", s_name);
-	delete [] s_name;
+	std::string s_name = name;
+	Globals::logger(LOG_WARNING, "unrecognized element `%s' in configuration file (ignored)", s_name.c_str());
       }
     } else if (!GMetaDOM::nodeIsBlank(p)) {
       Globals::logger(LOG_WARNING, "unrecognized node type `%d' in configuration file (ignored)", p.get_nodeType());
@@ -327,22 +321,19 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 bool
 Configuration::ParseColor(const GMetaDOM::Element& node, RGBValue& f, RGBValue& b)
 {
-  GMetaDOM::DOMString fs = node.getAttribute("foreground");
-  GMetaDOM::DOMString bs = node.getAttribute("background");
+  GMetaDOM::GdomeString fs = node.getAttribute("foreground");
+  GMetaDOM::GdomeString bs = node.getAttribute("background");
 
-  if (fs.isEmpty() || bs.isEmpty()) {
-    char* s_name = node.get_nodeName().toC();
-    Globals::logger(LOG_WARNING, "malformed `%s' element in configuration file", s_name);
-    delete [] s_name;
+  if (fs.empty() || bs.empty()) {
+    std::string s_name = node.get_nodeName();
+    Globals::logger(LOG_WARNING, "malformed `%s' element in configuration file", s_name.c_str());
     return false;
   }
 
-  char* s_fs = fs.toC();
-  char* s_bs = bs.toC();
-  StringC fss(s_fs);
-  StringC bss(s_bs);
-  delete [] s_fs;
-  delete [] s_bs;
+  std::string s_fs = fs;
+  std::string s_bs = bs;
+  StringC fss(s_fs.c_str());
+  StringC bss(s_bs.c_str());
 
   StringTokenizer fst(fss);
   StringTokenizer bst(bss);
@@ -354,9 +345,8 @@ Configuration::ParseColor(const GMetaDOM::Element& node, RGBValue& f, RGBValue& 
     delete fv;
     delete bv;
 
-    char* s_name = node.get_nodeName().toC();
-    Globals::logger(LOG_WARNING, "malformed color attribute in configuration file, `%s' element", s_name);
-    delete [] s_name;
+    std::string s_name = node.get_nodeName();
+    Globals::logger(LOG_WARNING, "malformed color attribute in configuration file, `%s' element", s_name.c_str());
 
     return false;
   }

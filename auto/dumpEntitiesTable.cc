@@ -80,29 +80,24 @@ dump(const char* fileName)
 
   try {
     GMetaDOM::Document doc = di.createDocumentFromURI(fileName, 0);
-    if (doc == NULL) return false;
+    if (!doc) return false;
   
     GMetaDOM::Element root = doc.get_documentElement();
-    if (root == 0) return false;
+    if (!root) return false;
 
-    for (GMetaDOM::Node p = root.get_firstChild(); p != 0; p = p.get_nextSibling()) {
+    for (GMetaDOM::Node p = root.get_firstChild(); p; p = p.get_nextSibling()) {
       if (p.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE) {
 	GMetaDOM::Element elem(p);
 
-	GMetaDOM::DOMString name = elem.getAttribute("name");
-	GMetaDOM::DOMString value = elem.getAttribute("value");
+	std::string name = elem.getAttribute("name");
+	GMetaDOM::GdomeString value = elem.getAttribute("value");
 
-	if (!name.isEmpty() && !value.isEmpty()) {
-	  char* s_name = name.toC();
-	  unsigned length;
-	  GMetaDOM::Char8* s_value = value.toUTF8(length);
+	if (!name.empty() && !value.empty()) {
+	  GMetaDOM::UTF8String s_value = value;
 
-	  printf("{ \"%s\", \"", s_name);
-	  for (unsigned i = 0; i < length; i++) printf("\\x%02x", s_value[i] & 0xff);
+	  printf("{ \"%s\", \"", name.c_str());
+	  for (unsigned i = 0; i < s_value.length(); i++) printf("\\x%02x", s_value[i] & 0xff);
 	  printf("\\x00\", 0, 0 },\n");
-
-	  delete [] s_name;
-	  delete [] s_value;
 	}
       }
     }

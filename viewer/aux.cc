@@ -34,7 +34,7 @@ getDepth(const GMetaDOM::Element& elem)
   unsigned length = 0;
   GMetaDOM::Element p = elem;
 
-  while (p != 0)
+  while (p)
     {
       p = p.get_parentNode();
       length++;
@@ -46,8 +46,8 @@ getDepth(const GMetaDOM::Element& elem)
 static GMetaDOM::Element
 findCommonAncestor(const GMetaDOM::Element& first, const GMetaDOM::Element& last)
 {
-  assert(first != 0);
-  assert(last != 0);
+  assert(first);
+  assert(last);
 
   GMetaDOM::Element p(first);
   GMetaDOM::Element q(last);
@@ -57,13 +57,13 @@ findCommonAncestor(const GMetaDOM::Element& first, const GMetaDOM::Element& last
       unsigned pDepth = getDepth(p);
       unsigned qDepth  = getDepth(q);
 
-      while (p != 0 && pDepth > qDepth)
+      while (p && pDepth > qDepth)
 	{
 	  p = p.get_parentNode();
 	  pDepth--;
 	}
 
-      while (q != 0 && qDepth > pDepth)
+      while (q && qDepth > pDepth)
 	{
 	  q = q.get_parentNode();
 	  qDepth--;
@@ -71,7 +71,7 @@ findCommonAncestor(const GMetaDOM::Element& first, const GMetaDOM::Element& last
 
       assert(pDepth == qDepth);
 
-      while (p != 0 && q != 0 && p != q)
+      while (p && q && p != q)
 	{
 	  p = p.get_parentNode();
 	  q = q.get_parentNode();
@@ -85,8 +85,8 @@ static void
 findCommonSiblings(const GMetaDOM::Element& first, const GMetaDOM::Element& last,
 		   GMetaDOM::Element& firstS, GMetaDOM::Element& lastS)
 {
-  assert(first != 0);
-  assert(last != 0);
+  assert(first);
+  assert(last);
 
   GMetaDOM::Element p(first);
   GMetaDOM::Element q(last);
@@ -96,13 +96,13 @@ findCommonSiblings(const GMetaDOM::Element& first, const GMetaDOM::Element& last
       unsigned pDepth = getDepth(p);
       unsigned qDepth  = getDepth(q);
 
-      while (p != 0 && pDepth > qDepth)
+      while (p && pDepth > qDepth)
 	{
 	  p = p.get_parentNode();
 	  pDepth--;
 	}
 
-      while (q != 0 && qDepth > pDepth)
+      while (q && qDepth > pDepth)
 	{
 	  q = q.get_parentNode();
 	  qDepth--;
@@ -110,7 +110,7 @@ findCommonSiblings(const GMetaDOM::Element& first, const GMetaDOM::Element& last
 
       assert(pDepth == qDepth);
 
-      while (p != 0 && q != 0 && p.get_parentNode() != q.get_parentNode())
+      while (p && q && p.get_parentNode() != q.get_parentNode())
 	{
 	  p = p.get_parentNode();
 	  q = q.get_parentNode();
@@ -124,10 +124,10 @@ findCommonSiblings(const GMetaDOM::Element& first, const GMetaDOM::Element& last
 static GMetaDOM::Node
 leftmostChild(const GMetaDOM::Node& node)
 {
-  if (node == 0) return node;
+  if (!node) return node;
 
   GMetaDOM::Node firstChild = node.get_firstChild();
-  if (firstChild == 0) return node;
+  if (!firstChild) return node;
 
   return leftmostChild(firstChild);
 }
@@ -135,10 +135,10 @@ leftmostChild(const GMetaDOM::Node& node)
 static GMetaDOM::Node
 rightmostChild(const GMetaDOM::Node& node)
 {
-  if (node == 0) return node;
+  if (!node) return node;
 
   GMetaDOM::Node lastChild = node.get_lastChild();
-  if (lastChild == 0) return node;
+  if (!lastChild) return node;
 
   return rightmostChild(lastChild);
 }
@@ -148,15 +148,15 @@ leftSibling(const GMetaDOM::Node& node)
 {
   GMetaDOM::Node p = node;
 
-  if (p == 0) return p;
+  if (!p) return p;
 
-  while (p.get_parentNode() != 0 && p.get_parentNode().get_firstChild() == p)
+  while (p.get_parentNode() && p.get_parentNode().get_firstChild() == p)
     p = p.get_parentNode();
 
-  if (p.get_parentNode() == 0) return 0;
+  if (!p.get_parentNode()) return 0;
 
   GMetaDOM::Node prevSibling = p.get_previousSibling();
-  assert(prevSibling != 0);
+  assert(prevSibling);
 
   return rightmostChild(prevSibling);
 }
@@ -166,18 +166,18 @@ rightSibling(const GMetaDOM::Node& node)
 {
   GMetaDOM::Node p = node;
 
-  if (p == 0) return p;
+  if (!p) return p;
 
   GMetaDOM::Node firstChild = p.get_firstChild();
-  if (firstChild != 0) return firstChild;
+  if (firstChild) return firstChild;
 
-  while (p.get_parentNode() != 0 && p.get_parentNode().get_lastChild() == p)
+  while (p.get_parentNode() && p.get_parentNode().get_lastChild() == p)
     p = p.get_parentNode();
 
-  if (p.get_parentNode() == 0) return 0;
+  if (!p.get_parentNode()) return 0;
 
   GMetaDOM::Node nextSibling = p.get_nextSibling();
-  assert(nextSibling != 0);
+  assert(nextSibling);
 
   return leftmostChild(nextSibling);
 }
@@ -209,7 +209,7 @@ delete_element(GdomeElement* elem)
   GMetaDOM::Element p(elem);
 
   GMetaDOM::Element parent = p.get_parentNode();
-  assert(parent != 0);
+  assert(parent);
 
   parent.removeChild(p);
 

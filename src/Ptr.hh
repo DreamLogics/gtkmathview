@@ -27,7 +27,7 @@ template <class P>
 class Ptr
 {
 public:
-  Ptr(void) : ptr(0);
+  Ptr(void) : ptr(0) { }
   Ptr(P* p) : ptr(p) { if (ptr != 0) ptr->ref(); }
   Ptr(const Ptr& p) : ptr(p.ptr) { if (ptr != 0) ptr->ref(); }
   ~Ptr() { if (ptr != 0) ptr->unref(); }

@@ -30,7 +30,7 @@ namespace GMetaDOM = GdomeSmartDOM;
 namespace GdomeSmartDOM {
 
   bool nodeIsBlank(const Node&);
-  DOMString elementValue(const Element&);
+  GdomeString elementValue(const Element&);
 
 }
 

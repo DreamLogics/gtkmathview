@@ -78,7 +78,7 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
   const Value* value = GetAttributeValue(ATTR_SELECTION, env);
   if (value != NULL) {
     selection = value->ToInteger() - 1;
-    if (selection >= content.GetSize()) selection = content.GetSize() - 1;
+    if (selection >= content.size()) selection = content.size() - 1;
   }
 
   MathMLLinearContainerElement::Setup(env);
@@ -152,13 +152,13 @@ MathMLActionElement::IsExpanding() const
 Ptr<MathMLElement>
 MathMLActionElement::GetSelectedElement() const
 {
-  return (selection < content.GetSize()) ? content.Get(selection) : Ptr<MathMLElement>(0);
+  return (selection < content.size()) ? content[selection] : Ptr<MathMLElement>(0);
 }
 
 void
 MathMLActionElement::SetSelectedIndex(unsigned i)
 {
-  assert(i > 0 && i <= content.GetSize());
+  assert(i > 0 && i <= content.size());
   if (selection == i - 1) return;
   selection = i - 1;
 
@@ -169,7 +169,7 @@ MathMLActionElement::SetSelectedIndex(unsigned i)
 unsigned
 MathMLActionElement::GetSelectedIndex() const
 {
-  return (content.GetSize() > 0) ? selection + 1 : 0;
+  return (content.size() > 0) ? selection + 1 : 0;
 }
 
 scaled

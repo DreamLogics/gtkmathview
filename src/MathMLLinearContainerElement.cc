@@ -22,16 +22,77 @@
 
 #include <config.h>
 
+#include <algorithm>
+#include <functional>
+
 #include <assert.h>
 #include <stdio.h>
 
 #include "Layout.hh"
-#include "Iterator.hh"
 #include "ChildList.hh"
-#include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLLinearContainerElement.hh"
 #include "FormattingContext.hh"
+
+/////// START OF ADAPTORS ///////
+
+struct NormalizeAdaptor
+  : public std::unary_function<Ptr<MathMLElement>,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem) const
+  { elem->Normalize(); }
+};
+
+struct DoStretchyLayoutAdaptor
+  : public std::unary_function<Ptr<MathMLElement>,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem) const
+  { elem->DoStretchyLayout(); }
+};
+
+struct SetDirtyAdaptor
+  : public std::binary_function<Ptr<MathMLElement>,const Rectangle*,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem, const Rectangle* rect) const
+  { elem->SetDirty(rect); }
+};
+
+struct SetDirtyLayoutAdaptor
+  : public std::binary_function<Ptr<MathMLElement>,bool,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem, bool children) const
+  { elem->SetDirtyLayout(children); }
+};
+
+struct SetSelectedAdaptor
+  : public std::unary_function<Ptr<MathMLElement>,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem) const
+  { elem->SetSelected(); }
+};
+
+struct ResetSelectedAdaptor
+  : public std::unary_function<Ptr<MathMLElement>,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem) const
+  { elem->ResetSelected(); }
+};
+
+struct ReleaseGCsAdaptor
+  : public std::unary_function<Ptr<MathMLElement>,void>
+{
+  void operator()(const Ptr<MathMLElement>& elem) const
+  { elem->ReleaseGCs(); }
+};
+
+struct IsExpandingPredicate
+  : public std::unary_function<Ptr<MathMLElement>,bool>
+{
+  bool operator()(const Ptr<MathMLElement>& elem) const
+  { return elem->IsExpanding(); }
+};
+
+/////// END OF ADAPTORS ///////
 
 MathMLLinearContainerElement::MathMLLinearContainerElement()
 {
@@ -55,10 +116,12 @@ MathMLLinearContainerElement::Normalize()
     {
       // editing is supported with GMetaDOM only
 #if defined(HAVE_GMETADOM)
-      if (GetDOMElement() != 0)
+      if (GetDOMElement())
 	{
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
-	  for (unsigned i = 0; i < children.get_length(); i++)
+	  unsigned n = children.get_length();
+	  content.reserve(n);
+	  for (unsigned i = 0; i < n; i++)
 	    {
 	      GMetaDOM::Node node = children.item(i);
 	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
@@ -73,19 +136,14 @@ MathMLLinearContainerElement::Normalize()
 
 	  // the following is to be sure that no spurious elements remain at the
 	  // end of the container
-	  SetSize(children.get_length());
+	  SetSize(n);
 	}
 #endif // HAVE_GMETADOM
 
       // it is better to normalize elements only after all the rendering
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
-
-      for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-	{
-	  assert(elem());
-	  elem()->Normalize();
-	}
+      std::for_each(content.begin(), content.end(), NormalizeAdaptor());
 
       ResetDirtyStructure();
     }
@@ -98,24 +156,24 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 
   background = env->GetBackgroundColor();
 
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
-    assert(elem());
-    elem()->Setup(env);
-  }
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    (*elem)->Setup(env);
 }
 
 void
-MathMLLinearContainerElement::DoLayout(const class FormattingContext& ctxt)
+MathMLLinearContainerElement::DoLayout(const FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   // an unbreakable container element will have all of its
   // children boxed, however the minimum box is to be called
   // by the overriding method!
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
-    assert(elem());
-    elem()->DoLayout(ctxt);
-  }
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    (*elem)->DoLayout(ctxt);
 
   ResetDirtyLayout(ctxt.GetLayoutType());
 }
@@ -123,11 +181,7 @@ MathMLLinearContainerElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLLinearContainerElement::DoStretchyLayout()
 {
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->DoStretchyLayout();
-    }
+  std::for_each(content.begin(), content.end(), DoStretchyLayoutAdaptor());
 }
 
 void
@@ -136,12 +190,10 @@ MathMLLinearContainerElement::Render(const DrawingArea& area)
   if (!HasDirtyChildren()) return;
 
   RenderBackground(area);
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->Render(area);
-    }
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    (*elem)->Render(area);
 
   ResetDirty();
 }
@@ -151,10 +203,10 @@ MathMLLinearContainerElement::Inside(scaled x, scaled y)
 {
   if (!IsInside(x, y)) return 0;
 
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+  for (vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end(); elem++)
     {
-      assert(elem());
-      Ptr<MathMLElement> inside = elem()->Inside(x, y);
+      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
       if (inside) return inside;
     }
 
@@ -165,13 +217,9 @@ void
 MathMLLinearContainerElement::SetDirtyLayout(bool children)
 {
   MathMLElement::SetDirtyLayout(children);
-  if (children) {
-    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-      {
-	assert(elem());
-	elem()->SetDirtyLayout(children);
-      }
-  }
+  if (children)
+    std::for_each(content.begin(), content.end(),
+		  std::bind2nd(SetDirtyLayoutAdaptor(), true));
 }
 
 void
@@ -187,11 +235,8 @@ MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
   //dirty = 1;
   //SetDirtyChildren();
 
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->SetDirty(rect);
-    }
+  std::for_each(content.begin(), content.end(),
+		std::bind2nd(SetDirtyAdaptor(), rect));
 }
 
 void
@@ -200,13 +245,7 @@ MathMLLinearContainerElement::SetSelected()
   if (IsSelected()) return;
 
   selected = 1;
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->SetSelected();
-    }
-
+  std::for_each(content.begin(), content.end(), SetSelectedAdaptor());
   SetDirty();
 }
 
@@ -216,83 +255,43 @@ MathMLLinearContainerElement::ResetSelected()
   if (!IsSelected()) return;
 
   SetDirty();
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->ResetSelected();
-    }  
-
+  std::for_each(content.begin(), content.end(), ResetSelectedAdaptor());
   selected = 0;
 }
 
 bool
 MathMLLinearContainerElement::IsExpanding() const
 {
-  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
-    {
-      Ptr<MathMLElement> elem = i();
-      assert(elem);
-      if (elem->IsExpanding()) return true;
-    }  
-  
-  return false;
-}
-
-scaled
-MathMLLinearContainerElement::GetLeftEdge() const
-{
-  scaled edge = 0;
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      if (elem.IsFirst()) edge = elem()->GetLeftEdge();
-      else edge = scaledMin(edge, elem()->GetLeftEdge());
-    }
-
-  return edge;
-}
-
-scaled
-MathMLLinearContainerElement::GetRightEdge() const
-{
-  scaled edge = 0;
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      if (elem.IsFirst()) edge = elem()->GetRightEdge();
-      else edge = scaledMax(edge, elem()->GetRightEdge());
-    }
-
-  return edge;
+  return std::find_if(content.begin(), content.end(), IsExpandingPredicate()) != content.end();
 }
 
 void
 MathMLLinearContainerElement::ReleaseGCs()
 {
   MathMLElement::ReleaseGCs();
-
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      elem()->ReleaseGCs();
-    }
+  std::for_each(content.begin(), content.end(), ReleaseGCsAdaptor());
 }
 
 void
 MathMLLinearContainerElement::SetSize(unsigned size)
 {
   assert(size <= GetSize());
-  while (size < GetSize()) Remove(content.GetLast());
+  if (size == GetSize()) return;
+
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin() + size;
+       elem < content.end();
+       elem++)
+    (*elem)->SetParent(0);
+
+  content.resize(size);
+  SetDirtyStructure();
 }
 
 Ptr<MathMLElement>
 MathMLLinearContainerElement::GetChild(unsigned i) const
 {
   assert(i < GetSize());
-  return content.Get(i);
+  return content[i];
 }
 
 void
@@ -303,12 +302,11 @@ MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& ele
   if (i == GetSize()) Append(elem);
   else
     {
-      Ptr<MathMLElement> oldElem = content.Get(i);
-      assert(oldElem);
-      if (oldElem != elem)
+      if (content[i] != elem)
 	{
+	  content[i]->SetParent(0);
 	  elem->SetParent(this);
-	  content.Set(i, elem);
+	  content[i] = elem;
 	  SetDirtyStructure();
 	}
     }
@@ -318,15 +316,7 @@ void
 MathMLLinearContainerElement::Append(const Ptr<MathMLElement>& elem)
 {
   elem->SetParent(this);
-  content.Append(elem);
-  SetDirtyStructure();
-}
-
-void
-MathMLLinearContainerElement::Remove(const Ptr<MathMLElement>& elem)
-{
-  assert(content.Contains(elem));
-  content.Remove(elem);
+  content.push_back(elem);
   SetDirtyStructure();
 }
 
@@ -334,7 +324,13 @@ void
 MathMLLinearContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
 				      const Ptr<MathMLElement>& newElem)
 {
-  assert(content.Contains(oldElem));
-  SetChild(content.IndexOf(oldElem), newElem);
+  std::vector< Ptr<MathMLElement> >::iterator old = find(content.begin(), content.end(), oldElem);
+  assert(old != content.end());
+  if (oldElem == newElem) return;
+
+  (*old)->SetParent(0);
+  newElem->SetParent(this);
+  *old = newElem;
+  SetDirtyStructure();
 }
 

@@ -109,12 +109,11 @@ MathMLStyleElement::Setup(RenderingEnvironment* env)
   for (unsigned i = 0; i < nnm.get_length(); i++) {
     GMetaDOM::Node attribute = nnm.item(i);
 
-    char* s_name = attribute.get_nodeName().toC();
-    AttributeId id = AttributeIdOfName(s_name);
-    delete [] s_name;
+    std::string s_name = attribute.get_nodeName();
+    AttributeId id = AttributeIdOfName(s_name.c_str());
 
     if (id != ATTR_NOTVALID) {
-      GMetaDOM::DOMString value = attribute.get_nodeValue();
+      GMetaDOM::GdomeString value = attribute.get_nodeValue();
       String* sValue = allocString(value);
       attributes.Append(new MathMLAttribute(id, sValue));
     }

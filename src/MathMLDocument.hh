@@ -57,7 +57,9 @@ public:
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
   const GMetaDOM::Element& GetDOMRoot(void) const { return DOMroot; }
+
 protected:
+
   class DOMSubtreeModifiedListener : public GMetaDOM::EventListener
   {
   public:

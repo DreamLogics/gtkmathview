@@ -23,6 +23,8 @@
 #ifndef MathMLLinearContainerElement_hh
 #define MathMLLinearContainerElement_hh
 
+#include <vector>
+
 #if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
@@ -40,7 +42,7 @@ protected:
 
 public:
   virtual void Normalize(void);
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(class RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void Render(const DrawingArea&);
@@ -53,28 +55,27 @@ public:
   virtual void ResetSelected(void);
 
   virtual bool IsExpanding(void) const;
-  virtual scaled GetLeftEdge(void) const;
-  virtual scaled GetRightEdge(void) const;
+  virtual scaled GetLeftEdge(void) const = 0;
+  virtual scaled GetRightEdge(void) const = 0;
 
   // the content can be accessed directly, but only in a read-only
   // way, because other operation involves SetParent and other
   // memory-management issues
-  const Container< Ptr<MathMLElement> >& GetContent(void) const { return content; }
+  const std::vector< Ptr<MathMLElement> >& GetContent(void) const { return content; }
 
-  unsigned GetSize(void) const { return content.GetSize(); }
+  unsigned GetSize(void) const { return content.size(); }
   void     SetSize(unsigned);
   Ptr<MathMLElement> GetChild(unsigned) const;
   void     SetChild(unsigned, const Ptr<MathMLElement>&);
 
   virtual void Append(const Ptr<MathMLElement>&);
-  virtual void Remove(const Ptr<MathMLElement>&);
   virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
   void         Prepend(const Ptr<MathMLElement>&);
   void         RemoveFirst(void);
   void         RemoveLast(void);
 
 protected:
-  Container< Ptr<MathMLElement> > content;
+  std::vector< Ptr<MathMLElement> > content;
 };
 
 #endif // MathMLLinearContainerElement_hh

@@ -27,11 +27,11 @@
 #if defined(HAVE_GMETADOM)
 
 ChildList::ChildList(const GMetaDOM::Element& root0,
-		     const GMetaDOM::DOMString& ns0,
-		     const GMetaDOM::DOMString& name0)
+		     const GMetaDOM::GdomeString& ns0,
+		     const GMetaDOM::GdomeString& name0)
   : root(root0), ns(ns0), name(name0)
 {
-  assert(root != 0);
+  assert(root);
 }
 
 GMetaDOM::Node
@@ -39,7 +39,7 @@ ChildList::item(unsigned long i) const
 {
   GMetaDOM::Node p = root.get_firstChild();
 
-  while (p != 0)
+  while (p)
     {
       if ((ns == "*" || ns == p.get_namespaceURI()) &&
 	  (name == "*" || p.get_localName() == name))
@@ -60,7 +60,7 @@ ChildList::get_length() const
   unsigned long length = 0;
   GMetaDOM::Node p = root.get_firstChild();
 
-  while (p != 0)
+  while (p)
     {
       if ((ns == "*" || ns == p.get_namespaceURI()) &&
 	  (name == "*" || p.get_localName() == name))

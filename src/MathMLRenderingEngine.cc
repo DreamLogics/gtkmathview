@@ -109,7 +109,7 @@ MathMLRenderingEngine::Load(const char* fileName)
   perf.Stop();
   Globals::logger(LOG_INFO, "parsing time: %dms", perf());
 
-  if (doc == 0) {
+  if (!doc) {
     Globals::logger(LOG_WARNING, "error while parsing `%s'", fileName);
     return false;
   }
@@ -121,7 +121,7 @@ MathMLRenderingEngine::Load(const char* fileName)
 bool
 MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 {
-  assert(doc != 0);
+  assert(doc);
 
   Unload();
 
@@ -145,7 +145,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 bool
 MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
 {
-  assert(elem != 0);
+  assert(elem);
 
   Unload();
 

@@ -66,11 +66,11 @@ T1_FontManager::IsAvailable(const FontAttributes& fa,
 {
   if (efa == NULL) return false;
 
-  const char* type = efa->GetProperty("type");
-  if (type == NULL || (strcmp(type, "type1") && strcmp(type, "ps"))) return false;
+  const std::string type = efa->GetProperty("type");
+  if (type != "type1" && type != "ps") return false;
 
-  const char* fileName = efa->GetProperty("ps-file");
-  if (fileName == NULL) return false;
+  const std::string fileName = efa->GetProperty("ps-file");
+  if (fileName == "") return false;
 
   return true;
 }
@@ -105,18 +105,18 @@ T1_FontManager::SearchNativeFontAux(const FontAttributes& fa,
 {
   assert(efa != NULL);
 
-  const char* type = efa->GetProperty("type");
-  if (type == NULL) {
+  const std::string type = efa->GetProperty("type");
+  if (type == "") {
     Globals::logger(LOG_ERROR, "could not determine font type (check the font configuration file)");
     return -1;
   }
 
-  if (strcmp(type, "type1") && strcmp(type, "ps")) return -1;
+  if (type != "type1" && type != "ps") return -1;
 
-  const char* fileName = efa->GetProperty("ps-file");
-  assert(fileName != NULL);
+  const std::string fileName = efa->GetProperty("ps-file");
+  assert(fileName != "");
 
-  int i = SearchT1FontId(fileName);
+  int i = SearchT1FontId(fileName.c_str());
   
   size = 1.0;
   if (fa.HasSize())

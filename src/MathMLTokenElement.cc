@@ -174,11 +174,11 @@ MathMLTokenElement::Append(const Ptr<MathMLTextNode>& node)
 void
 MathMLTokenElement::Normalize()
 {
-  if ((HasDirtyStructure() || HasChildWithDirtyStructure()) && GetDOMElement() != 0)
+  if ((HasDirtyStructure() || HasChildWithDirtyStructure()) && GetDOMElement())
     {
       String* sContent = NULL;
       for (GMetaDOM::Node p = GetDOMElement().get_firstChild(); 
-	   p != 0;
+	   p;
 	   p = p.get_nextSibling()) 
 	{
 	  switch (p.get_nodeType())
@@ -186,7 +186,7 @@ MathMLTokenElement::Normalize()
 	    case GMetaDOM::Node::TEXT_NODE:
 	      {
 		// ok, we have a chunk of text
-		GMetaDOM::DOMString content = p.get_nodeValue();
+		GMetaDOM::GdomeString content = p.get_nodeValue();
 		String* s = allocString(content);
 		assert(s != NULL);
 	      
@@ -195,8 +195,8 @@ MathMLTokenElement::Normalize()
 	      
 		// ...but spaces at the at the beginning (end) are deleted only if this
 		// is the very first (last) chunk in the token.
-		if (p.get_previousSibling() == 0) s->TrimSpacesLeft();
-		if (p.get_nextSibling() == 0) s->TrimSpacesRight();
+		if (!p.get_previousSibling()) s->TrimSpacesLeft();
+		if (!p.get_nextSibling()) s->TrimSpacesRight();
 
 		Append(s);
 		delete s;
@@ -227,15 +227,13 @@ MathMLTokenElement::Normalize()
 		      }
 		    else
 		      {
-			char* s_name = p.get_nodeName().toC();
-			Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name);
-			delete [] s_name;
+			std::string s_name = p.get_nodeName();
+			Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name.c_str());
 		      }
 		  } else
 		    {
-		      char* s_name = p.get_nodeName().toC();
-		      Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name);
-		      delete [] s_name;
+		      std::string s_name = p.get_nodeName();
+		      Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name.c_str());
 		    }
 	      }
 	    break;
@@ -551,32 +549,29 @@ MathMLTokenElement::AddItalicCorrection()
 Ptr<MathMLTextNode>
 MathMLTokenElement::SubstituteMGlyphElement(const GMetaDOM::Element& node)
 {
-  assert(node != 0);
+  assert(node);
 
-  GMetaDOM::DOMString alt        = node.getAttribute("alt");
-  GMetaDOM::DOMString fontFamily = node.getAttribute("fontfamily");
-  GMetaDOM::DOMString index      = node.getAttribute("index");
+  GMetaDOM::GdomeString alt        = node.getAttribute("alt");
+  GMetaDOM::GdomeString fontFamily = node.getAttribute("fontfamily");
+  GMetaDOM::GdomeString index      = node.getAttribute("index");
 
-  if (alt.isEmpty() || fontFamily.isEmpty() || index.isEmpty()) {
+  if (alt.empty() || fontFamily.empty() || index.empty()) {
     Globals::logger(LOG_WARNING, "malformed `mglyph' element (some required attribute is missing)\n");
     return MathMLCharNode::create('?');
   }
 
-  char* s_index = index.toC();
+  std::string s_index = index;
   char* endPtr;
-  unsigned nch = strtoul(s_index, &endPtr, 10);
-  delete [] s_index;
+  unsigned nch = strtoul(s_index.c_str(), &endPtr, 10);
 
   if (endPtr == NULL || *endPtr != '\0') {
     Globals::logger(LOG_WARNING, "malformed `mglyph' element (parsing error in `index' attribute)\n");
     nch = '?';
   }
 
-  char* s_alt = alt.toC();
-  char* s_fontFamily = fontFamily.toC();
-  Ptr<MathMLGlyphNode> glyph = MathMLGlyphNode::create(s_alt, s_fontFamily, nch);
-  delete [] s_alt;
-  delete [] s_fontFamily;
+  std::string s_alt = alt;
+  std::string s_fontFamily = fontFamily;
+  Ptr<MathMLGlyphNode> glyph = MathMLGlyphNode::create(s_alt.c_str(), s_fontFamily.c_str(), nch);
 
   return glyph;
 }
@@ -584,23 +579,22 @@ MathMLTokenElement::SubstituteMGlyphElement(const GMetaDOM::Element& node)
 Ptr<MathMLTextNode>
 MathMLTokenElement::SubstituteAlignMarkElement(const GMetaDOM::Element& node)
 {
-  assert(node != 0);
+  assert(node);
 
-  GMetaDOM::DOMString edge = node.getAttribute("edge");
+  GMetaDOM::GdomeString edge = node.getAttribute("edge");
 
   MarkAlignType align = MARK_ALIGN_NOTVALID;
 
-  if (!edge.isEmpty())
+  if (!edge.empty())
     {
       if      (edge == "left") align = MARK_ALIGN_LEFT;
       else if (edge == "right") align = MARK_ALIGN_RIGHT;
       else
 	{
-	  char* s_edge = edge.toC();
+	  std::string s_edge = edge;
 	  Globals::logger(LOG_WARNING,
 			  "malformed `malignmark' element, attribute `edge' has invalid value `%s' (ignored)",
-			  s_edge);
-	  delete [] s_edge;
+			  s_edge.c_str());
 	}
     }
 

@@ -21,12 +21,15 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
+#include <functional>
+#include <algorithm>
+
 #include <assert.h>
 #include <stddef.h>
 
 #include "Layout.hh"
 #include "CharMap.hh"
-#include "Iterator.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
 #include "MathMLRowElement.hh"
@@ -35,6 +38,17 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
+
+/////// START OF ADAPTORS ///////
+
+struct IsSpaceLikePredicate
+  : public std::unary_function<Ptr<MathMLElement>,bool>
+{
+  bool operator()(const Ptr<MathMLElement>& elem) const
+  { return elem->IsSpaceLike(); }
+};
+
+/////// END OF ADAPTORS ///////
 
 MathMLRowElement::MathMLRowElement()
 {
@@ -51,39 +65,18 @@ MathMLRowElement::~MathMLRowElement()
 {
 }
 
-#if 0
-void
-MathMLRowElement::Normalize()
-{
-}
-#endif
-
-void
-MathMLRowElement::Setup(RenderingEnvironment* env)
-{
-  MathMLLinearContainerElement::Setup(env);
-
-  Iterator< Ptr<MathMLElement> > i(content);
-  i.ResetLast();
-  while (i.More() && i() &&
-	 (i()->IsSpaceLike() || is_a<MathMLEmbellishedOperatorElement>(i())))
-    i.Prev();
-	      
-  if (i.More() && i()) lastElement = i();
-}
-
 void
 MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   box.Null();
-  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
     {
-      Ptr<MathMLElement> elem = i();
-      assert(elem);
-      elem->DoLayout(ctxt);
-      box.Append(elem->GetBoundingBox());
+      (*elem)->DoLayout(ctxt);
+      box.Append((*elem)->GetBoundingBox());
     }
 
   DoStretchyLayout();
@@ -104,12 +97,11 @@ MathMLRowElement::DoStretchyLayout()
   rowBox.Null();
   opBox.Null();
 
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
     {
-      assert(elem());
-      BoundingBox elemBox;
-
-      Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
+      Ptr<MathMLOperatorElement> op = findStretchyOperator(*elem, STRETCH_VERTICAL);
       if (op)
 	{
 	  opBox.Append(op->GetMinBoundingBox());
@@ -117,7 +109,7 @@ MathMLRowElement::DoStretchyLayout()
 	} 
       else
 	{
-	  rowBox.Append(elem()->GetBoundingBox());
+	  rowBox.Append((*elem)->GetBoundingBox());
 	  nOther++;
 	}
     }
@@ -132,15 +124,16 @@ MathMLRowElement::DoStretchyLayout()
 	     NameOfTagId(IsA()), this, nStretchy, nOther, sp2ipx(toAscent), sp2ipx(toDescent));
 #endif
 
-      for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+	   elem != content.end();
+	   elem++)
 	{
-	  assert(elem());
-	  Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
+	  Ptr<MathMLOperatorElement> op = findStretchyOperator(*elem, STRETCH_VERTICAL);
 
 	  if (op)
 	    {
 	      op->VerticalStretchTo(toAscent, toDescent);
-	      elem()->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
+	      (*elem)->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
 	    }
 	}
     }
@@ -150,36 +143,52 @@ void
 MathMLRowElement::SetPosition(scaled x, scaled y)
 {
   MathMLLinearContainerElement::SetPosition(x, y);
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
     {
-      assert(elem());
-      elem()->SetPosition(x, y);
-      x += elem()->GetBoundingBox().width;
+      (*elem)->SetPosition(x, y);
+      x += (*elem)->GetBoundingBox().width;
     }
 }
 
 bool
 MathMLRowElement::IsSpaceLike() const
 {
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem());
-      if (!elem()->IsSpaceLike()) return false;
-    }
-
-  return true;
+  return std::find_if(content.begin(), content.end(),
+		      std::not1(IsSpaceLikePredicate())) != content.end();
 }
 
-bool
-MathMLRowElement::IsExpanding() const
+scaled
+MathMLRowElement::GetLeftEdge() const
 {
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+  scaled edge = 0;
+  
+  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
     {
-      assert(elem());
-      if (elem()->IsExpanding()) return true;
+      if (elem == content.begin()) edge = (*elem)->GetLeftEdge();
+      else edge = scaledMin(edge, (*elem)->GetX() + (*elem)->GetLeftEdge());
     }
 
-  return false;
+  return edge;
+}
+
+scaled
+MathMLRowElement::GetRightEdge() const
+{
+  scaled edge = 0;
+
+  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    {
+      if (elem == content.begin()) edge = (*elem)->GetRightEdge();
+      else edge = scaledMax(edge, (*elem)->GetX() + (*elem)->GetRightEdge());
+    }
+
+  return edge;
 }
 
 OperatorFormId
@@ -191,10 +200,11 @@ MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
 
   unsigned rowLength = 0;
   unsigned position  = 0;
-  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
     {
-      Ptr<const MathMLElement> p = i();
-      assert(p);
+      Ptr<const MathMLElement> p = *elem;
 
       if (!p->IsSpaceLike())
 	{
@@ -217,14 +227,13 @@ MathMLRowElement::GetCoreOperator()
 {
   Ptr<MathMLElement> core = 0;
 
-  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
     {
-      Ptr<MathMLElement> elem = i();
-      assert(elem);
-
-      if (!elem->IsSpaceLike())
+      if (!(*elem)->IsSpaceLike())
 	{
-	  if (!core) core = elem;
+	  if (!core) core = *elem;
 	  else return 0;
 	}
     }

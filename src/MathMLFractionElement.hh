@@ -27,9 +27,9 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 
-class MathMLFractionElement: public MathMLLinearContainerElement
+class MathMLFractionElement: public MathMLContainerElement
 {
 protected:
   MathMLFractionElement(void);
@@ -47,16 +47,34 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Normalize(void);
-  virtual void Setup(RenderingEnvironment*);
-  virtual void DoLayout(const class FormattingContext&);
-  virtual void SetPosition(scaled, scaled);
-  virtual void Render(const DrawingArea&);
+  virtual void   Normalize(void);
+  virtual void   Setup(RenderingEnvironment*);
+  virtual void   DoLayout(const class FormattingContext&);
+  virtual void   SetPosition(scaled, scaled);
+  virtual void   SetDirtyLayout(bool = false);
+  virtual void   SetDirty(const Rectangle* = 0);
+  virtual void   SetSelected(void);
+  virtual void   ResetSelected(void);
+  virtual void   Render(const DrawingArea&);
 
-  virtual bool IsExpanding(void) const;
+  virtual void   Replace(const Ptr<class MathMLElement>&, const Ptr<class MathMLElement>&);
+
+  virtual bool   IsExpanding(void) const;
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
+  virtual void   ReleaseGCs(void);
+  virtual Ptr<class MathMLElement> Inside(scaled, scaled);
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
+  Ptr<MathMLElement> GetNumerator(void) const { return numerator; }
+  Ptr<MathMLElement> GetDenominator(void) const { return denominator; }
+  void SetNumerator(const Ptr<MathMLElement>&);
+  void SetDenominator(const Ptr<MathMLElement>&);
+
 private:
+  Ptr<MathMLElement> numerator;
+  Ptr<MathMLElement> denominator;
+
   scaled          axis;
   scaled          numShift;
   scaled          denomShift;

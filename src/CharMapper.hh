@@ -56,7 +56,7 @@ public:
 
 private:
   struct FontMap {
-    const char* id;
+    std::string id;
     Container<CharMap*> multi; // actually, RANGE and MULTI maps
     Container<CharMap*> single[CHAR_MAP_HASH_TABLE_SIZE]; // actually, SINGLE and STRETCHY
 
@@ -68,7 +68,7 @@ private:
     FontAttributes      attributes;
     ExtraFontAttributes extraAttributes;
 
-    const char*         fontMapId;
+    std::string         fontMapId;
     const FontMap*      fontMap;
   };
 
@@ -97,7 +97,7 @@ private:
 #endif // HAVE_GMETADOM
 
   void PatchConfiguration(void);
-  const FontMap* SearchMapping(const char*) const;
+  const FontMap* SearchMapping(const std::string&) const;
 
   Container<FontDescriptor*> fonts;
   Container<FontMap*>        maps;

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "Globals.hh"
+#include "ChildList.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
 #include "MathMLDummyElement.hh"
@@ -38,7 +39,7 @@ MathMLFractionElement::MathMLFractionElement()
 
 #if defined(HAVE_GMETADOM)
 MathMLFractionElement::MathMLFractionElement(const GMetaDOM::Element& node)
-  : MathMLLinearContainerElement(node)
+  : MathMLContainerElement(node)
 {
 }
 #endif
@@ -67,19 +68,31 @@ MathMLFractionElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLFractionElement::Normalize()
 {
-  while (content.GetSize() > 2)
-    content.RemoveLast();
-
-  while (content.GetSize() < 2)
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy);
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement())
+	{
+	  assert(IsA() == TAG_MFRAC);
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	  unsigned n = children.get_length();
 
-      mdummy->SetParent(this);
-      content.Append(mdummy);
+	  if (n > 0)
+	    SetNumerator(MathMLElement::getRenderingInterface(children.item(0)));
+	  else if (!numerator || !is_a<MathMLDummyElement>(numerator))
+	    SetNumerator(MathMLDummyElement::create());
+
+	  if (n > 1)
+	    SetDenominator(MathMLElement::getRenderingInterface(children.item(1)));
+	  else if (!denominator || !is_a<MathMLDummyElement>(denominator))
+	    SetDenominator(MathMLDummyElement::create());
+	}
+#endif
+
+      assert(numerator && denominator);
+      numerator->Normalize();
+      denominator->Normalize();
     }
-
-  MathMLLinearContainerElement::Normalize();
 }
 
 void
@@ -179,7 +192,11 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
   env->Push();
   if (!displayStyle) env->AddScriptLevel(1);
   else env->SetDisplayStyle(false);
-  MathMLLinearContainerElement::Setup(env);
+
+  assert(numerator && denominator);
+  numerator->Setup(env);
+  denominator->Setup(env);
+
   env->Drop();
 }
 
@@ -188,18 +205,14 @@ MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  Ptr<MathMLElement> num   = content.GetFirst();
-  Ptr<MathMLElement> denom = content.GetLast();
-  assert(num && denom);
+  assert(numerator && denominator);
+  numerator->DoLayout(ctxt);
+  denominator->DoLayout(ctxt);
+
+  const BoundingBox& numBox   = numerator->GetBoundingBox();
+  const BoundingBox& denomBox = denominator->GetBoundingBox();
 
   if (bevelled) {
-    // the fraction is bevelled
-    num->DoLayout(ctxt);
-    denom->DoLayout(ctxt);
-
-    const BoundingBox& numBox   = num->GetBoundingBox();
-    const BoundingBox& denomBox = denom->GetBoundingBox();
-
     scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
     scaled barHoriz = barVert / 2;
 
@@ -207,12 +220,6 @@ MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
     box.Append(numBox);
     box.Append(denomBox);
   } else {
-    num->DoLayout(ctxt);
-    denom->DoLayout(ctxt);
-
-    const BoundingBox& numBox   = num->GetBoundingBox();
-    const BoundingBox& denomBox = denom->GetBoundingBox();
-
 #ifdef TEXISH_MATHML
     scaled u = numMinShift;
     scaled v = denomMinShift;
@@ -264,20 +271,18 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  Ptr<MathMLElement> num   = content.GetFirst();
-  Ptr<MathMLElement> denom = content.GetLast();
-  assert(num && denom);
+  assert(numerator && denominator);
 
   const BoundingBox& box      = GetBoundingBox();
-  const BoundingBox& numBox   = num->GetBoundingBox();
-  const BoundingBox& denomBox = denom->GetBoundingBox();
+  const BoundingBox& numBox   = numerator->GetBoundingBox();
+  const BoundingBox& denomBox = denominator->GetBoundingBox();
 
   if (bevelled) {
     scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
     scaled barHoriz = barVert / 2;
 
-    num->SetPosition(x, y);
-    denom->SetPosition(x + numBox.width + barHoriz + 2 * lineThickness, y);
+    numerator->SetPosition(x, y);
+    denominator->SetPosition(x + numBox.width + barHoriz + 2 * lineThickness, y);
   } else {
     scaled numXOffset = 0;
     switch (numAlign) {
@@ -305,8 +310,8 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
       break;
     }
 
-    num->SetPosition(x + numXOffset, y - numShift);
-    denom->SetPosition(x + denomXOffset, y + denomShift);
+    numerator->SetPosition(x + numXOffset, y - numShift);
+    denominator->SetPosition(x + denomXOffset, y + denomShift);
   }
 }
 
@@ -315,37 +320,42 @@ MathMLFractionElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  MathMLLinearContainerElement::Render(area);
-
-  if (fGC[IsSelected()] == NULL) {
-    GraphicsContextValues values;
-    values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-    values.lineWidth = lineThickness;
-    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_WIDTH);
-  }
-
-  if (lineThickness > SP_EPSILON) {
-    if (bevelled) {
-      Ptr<MathMLElement> num   = content.GetFirst();
-      Ptr<MathMLElement> denom = content.GetLast();
-      assert(num && denom);
-
-      const BoundingBox& numBox   = num->GetBoundingBox();
-      const BoundingBox& denomBox = denom->GetBoundingBox();
-
-      scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
-      scaled barHoriz = barVert / 2;
-
-      area.DrawLine(fGC[IsSelected()],
-		    GetX() + numBox.width + lineThickness,
-		    GetY() + scaledMax(numBox.descent, denomBox.descent),
-		    GetX() + numBox.width + lineThickness + barHoriz,
-		    GetY() - scaledMax(numBox.ascent, denomBox.ascent));
-    } else {
-      area.DrawLine(fGC[IsSelected()], GetX(), GetY() - axis,
-		    GetX() + box.width, GetY() - axis);
+  if (fGC[IsSelected()] == NULL)
+    {
+      GraphicsContextValues values;
+      values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
+      values.lineWidth = lineThickness;
+      fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_WIDTH);
     }
-  }
+
+  RenderBackground(area);
+
+  assert(numerator && denominator);
+  numerator->Render(area);
+  denominator->Render(area);
+
+  if (lineThickness > SP_EPSILON)
+    {
+      if (bevelled)
+	{
+	  const BoundingBox& numBox   = numerator->GetBoundingBox();
+	  const BoundingBox& denomBox = denominator->GetBoundingBox();
+
+	  scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
+	  scaled barHoriz = barVert / 2;
+
+	  area.DrawLine(fGC[IsSelected()],
+			GetX() + numBox.width + lineThickness,
+			GetY() + scaledMax(numBox.descent, denomBox.descent),
+			GetX() + numBox.width + lineThickness + barHoriz,
+			GetY() - scaledMax(numBox.ascent, denomBox.ascent));
+	}
+      else
+	{
+	  area.DrawLine(fGC[IsSelected()], GetX(), GetY() - axis,
+			GetX() + box.width, GetY() - axis);
+	}
+    }
 
   ResetDirty();
 }
@@ -353,12 +363,10 @@ MathMLFractionElement::Render(const DrawingArea& area)
 bool
 MathMLFractionElement::IsExpanding() const
 {
-  Ptr<MathMLElement> num   = content.GetFirst();
-  Ptr<MathMLElement> denom = content.GetLast();
-  assert(num && denom);
+  assert(numerator && denominator);
 
-  if (num->IsExpanding()) return true;
-  if (denom->IsExpanding()) return true;
+  if (numerator->IsExpanding()) return true;
+  if (denominator->IsExpanding()) return true;
 
   return false;
 }
@@ -366,7 +374,6 @@ MathMLFractionElement::IsExpanding() const
 Ptr<class MathMLOperatorElement>
 MathMLFractionElement::GetCoreOperator()
 {
-  Ptr<MathMLElement> num = content.GetFirst();
-  assert(num);
-  return num->GetCoreOperator();
+  assert(numerator);
+  return numerator->GetCoreOperator();
 }

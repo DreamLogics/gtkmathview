@@ -173,10 +173,11 @@ findDOMNode(const Ptr<MathMLElement>& elem)
 {
   Ptr<MathMLElement> elemP(elem);
 
-  while (elemP && elemP->GetDOMElement() == 0)
+  while (elemP && !elemP->GetDOMElement())
     elemP = elemP->GetParent();
 
-  return (elemP) ? elemP->GetDOMElement() : 0;
+  if (elemP) return elemP->GetDOMElement();
+  else return 0;
 }
 
 Ptr<MathMLElement>
@@ -193,7 +194,7 @@ getRenderingInterface(const GMetaDOM::Element& node)
 void
 setRenderingInterface(const GMetaDOM::Element& node, const Ptr<MathMLElement>& elem)
 {
-  assert(node != 0);
+  assert(node);
   // WARNING: this will allow to decrement the counter of the element whose
   // pointer is currently stored inside node as soon as oldElem goes
   // out of scope
@@ -281,13 +282,13 @@ Ptr<MathMLElement>
 findRightSibling(const Ptr<MathMLElement>& elem)
 {
   GMetaDOM::Node p = findDOMNode(elem);
-  if (p == 0) return 0;
+  if (!p) return 0;
 
   for (p = p.get_nextSibling();
-       p != 0 && p.get_userData() == NULL;
+       p && p.get_userData() == NULL;
        p = p.get_nextSibling()) ;
   
-  if (p != 0) return findLeftmostChild(findMathMLElement(p));
+  if (p) return findLeftmostChild(findMathMLElement(p));
   else return findRightmostChild(findRightSibling(elem->GetParent()));
 }
 
@@ -295,13 +296,13 @@ Ptr<MathMLElement>
 findLeftSibling(const Ptr<MathMLElement>& elem)
 {
   GMetaDOM::Node p = findDOMNode(elem);
-  if (p == 0) return 0;
+  if (!p) return 0;
 
   for (p = p.get_previousSibling();
-       p != 0&& p.get_userData() == NULL;
+       p && p.get_userData() == NULL;
        p = p.get_previousSibling()) ;
 
-  if (p != 0) return findRightmostChild(findMathMLElement(p));
+  if (p) return findRightmostChild(findMathMLElement(p));
   else return findLeftmostChild(findLeftSibling(elem->GetParent()));
 }
 

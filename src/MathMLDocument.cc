@@ -54,10 +54,10 @@ MathMLDocument::MathMLDocument(const GMetaDOM::Element& root)
 void
 MathMLDocument::Init()
 {
-  if (DOMroot != 0)
+  if (DOMroot)
     {
       GMetaDOM::EventTarget et(DOMroot);
-      assert(et != 0);
+      assert(et);
 
       et.addEventListener("DOMNodeRemoved", subtreeModifiedListener, false);
       et.addEventListener("DOMAttrModified", attrModifiedListener, false);
@@ -68,10 +68,10 @@ MathMLDocument::Init()
 MathMLDocument::~MathMLDocument()
 {
 #if defined(HAVE_GMETADOM)
-  if (DOMroot != 0)
+  if (DOMroot)
     {
       GMetaDOM::EventTarget et(DOMroot);
-      assert(et != 0);
+      assert(et);
 
       et.removeEventListener("DOMSubtreeModified", subtreeModifiedListener, false);
       et.removeEventListener("DOMAttrModified", attrModifiedListener, false);
@@ -86,10 +86,9 @@ MathMLDocument::Normalize()
     {
 #if defined(HAVE_GMETADOM)
       GMetaDOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
-      GMetaDOM::Element node = (nodeList.get_length() > 0) ? nodeList.item(0) : 0;
-      if (node != 0)
+      if (nodeList.get_length() > 0)
 	{
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(nodeList.item(0));
 	  assert(elem);
 	  SetChild(elem);
 	}	  
@@ -106,7 +105,7 @@ void
 MathMLDocument::DOMSubtreeModifiedListener::handleEvent(const GMetaDOM::Event& ev)
 {
   const GMetaDOM::MutationEvent& me(ev);
-  assert(me != 0);
+  assert(me);
   printf("subtree modified\n");
 }
 
@@ -114,7 +113,7 @@ void
 MathMLDocument::DOMAttrModifiedListener::handleEvent(const GMetaDOM::Event& ev)
 {
   const GMetaDOM::MutationEvent& me(ev);
-  assert(me != 0);
+  assert(me);
   printf("an attribute changed\n");
 }
 

@@ -89,7 +89,7 @@ MathMLRadicalElement::Normalize()
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
-      if (GetDOMElement() != 0)
+      if (GetDOMElement())
 	{
 	  if (IsA() == TAG_MSQRT)
 	    {
@@ -257,6 +257,34 @@ MathMLRadicalElement::SetDirtyLayout(bool children)
 }
 
 void
+MathMLRadicalElement::SetSelected()
+{
+  if (IsSelected()) return;
+
+  selected = 1;
+
+  if (radical) radical->SetSelected();
+  if (radicand) radicand->SetSelected();
+  if (index) index->SetSelected();
+
+  SetDirty();
+}
+
+void
+MathMLRadicalElement::ResetSelected()
+{
+  if (!IsSelected()) return;
+  
+  SetDirty();
+
+  if (radical) radical->ResetSelected();
+  if (radicand) radicand->ResetSelected();
+  if (index) index->ResetSelected();
+
+  selected = 0;
+}
+
+void
 MathMLRadicalElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
@@ -269,7 +297,7 @@ MathMLRadicalElement::Render(const DrawingArea& area)
     fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND | GC_MASK_LINE_WIDTH);
   }
 
-  MathMLElement::Render(area);
+  RenderBackground(area);
 
   assert(radicand);
   radicand->Render(area);
