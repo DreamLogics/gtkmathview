@@ -109,8 +109,7 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
 	} else if (elem->IsEmbellishedOperator()) {
 	  MathMLOperatorElement* op = findCoreOperator(elem);
 	  assert(op != NULL);
-	  if (op->IsSeparator()) state = STATE_C;
-	  else {
+	  if (!op->IsSeparator()) {
 	    bid = BREAK_BAD;
 	    state = STATE_D;
 	  }
@@ -127,10 +126,7 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
       }
     }
 
-    if (lastBreakability != BREAK_AUTO) {
-      bid = lastBreakability;
-      lastBreakability = BREAK_AUTO;
-    }
+    if (lastBreakability != BREAK_AUTO) bid = lastBreakability;
 
     lastBreakability = elem->GetBreakability();
     layout.SetLastBreakability(bid);

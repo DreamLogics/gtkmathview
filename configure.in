@@ -141,15 +141,25 @@ AC_CHECK_LIB(iberty, getopt_long,
 )
 AC_CHECK_FUNC(getopt_long)
 
-AC_CHECK_LIB(glib, g_malloc,
+AC_LANG_C
+AM_PATH_GLIB(1.2.0,
 	[
-		CFLAGS="$CFLAGS `glib-config --cflags`"
-		CXXFLAGS="$CXXFLAGS `glib-config --cflags`"
-		LIBS="$LIBS `glib-config --libs`"
+		CFLAGS="$CFLAGS $GLIB_CFLAGS"
+		CXXFLAGS="CXXFLAGS $GLIB_CFLAGS"
+		LIBS="$LIBS $GLIB_LIBS"
 	],
-	AC_MSG_ERROR(cound not find glib),
-	`glib-config --libs`
+	AC_MSG_ERROR(could not find glib)
 )
+
+AM_PATH_GTK(1.2.0, gtklib="yes", gtklib="no")
+
+if test $gtklib = "yes"; then
+	CFLAGS="$CFLAGS $GTK_CFLAGS"
+	CXXFLAGS="$CXXFLAGS $GTK_CFLAGS"
+	LIBS="$LIBS $GTK_LIBS"
+else
+	AC_MSG_WARN(GTK is needed in order to use the widget),
+fi
 
 AC_CHECK_LIB(minidom, mdom_node_get_type,
 	[
@@ -160,16 +170,6 @@ AC_CHECK_LIB(minidom, mdom_node_get_type,
 	AC_MSG_ERROR(gtkmathview will not compile if minidom is not installed),
 	`minidom-config --libs` `glib-config --libs`
 )
-
-AC_CHECK_LIB(gtk, gtk_window_new, gtklib="yes", gtklib="no", `gtk-config --libs`)
-
-if test $gtklib = "yes"; then
-	CFLAGS="$CFLAGS `gtk-config --cflags`"
-	CXXFLAGS="$CXXFLAGS `gtk-config --cflags`"
-	LIBS="$LIBS `gtk-config --libs`"
-else
-	AC_MSG_WARN(GTK is needed in order to use the widget),
-fi
 
 if test $t1lib = "auto"; then
 	AC_CHECK_LIB(t1, T1_InitLib, t1lib="yes", t1lib="no")
