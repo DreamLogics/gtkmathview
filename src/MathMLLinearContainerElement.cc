@@ -29,7 +29,6 @@
 #include <stdio.h>
 
 #include "Adaptors.hh"
-#include "Layout.hh"
 #include "ChildList.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLLinearContainerElement.hh"

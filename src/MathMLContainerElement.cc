@@ -25,8 +25,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "Layout.hh"
-#include "ShapeFactory.hh"
 #include "MathMLContainerElement.hh"
 
 MathMLContainerElement::MathMLContainerElement()

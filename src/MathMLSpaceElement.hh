@@ -27,7 +27,6 @@
 #include "gmetadom.hh"
 #endif
 
-#include "Layout.hh"
 #include "MathMLElement.hh"
 
 class MathMLSpaceElement: public MathMLElement

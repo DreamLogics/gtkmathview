@@ -323,7 +323,7 @@ MathMLStyleElement::IsSpaceLike() const
 }
 
 void
-MathMLStyleElement::SetDirtyAttribute() const
+MathMLStyleElement::SetDirtyAttribute()
 {
   SetDirtyAttributeDeep();
 }

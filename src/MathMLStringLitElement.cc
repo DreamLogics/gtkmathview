@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "Layout.hh"
 #include "StringUnicode.hh"
 #include "MathMLCharNode.hh"
 #include "MathMLStringNode.hh"

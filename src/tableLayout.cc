@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "Iterator.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
 #include "MathMLTableElement.hh"

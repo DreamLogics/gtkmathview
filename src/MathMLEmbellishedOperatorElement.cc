@@ -23,7 +23,6 @@
 #include <config.h>
 #include <assert.h>
 
-#include "Layout.hh"
 #include "Globals.hh"
 #include "MathMLCharNode.hh"
 #include "RenderingEnvironment.hh"

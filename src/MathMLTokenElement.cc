@@ -33,12 +33,10 @@
 #endif
 
 #include "AFont.hh"
-#include "Layout.hh"
 #include "frameAux.hh"
 #include "stringAux.hh"
 #include "Globals.hh"
 #include "traverseAux.hh"
-#include "ShapeFactory.hh"
 #include "StringFactory.hh"
 #include "allocTextNode.hh"
 #include "StringUnicode.hh"

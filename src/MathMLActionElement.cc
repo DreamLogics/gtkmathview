@@ -25,7 +25,6 @@
 #include <assert.h>
 
 #include "Globals.hh"
-#include "ShapeFactory.hh"
 #include "StringUnicode.hh"
 #include "AttributeParser.hh"
 #include "MathMLActionElement.hh"

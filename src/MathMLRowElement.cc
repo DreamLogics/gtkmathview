@@ -29,7 +29,6 @@
 #include <stddef.h>
 
 #include "Adaptors.hh"
-#include "Layout.hh"
 #include "CharMap.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"

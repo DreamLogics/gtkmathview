@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "Layout.hh"
 #include "ChildList.hh"
 #include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"

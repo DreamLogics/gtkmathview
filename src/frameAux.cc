@@ -27,7 +27,6 @@
 #include <assert.h>
 
 #include "frameAux.hh"
-#include "Iterator.hh"
 #include "MathMLFrame.hh"
 #include "MathMLTextNode.hh"
 #include "MathMLRowElement.hh"

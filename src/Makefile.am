@@ -168,7 +168,6 @@ noinst_HEADERS = \
   Coords.hh \
   DrawingArea.hh \
   EntitiesTable.hh \
-  FontifiedString.hh \
   FontAttributes.hh \
   FontManager.hh \
   GraphicsContext.hh \

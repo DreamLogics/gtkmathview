@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "Layout.hh"
 #include "stringAux.hh"
 #include "Globals.hh"
 #include "traverseAux.hh"

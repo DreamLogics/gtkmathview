@@ -23,7 +23,6 @@
 #include <config.h>
 #include <assert.h>
 
-#include "Iterator.hh"
 #include "traverseAux.hh"
 #include "MathMLElement.hh"
 #include "MathMLDocument.hh"

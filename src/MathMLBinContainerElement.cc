@@ -26,9 +26,7 @@
 #include <stdio.h>
 
 #include "Globals.hh"
-#include "Layout.hh"
 #include "ChildList.hh"
-#include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLBinContainerElement.hh"
 #include "FormattingContext.hh"
