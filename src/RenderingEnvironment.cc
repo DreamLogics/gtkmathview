@@ -366,7 +366,10 @@ RenderingEnvironment::GetScaledPointsPerEm() const
   assert(top != NULL);
 
   FontifiedChar fChar;
-  charMapper.FontifyChar(fChar, top->fontAttributes, 'M');
+  if (!charMapper.FontifyChar(fChar, top->fontAttributes, 'M')) {
+    MathEngine::logger(LOG_ERROR, "fatal: could not find default fonts, maybe the font configuration is wrong");
+    exit(1);
+  }
   assert(fChar.font != NULL);
 
   return fChar.font->GetEm();
@@ -381,7 +384,10 @@ RenderingEnvironment::GetScaledPointsPerEx() const
   assert(top != NULL);
 
   FontifiedChar fChar;
-  charMapper.FontifyChar(fChar, top->fontAttributes, 'x');
+  if (!charMapper.FontifyChar(fChar, top->fontAttributes, 'x')) {
+    MathEngine::logger(LOG_ERROR, "fatal: could not find default fonts, maybe the font configuration is wrong");
+    exit(1);
+  }
   assert(fChar.font != NULL);
 
   return fChar.font->GetEx();
@@ -407,7 +413,10 @@ RenderingEnvironment::GetAxis() const
   assert(top != NULL);
 
   FontifiedChar fChar;
-  charMapper.FontifyChar(fChar, top->fontAttributes, '=');
+  if (!charMapper.FontifyChar(fChar, top->fontAttributes, '=')) {
+    MathEngine::logger(LOG_ERROR, "fatal: could not find default fonts, maybe the font configuration is wrong");
+    exit(1);
+  }
   assert(fChar.font != NULL);
 
   BoundingBox eqBox;

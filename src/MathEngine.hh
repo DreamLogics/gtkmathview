@@ -77,6 +77,8 @@ public:
   bool GetTransparency(void) const;
 
   static void InitGlobalData(const char*);
+  static bool  DrawMissingCharacter(void) { return drawMissingCharacter; }
+  static void  DrawMissingCharacter(bool dmc) { drawMissingCharacter = dmc; }
 
   static EntitiesTable      entitiesTable;
   static OperatorDictionary dictionary;
@@ -84,6 +86,7 @@ public:
   static Logger             logger;
 
 private:
+  static bool drawMissingCharacter;
   unsigned defaultFontSize;
 
   class MathMLDocument* document;

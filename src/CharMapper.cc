@@ -121,19 +121,12 @@ CharMapper::FontifyChar(FontifiedChar& fMap, const FontAttributes& fa, Char ch) 
   if (isalnum(ch)) alnumChars++;
 #endif // ENABLE_PROFILE
   
-  bool res = FontifyCharAux(fMap, fa, ch, false);
-  if (res) return true;
+  if (FontifyCharAux(fMap, fa, ch, false)) return true;
 
   if (isPlain(ch)) 
     MathEngine::logger(LOG_WARNING, "could not find a suitable font for `%c = U+%04x'", ch, ch);
   else
     MathEngine::logger(LOG_WARNING, "could not find a suitable font for `U+%04x'", ch);
-
-  res = FontifyCharAux(fMap, fa, '?', false);
-  if (!res) {
-    MathEngine::logger(LOG_ERROR, "fatal: could not find default fonts, maybe the font configuration is wrong");
-    exit(1);
-  }
 
   return false;
 }

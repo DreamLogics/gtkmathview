@@ -44,6 +44,7 @@ EntitiesTable      MathEngine::entitiesTable;
 OperatorDictionary MathEngine::dictionary;
 Configuration      MathEngine::configuration;
 Logger             MathEngine::logger;
+bool               MathEngine::drawMissingCharacter;
 
 MathEngine::MathEngine()
 {
@@ -51,6 +52,7 @@ MathEngine::MathEngine()
   fontManager = NULL;
   charMapper = NULL;
 
+  drawMissingCharacter = true;
   defaultFontSize = configuration.GetFontSize();
 
   document = NULL;

@@ -22,7 +22,7 @@
 
 #include <config.h>
 
-#define MATHML2PS_VERSION "0.0.7"
+#define MATHML2PS_VERSION "0.0.8"
 
 #include <assert.h>
 #ifdef HAVE_GETOPT_H
@@ -55,6 +55,7 @@ enum CommandLineOptionId {
   OPTION_COLORS,
   OPTION_SUBSET,
   OPTION_CROP,
+  OPTION_SHOW_MISSING,
   //OPTION_KERNING,
   OPTION_CONFIG
 };
@@ -70,6 +71,7 @@ static double fontSize = 10;
 static bool   colors = false;
 static bool   subsetting = true;
 static bool   cropping = true;
+static bool   showMissing = true;
 //static bool   kerning = false;
 static const char* configPath = NULL;
 static int logLevel = LOG_ERROR;
@@ -101,6 +103,7 @@ Usage: mathml2ps [options] file ...\n\n\
   -c, --colors[=yes|no]           Enable/disable colors (default='no')\n\
   -s, --subset[=yes|no]           Enable/disable font subsetting (default='yes')\n\
   -r, --crop[=yes|no]             Enable/disable cropping to bounding box (default='yes')\n\
+  -i, --show-missing[=yes|no]     Show missing characters (default='yes')\n\
   --config=<path>                 Configuration file path\n\
   --verbose[=0-3]                 Display messages\n\n\
 Valid units are:\n\n\
@@ -257,6 +260,7 @@ main(int argc, char *argv[])
       { "colors",        optional_argument, NULL, OPTION_COLORS },
       { "subset",        optional_argument, NULL, OPTION_SUBSET },
       { "crop",          optional_argument, NULL, OPTION_CROP },
+      { "show-missing",  optional_argument, NULL, OPTION_SHOW_MISSING },
       //{ "kerning",       optional_argument, NULL, OPTION_KERNING },
       { "config",        required_argument, NULL, OPTION_CONFIG },
 
@@ -323,6 +327,12 @@ main(int argc, char *argv[])
     case 'r':
       if (optarg == NULL) cropping = true;
       else if (!parseBoolean(optarg, cropping)) parseError("crop");
+      break;
+
+    case OPTION_SHOW_MISSING:
+    case 'i':
+      if (optarg == NULL) showMissing = true;
+      else if (!parseBoolean(optarg, showMissing)) parseError("show-missing");
       break;
 
 #if 0
@@ -402,6 +412,7 @@ main(int argc, char *argv[])
     engine.Init(&area, &fm);
     engine.SetVerbosity(logLevel);
     engine.SetDefaultFontSize(fontSize);
+    MathEngine::DrawMissingCharacter(showMissing);
 #if 0
     engine.SetKerning(kerning);
 #endif

@@ -53,18 +53,23 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
   fChar.font = NULL;
   fChar.charMap = NULL;
   env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), ch);
-  assert(fChar.font != NULL);
-  assert(fChar.charMap != NULL);
+  if (fChar.font != NULL) {
+    assert(fChar.charMap != NULL);
 
-  FontifiedChar sChar;
-  sChar.font = NULL;
-  sChar.charMap = NULL;
-  env->charMapper.FontifyStretchyChar(sChar, env->GetFontAttributes(), ch);
-  if (sChar.font != NULL && sChar.charMap != NULL) {
-    layout = new StretchyCharLayout;
-    layout->sChar = sChar;
-    layout->simple = NULLCHAR;
-    layout->n = 0;
+    FontifiedChar sChar;
+    sChar.font = NULL;
+    sChar.charMap = NULL;
+    env->charMapper.FontifyStretchyChar(sChar, env->GetFontAttributes(), ch);
+    if (sChar.font != NULL && sChar.charMap != NULL) {
+      layout = new StretchyCharLayout;
+      layout->sChar = sChar;
+      layout->simple = NULLCHAR;
+      layout->n = 0;
+    }
+  } else {
+    // no glyph found
+    scaled sppex = env->GetScaledPointsPerEx();
+    box.Set(sppex, sppex, 0);
   }
 }
 
@@ -82,7 +87,8 @@ MathMLCharNode::SetDefaultLargeGlyph(bool large)
 void
 MathMLCharNode::DoLayout()
 {
-  assert(IsFontified());
+  if (!IsFontified()) return;
+
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
@@ -312,15 +318,13 @@ MathMLCharNode::Render(const DrawingArea& area)
       RenderVerticalStretchyChar(area, gc, GetX(), GetY() + box.descent);
     else
       RenderHorizontalStretchyChar(area, gc, GetX(), GetY());
-  } else {
+  } else if (IsFontified()) {
     area.DrawChar(gc, fChar.font, GetX(), GetY() + box.descent - charBox.descent, fChar.nch);
+  } else {
+    // no glyph available
+    if (MathEngine::DrawMissingCharacter())
+      area.DrawBoundingBox(gc, GetX(), GetY(), box);
   }
-
-#if 0
-  box.Dump();
-  putchar('\n');
-  area.DrawBoundingBox(gc, GetX(), GetY(), box, true);
-#endif
 
   ResetDirty();
 }
