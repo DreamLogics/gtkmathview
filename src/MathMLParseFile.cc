@@ -28,7 +28,7 @@
 #include "MathMLParseFile.hh"
 
 static mDOMEntityRef
-getEntity(void* user_data, mDOMConstStringRef name)
+myVeryPrivateGetEntity(void* user_data, mDOMConstStringRef name)
 {
   mDOMEntityRef entity = mdom_get_predefined_entity(name);
   if (entity == NULL) entity = MathEngine::entitiesTable.GetEntity(name);
@@ -43,6 +43,6 @@ getEntity(void* user_data, mDOMConstStringRef name)
 mDOMDocRef
 MathMLParseFile(const char* filename, bool subst)
 {
-  return mdom_load(filename, subst, getEntity);
+  return mdom_load(filename, subst, myVeryPrivateGetEntity);
 }
 
