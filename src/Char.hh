@@ -53,4 +53,6 @@ unsigned    isNonMarkingChar(Char, Char, int* = NULL, BreakId* = NULL);
 unsigned    isNonMarkingChar(const class String&, int* = NULL, BreakId* = NULL);
 unsigned    isNonMarkingChar(const class String&, unsigned, int* = NULL, BreakId* = NULL);
 
+inline bool isUpperCaseGreek(Char ch) { return ch >= 0x0391 && ch <= 0x03a9; }
+
 #endif // Char_hh

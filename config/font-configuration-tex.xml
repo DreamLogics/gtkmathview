@@ -351,6 +351,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x201c" index="0x5c"/>
     <single code="0x201d" index="0x22"/>
     <single code="0x2033" index="0x7d"/>
+    <single code="0x2146" index="0144"/>
     <single code="0xed02" index="0xb4"/>
     <single code="0xfb00" index="0xae"/>
     <single code="0xfb01" index="0xaf"/>
@@ -668,7 +669,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <stretchy name="Coproduct" direction="vertical">
       <simple index="0140 0141"/>
     </stretchy>
-    <stretchy name="Cap" direction="horizontal">
+    <stretchy name="Hat" direction="horizontal">
       <simple index="0142 0143 0144"/>
     </stretchy>
     <stretchy name="Tilde" direction="horizontal">

@@ -162,7 +162,7 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
   FontDescriptor* bestDesc = NULL;
 
   FontAttributes myfa(fa);
-#if 0
+#if 1
   MathEngine::logger(LOG_DEBUG, "requested font attributes:");
   myfa.Dump();
 #endif
@@ -200,8 +200,8 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
     if (bestDesc != NULL) bestFont = fontManager.GetFont(myfa, &bestDesc->extraAttributes);
   } while (bestFont == NULL && myfa.DownGrade());
 
-  //MathEngine::logger(LOG_DEBUG, "attributes:");
-  //myfa.Dump();
+  MathEngine::logger(LOG_DEBUG, "attributes:");
+  myfa.Dump();
 
   if (bestFont == NULL || bestCharMap == NULL) {
     fMap.charMap = NULL;

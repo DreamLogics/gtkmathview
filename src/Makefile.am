@@ -76,6 +76,7 @@ libgtkmathview_la_SOURCES = \
   MathMLFractionElement.cc \
   MathMLFrame.cc \
   MathMLGlyphNode.cc \
+  MathMLHorizBarNode.cc \
   MathMLMarkNode.cc \
   MathMLMultiScriptsElement.cc \
   MathMLNode.cc \
@@ -181,6 +182,7 @@ noinst_HEADERS = \
   MathMLFractionElement.hh \
   MathMLFrame.hh \
   MathMLGlyphNode.hh \
+  MathMLHorizBarNode.hh \
   MathMLMarkNode.hh \
   MathMLMultiScriptsElement.hh \
   MathMLNode.hh \

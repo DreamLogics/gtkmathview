@@ -43,7 +43,8 @@
 	<mtd>
 	  <mover accent="true">
 	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0302;</mo>
+	    <!--<mo stretchy="false">&#x0302;</mo>-->
+            <mo>^</mo>
 	  </mover>
 	</mtd>
 	<mtd>

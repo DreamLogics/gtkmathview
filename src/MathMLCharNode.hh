@@ -42,11 +42,10 @@ public:
   bool           IsFontified(void) const;
   bool           IsStretchyFontified(void) const;
 
-  void           SetDefaultLargeGlyph(bool);
-  //void           DoMinimumLayout(void);
-  void           DoVerticalStretchyLayout(scaled, scaled, scaled, bool);
-  void           DoHorizontalStretchyLayout(scaled, bool);
-  StretchId      GetStretch(void) const;
+  virtual void   SetDefaultLargeGlyph(bool);
+  virtual void   DoVerticalStretchyLayout(scaled, scaled, scaled, bool);
+  virtual void   DoHorizontalStretchyLayout(scaled, bool);
+  virtual StretchId GetStretch(void) const;
   Char           GetChar(void) const { return ch; }
 
 protected:

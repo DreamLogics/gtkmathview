@@ -8,6 +8,7 @@ EXTRA_DIST = \
   dictionary.in \
   dictionary.dtd \
   dictionary.xml \
+  dictionary-local.xml \
   entities-table.in \
   entities-table.dtd \
   entities-table.xml \
@@ -25,6 +26,7 @@ EXTRA_DIST = \
 pkgdata_DATA = \
   dictionary.dtd \
   dictionary.xml \
+  dictionary-local.xml \
   entities-table.dtd \
   entities-table.xml \
   font-configuration.dtd \

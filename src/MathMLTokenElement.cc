@@ -35,6 +35,7 @@
 #include "allocTextNode.hh"
 #include "StringUnicode.hh"
 #include "MathMLMarkNode.hh"
+#include "MathMLCharNode.hh"
 #include "MathMLTextNode.hh"
 #include "mathVariantAux.hh"
 #include "ValueConversion.hh"
@@ -206,25 +207,36 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
   } else {
     value = GetAttributeValue(ATTR_FONTFAMILY, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontfamily` is deprecated in MathML 2");
+      MathEngine::logger(LOG_WARNING, "the attribute `fontfamily' is deprecated in MathML 2");
       env->SetFontFamily(value->ToString());
     }
     delete value;
 
     value = GetAttributeValue(ATTR_FONTWEIGHT, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontweight` is deprecated in MathML 2");
+      MathEngine::logger(LOG_WARNING, "the attribute `fontweight' is deprecated in MathML 2");
       env->SetFontWeight(ToFontWeightId(value));
     }
     delete value;
 
     value = GetAttributeValue(ATTR_FONTSTYLE, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontstyle` is deprecated in MathML 2");
+      MathEngine::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
       env->SetFontStyle(ToFontStyleId(value));
     } else if (IsA() == TAG_MI) {
-      if (rawContentLength == 1) env->SetFontStyle(FONT_STYLE_ITALIC);
-      else {
+      if (rawContentLength == 1) {
+	MathMLTextNode* node = content.GetFirst();
+	assert(node != NULL);
+
+	if (node->IsChar()) {
+	  MathMLCharNode* cNode = TO_CHAR(node);
+	  assert(cNode != NULL);
+
+	  if (!isUpperCaseGreek(cNode->GetChar())) env->SetFontStyle(FONT_STYLE_ITALIC);
+	  else env->SetFontStyle(FONT_STYLE_NORMAL);
+	} else
+	  env->SetFontStyle(FONT_STYLE_NORMAL);
+      } else {
 	env->SetFontStyle(FONT_STYLE_NORMAL);
 	env->SetFontMode(FONT_MODE_TEXT);
       }
