@@ -534,9 +534,10 @@ extern "C" gboolean
 gtk_math_view_thaw(GtkMathView* math_view)
 {
   g_return_val_if_fail(math_view != NULL, FALSE);
-  if (math_view->freeze_counter > 0)
+  g_return_val_if_fail(math_view->freeze_counter > 0, FALSE);
+  if (--math_view->freeze_counter == 0)
     {
-      math_view->freeze_counter--;
+      paint_widget(math_view);
       return TRUE;
     }
   else
