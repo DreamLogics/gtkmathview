@@ -146,7 +146,7 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
   box.rBearing = scaledMax(box.width + scriptSpacing + subScriptBox.rBearing,
 			   box.rBearing + scriptSpacing + superScriptBox.rBearing);
   box.width += scaledMax(scriptSpacing + subScriptBox.width,
-			 scriptSpacing + baseBox.rBearing - baseBox.width + superScriptBox.width);
+			 scriptSpacing + scaledMax(0, baseBox.rBearing - baseBox.width) + superScriptBox.width);
 
   if (subScript != NULL) {
     box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShift);
@@ -182,5 +182,5 @@ MathMLScriptElement::SetPosition(scaled x, scaled y)
   if (subScript != NULL) subScript->SetPosition(x + baseBox.width + scriptSpacing, y + subShift);
 
   if (superScript != NULL)
-    superScript->SetPosition(x + baseBox.rBearing + scriptSpacing, y - superShift);
+    superScript->SetPosition(x + scaledMax(baseBox.width, baseBox.rBearing) + scriptSpacing, y - superShift);
 }
