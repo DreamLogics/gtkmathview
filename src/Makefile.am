@@ -265,5 +265,6 @@ INCLUDES = \
   $(DOM_CFLAGS) \
   $(T1_CFLAGS) \
   $(GTK_CFLAGS) \
+  -I$(top_srcdir) \
   -I$(srcdir)/../auto/
 

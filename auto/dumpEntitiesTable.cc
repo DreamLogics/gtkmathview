@@ -20,7 +20,7 @@
 // http://www.cs.unibo.it/helm/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#include <config.h>
+#include "config.h"
 #include <stdlib.h> // for exit(...)
 #include <stdio.h>
 
