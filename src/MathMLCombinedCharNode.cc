@@ -55,6 +55,8 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
     MathEngine::logger(LOG_WARNING, "not able to render combining char `U+%04x'", cch);
   else if (cChar.font != fChar.font)
     MathEngine::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cch);
+
+  sppex = env->GetScaledPointsPerEx();
 }
 
 void
@@ -71,7 +73,7 @@ MathMLCombinedCharNode::DoLayout()
       shiftY = 0;
     } else if (isCombiningBelow(cch)) {
       shiftX = 0;
-      shiftY = -box.descent - cBox.ascent;
+      shiftY = - box.descent - cBox.ascent;
     } else {
 #if 0
       if (cChar.font == fChar.font)
@@ -87,7 +89,8 @@ MathMLCombinedCharNode::DoLayout()
 	shiftX = fChar.font->GetKerning(fChar.nch, 127);
 #endif
 
-      shiftY = box.ascent + cBox.descent + cChar.font->GetLineThickness();
+      //shiftY = box.ascent + cBox.descent + cChar.font->GetLineThickness();
+      shiftY = box.ascent - sppex;
     }
 
     charBox.ascent = scaledMax(box.ascent, cBox.ascent + shiftY);

@@ -103,6 +103,8 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   assert(env != NULL);
   assert(base != NULL);
 
+  bool displayStyle = env->GetDisplayStyle();
+
   ScriptSetup(env);
 
   scaled smallSpacing = ruleThickness;
@@ -140,7 +142,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
     if (accentUnder) underSpacing = smallSpacing;
     else {
       env->AddScriptLevel(1);
-      underSpacing = bigSpacing;
+      underSpacing = displayStyle ? bigSpacing : smallSpacing;
     }
     underScript->Setup(env);
   }
@@ -167,7 +169,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
     if (accent) overSpacing = smallSpacing;
     else {
       env->AddScriptLevel(1);
-      overSpacing = bigSpacing;
+      overSpacing = displayStyle ? bigSpacing : smallSpacing;
     }
     overScript->Setup(env);
   }

@@ -37,6 +37,7 @@ private:
   FontifiedChar cChar;
   Char          cch;
 
+  scaled sppex;
   scaled shiftX; // due to kerning information
   scaled shiftY;
 };
