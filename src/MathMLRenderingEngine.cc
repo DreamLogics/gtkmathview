@@ -163,6 +163,18 @@ MathMLRenderingEngine::Unload()
   document = 0;
 }
 
+DOM::Document
+MathMLRenderingEngine::GetDOMDocument() const
+{
+  return document ? document->GetDOMDocument() : DOM::Document(0);
+}
+
+DOM::Element
+MathMLRenderingEngine::GetDOMRootElement() const
+{
+  return document ? document->GetDOMElement() : DOM::Element(0);
+}
+
 void
 MathMLRenderingEngine::Layout() const
 {

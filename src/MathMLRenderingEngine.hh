@@ -55,6 +55,9 @@ public:
   void SetDirty(const struct Rectangle* = 0) const;
   void Render(const struct Rectangle* = 0) const;
 
+  DOM::Document GetDOMDocument(void) const;
+  DOM::Element GetDOMRootElement(void) const;
+
   Ptr<MathMLDocument> GetDocument(void) const { return document; }
   Ptr<MathMLElement> GetElementAt(scaled, scaled) const;
 

@@ -965,6 +965,14 @@ gtk_math_view_unload(GtkMathView* math_view)
   paint_widget(math_view);
 }
 
+extern "C" GdomeElement*
+gtk_math_view_get_root_element(GtkMathView* math_view)
+{
+  g_return_val_if_fail(math_view != NULL, NULL);
+  g_return_val_if_fail(math_view->interface != NULL, NULL);
+  return gdome_cast_el(math_view->interface->GetDOMRootElement().gdome_object());
+}
+
 extern "C" GdkPixmap*
 gtk_math_view_get_buffer(GtkMathView* math_view)
 {
@@ -1203,22 +1211,21 @@ gtk_math_view_get_element_coords(GtkMathView* math_view, GdomeElement* elem, gin
 }
 
 extern "C" gboolean
-gtk_math_view_get_element_rectangle(GtkMathView* math_view, GdomeElement* elem, GdkRectangle* rect)
+gtk_math_view_get_element_bounding_box(GtkMathView* math_view, GdomeElement* elem,
+				       gint* width, gint* height, gint* depth)
 {
   g_return_val_if_fail(math_view != NULL, FALSE);
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(elem != NULL, FALSE);
-  g_return_val_if_fail(rect != NULL, FALSE);
 
   Ptr<MathMLElement> el = findMathMLElement(math_view->interface->GetDocument(),
 					    DOM::Element(elem));
   if (!el) return FALSE;
 
   const BoundingBox& box = el->GetBoundingBox();
-  rect->x = sp2ipx(el->GetX());
-  rect->y = sp2ipx(el->GetY() - box.ascent);
-  rect->width = sp2ipx(box.width);
-  rect->height = sp2ipx(box.GetHeight());
+  if (width) *width = sp2ipx(box.width);
+  if (height) *height = sp2ipx(box.ascent);
+  if (depth) *depth = sp2ipx(box.descent);
 
   return TRUE;
 }

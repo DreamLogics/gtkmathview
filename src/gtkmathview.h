@@ -27,10 +27,7 @@
 
 #include "defs.h"
 
-#if defined(HAVE_GMETADOM)
 #include <gdome.h>
-#endif
-
 #include <stdio.h>
 
 #include <gtk/gtkframe.h>
@@ -61,19 +58,16 @@ extern "C" {
   gboolean       gtk_math_view_freeze(GtkMathView*);
   gboolean       gtk_math_view_thaw(GtkMathView*);
   gboolean     	 gtk_math_view_load_uri(GtkMathView*, const gchar*);
-#if defined(HAVE_GMETADOM)
   gboolean       gtk_math_view_load_doc(GtkMathView*, GdomeDocument*);
   gboolean       gtk_math_view_load_tree(GtkMathView*, GdomeElement*);
-#endif
   void           gtk_math_view_unload(GtkMathView*);
-#if defined(HAVE_GMETADOM)
+  GdomeElement*  gtk_math_view_get_root_element(GtkMathView*);
   void           gtk_math_view_select(GtkMathView*, GdomeElement*);
   void           gtk_math_view_unselect(GtkMathView*, GdomeElement*);
   gboolean       gtk_math_view_is_selected(GtkMathView*, GdomeElement*);
   GdomeElement*  gtk_math_view_get_element_at(GtkMathView*, gint, gint);
   gboolean       gtk_math_view_get_element_coords(GtkMathView*, GdomeElement*, gint*, gint*);
-  gboolean       gtk_math_view_get_element_rectangle(GtkMathView*, GdomeElement*, GdkRectangle*);
-#endif
+  gboolean       gtk_math_view_get_element_bounding_box(GtkMathView*, GdomeElement*, gint*, gint*, gint*);
   gint      	 gtk_math_view_get_width(GtkMathView*);
   gint      	 gtk_math_view_get_height(GtkMathView*);
   void       	 gtk_math_view_get_top(GtkMathView*, gint*, gint*);
