@@ -1,9 +1,9 @@
-<math>
+<math display="block">
   <mfrac>
-    <menclose notation="NWSEslash">
+    <menclose notation="downdiagonalstrike">
       <mn>2</mn>
     </menclose>
-    <menclose notation="NESWslash">
+    <menclose notation="updiagonalstrike">
       <msup><mi>x</mi><mn>2</mn></msup>
       <mo>+</mo>
       <mn>1</mn>
@@ -11,17 +11,17 @@
   </mfrac>
   <mo>*</mo>
   <mfrac>
-    <menclose notation="NESWslash">
+    <menclose notation="updiagonalstrike">
       <msup><mi>x</mi><mn>2</mn></msup>
       <mo>+</mo>
       <mn>1</mn>
     </menclose>
-    <menclose notation="NWSEslash">
+    <menclose notation="downdiagonalstrike">
       <mn>2</mn>
     </menclose>
   </mfrac>
   <mo>=</mo>
-  <menclose notation="overstrike">
+  <menclose notation="horizontalstrike">
     <mo>(</mo>
     <mrow>
       <mn>1</mn>
@@ -35,5 +35,9 @@
       <mo>...</mo>
     </mrow>
     <mo>)</mo>
+  </menclose>
+  <mo>+</mo>
+  <menclose notation="verticalstrike">
+    <mn>S</mn>
   </menclose>
 </math>
