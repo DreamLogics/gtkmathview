@@ -109,7 +109,7 @@ OperatorDictionary::Load(const char* fileName)
 	item->name     = opString;
 	item->defaults = defaults;
 
-	items.Append(item);
+	items.AddFirst(item);
       } else {
 	MathEngine::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
       }

@@ -4,4 +4,6 @@
 
  <operator name="&minus;" form="prefix" lspace="0em" rspace="veryverythinmathspace"/>
  <operator name="&minus;" form="infix" lspace="mediummathspace" rspace="mediummathspace"/>
+
+ <operator name="&Integral;" form="prefix" largeop="true" stretchy="true" lspace="0em" rspace="1cm"/>
 </dictionary>
