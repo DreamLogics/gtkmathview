@@ -106,6 +106,8 @@ MathMLDocument::Normalize()
 	  assert(elem);
 	  SetChild(elem);
 	}	  
+      else
+        SetChild(0);
 #endif // HAVE_GMETADOM
 
       if (GetChild()) GetChild()->Normalize(this);
