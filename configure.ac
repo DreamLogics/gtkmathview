@@ -33,6 +33,17 @@ if test "x$enable_debug" = "xyes"; then
    AC_DEFINE(ENABLE_DEBUG,,[Define to 1 if you want to enable validity checks while running])
 fi
 
+AC_ARG_ENABLE(
+	breaks,
+	[  --enable-breaks[=ARG]   enable linebreaking with mspace elements [default=no]],
+	enable_breaks=$enableval,
+	enable_breaks=no
+)
+
+if test "x$enable_breaks" = "xyes"; then
+	AC_DEFINE(ENABLE_BREAKS,,[Define to 1 if you want to enable linebreaking using mspace elements])
+fi
+
 AC_ARG_WITH(
 	scaled-type,
 	[  --with-scaled-type[=TYPE] define the type for scaled points [default=float]],

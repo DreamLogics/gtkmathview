@@ -66,6 +66,8 @@ libgtkmathview_la_SOURCES = \
   Logger.cc \
   Globals.cc \
   ChildList.cc \
+  HorizontalLayout.cc \
+  VerticalLayout.cc \
   MathMLRenderingEngine.cc \
   MathMLActionElement.cc \
   MathMLAlignGroupElement.cc \
@@ -104,6 +106,7 @@ libgtkmathview_la_SOURCES = \
   MathMLPhantomElement.cc \
   MathMLRadicalElement.cc \
   MathMLRowElement.cc \
+  MathMLBreakableRowElement.cc \
   MathMLScriptCommonElement.cc \
   MathMLScriptElement.cc \
   MathMLSemanticsElement.cc \
@@ -171,6 +174,8 @@ noinst_HEADERS = \
   Globals.hh \
   MathML.hh \
   ChildList.hh \
+  HorizontalLayout.hh \
+  VerticalLayout.hh \
   FormattingContext.hh \
   MathMLRenderingEngine.hh \
   MathMLActionElement.hh \
@@ -210,6 +215,7 @@ noinst_HEADERS = \
   MathMLPhantomElement.hh \
   MathMLRadicalElement.hh \
   MathMLRowElement.hh \
+  MathMLBreakableRowElement.hh \
   MathMLScriptCommonElement.hh \
   MathMLScriptElement.hh \
   MathMLSemanticsElement.hh \

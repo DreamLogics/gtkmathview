@@ -30,6 +30,8 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 
+#include "MathMLBreakableRowElement.hh"
+
 MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
   : DOMdoc(0)
