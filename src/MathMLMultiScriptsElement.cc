@@ -535,7 +535,7 @@ MathMLMultiScriptsElement::Inside(scaled x, scaled y)
       assert(base);
       if (Ptr<MathMLElement> inside = base->Inside(x, y)) return inside;
 
-      for (vector< Ptr<MathMLElement> >::iterator elem = preSubScript.begin();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = preSubScript.begin();
 	   elem != preSubScript.end(); elem++)
 	if (*elem)
 	  {
@@ -543,7 +543,7 @@ MathMLMultiScriptsElement::Inside(scaled x, scaled y)
 	    if (inside) return inside;
 	  }
 
-      for (vector< Ptr<MathMLElement> >::iterator elem = preSuperScript.begin();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = preSuperScript.begin();
 	   elem != preSuperScript.end(); elem++)
 	if (*elem)
 	  {
@@ -551,7 +551,7 @@ MathMLMultiScriptsElement::Inside(scaled x, scaled y)
 	    if (inside) return inside;
 	  }
 
-      for (vector< Ptr<MathMLElement> >::iterator elem = subScript.begin();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = subScript.begin();
 	   elem != subScript.end(); elem++)
 	if (*elem)
 	  {
@@ -559,7 +559,7 @@ MathMLMultiScriptsElement::Inside(scaled x, scaled y)
 	    if (inside) return inside;
 	  }
 
-      for (vector< Ptr<MathMLElement> >::iterator elem = superScript.begin();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = superScript.begin();
 	   elem != superScript.end(); elem++)
 	if (*elem)
 	  {

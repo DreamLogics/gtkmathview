@@ -26,7 +26,6 @@
 
 #include "StringUnicode.hh"
 #include "MathMLCharNode.hh"
-#include "MathMLStringNode.hh"
 #include "MathMLStringLitElement.hh"
 
 MathMLStringLitElement::MathMLStringLitElement()

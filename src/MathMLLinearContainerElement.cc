@@ -132,7 +132,7 @@ MathMLLinearContainerElement::Inside(scaled x, scaled y)
 {
   if (IsInside(x, y)) 
     {
-      for (vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
 	   elem != content.end(); elem++)
 	{
 	  Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
@@ -236,7 +236,7 @@ MathMLLinearContainerElement::GetLeftEdge() const
 {
   scaled edge = 0;
   
-  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+  for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
        elem != content.end();
        elem++)
     {
@@ -252,7 +252,7 @@ MathMLLinearContainerElement::GetRightEdge() const
 {
   scaled edge = 0;
 
-  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+  for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
        elem != content.end();
        elem++)
     {

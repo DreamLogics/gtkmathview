@@ -25,7 +25,7 @@
 
 #include <stddef.h>
 
-#include <slist>
+#include <list>
 
 #include "AFont.hh"
 #include "String.hh"
@@ -114,7 +114,7 @@ private:
     const MathMLAttributeList* defaults;
   };
 
-  std::slist<AttributeLevel*> level;
+  std::list<AttributeLevel*> level;
 };
 
 #endif // RenderingEnvironment_hh

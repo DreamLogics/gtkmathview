@@ -60,12 +60,12 @@ public:
   void AddProperty(const std::string&, const std::string&);
   void Dump(void) const;
 
-private:
   struct ExtraFontAttribute {
     std::string name;
     std::string value;
   };
 
+private:
   std::vector<ExtraFontAttribute*> content;
 };
 

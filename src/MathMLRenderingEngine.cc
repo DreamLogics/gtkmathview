@@ -69,6 +69,14 @@ MathMLRenderingEngine::Init(class DrawingArea* a, class FontManager* fm)
   assert(a != NULL);
   assert(fm != NULL);
 
+  if (document)
+    {
+      document->ReleaseGCs();
+      document->SetDirtyAttributeD();
+      document->SetDirtyLayout();
+      document->SetDirty();
+    }
+
   area = a;
   fontManager = fm;
 
@@ -220,13 +228,6 @@ MathMLRenderingEngine::Render(const Rectangle* rect) const
   assert(area);
 
   Layout();
-  if (rect)
-    {
-      rect->Dump();
-      printf("\n");
-    }
-  else
-    printf("(null) rect\n");
   SetDirty(rect);
 
   if (document && document->Dirty())
@@ -295,18 +296,13 @@ void
 MathMLRenderingEngine::SetDefaultFontSize(unsigned size)
 {
   assert(size > 0);
-  if (defaultFontSize != size)
-    {
-      defaultFontSize = size;
-      printf("changing default font size to %d\n", size);
-    }
+  if (defaultFontSize != size) defaultFontSize = size;
 
   if (document)
     {
       document->SetDirtyAttributeD();
       document->SetDirtyLayout();
       document->SetDirty();
-      printf("changing default font size to %d %d\n", size, document->DirtyAttribute() + document->DirtyAttributeD());
     }
 }
 

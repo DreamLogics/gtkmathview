@@ -84,9 +84,8 @@ T1_FontManager::SearchT1FontId(const char* fileName) const
   if (i == n) {
     Globals::logger(LOG_INFO, "adding font file `%s' to the font database", fileName);
     //i = T1_AddFont(const_cast<char*>(fileName));
-    cout << "this causes the trouble I believe" << endl;
+    // this causes a memory leak, but T1 is really buggy
     i = T1_AddFont(strdup(fileName));
-    cout << "did it?" << endl;
     if (i < 0) {
       Globals::logger(LOG_WARNING, "could not load Type1 font file `%s'", fileName);
       return -1;

@@ -41,7 +41,16 @@ MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
 MathMLDocument::MathMLDocument(const DOM::Document& doc)
   : MathMLBinContainerElement()
-  , DOMdoc(doc)
+    , DOMdoc(doc)
+    , DOMroot(doc.get_documentElement())
+{
+  Init();
+}
+
+MathMLDocument::MathMLDocument(const DOM::Element& root)
+  : MathMLBinContainerElement()
+    , DOMdoc(root.get_ownerDocument())
+    , DOMroot(root)
 {
   Init();
 }

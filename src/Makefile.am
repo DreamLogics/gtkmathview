@@ -154,6 +154,7 @@ noinst_HEADERS = \
   AFont.hh \
   Array.hh \
   Array.icc \
+  Adaptors.hh \
   AttributeParser.hh \
   AttributeSignature.hh \
   BoundingBox.hh \
@@ -198,10 +199,12 @@ noinst_HEADERS = \
   MathMLHorizBarNode.hh \
   MathMLIdentifierElement.hh \
   MathMLInvisibleTimesNode.hh \
+  MathMLLabeledTableRowElement.hh \
   MathMLMarkNode.hh \
   MathMLMultiScriptsElement.hh \
   MathMLNode.hh \
   MathMLNormalizingContainerElement.hh \
+  MathMLNumberElement.hh \
   MathMLObject.hh \
   MathMLOperatorElement.hh \
   MathMLPaddedElement.hh \
@@ -215,7 +218,6 @@ noinst_HEADERS = \
   MathMLSpaceElement.hh \
   MathMLSpaceNode.hh \
   MathMLStringLitElement.hh \
-  MathMLStringNode.hh \
   MathMLStyleElement.hh \
   MathMLTableCellElement.hh \
   MathMLTableElement.hh \
@@ -249,6 +251,7 @@ noinst_HEADERS = \
   traverseAux.hh \
   mathVariantAux.hh \
   scaled.hh \
+  for_each_if.h \
   unidefs.h \
   $(GTKHEADERS) \
   $(T1HEADERS) \

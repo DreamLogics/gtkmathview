@@ -31,7 +31,6 @@
 #include "StringUnicode.hh"
 #include "MathMLCharNode.hh"
 #include "MathMLRowElement.hh"
-#include "MathMLStringNode.hh"
 #include "MathMLFencedElement.hh"
 #include "MathMLOperatorElement.hh"
 #include "RenderingEnvironment.hh"

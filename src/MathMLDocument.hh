@@ -24,7 +24,13 @@
 #define MathMLDocument_hh
 
 // !!! BEGIN WARNING: hash_map is not part of the STL !!!
+#if defined(HAVE_EXT_HASH_MAP)
+#include <ext/hash_map>
+#elif defined(HAVE_HASH_MAP)
 #include <hash_map>
+#else
+#error "no implementation of hash_map could be found"
+#endif
 // !!! END WARNING: hash_map is not part of the STL !!!
 
 #if defined(HAVE_GMETADOM)
@@ -39,6 +45,7 @@ protected:
   MathMLDocument(void);
 #if defined(HAVE_GMETADOM)
   MathMLDocument(const DOM::Document&);
+  MathMLDocument(const DOM::Element&);
   void Init(void);
 #endif
   virtual ~MathMLDocument();
@@ -49,6 +56,8 @@ public:
 #if defined(HAVE_GMETADOM)
   static Ptr<MathMLDocument> create(const DOM::Document& doc)
   { return Ptr<MathMLDocument>(new MathMLDocument(doc)); }
+  static Ptr<MathMLDocument> create(const DOM::Element& root)
+  { return Ptr<MathMLDocument>(new MathMLDocument(root)); }
 #endif
 
   virtual void Normalize(void);
@@ -67,6 +76,7 @@ public:
 
 #if defined(HAVE_GMETADOM)
   const DOM::Document& GetDOMDocument(void) const { return DOMdoc; }
+  const DOM::Element& GetDOMElement(void) const { return DOMroot; }
 
 protected:
 
@@ -96,6 +106,7 @@ protected:
   DOMAttrModifiedListener*    attrModifiedListener;
 
   DOM::Document DOMdoc;  // can be 0
+  DOM::Element  DOMroot; // cannot be 0
 
   struct DOM_hash : public std::unary_function< DOM::Node, size_t >
   {
@@ -107,7 +118,11 @@ protected:
     }
   };
 
+#if defined(HAVE_EXT_HASH_MAP)
+  typedef __gnu_cxx::hash_map< DOM::Node, Ptr<MathMLElement>, DOM_hash > DOMNodeMap;
+#elif defined(HAVE_HASH_MAP)
   typedef std::hash_map< DOM::Node, Ptr<MathMLElement>, DOM_hash > DOMNodeMap;
+#endif
   mutable DOMNodeMap nodeMap;
 #endif // HAVE_GMETADOM
 };

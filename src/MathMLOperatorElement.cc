@@ -33,7 +33,6 @@
 #include "StringUnicode.hh"
 #include "MathMLCharNode.hh"
 #include "ValueConversion.hh"
-#include "MathMLStringNode.hh"
 #include "MathMLRowElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
@@ -247,7 +246,11 @@ MathMLOperatorElement::Setup(RenderingEnvironment& env)
 
       if (GetSize() == 1 && largeOp && env.GetDisplayStyle())
 	{
-	  if (Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0)))
+	  // WARNING: the fact that I'm using a local variable is probably due
+	  // to a GCC bug. If the method is called directly the compiler
+	  // reports an ambiguous overloading
+          Ptr<MathMLTextNode> child = GetChild(0);
+	  if (Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(child))
 	    if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
 	}
 

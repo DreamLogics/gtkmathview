@@ -203,7 +203,7 @@ MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
 
   unsigned rowLength = 0;
   unsigned position  = 0;
-  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+  for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
        elem != content.end();
        elem++)
     {

@@ -185,7 +185,7 @@ findDOMNode(const Ptr<MathMLElement>& elem)
 Ptr<MathMLElement>
 findMathMLElement(const Ptr<MathMLDocument>& doc, const DOM::Element& node)
 {
-  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
+  Ptr<MathMLElement> elem = doc->getFormattingNodeNoCreate(node);
   assert(elem);
 
   while (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))

@@ -95,7 +95,7 @@ RenderingEnvironment::Drop()
 const MathMLAttribute*
 RenderingEnvironment::GetAttribute(AttributeId id) const
 {
-  for (std::slist<AttributeLevel*>::const_iterator i = level.begin();
+  for (std::list<AttributeLevel*>::const_iterator i = level.begin();
        i != level.end();
        i++)
     {

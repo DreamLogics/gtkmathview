@@ -200,6 +200,10 @@ AC_TRY_COMPILE(
 		AC_MSG_RESULT(no)
 	]
 )
+
+AC_CHECK_HEADERS(hash_map)
+AC_CHECK_HEADERS(ext/hash_map)
+
 AC_LANG_POP(C++)
 
 AC_CHECK_PROG(HAVE_ICONV, iconv, yes, no)

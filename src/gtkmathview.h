@@ -96,10 +96,12 @@ extern "C" {
   void           gtk_math_view_set_font_manager_type(GtkMathView*, FontManagerId);
   FontManagerId  gtk_math_view_get_font_manager_type(GtkMathView*);
 
+#if 0
 #if defined(HAVE_GMETADOM)
   guint          gtk_math_view_action_get_selected(GtkMathView*, GdomeElement*);
   void           gtk_math_view_action_set_selected(GtkMathView*, GdomeElement*, guint);
   void           gtk_math_view_action_toggle(GtkMathView*, GdomeElement*);
+#endif
 #endif
 
 #ifdef __cplusplus

@@ -33,7 +33,9 @@
 #include "MathMLCombinedCharNode.hh"
 #include "MathMLApplyFunctionNode.hh"
 #include "MathMLInvisibleTimesNode.hh"
+#if 0
 #include "MathMLStringNode.hh"
+#endif
 
 Ptr<MathMLTextNode>
 allocCharNode(Char ch)

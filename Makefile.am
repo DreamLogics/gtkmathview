@@ -1,4 +1,4 @@
-EXTRA_DIST = BUGS HISTORY LICENSE ANNOUNCEMENT CONTRIBUTORS debian/
+EXTRA_DIST = BUGS HISTORY LICENSE ANNOUNCEMENT CONTRIBUTORS config.h.in
 SUBDIRS = scripts config auto src doc viewer mathml2ps randomath
 CLEANFILES = core *.log *.eps
 

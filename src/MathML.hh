@@ -52,7 +52,6 @@
 #include "MathMLSpaceElement.hh"
 #include "MathMLSpaceNode.hh"
 #include "MathMLStringLitElement.hh"
-#include "MathMLStringNode.hh"
 #include "MathMLStyleElement.hh"
 #include "MathMLTableCellElement.hh"
 #include "MathMLTableElement.hh"

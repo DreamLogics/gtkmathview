@@ -1283,6 +1283,7 @@ gtk_math_view_export_to_postscript(GtkMathView* math_view,
 #endif // HAVE_LIBT1
 }
 
+#if 0
 extern "C" guint
 gtk_math_view_action_get_selected(GtkMathView* math_view, GdomeElement* elem)
 {
@@ -1291,8 +1292,18 @@ gtk_math_view_action_get_selected(GtkMathView* math_view, GdomeElement* elem)
   g_return_val_if_fail(elem != NULL, 0);
 
   DOM::Element el(elem);
-  if (el.hasAttribute("selection")) return atoi(std::string(el.getAttribute("selection")).c_str());
-  else return 1;
+  if (el.get_namespaceURI() != MATHML_NS_URI || el.get_localName() != "maction") return 0;
+
+  Ptr<MathMLDocument> doc = math_view->interface->GetDocument();
+  assert(doc);
+
+  Ptr<MathMLElement> e = doc->getFormattingNodeNoCreate(DOM::Element(elem));
+  if (!e) return 0;
+
+  Ptr<MathMLActionElement> action = smart_cast<MathMLActionElement>(e);
+  assert(action);
+
+  return action->GetSelectedIndex();
 }
 
 extern "C" void
@@ -1303,9 +1314,18 @@ gtk_math_view_action_set_selected(GtkMathView* math_view, GdomeElement* elem, gu
   g_return_if_fail(elem != NULL);
 
   DOM::Element el(elem);
-  std::ostringstream os;
-  os << idx;
-  el.setAttribute("selection", os.str());
+  if (el.get_namespaceURI() != MATHML_NS_URI || el.get_localName() != "maction") return;
+
+  Ptr<MathMLDocument> doc = math_view->interface->GetDocument();
+  assert(doc);
+
+  Ptr<MathMLElement> e = doc->getFormattingNodeNoCreate(DOM::Element(elem));
+  if (!e) return;
+
+  Ptr<MathMLActionElement> action = smart_cast<MathMLActionElement>(e);
+  assert(action);
+
+  return action->SetSelectedIndex(idx);
 }
 
 extern "C" void
@@ -1314,23 +1334,6 @@ gtk_math_view_action_toggle(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
-
-  Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(math_view->interface->GetDocument(),
-						      DOM::Element(elem)));
-
-  cout << "action ptr? " << elem << " action elem? " << static_cast<MathMLActionElement*>(action_element) << endl;
-  if (!action_element) return;
-
-  guint idx = action_element->GetSelectedIndex();
-  cout << "selected was " << idx << " out of " << action_element->GetSize() << endl;
-  if (idx < action_element->GetSize())
-    idx++;
-  else
-    idx = 1;
-
-  cout << "new selected is " << idx << endl;
-
-  gtk_math_view_action_set_selected(math_view, elem, idx);
+  gtk_math_view_action_set_selected(math_view, elem, gtk_math_view_action_get_selected(math_view, elem) + 1);
 }
-
+#endif

@@ -48,7 +48,6 @@
 #include "ValueConversion.hh"
 #include "MathMLGlyphNode.hh"
 #include "MathMLSpaceNode.hh"
-#include "MathMLStringNode.hh"
 #include "MathMLTextElement.hh"
 #include "MathMLTokenElement.hh"
 #include "MathMLNumberElement.hh"

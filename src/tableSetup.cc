@@ -62,7 +62,7 @@ MathMLTableElement::Setup(RenderingEnvironment& env)
       MathMLLinearContainerElement::Setup(env);
       SetupAlignMarks();
 
-#if 1
+#if 0
       for (unsigned i = 0; i < nRows; i++)
 	for (unsigned j = 0; j < nColumns; j++) {
 	  printf("(%d,%d) rowAlign: %d columnAlign: %d\n", i, j, cell[i][j].rowAlign, cell[i][j].columnAlign);

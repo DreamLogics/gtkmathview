@@ -24,11 +24,17 @@
 #define OperatorDictionary_hh
 
 #include <vector>
+// !!! BEGIN WARNING: hash_map is not part of the STL !!!
+#if defined(HAVE_EXT_HASH_MAP)
+#include <ext/hash_map>
+#elif defined(HAVE_HASH_MAP)
 #include <hash_map>
+#else
+#error "no implementation of hash_map could be found"
+#endif
+// !!! END WARNING: hash_map is not part of the STL !!!
 
 #include "String.hh"
-#include "StringEq.hh"
-#include "StringHash.hh"
 
 class OperatorDictionary
 {
@@ -55,7 +61,11 @@ private:
 
   void Delete(void);
 
+#if defined(HAVE_EXT_HASH_MAP)
+  typedef __gnu_cxx::hash_map<const String*, FormDefaults, String::Hash, String::Eq> Dictionary;
+#elif defined(HAVE_HASH_MAP)
   typedef std::hash_map<const String*, FormDefaults, String::Hash, String::Eq> Dictionary;
+#endif
   Dictionary items;
 };
 

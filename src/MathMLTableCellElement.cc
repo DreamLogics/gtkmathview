@@ -422,8 +422,6 @@ MathMLTableCellElement::CalcGroupsExtent()
 void
 MathMLTableCellElement::SetPosition(scaled x, scaled y)
 {
-  cout << "redoing set position on cell " << this << endl;
-
   if (GetChild())
     {
       if (cell)
