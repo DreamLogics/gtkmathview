@@ -61,9 +61,9 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
     assert(fChar.font != NULL);
     assert(fChar.charMap != NULL);
 
-#if 0
+#ifdef DEBUG
     MathEngine::logger(LOG_DEBUG, "successful layout for U+%04x simple index %02x", ch, fChar.nch);
-#endif
+#endif // DEBUG
   }
 
   FontifiedChar sChar;
@@ -72,9 +72,9 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
     assert(sChar.font != NULL);
     assert(sChar.charMap != NULL);
     
-#if 0
+#ifdef DEBUG
     MathEngine::logger(LOG_DEBUG, "successful stretchy layout for U+%04x simple index %02x", ch, sChar.nch);
-#endif
+#endif // DEBUG
     
     layout = new StretchyCharLayout;
     layout->sChar = sChar;
@@ -114,10 +114,9 @@ MathMLCharNode::DoLayout()
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
-#if 0
   MathEngine::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
-#endif
 
+#if 1
   if (box.descent > box.ascent && fChar.charMap->GetStretch() != STRETCH_NO) {
     MathEngine::logger(LOG_DEBUG, "WARNING Texish code here");
     // BEWARE!
@@ -144,6 +143,7 @@ MathMLCharNode::DoLayout()
     box.tAscent = fontAscent - delta;
     box.tDescent = fontDescent - delta;
   }
+#endif
 }
 
 void
@@ -172,11 +172,18 @@ MathMLCharNode::DoVerticalStretchyLayoutAux(scaled desiredSize, bool)
   const char* nch = layout->sChar.charMap->stretchy.simple;
 
   layout->n = 0;
+  layout->simple = NULLCHAR;
 
-  // first of all let's see if there is some single char large enough
+  // first of all let's see if the small, unstretchable char is enough
+  fChar.GetBoundingBox(charBox);
+  if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
+
+  // next let's see if there is some single large char large enough
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS && nch[i] != NULLCHAR; i++) {
     layout->simple = nch[i];
+#if 0
     MathEngine::logger(LOG_DEBUG, "trying simple char %x for desire %d", layout->simple, sp2ipx(desiredSize));
+#endif
     font->CharBox(layout->simple, charBox);
     if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
   }
@@ -573,17 +580,16 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
     shiftY = box.ascent - cFont->GetEx();
 
     float ia = (M_PI * (90 + fChar.font->GetItalicAngle())) / 180;
-    printf("ia = %f\n", cos(ia));
-
-#if 0
     scaled correction = pt2sp(sp2pt(shiftY) * cos(ia));
-
     shiftX = correction + (box.width - cBox.width) / 2;
-#endif
+#if 0
+    float ia = (M_PI * (90 + fChar.font->GetItalicAngle())) / 180;
+
     scaled correction = (shiftY > 0) ? float2sp(sp2float(box.ascent) * cos(ia)) : 0;
 
     shiftX = correction + (box.width - cBox.rBearing + cBox.lBearing) / 2 - cBox.lBearing;
     //printf("%04x ic: %f height: %f\n", GetChar(), scaledMax(0, box.rBearing - box.width), box.ascent);
+#endif
   }
 
   return true;

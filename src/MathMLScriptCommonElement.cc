@@ -25,7 +25,9 @@
 
 #include "traverseAux.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLScriptCommonElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLScriptCommonElement::MathMLScriptCommonElement()
 {
@@ -58,10 +60,18 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
   scaled u;
   scaled v;
 
-  const MathMLElement* rel = findRightmostChild(base);
+  MathMLElement* rel = findRightmostChild(base);
   assert(rel != NULL);
 
-  if (rel->IsToken() && rel->IsA() != TAG_MO) {
+  const MathMLOperatorElement* coreOp = NULL;
+  if (rel->IsOperator()) coreOp = TO_OPERATOR(rel);
+  else if (rel->IsEmbellishedOperator()) {
+    MathMLEmbellishedOperatorElement* eOp = TO_EMBELLISHED_OPERATOR(rel);
+    assert(eOp != NULL);
+    coreOp = eOp->GetCoreOperator();
+  }
+
+  if ((rel->IsToken() && coreOp == NULL) || (coreOp != NULL && !coreOp->IsStretchy() && coreOp->IsFence())) {
     u = v = 0;
   } else {
     u = baseBox.ascent - scriptAxis;
