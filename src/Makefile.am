@@ -123,6 +123,7 @@ libgtkmathview_la_SOURCES = \
   Rectangle.cc \
   RenderingEnvironment.cc \
   String.cc \
+  StringHash.cc \
   StringFactory.cc \
   StringTokenizer.cc \
   StringUnicode.cc \

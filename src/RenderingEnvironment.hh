@@ -25,8 +25,9 @@
 
 #include <stddef.h>
 
+#include <slist>
+
 #include "AFont.hh"
-#include "Stack.hh"
 #include "String.hh"
 #include "RGBValue.hh"
 #include "UnitValue.hh"
@@ -113,7 +114,7 @@ private:
     const MathMLAttributeList* defaults;
   };
 
-  Stack<AttributeLevel*> level;
+  std::slist<AttributeLevel*> level;
 };
 
 #endif // RenderingEnvironment_hh

@@ -23,10 +23,14 @@
 #ifndef OperatorDictionary_hh
 #define OperatorDictionary_hh
 
-#include "String.hh"
-#include "Container.hh"
+#include <vector>
+#include <hash_map>
 
-class OperatorDictionary {
+#include "String.hh"
+#include "StringHash.hh"
+
+class OperatorDictionary
+{
 public:
   OperatorDictionary(void);
   ~OperatorDictionary();
@@ -39,17 +43,21 @@ public:
 	      const class MathMLAttributeList**) const;
 
 private:
-  struct OperatorDictionaryItem 
+  struct FormDefaults
   {
-    const String* name;
-    const MathMLAttributeList* defaults;
+    const class MathMLAttributeList* prefix;
+    const class MathMLAttributeList* infix;
+    const class MathMLAttributeList* postfix;
   };
 
   void Delete(void);
   const MathMLAttributeList* AlreadyDefined(const MathMLAttributeList&) const;
 
-  Container<const class MathMLAttributeList*> defaults;
-  Container<OperatorDictionaryItem*> items;
+  typedef std::vector<const class MathMLAttributeList*> AttributeListContainer;
+  typedef std::hash_map<const String*, FormDefaults, StringHash> Dictionary;
+
+  AttributeListContainer defaults;
+  Dictionary items;
 };
 
 #endif // OperatorDictionary_hh

@@ -24,7 +24,6 @@
 #include <assert.h>
 
 #include "keyword.hh"
-#include "Iterator.hh"
 #include "stringAux.hh"
 #include "Globals.hh"
 #include "MathMLAttribute.hh"
@@ -200,11 +199,30 @@ OperatorDictionary::Load(const char* fileName)
 	  if (defaults == NULL) defaults = def;
 	  else delete def;
 
-	  OperatorDictionaryItem* item = new OperatorDictionaryItem;
-	  item->name     = opString;
-	  item->defaults = defaults;
-
-	  items.AddFirst(item);
+	  Dictionary::const_iterator p = items.find(opString);
+	  if (p == items.end())
+	    {
+	      FormDefaults& formDefaults = items[opString];
+	      if (elem.getAttribute("form") == "prefix")
+		{
+		  assert(formDefaults.prefix == 0);
+		  formDefaults.prefix = defaults;
+		}
+	      else if (elem.getAttribute("form") == "infix")
+		{
+		  assert(formDefaults.infix == 0);
+		  formDefaults.infix = defaults;
+		}
+	      else if (elem.getAttribute("form") == "postfix")
+		{
+		  assert(formDefaults.postfix == 0);
+		  formDefaults.postfix = defaults;
+		}
+	      else
+		Globals::logger(LOG_WARNING, 
+				"invalid `form' attribute for entry `%s' in operator dictionary (ignored)",
+				opString->ToStaticC());
+	    }
 	} else {
 	  Globals::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
 	}
@@ -225,26 +243,27 @@ OperatorDictionary::Load(const char* fileName)
 void
 OperatorDictionary::Unload()
 {
-  while (defaults.GetSize() > 0) {
-    const MathMLAttributeList* aList = defaults.RemoveFirst();
-    delete aList;
-  }
-
-  while (items.GetSize() > 0) {
-    OperatorDictionaryItem* item = items.RemoveFirst();
-    delete item;
-  }
+  for (AttributeListContainer::iterator p = defaults.begin();
+       p != defaults.end();
+       p++)
+    {
+      assert(*p);
+      delete *p;
+    }
 }
 
 const MathMLAttributeList*
 OperatorDictionary::AlreadyDefined(const MathMLAttributeList& def) const
 {
-  for (Iterator<const MathMLAttributeList*> i(defaults); i.More(); i.Next()) {
-    assert(i() != NULL);
-    if (i()->Equal(def)) return i();
-  }
+  for (AttributeListContainer::const_iterator p = defaults.begin();
+       p != defaults.end();
+       p++)
+    {
+      assert(*p);
+      if ((*p)->Equal(def)) return *p;
+    }
 
-  return NULL;
+  return 0;
 }
 
 void
@@ -253,27 +272,17 @@ OperatorDictionary::Search(const String* opName,
 			   const MathMLAttributeList** infix,
 			   const MathMLAttributeList** postfix) const
 {
-  assert(opName != NULL);
-  assert(prefix != NULL && infix != NULL && postfix != NULL);
+  assert(opName != 0);
+  assert(prefix != 0 && infix != 0 && postfix != 0);
 
-  *prefix = *infix = *postfix = NULL;
+  *prefix = *infix = *postfix = 0;
 
-  for (Iterator<OperatorDictionaryItem*> p(items); p.More(); p.Next()) {
-    assert(p() != NULL);
-    assert(p()->name != NULL);
-    assert(p()->defaults != NULL);
-
-    if (p()->name->Equal(*opName)) {
-      const MathMLAttribute* attribute = p()->defaults->GetAttribute(ATTR_FORM);
-      if (attribute != NULL && attribute->GetValue() != NULL) {
-	const String* form = attribute->GetValue();
-	if (*prefix == NULL && form->Equal("prefix")) *prefix = p()->defaults;
-	else if (*infix == NULL && form->Equal("infix")) *infix = p()->defaults;
-	else if (*postfix == NULL && form->Equal("postfix")) *postfix = p()->defaults;
-      } else
-	Globals::logger(LOG_WARNING, 
-			   "entry for `%s' in operator dictionary has no mandatory `form' attribute",
-			   p()->name->ToStaticC());
+  Dictionary::const_iterator p = items.find(opName);
+  if (p != items.end())
+    {
+      assert((*p).first != 0);
+      *prefix = (*p).second.prefix;
+      *infix = (*p).second.infix;
+      *postfix = (*p).second.postfix;
     }
-  }
 }

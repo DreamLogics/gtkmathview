@@ -350,9 +350,12 @@ MathMLRadicalElement::GetRightEdge() const
 }
 
 void
-MathMLRadicalElement::Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&)
+MathMLRadicalElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
 {
-  assert(0);
+  assert(oldElem);
+  if (oldElem == radicand) SetRadicand(newElem);
+  else if (oldElem == index) SetIndex(newElem);
+  else assert(0);
 }
 
 void

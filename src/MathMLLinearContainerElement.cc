@@ -246,14 +246,10 @@ void
 MathMLLinearContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
 				      const Ptr<MathMLElement>& newElem)
 {
+  assert(oldElem);
   std::vector< Ptr<MathMLElement> >::iterator old = find(content.begin(), content.end(), oldElem);
   assert(old != content.end());
-  if (oldElem == newElem) return;
-
-  (*old)->SetParent(0);
-  newElem->SetParent(this);
-  *old = newElem;
-  SetDirtyStructure();
+  SetChild(old - content.begin(), newElem);
 }
 
 scaled

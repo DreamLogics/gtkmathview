@@ -21,10 +21,10 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
 #include <assert.h>
 
 #include "String.hh"
-#include "Iterator.hh"
 #include "stringAux.hh"
 #include "StringFactory.hh"
 #include "StringUnicode.hh"
@@ -35,17 +35,19 @@ StringFactory::StringFactory()
 
 StringFactory::~StringFactory()
 {
-  while (content.GetSize() > 0)
+  for (std::vector<const String*>::iterator p = content.begin();
+       p != content.end();
+       p++)
     {
-      const String* s = content.RemoveFirst();
-      delete s;
+      assert(*p);
+      delete *p;
     }
 }
 
 void
 StringFactory::Append(Char ch)
 {
-  content.Append(allocString(&ch, 1));
+  content.push_back(allocString(&ch, 1));
 }
 
 void
@@ -53,7 +55,7 @@ StringFactory::Append(const String* s)
 {
   assert(s != NULL);
   if (s->GetLength() == 0) return;
-  content.Append(s->Clone());
+  content.push_back(s->Clone());
 }
 
 unsigned
@@ -61,10 +63,12 @@ StringFactory::GetLength() const
 {
   unsigned len = 0;
 
-  for (Iterator<const String*> s(content); s.More(); s.Next())
+  for (std::vector<const String*>::const_iterator s = content.begin();
+       s != content.end();
+       s++)
     {
-      assert(s() != NULL);
-      len += s()->GetLength();
+      assert(*s);
+      len += (*s)->GetLength();
     }  
   
   return len;
@@ -76,27 +80,31 @@ StringFactory::Pack() const
   Char big = 0;
   unsigned len = 0;
 
-  for (Iterator<const String*> s1(content); s1.More(); s1.Next())
+  for (std::vector<const String*>::const_iterator s1 = content.begin();
+       s1 != content.end();
+       s1++)
     {
-      assert(s1() != NULL);
-      Char sBig = s1()->GetBiggestChar();
+      assert(*s1);
+      Char sBig = (*s1)->GetBiggestChar();
       if (sBig > big) big = sBig;
-      len += s1()->GetLength();
+      len += (*s1)->GetLength();
     }
 
-  String* res = NULL;
+  String* res = 0;
   if (isPlain(big)) res = new StringU<Char8>(len);
   else if (isUnicode16(big)) res = new StringU<Char16>(len);
   else res = new StringU<Char32>(len);
 
   unsigned offset = 0;
 
-  for (Iterator<const String*> s2(content); s2.More(); s2.Next())
+  for (std::vector<const String*>::const_iterator s2 = content.begin();
+       s2 != content.end();
+       s2++)
     {
-      assert(s2() != NULL);
-      for (unsigned i = 0; i < s2()->GetLength(); i++)
+      assert(*s2);
+      for (unsigned i = 0; i < (*s2)->GetLength(); i++)
 	{
-	  res->SetChar(offset, s2()->GetChar(i));
+	  res->SetChar(offset, (*s2)->GetChar(i));
 	  offset++;
 	}
     }

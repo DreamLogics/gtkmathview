@@ -23,7 +23,7 @@
 #ifndef StringFactory_hh
 #define StringFactory_hh
 
-#include "Container.hh"
+#include <vector>
 
 class StringFactory
 {
@@ -37,7 +37,7 @@ public:
   String*  Pack(void) const;
 
 private:
-  Container<const class String*> content;
+  std::vector<const class String*> content;
 };
 
 #endif // StringFactory_hh

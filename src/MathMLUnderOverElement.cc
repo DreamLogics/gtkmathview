@@ -186,6 +186,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment& env)
       assert(base);
 
       bool displayStyle = env.GetDisplayStyle();
+      background = env.GetBackgroundColor();
 
       ScriptSetup(env);
 
