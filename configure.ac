@@ -4,7 +4,7 @@ AC_CONFIG_SRCDIR([src/MathMLObject.cc])
 
 MATHVIEW_MAJOR_VERSION=0
 MATHVIEW_MINOR_VERSION=4
-MATHVIEW_MICRO_VERSION=0
+MATHVIEW_MICRO_VERSION=1
 MATHVIEW_VERSION=$MATHVIEW_MAJOR_VERSION.$MATHVIEW_MINOR_VERSION.$MATHVIEW_MICRO_VERSION
 MATHVIEW_VERSION_INFO=`expr $MATHVIEW_MAJOR_VERSION + $MATHVIEW_MINOR_VERSION`:$MATHVIEW_MICRO_VERSION:$MATHVIEW_MINOR_VERSION
 
@@ -118,7 +118,7 @@ AM_PROG_LIBTOOL
 
 dnl config.h top and bottom
 AH_TOP([
-/* Copyright (C) 2000-2001, Luca Padovani <luca.padovani@cs.unibo.it>.
+/* Copyright (C) 2000-2003, Luca Padovani <luca.padovani@cs.unibo.it>.
  *
  * This file is part of GtkMathView, a Gtk widget for MathML.
  * 
@@ -137,7 +137,7 @@ AH_TOP([
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * 
  * For details, see the GtkMathView World-Wide-Web page,
- * http://www.cs.unibo.it/helm/mml-widget, or send a mail to
+ * http://helm.cs.unibo.it/mml-widget, or send a mail to
  * <luca.padovani@cs.unibo.it>
  */
 
