@@ -318,7 +318,7 @@ MathMLRenderingEngine::SetDefaultFontSize(unsigned size)
   defaultFontSize = size;
   if (document)
     {
-      document->SetDirtyAttributeDeep();
+      document->SetDirtyAttributeD();
       document->SetDirtyLayout();
       document->SetDirty();
     }

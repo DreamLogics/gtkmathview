@@ -67,7 +67,6 @@ MathMLElement::Init()
   SetDirtyStructure();
   SetDirtyAttribute();
   SetDirtyLayout();
-  SetDirty();
 
   fGC[0] = fGC[1] = NULL;
   bGC[0] = bGC[1] = NULL;
@@ -517,11 +516,11 @@ MathMLElement::SetDirtyAttribute()
 }
 
 void
-MathMLElement::SetDirtyAttributeDeep()
+MathMLElement::SetDirtyAttributeD()
 {
-  if (!DirtyAttribute())
+  if (!DirtyAttributeD())
     {
-      SetFlagDown(FDirtyAttribute);
+      SetFlagDown(FDirtyAttributeD);
       SetFlagUp(FDirtyAttributeP);
     }
 }
@@ -606,6 +605,7 @@ MathMLElement::SetParent(const Ptr<MathMLElement>& p)
     {
       if (DirtyStructure()) SetFlagUp(FDirtyStructure);
       if (DirtyAttribute()) SetFlagUp(FDirtyAttributeP);
+      if (p->DirtyAttributeD()) SetFlagDown(FDirtyAttributeD);
       if (DirtyLayout()) SetFlagUp(FDirtyLayout);
       if (Dirty()) SetFlagUp(FDirty);
       if (p->DirtyLayout()) SetFlagDown(FDirtyLayout);

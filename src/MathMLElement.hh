@@ -105,36 +105,15 @@ protected:
 						     AttributeSignature[]) const;
 
 public:
-#if 0
-  virtual void SetDirtyStructure(void);
-  void         ResetDirtyStructure(void) { dirtyStructure = childWithDirtyStructure = 0; }
-  bool         HasDirtyStructure(void) const { return dirtyStructure != 0; }
-  bool         HasChildWithDirtyStructure(void) const { return childWithDirtyStructure != 0; }
-  virtual void SetDirtyAttribute(void);
-  void         ResetDirtyAttribute(void) { dirtyAttribute = childWithDirtyAttribute = 0; }
-  bool         HasDirtyAttribute(void) const { return dirtyAttribute != 0; }
-  bool         HasChildWithDirtyAttribute(void) const { return childWithDirtyAttribute != 0; }
-  bool         IsSelected(void) const { return selected != 0; }
-  bool         IsDirty(void) const { return dirty != 0; }
-  bool         HasDirtyChildren(void) const { return dirtyChildren != 0; }
-  bool         HasDirtyBackground(void) const { return dirtyBackground != 0; }
-  bool         HasDirtyLayout(void) const { return dirtyLayout != 0; }
-  virtual void SetDirtyChildren(void);
-  virtual void SetSelected(void);
-  virtual void ResetSelected(void);
-  void         ResetDirty(void) { dirty = dirtyChildren = dirtyBackground = 0; }
-  void         ResetDirtyLayout(void) { dirtyLayout = 0; }
-  virtual void SetDirtyLayout(bool = false);  
-#endif
-
   virtual void SetDirtyStructure(void);
   void ResetDirtyStructure(void) { ResetFlag(FDirtyStructure); }
   bool DirtyStructure(void) const { return GetFlag(FDirtyStructure); }
   virtual void SetDirtyAttribute(void);
-  virtual void SetDirtyAttributeDeep(void);
-  void ResetDirtyAttribute(void) { ResetFlag(FDirtyAttribute); }
-  bool DirtyAttribute(void) const { return GetFlag(FDirtyAttribute); }
+  virtual void SetDirtyAttributeD(void);
+  void ResetDirtyAttribute(void) { ResetFlag(FDirtyAttribute); ResetFlag(FDirtyAttributeD); }
+  bool DirtyAttribute(void) const { return GetFlag(FDirtyAttribute) || GetFlag(FDirtyAttributeD); }
   bool DirtyAttributeP(void) const { return GetFlag(FDirtyAttributeP); }
+  bool DirtyAttributeD(void) const { return GetFlag(FDirtyAttributeD); }
   virtual void SetDirtyLayout(void);
   void ResetDirtyLayout(void) { ResetFlag(FDirtyLayout); }
   bool DirtyLayout(void) const { return GetFlag(FDirtyLayout); }
@@ -147,27 +126,16 @@ public:
   bool Selected(void) const { return GetFlag(FSelected); }
 
 public:
-#if 0
-  unsigned selected : 1;
-  unsigned dirty : 1;
-  unsigned dirtyChildren : 1;
-  unsigned dirtyBackground : 1;
-  unsigned dirtyLayout : 1;
-  unsigned dirtyStructure : 1;
-  unsigned childWithDirtyStructure : 1;
-  unsigned dirtyAttribute : 1;
-  unsigned childWithDirtyAttribute : 1;
-#endif
-
   enum Flags {
     FDirtyStructure,  // need to resynchronize with DOM
     FDirtyAttribute,  // an attribute was modified
     FDirtyAttributeP, // an attribute was modified in a descendant
+    FDirtyAttributeD, // an attribute was modified and must set DirtyAttribute on all descendants
     FDirtyLayout,     // need to layout
     FDirty,           // need to render
     FSelected,        // selected subtree
 
-    FUnusedFlag
+    FUnusedFlag       // Just to know how many flags we use without having to count them
   };
 
   void SetFlag(Flags f) { flags.set(f); }
@@ -179,7 +147,7 @@ public:
   bool GetFlag(Flags f) const { return flags.test(f); }
 
 private:
-  bitset<FUnusedFlag> flags;
+  std::bitset<FUnusedFlag> flags;
 
 protected:
   const class GraphicsContext* fGC[2];
