@@ -406,10 +406,12 @@ MathMLCharNode::RenderVerticalStretchyChar(const DrawingArea& area,
     y -= layout->box[SC_LAST].ascent;
   }
 
+  unsigned i;
+
   if (nch[SC_MIDDLE] != NULLCHAR) {  
     assert((nRepeat % 2) == 0);
 
-    for (unsigned i = 0; i < nRepeat / 2; i++) {
+    for (i = 0; i < nRepeat / 2; i++) {
       y -= layout->box[SC_REPEAT].descent;
       area.DrawChar(gc, font, x, y, nch[SC_REPEAT]);
       y -= layout->box[SC_REPEAT].ascent;
@@ -419,13 +421,13 @@ MathMLCharNode::RenderVerticalStretchyChar(const DrawingArea& area,
     area.DrawChar(gc, font, x, y, nch[SC_MIDDLE]);
     y -= layout->box[SC_MIDDLE].ascent;
 
-    for (unsigned i = 0; i < nRepeat / 2; i++) {
+    for (i = 0; i < nRepeat / 2; i++) {
       y -= layout->box[SC_REPEAT].descent;
       area.DrawChar(gc, font, x, y, nch[SC_REPEAT]);
       y -= layout->box[SC_REPEAT].ascent;
     }
   } else {
-    for (unsigned i = 0; i < nRepeat; i++) {
+    for (i = 0; i < nRepeat; i++) {
       y -= layout->box[SC_REPEAT].descent;
       area.DrawChar(gc, font, x, y, nch[SC_REPEAT]);
       y -= layout->box[SC_REPEAT].ascent;
@@ -448,6 +450,7 @@ MathMLCharNode::RenderHorizontalStretchyChar(const DrawingArea& area,
   assert(layout->sChar.charMap != NULL);
 
   const AFont* font = layout->sChar.font;
+  unsigned i = 0;
 
   if (layout->n == 0) {
     assert(layout->simple != NULLCHAR);
@@ -472,7 +475,7 @@ MathMLCharNode::RenderHorizontalStretchyChar(const DrawingArea& area,
   if (nch[SC_MIDDLE] != NULLCHAR) {  
     assert((nRepeat % 2) == 0);
 
-    for (unsigned i = 0; i < nRepeat / 2; i++) {
+    for (i = 0; i < nRepeat / 2; i++) {
       area.DrawChar(gc, font, x, y, nch[SC_REPEAT]);
       x += layout->box[SC_REPEAT].width;
     }
@@ -480,12 +483,12 @@ MathMLCharNode::RenderHorizontalStretchyChar(const DrawingArea& area,
     area.DrawChar(gc, font, x, y, nch[SC_MIDDLE]);
     x += layout->box[SC_MIDDLE].width;
 
-    for (unsigned i = 0; i < nRepeat / 2; i++) {
+    for (i = 0; i < nRepeat / 2; i++) {
       area.DrawChar(gc, font, x, y, nch[SC_REPEAT]);
       x += layout->box[SC_REPEAT].width;
     }
   } else {
-    for (unsigned i = 0; i < nRepeat; i++) {
+    for (i = 0; i < nRepeat; i++) {
       area.DrawChar(gc, font, x, y, nch[SC_REPEAT]);
       x += layout->box[SC_REPEAT].width;
     }

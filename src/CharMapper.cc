@@ -61,16 +61,16 @@ CharMapper::CharMapper(FontManager& fm) : fontManager(fm)
 
 CharMapper::~CharMapper()
 {
-  for (Iterator<FontDescriptor*> i(fonts); i.More(); i.Next()) {
-    assert(i() != NULL);
+  for (Iterator<FontDescriptor*> fd(fonts); fd.More(); fd.Next()) {
+    assert(fd() != NULL);
     // TODO: more to be deleted...
-    delete i();
+    delete fd();
   }
 
-  for (Iterator<FontMap*> i(maps); i.More(); i.Next()) {
-    assert(i() != NULL);
+  for (Iterator<FontMap*> fm(maps); fm.More(); fm.Next()) {
+    assert(fm() != NULL);
     // TODO: more to be deleted...
-    delete i();
+    delete fm();
   }
 }
 
@@ -531,7 +531,7 @@ CharMapper::ParseStretchy(mDOMNodeRef node, FontMap* fontMap)
   charMap->type = CHAR_MAP_STRETCHY;
 
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS; i++) charMap->stretchy.simple[i] = NULLCHAR;
-  for (unsigned i = 0; i < SC_REPEAT + 1; i++) charMap->stretchy.compound[i] = NULLCHAR;
+  for (unsigned j = 0; j < SC_REPEAT + 1; j++) charMap->stretchy.compound[j] = NULLCHAR;
 
   charMap->stretchy.code = parseCode(node);
   if (charMap->stretchy.code == 0) {

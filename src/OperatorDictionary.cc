@@ -137,7 +137,7 @@ OperatorDictionary::Unload()
   }
 
   while (items.GetSize() > 0) {
-    const OperatorDictionaryItem* item = items.RemoveFirst();
+    OperatorDictionaryItem* item = items.RemoveFirst();
     delete item;
   }
 }
@@ -164,7 +164,7 @@ OperatorDictionary::Search(const String* opName,
 
   *prefix = *infix = *postfix = NULL;
 
-  for (Iterator<const OperatorDictionaryItem*> p(items); p.More(); p.Next()) {
+  for (Iterator<OperatorDictionaryItem*> p(items); p.More(); p.Next()) {
     assert(p() != NULL);
     assert(p()->name != NULL);
     assert(p()->defaults != NULL);

@@ -267,7 +267,7 @@ bool StringTokenizer::ParseRGB(RGBValue* v)
     blue  = blue * 16 + hexOfChar(s.GetChar(i++));
   }
 
-  if (v != NULL) *v = RGB(red, green, blue);
+  if (v != NULL) *v = MKRGB(red, green, blue);
 
   return true;
 }

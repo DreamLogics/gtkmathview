@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <math.h>   // for pow(...)
 #include <string.h> // for strncpy(...)
+#include <stdlib.h> // for exit()
 
 #include "Iterator.hh"
 #include "CharMapper.hh"
@@ -31,6 +32,7 @@
 #include "StringTokenizer.hh"
 #include "ValueConversion.hh"
 #include "RenderingEnvironment.hh"
+
 
 RenderingEnvironment::RenderingEnvironment(CharMapper& cm) : charMapper(cm)
 {

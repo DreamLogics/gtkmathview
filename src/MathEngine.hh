@@ -56,8 +56,9 @@ public:
   void                 SetSelected(class MathMLElement*);
   class MathMLElement* GetSelected(void) const { return selected; }
 
-  void GetDocumentBoundingBox(class BoundingBox&) const;
-  void GetDocumentRectangle(class Rectangle&) const;
+  // BoundingBox, and Rectangle are structs, not classes, 
+  void GetDocumentBoundingBox(struct BoundingBox&) const;
+  void GetDocumentRectangle(struct Rectangle&) const;
 
   void     SetDefaultFontSize(unsigned);
   unsigned GetDefaultFontSize(void) const { return defaultFontSize; }
