@@ -277,24 +277,24 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	   "/>
-    <single code="0x0300" index="248"/>
-    <single code="0x0301" index="246"/>
+    <single code="0x0300" index="249"/>
+    <single code="0x0301" index="247"/>
     <single code="0x0303" index="0xf3"/>
-    <single code="0x0306" index="240"/>
-    <single code="0x0308" index="0xd1"/>
-    <single code="0x030b" index="247"/>
-    <single code="0x030f" index="249"/>
-    <single code="0x0311" index="241"/>
+    <single code="0x0306" index="241"/>
+    <single code="0x0308" index="208"/>
+    <single code="0x030b" index="248"/>
+    <single code="0x030f" index="250"/>
+    <single code="0x0311" index="242"/>
     <single code="0x2032" index="0xf7"/>
     <single code="0x2033" index="0xf8"/>
     <single code="0x2035" index="0xf9"/>
     <single code="0x2036" index="0xfa"/>
-    <single code="0x20d0" index="209"/>
-    <single code="0x20d1" index="210"/>
-    <single code="0x20d6" index="212"/>
-    <single code="0x20d7" index="214"/>
-    <single code="0x20db" index="208"/>
-    <single code="0x20e1" index="215"/>
+    <single code="0x20d0" index="210"/>
+    <single code="0x20d1" index="211"/>
+    <single code="0x20d6" index="213"/>
+    <single code="0x20d7" index="215"/>
+    <single code="0x20db" index="209"/>
+    <single code="0x20e1" index="216"/>
     <single code="0x2195" index="0xd7"/>
     <single code="0x21c0" index="0xd3"/>
     <multi first="0x2200" last="0x22ff" index="

@@ -148,15 +148,15 @@ bool
 isCombiningBelow(Char ch)
 {
   return 
-    ch >= 0x031c && ch <= 0x0333 ||
-    ch >= 0x0339 && ch <= 0x033c;
+    (ch >= 0x031c && ch <= 0x0333) ||
+    (ch >= 0x0339 && ch <= 0x033c);
 }
 
 bool
 isCombiningOverlay(Char ch)
 {
   return
-    ch >= 0x0334 && ch <= 0x0338 ||
+    (ch >= 0x0334 && ch <= 0x0338) ||
     ch == 0x20d2 || ch == 0x20d3 ||
     ch == 0x20e5;
 }

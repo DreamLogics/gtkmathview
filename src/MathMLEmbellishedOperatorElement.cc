@@ -73,6 +73,13 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
   }
   box.width += totalPadding;
 
+#ifdef ENABLE_EXTENSIONS
+  box.ascent += coreOp->GetTopPadding();
+  box.tAscent += coreOp->GetTopPadding();
+  box.descent += coreOp->GetBottomPadding();
+  box.tDescent += coreOp->GetBottomPadding();
+#endif // ENABLE_EXTENSIONS
+
   ConfirmLayout(id);
 
   ResetDirtyLayout(id, availWidth);
@@ -102,7 +109,11 @@ MathMLEmbellishedOperatorElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
+#ifdef ENABLE_EXTENSIONS
+  content.GetFirst()->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y + coreOp->GetTopPadding());
+#else
   content.GetFirst()->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y);
+#endif // ENABLE_EXTENSIONS
 }
 
 bool

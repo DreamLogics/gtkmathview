@@ -66,6 +66,10 @@ MathMLOperatorElement::GetAttributeSignature(AttributeId id) const
     { ATTR_SEPARATOR, 	  booleanParser,      	 new StringC("false"),          NULL },
     { ATTR_LSPACE,    	  spaceParser,    	 new StringC("thickmathspace"), NULL },
     { ATTR_RSPACE,    	  spaceParser,    	 new StringC("thickmathspace"), NULL },
+#ifdef ENABLE_EXTENSIONS
+    { ATTR_TSPACE,        numberUnitParser,      new StringC("0ex"),            NULL },
+    { ATTR_BSPACE,        numberUnitParser,      new StringC("0ex"),            NULL },
+#endif // ENABLE_EXTENSIONS
     { ATTR_STRETCHY,  	  booleanParser,      	 new StringC("false"),          NULL },
     { ATTR_SYMMETRIC, 	  booleanParser,      	 new StringC("true"),           NULL },
     { ATTR_MAXSIZE,   	  operatorMaxSizeParser, new StringC("infinity"),       NULL },
@@ -184,6 +188,18 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
   rSpace = env->ToScaledPoints(resValue->ToNumberUnit());
   delete resValue;
   delete value;
+
+#ifdef ENABLE_EXTENSIONS
+  value = GetOperatorAttributeValue(ATTR_TSPACE, env);
+  assert(value != NULL && value->IsNumberUnit());
+  tSpace = env->ToScaledPoints(value->ToNumberUnit());
+  delete value;
+
+  value = GetOperatorAttributeValue(ATTR_BSPACE, env);
+  assert(value != NULL && value->IsNumberUnit());
+  bSpace = env->ToScaledPoints(value->ToNumberUnit());
+  delete value;
+#endif // ENABLE_EXTENSIONS
 
   value = GetOperatorAttributeValue(ATTR_STRETCHY, env);
   assert(value != NULL && value->IsBoolean());

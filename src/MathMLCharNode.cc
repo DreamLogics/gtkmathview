@@ -560,12 +560,16 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
 
   const BoundingBox& cBox = cChar->GetBoundingBox();
 
+  printf("overlay: %d below: %d above: %d\n", isCombiningOverlay(cch), isCombiningBelow(cch), isCombiningAbove(cch));
+
   if (isCombiningOverlay(cch)) {
     shiftX = box.lBearing - cBox.lBearing + (box.rBearing - box.lBearing - cBox.rBearing + cBox.lBearing) / 2;
     shiftY = 0;
   } else if (isCombiningBelow(cch)) {
     shiftX = 0;
     shiftY = - box.descent - cBox.ascent;
+
+    printf("in this case box.descent = %d cBox.ascent = %d, shift = %d\n", sp2ipx(box.descent), sp2ipx(cBox.ascent), sp2ipx(shiftY));
   } else {
     /*
     printf("italic angle of the base char is %f %f\n",
@@ -578,6 +582,7 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
     // the following computation assumes that the accent is taken from a TeX font
     // and that that font has a valid glyph for x as position 'x'
     shiftY = box.ascent - cFont->GetEx();
+    shiftY = scaledMax(shiftY, box.ascent + cBox.descent);
 
     float ia = (M_PI * (90 + fChar.font->GetItalicAngle())) / 180;
     scaled correction = pt2sp(sp2pt(shiftY) * cos(ia));

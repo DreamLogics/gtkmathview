@@ -4,7 +4,7 @@
  <operator name="&#x0302;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0303;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0304;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
- <operator name="&#x0305;" form="infix" accent="false" stretchy="true"  lspace="0em" rspace="0em"/>
+ <operator name="&#x0305;" form="infix" accent="false" stretchy="true" lspace="0em" rspace="0em"/>
  <operator name="&#x0306;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0307;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0308;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
@@ -14,9 +14,9 @@
  <operator name="&#x030c;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x030d;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x030e;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
- <operator name="&#x030f;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
+ <operator name="&#x030f;" form="infix" accent="true" stretchy="false" lspace="-0.1em" rspace="0em"/>
  <operator name="&#x0310;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
- <operator name="&#x0311;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
+ <operator name="&#x0311;" form="infix" accent="true" stretchy="false" lspace="-0.1em" rspace="0em"/>
  <operator name="&#x0312;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0313;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0314;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
@@ -34,7 +34,7 @@
  <operator name="&#x0320;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0321;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0322;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
- <operator name="&#x0323;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
+ <operator name="&#x0323;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em" tspace="0.1ex"/>
  <operator name="&#x0324;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0325;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0326;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
@@ -49,7 +49,7 @@
  <operator name="&#x032f;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0330;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0331;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
- <operator name="&#x0332;" form="infix" accent="false" stretchy="true"  lspace="0em" rspace="0em"/>
+ <operator name="&#x0332;" form="infix" accent="false" stretchy="true" lspace="0em" rspace="0em"/>
  <operator name="&#x0333;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0334;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x0335;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
@@ -78,4 +78,7 @@
  <operator name="&#x034c;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x034d;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
  <operator name="&#x034e;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em"/>
+
+ <operator name="&#x20d0;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em" bspace="0.2ex"/>
+ <operator name="&#x20d1;" form="infix" accent="true" stretchy="false" lspace="0em" rspace="0em" bspace="0.2ex"/>
 </dictionary>

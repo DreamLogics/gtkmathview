@@ -92,6 +92,10 @@ OperatorDictionary::Load(const char* fileName)
 	getAttribute(op, "separator", def);
 	getAttribute(op, "lspace", def);
 	getAttribute(op, "rspace", def);
+#ifdef ENABLE_EXTENSIONS
+	getAttribute(op, "tspace", def);
+	getAttribute(op, "bspace", def);
+#endif // ENABLE_EXTENSIONS
 	getAttribute(op, "stretchy", def);
 	getAttribute(op, "direction", def);
 	getAttribute(op, "symmetric", def);

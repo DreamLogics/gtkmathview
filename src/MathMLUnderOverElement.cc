@@ -275,9 +275,18 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	  bChar != NULL && cChar != NULL &&
 	  isCombiningBelow(cChar->GetChar()) &&
 	  bChar->CombineWith(cChar, underShiftX, underShiftY)) {
-	// nothing to do
 	MathEngine::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent under U+%04X",
 			   cChar->GetChar(), bChar->GetChar());
+
+	underShiftY = -underShiftY;
+
+	if (underScript->IsEmbellishedOperator()) {
+	  MathMLEmbellishedOperatorElement* eOp = TO_EMBELLISHED_OPERATOR(underScript);
+	  assert(eOp != NULL);
+	  MathMLOperatorElement* coreOp = eOp->GetCoreOperator();
+	  assert(coreOp != NULL);
+	  underShiftY += coreOp->GetTopPadding();
+	}
       } else {
 	const BoundingBox& scriptBox = underScript->GetBoundingBox();
 
@@ -294,9 +303,17 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	  bChar != NULL && cChar != NULL &&
 	  isCombiningAbove(cChar->GetChar()) &&
 	  bChar->CombineWith(cChar, overShiftX, overShiftY)) {
-	// nothing to do
 	MathEngine::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
 			   cChar->GetChar(), bChar->GetChar());
+
+	if (overScript->IsEmbellishedOperator()) {
+	  MathMLEmbellishedOperatorElement* eOp = TO_EMBELLISHED_OPERATOR(overScript);
+	  assert(eOp != NULL);
+	  MathMLOperatorElement* coreOp = eOp->GetCoreOperator();
+	  assert(coreOp != NULL);
+	  MathEngine::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
+	  overShiftY += coreOp->GetBottomPadding();
+	}
       } else {
 	const BoundingBox& scriptBox = overScript->GetBoundingBox();
 
