@@ -115,14 +115,13 @@ MathMLOperatorElement::Normalize()
 	}
       assert(eOp);
 
-      eOp->SetChild(root);
-
       // now we have to substitute the root of the embellished operator
       // with the embellished operator object just created
       assert(is_a<MathMLContainerElement>(p));
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
       assert(pContainer);
       pContainer->Replace(root, eOp);
+      eOp->SetChild(root);
 
       MathMLTokenElement::Normalize();
     }

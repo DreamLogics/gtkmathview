@@ -110,6 +110,26 @@ MathMLScriptElement::SetSuperScript(const Ptr<MathMLElement>& elem)
 }
 
 void
+MathMLScriptElement::Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&)
+{
+  assert(0);
+}
+
+Ptr<MathMLElement>
+MathMLScriptElement::Inside(scaled x, scaled y)
+{
+  if (!IsInside(x, y)) return 0;
+
+  Ptr<MathMLElement> inside;
+  assert(base);
+  if (inside = base->Inside(x, y)) return inside;
+  if (subScript && (inside = subScript->Inside(x, y))) return inside;
+  if (superScript && (inside = superScript->Inside(x, y))) return inside;
+
+  return this;
+}
+
+void
 MathMLScriptElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
@@ -316,9 +336,53 @@ MathMLScriptElement::ReleaseGCs()
   if (superScript) superScript->ReleaseGCs();
 }
 
+scaled
+MathMLScriptElement::GetLeftEdge() const
+{
+  assert(base);
+  scaled m = base->GetLeftEdge();
+  if (subScript) m = scaledMin(m, subScript->GetLeftEdge());
+  if (superScript) m = scaledMin(m, superScript->GetLeftEdge());
+  return m;
+}
+
+scaled
+MathMLScriptElement::GetRightEdge() const
+{
+  assert(base);
+  scaled m = base->GetRightEdge();
+  if (subScript) m = scaledMax(m, subScript->GetRightEdge());
+  if (superScript) m = scaledMax(m, superScript->GetRightEdge());
+  return m;
+}
+
 Ptr<class MathMLOperatorElement>
 MathMLScriptElement::GetCoreOperator()
 {
   assert(base);
   return base->GetCoreOperator();
+}
+
+void
+MathMLScriptElement::SetDirty(const Rectangle* rect)
+{
+  if (!IsDirty() && !HasDirtyChildren())
+    {
+      MathMLElement::SetDirty(rect);
+      if (base) base->SetDirty(rect);
+      if (subScript) subScript->SetDirty(rect);
+      if (superScript) superScript->SetDirty(rect);
+    }
+}
+
+void
+MathMLScriptElement::SetDirtyLayout(bool children)
+{
+  MathMLElement::SetDirtyLayout(children);
+  if (children)
+    {
+      if (base) base->SetDirtyLayout(children);
+      if (subScript) subScript->SetDirtyLayout(children);
+      if (superScript) superScript->SetDirtyLayout(children);
+    }
 }

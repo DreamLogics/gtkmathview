@@ -204,6 +204,12 @@ MathMLMultiScriptsElement::SetPreSuperScript(unsigned i, const Ptr<MathMLElement
 }
 
 void
+MathMLMultiScriptsElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
+{
+  assert(0);
+}
+
+void
 MathMLMultiScriptsElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
@@ -490,10 +496,43 @@ MathMLMultiScriptsElement::ReleaseGCs()
   std::for_each(preSuperScript.begin(), preSuperScript.end(), ReleaseGCsAdaptor());
 }
 
-void
-MathMLMultiScriptsElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
+Ptr<MathMLElement>
+MathMLMultiScriptsElement::Inside(scaled x, scaled y)
 {
-  assert(0);
+  if (!IsInside(x, y)) return 0;
+
+  assert(base);
+  if (Ptr<MathMLElement> inside = base->Inside(x, y)) return inside;
+
+  for (vector< Ptr<MathMLElement> >::iterator elem = preSubScript.begin();
+       elem != preSubScript.end(); elem++)
+    {
+      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+      if (inside) return inside;
+    }
+
+  for (vector< Ptr<MathMLElement> >::iterator elem = preSuperScript.begin();
+       elem != preSuperScript.end(); elem++)
+    {
+      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+      if (inside) return inside;
+    }
+
+  for (vector< Ptr<MathMLElement> >::iterator elem = subScript.begin();
+       elem != subScript.end(); elem++)
+    {
+      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+      if (inside) return inside;
+    }
+
+  for (vector< Ptr<MathMLElement> >::iterator elem = superScript.begin();
+       elem != superScript.end(); elem++)
+    {
+      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+      if (inside) return inside;
+    }
+
+  return this;
 }
 
 scaled
@@ -549,4 +588,32 @@ MathMLMultiScriptsElement::GetCoreOperator()
 {
   assert(base);
   return base->GetCoreOperator();
+}
+
+void
+MathMLMultiScriptsElement::SetDirty(const Rectangle* rect)
+{
+  if (!IsDirty() && !HasDirtyChildren())
+    {
+      MathMLElement::SetDirty(rect);
+      if (base) base->SetDirty(rect);
+      std::for_each(subScript.begin(), subScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
+      std::for_each(superScript.begin(), superScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
+      std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
+      std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
+    }
+}
+
+void
+MathMLMultiScriptsElement::SetDirtyLayout(bool children)
+{
+  MathMLElement::SetDirtyLayout(children);
+  if (children)
+    {
+      if (base) base->SetDirtyLayout(children);
+      std::for_each(subScript.begin(), subScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      std::for_each(superScript.begin(), superScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+    }
 }

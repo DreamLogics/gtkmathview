@@ -112,6 +112,16 @@ MathMLUnderOverElement::SetOverScript(const Ptr<MathMLElement>& elem)
 }
 
 void
+MathMLUnderOverElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
+{
+  assert(oldElem);
+  if (oldElem == base) SetBase(newElem);
+  else if (oldElem == underScript) SetUnderScript(newElem);
+  else if (oldElem == overScript) SetOverScript(newElem);
+  else assert(0);
+}
+
+void
 MathMLUnderOverElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
@@ -143,7 +153,7 @@ MathMLUnderOverElement::Normalize()
 	      else if (!is_a<MathMLDummyElement>(GetOverScript()))
 		SetOverScript(MathMLDummyElement::create());
 	      break;
-	    case TAG_MSUBSUP:
+	    case TAG_MUNDEROVER:
 	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
 		SetUnderScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetUnderScript()))
@@ -509,9 +519,75 @@ MathMLUnderOverElement::Render(const DrawingArea& area)
     }
 }
 
+Ptr<MathMLElement>
+MathMLUnderOverElement::Inside(scaled x, scaled y)
+{
+  if (!IsInside(x, y)) return 0;
+
+  Ptr<MathMLElement> inside;
+  if (base && (inside = base->Inside(x, y))) return inside;
+  if (underScript && (inside = underScript->Inside(x, y))) return inside;
+  if (overScript && (inside = overScript->Inside(x, y))) return inside;
+
+  return this;
+}
+
+void
+MathMLUnderOverElement::ReleaseGCs()
+{
+  MathMLElement::ReleaseGCs();
+  if (base) base->ReleaseGCs();
+  if (underScript) underScript->ReleaseGCs();
+  if (overScript) overScript->ReleaseGCs();
+}
+
+scaled
+MathMLUnderOverElement::GetLeftEdge() const
+{
+  assert(base);
+  scaled m = base->GetLeftEdge();
+  if (underScript) m = scaledMin(m, underScript->GetLeftEdge());
+  if (overScript) m = scaledMin(m, overScript->GetLeftEdge());
+  return m;
+}
+
+scaled
+MathMLUnderOverElement::GetRightEdge() const
+{
+  assert(base);
+  scaled m = base->GetRightEdge();
+  if (underScript) m = scaledMax(m, underScript->GetRightEdge());
+  if (overScript) m = scaledMax(m, overScript->GetRightEdge());
+  return m;
+}
+
 Ptr<class MathMLOperatorElement>
 MathMLUnderOverElement::GetCoreOperator()
 {
   assert(base);
   return base->GetCoreOperator();
+}
+
+void
+MathMLUnderOverElement::SetDirty(const Rectangle* rect)
+{
+  if (!IsDirty() && !HasDirtyChildren())
+    {
+      MathMLElement::SetDirty(rect);
+      if (base) base->SetDirty(rect);
+      if (underScript) underScript->SetDirty(rect);
+      if (overScript) overScript->SetDirty(rect);
+    }
+}
+
+void
+MathMLUnderOverElement::SetDirtyLayout(bool children)
+{
+  MathMLElement::SetDirtyLayout(children);
+  if (children)
+    {
+      if (base) base->SetDirtyLayout(children);
+      if (underScript) underScript->SetDirtyLayout(children);
+      if (overScript) overScript->SetDirtyLayout(children);
+    }
 }

@@ -210,15 +210,21 @@ MathMLBinContainerElement::Remove(const Ptr<MathMLElement>&)
 }
 
 void
-MathMLBinContainerElement::Replace(const Ptr<MathMLElement>&,
-				   const Ptr<MathMLElement>&)
+MathMLBinContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
+				   const Ptr<MathMLElement>& newElem)
 {
-  assert(0);
+  assert(oldElem == child);
+  SetChild(newElem);
 }
 
 void
 MathMLBinContainerElement::SetChild(const Ptr<MathMLElement>& elem)
 {
-  if (elem) elem->SetParent(this);
-  child = elem;
+  if (elem != child)
+    {
+      if (child) child->SetParent(0);
+      if (elem) elem->SetParent(this);
+      child = elem;
+      SetDirtyLayout();
+    }
 }

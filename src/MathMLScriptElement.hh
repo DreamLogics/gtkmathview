@@ -63,6 +63,8 @@ public:
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const class DrawingArea&);
 
+  virtual void SetDirty(const Rectangle* = 0);
+  virtual void SetDirtyLayout(bool = false);
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
   virtual void   ReleaseGCs(void);

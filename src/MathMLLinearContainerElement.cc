@@ -261,3 +261,35 @@ MathMLLinearContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
   SetDirtyStructure();
 }
 
+scaled
+MathMLLinearContainerElement::GetLeftEdge() const
+{
+  scaled edge = 0;
+  
+  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    {
+      if (elem == content.begin()) edge = (*elem)->GetLeftEdge();
+      else edge = scaledMin(edge, (*elem)->GetX() + (*elem)->GetLeftEdge());
+    }
+
+  return edge;
+}
+
+scaled
+MathMLLinearContainerElement::GetRightEdge() const
+{
+  scaled edge = 0;
+
+  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    {
+      if (elem == content.begin()) edge = (*elem)->GetRightEdge();
+      else edge = scaledMax(edge, (*elem)->GetX() + (*elem)->GetRightEdge());
+    }
+
+  return edge;
+}
+

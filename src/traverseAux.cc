@@ -42,6 +42,22 @@
 #include "MathMLEmbellishedOperatorElement.hh"
 
 Ptr<MathMLElement>
+findEmbellishedOperatorRoot(const Ptr<MathMLElement>& op)
+{
+  Ptr<MathMLElement> root = op;
+
+  while (root && root->GetParent())
+    {
+      Ptr<MathMLElement> newRoot = op->GetParent()->GetCoreOperator();
+      if (newRoot != root) break;
+      else root = op->GetParent();
+    }
+
+  return root;
+}
+
+#if 0
+Ptr<MathMLElement>
 findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 {
   assert(root);
@@ -86,6 +102,7 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
   else
     return root;
 }
+#endif
 
 Ptr<MathMLOperatorElement>
 findStretchyOperator(const Ptr<MathMLElement>& elem)

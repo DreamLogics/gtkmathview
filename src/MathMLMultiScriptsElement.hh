@@ -71,6 +71,8 @@ public:
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
 
+  virtual void SetDirty(const Rectangle* = 0);
+  virtual void SetDirtyLayout(bool = false);
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);

@@ -93,12 +93,11 @@ MathMLSemanticsElement::IsExpanding() const
   assert(content.GetFirst());
   return content.GetFirst()->IsExpanding();
 }
+#endif
 
 Ptr<class MathMLOperatorElement>
 MathMLSemanticsElement::GetCoreOperator()
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst());
-  return content.GetFirst()->GetCoreOperator();
+  return GetChild() ? GetChild()->GetCoreOperator() : Ptr<MathMLOperatorElement>(0);
 }
-#endif
+

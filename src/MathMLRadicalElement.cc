@@ -237,8 +237,7 @@ MathMLRadicalElement::SetDirty(const Rectangle* rect)
 {
   if (!IsDirty() && !HasDirtyChildren())
     {
-      MathMLElement::SetDirty();
-
+      MathMLElement::SetDirty(rect);
       if (radical) radical->SetDirty(rect);
       if (radicand) radicand->SetDirty(rect);
       if (index) index->SetDirty(rect);  

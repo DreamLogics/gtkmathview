@@ -52,8 +52,6 @@ public:
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsSpaceLike(void) const;
-  virtual scaled GetLeftEdge(void) const;
-  virtual scaled GetRightEdge(void) const;
 
   OperatorFormId GetOperatorForm(const Ptr<MathMLElement>&) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator();

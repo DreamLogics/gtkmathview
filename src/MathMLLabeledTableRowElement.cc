@@ -79,6 +79,22 @@ MathMLLabeledTableRowElement::Normalize()
 }
 
 Ptr<MathMLElement>
+MathMLLabeledTableRowElement::Inside(scaled x, scaled y)
+{
+  Ptr<MathMLElement> inside;
+  if (inside = MathMLTableRowElement::Inside(x, y)) return inside;
+  if (label && (inside = label->Inside(x, y))) return inside;
+  return 0;
+}
+
+void
+MathMLLabeledTableRowElement::SetDirty(const Rectangle* rect)
+{
+  MathMLTableRowElement::SetDirty(rect);
+  if (label) label->SetDirty(rect);
+}
+
+Ptr<MathMLElement>
 MathMLLabeledTableRowElement::GetLabel(void) const
 {
   return label;

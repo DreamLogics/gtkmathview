@@ -157,8 +157,6 @@ public:
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
 
-  virtual scaled GetLeftEdge(void) const;
-  virtual scaled GetRightEdge(void) const;
   virtual Ptr<MathMLElement> Inside(scaled x, scaled y);
 
   void 	       SetupColumnAlignAux(const Value*, unsigned, unsigned, bool = false);

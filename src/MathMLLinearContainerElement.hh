@@ -64,8 +64,8 @@ public:
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
 
-  virtual scaled GetLeftEdge(void) const = 0;
-  virtual scaled GetRightEdge(void) const = 0;
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
 
   // the content can be accessed directly, but only in a read-only
   // way, because other operation involves SetParent and other

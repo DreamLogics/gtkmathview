@@ -97,9 +97,7 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 
 #ifdef ENABLE_EXTENSIONS
   box.ascent += coreOp->GetTopPadding();
-  box.tAscent += coreOp->GetTopPadding();
   box.descent += coreOp->GetBottomPadding();
-  box.tDescent += coreOp->GetBottomPadding();
 #endif // ENABLE_EXTENSIONS
 
   ResetDirtyLayout(ctxt.GetLayoutType());

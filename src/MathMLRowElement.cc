@@ -149,38 +149,6 @@ MathMLRowElement::IsSpaceLike() const
 		      std::not1(IsSpaceLikePredicate())) != content.end();
 }
 
-scaled
-MathMLRowElement::GetLeftEdge() const
-{
-  scaled edge = 0;
-  
-  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end();
-       elem++)
-    {
-      if (elem == content.begin()) edge = (*elem)->GetLeftEdge();
-      else edge = scaledMin(edge, (*elem)->GetX() + (*elem)->GetLeftEdge());
-    }
-
-  return edge;
-}
-
-scaled
-MathMLRowElement::GetRightEdge() const
-{
-  scaled edge = 0;
-
-  for (std::vector< const Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end();
-       elem++)
-    {
-      if (elem == content.begin()) edge = (*elem)->GetRightEdge();
-      else edge = scaledMax(edge, (*elem)->GetX() + (*elem)->GetRightEdge());
-    }
-
-  return edge;
-}
-
 OperatorFormId
 MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
 {
