@@ -30,6 +30,11 @@
 #include "gtkmathview.h"
 #include "guiGTK.h"
 
+extern GdomeDOMString* find_hyperlink(GdomeElement*, const char*, const char*);
+extern GdomeElement* find_xref_element(GdomeElement*);
+extern GdomeElement* find_common_ancestor(GdomeElement*, GdomeElement*);
+extern GdomeElement* find_self_or_ancestor(GdomeElement*, const char*, const char*);
+
 #define XLINK_NS_URI "http://www.w3.org/1999/xlink"
 
 static GtkWidget* window;
