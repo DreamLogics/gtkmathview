@@ -894,24 +894,11 @@ gtk_math_view_get_element_rectangle(GtkMathView* math_view, GdomeElement* elem, 
   Ptr<MathMLElement> el = findMathMLElement(elem);
   if (el == 0) return FALSE;
 
-  if (el->IsBreakable())
-    {
-      const Shape& shape = el->GetShape();
-      Rectangle r;
-      shape.GetRectangle(r);
-      rect->x = sp2ipx(r.x);
-      rect->y = sp2ipx(r.y);
-      rect->width = sp2ipx(r.width);
-      rect->height = sp2ipx(r.height);
-    }
-  else
-    {
-      const BoundingBox& box = el->GetBoundingBox();
-      rect->x = sp2ipx(el->GetX());
-      rect->y = sp2ipx(el->GetY() - box.ascent);
-      rect->width = sp2ipx(box.width);
-      rect->height = sp2ipx(box.GetHeight());
-    }
+  const BoundingBox& box = el->GetBoundingBox();
+  rect->x = sp2ipx(el->GetX());
+  rect->y = sp2ipx(el->GetY() - box.ascent);
+  rect->width = sp2ipx(box.width);
+  rect->height = sp2ipx(box.GetHeight());
 
   return TRUE;
 }

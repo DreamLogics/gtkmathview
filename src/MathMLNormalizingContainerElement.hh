@@ -42,8 +42,7 @@ protected:
 
 public:
   virtual void Normalize(void);
-  virtual void DoLayout(LayoutId, scaled);
-  virtual void SetPosition(scaled, scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void Render(const DrawingArea&);
 
   virtual bool IsExpanding(void) const;

@@ -48,7 +48,7 @@ public:
   { return Ptr<MathMLElement>(new MathMLAlignGroupElement(el)); }
 #endif
 
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
 
   void SetWidth(scaled);
   void SetDecimalPoint(const Ptr<class MathMLTokenElement>&);

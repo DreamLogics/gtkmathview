@@ -284,7 +284,7 @@ MathMLTableElement::Render(const DrawingArea& area)
       rect.width = tableWidth;
       rect.height = box.GetHeight();
     } else
-      box.ToRectangle(GetX(), GetY(), rect);
+      rect = box.GetRectangle(GetX(), GetY());
 
     area.DrawRectangle((frame == TABLE_LINE_DASHED) ? dGC[IsSelected()] : fGC[IsSelected()], rect);
   }

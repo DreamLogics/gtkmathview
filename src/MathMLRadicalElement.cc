@@ -35,6 +35,7 @@
 #include "MathMLRadicalElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLRadicalElement::MathMLRadicalElement()
 {
@@ -109,18 +110,18 @@ MathMLRadicalElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLRadicalElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLRadicalElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   Ptr<MathMLElement> base = content.GetFirst();
   assert(base != 0);
 
-  base->DoLayout(id, availWidth / content.GetSize());
+  base->DoLayout(ctxt);
   box = base->GetBoundingBox();
 
   assert(radical != 0);
-  radical->DoLayout();
+  radical->DoLayout(ctxt);
   radical->DoVerticalStretchyLayout(box.ascent + lineThickness, box.descent, 0, false);
   const BoundingBox& radBox = radical->GetBoundingBox();
 
@@ -136,7 +137,7 @@ MathMLRadicalElement::DoLayout(LayoutId id, scaled availWidth)
       Ptr<MathMLElement> script = content.GetLast();
       assert(script != 0);
 
-      script->DoLayout(id, availWidth / 2);
+      script->DoLayout(ctxt);
       const BoundingBox& scriptBox = script->GetBoundingBox();
 
       box.width += scriptBox.width;
@@ -148,7 +149,7 @@ MathMLRadicalElement::DoLayout(LayoutId id, scaled availWidth)
 	}
     }
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

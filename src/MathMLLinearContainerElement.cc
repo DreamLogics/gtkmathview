@@ -31,6 +31,7 @@
 #include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLLinearContainerElement.hh"
+#include "FormattingContext.hh"
 
 MathMLLinearContainerElement::MathMLLinearContainerElement()
 {
@@ -54,23 +55,26 @@ MathMLLinearContainerElement::Normalize()
     {
       // editing is supported with GMetaDOM only
 #if defined(HAVE_GMETADOM)
-      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
-      for (unsigned i = 0; i < children.get_length(); i++)
+      if (GetDOMElement() != 0)
 	{
-	  GMetaDOM::Node node = children.item(i);
-	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	  for (unsigned i = 0; i < children.get_length(); i++)
+	    {
+	      GMetaDOM::Node node = children.item(i);
+	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-	  // it might be that we get a NULL. In that case it would probably make
-	  // sense to create a dummy element, because we filtered MathML
-	  // elements only
-	  assert(elem != 0);
-	  SetChild(i, elem);
+	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	      // it might be that we get a NULL. In that case it would probably make
+	      // sense to create a dummy element, because we filtered MathML
+	      // elements only
+	      assert(elem != 0);
+	      SetChild(i, elem);
+	    }
+
+	  // the following is to be sure that no spurious elements remain at the
+	  // end of the container
+	  SetSize(children.get_length());
 	}
-
-      // the following is to be sure that no spurious elements remain at the
-      // end of the container
-      SetSize(children.get_length());
 #endif // HAVE_GMETADOM
 
       // it is better to normalize elements only after all the rendering
@@ -101,7 +105,7 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLLinearContainerElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLLinearContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
@@ -110,10 +114,10 @@ MathMLLinearContainerElement::DoLayout(LayoutId id, scaled availWidth)
   // by the overriding method!
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
     assert(elem() != 0);
-    elem()->DoLayout(id, availWidth);
+    elem()->DoLayout(ctxt);
   }
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

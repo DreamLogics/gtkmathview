@@ -37,7 +37,7 @@ public:
   { return Ptr<MathMLStringNode>(new MathMLStringNode(s)); }
 
   virtual void     Setup(class RenderingEnvironment*);
-  virtual void     DoLayout(void);
+  virtual void     DoLayout(const class FormattingContext&);
   virtual void     Render(const DrawingArea&);
 
   virtual bool     HasDecimalPoint(void) const;

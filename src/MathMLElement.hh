@@ -49,14 +49,13 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void) = 0;
   virtual void Setup(class RenderingEnvironment*); // setup attributes
-  virtual void DoLayout(LayoutId, scaled = 0);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void RenderBackground(const DrawingArea&);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
   virtual void SetDirty(const Rectangle* = NULL);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
-  virtual bool IsElement(void) const;
 
   const class GraphicsContext* GetForegroundGC(void) const { return fGC[IsSelected()]; }
   const class GraphicsContext* GetBackgroundGC(void) const { return bGC[IsSelected()]; }
@@ -82,7 +81,6 @@ public:
   const GMetaDOM::Element& GetDOMElement(void) const { return node; }
   static Ptr<MathMLElement> getRenderingInterface(const GMetaDOM::Element&);
 #endif
-  Rectangle      GetRectangle(void) const;
   virtual bool 	 IsSpaceLike(void) const;
   virtual bool 	 IsExpanding(void) const;
   virtual bool 	 IsInside(scaled, scaled) const;

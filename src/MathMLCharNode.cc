@@ -30,6 +30,7 @@
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
 #include "MathMLCharNode.hh"
+#include "MathMLCombinedCharNode.hh"
 #include "RenderingEnvironment.hh"
 
 MathMLCharNode::MathMLCharNode(Char c)
@@ -108,7 +109,7 @@ MathMLCharNode::SetDefaultLargeGlyph(bool large)
 }
 
 void
-MathMLCharNode::DoLayout()
+MathMLCharNode::DoLayout(const FormattingContext&)
 {
   if (!IsFontified()) return;
 
@@ -511,12 +512,6 @@ MathMLCharNode::RenderMissingCharacter(const DrawingArea& area, const GraphicsCo
 }
 
 bool
-MathMLCharNode::IsChar() const
-{
-  return true;
-}
-
-bool
 MathMLCharNode::IsFontified() const
 {
   return fChar.font != NULL && fChar.charMap != NULL;
@@ -559,7 +554,7 @@ bool
 MathMLCharNode::CombineWith(const Ptr<MathMLCharNode>& cChar, scaled& shiftX, scaled& shiftY) const
 {
   assert(cChar != 0);
-  if (!IsFontified() || cChar->IsCombinedChar() || !cChar->IsFontified()) return false;
+  if (!IsFontified() || is_a<MathMLCombinedCharNode>(cChar) || !cChar->IsFontified()) return false;
   if (!isCombining(cChar->GetChar())) return false;
 
   Char cch = cChar->GetChar();

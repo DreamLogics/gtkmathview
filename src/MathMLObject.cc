@@ -27,7 +27,6 @@
 
 #include "MathMLObject.hh"
 
-unsigned MathMLObject::indentLevel = 0;
 #ifdef DEBUG
 int MathMLObject::counter = 0;
 #endif
@@ -58,100 +57,4 @@ void
 MathMLObject::unref() const
 {
   if (--refCounter == 0) delete this;
-}
-
-void
-MathMLObject::PrintIndentation() const
-{
-  for (unsigned i = 0; i < indentLevel; i++) putchar(' ');
-}
-
-bool
-MathMLObject::IsNode() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsText() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsString() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsChar() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsStretchyChar() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsCombinedChar() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsSpace() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsElement() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsToken() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsContainer() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsDocument() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsOperator() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsEmbellishedOperator() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsBreakable() const
-{
-  return false;
-}
-
-bool
-MathMLObject::IsMark() const
-{
-  return false;
 }

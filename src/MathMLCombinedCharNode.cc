@@ -63,11 +63,11 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLCombinedCharNode::DoLayout()
+MathMLCombinedCharNode::DoLayout(const FormattingContext& ctxt)
 {
-  MathMLCharNode::DoLayout();
+  MathMLCharNode::DoLayout(ctxt);
   assert(cChar != NULL);
-  cChar->DoLayout();
+  cChar->DoLayout(ctxt);
 
   if (IsFontified() && cChar->IsFontified()) {
     const BoundingBox& cBox = cChar->GetBoundingBox();

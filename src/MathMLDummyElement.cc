@@ -26,6 +26,7 @@
 #include "CharMapper.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
+#include "FormattingContext.hh"
 
 MathMLDummyElement::MathMLDummyElement()
 {
@@ -64,9 +65,9 @@ MathMLDummyElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLDummyElement::DoLayout(LayoutId id, scaled)
+MathMLDummyElement::DoLayout(const FormattingContext& ctxt)
 {
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

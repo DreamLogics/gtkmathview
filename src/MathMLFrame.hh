@@ -41,6 +41,7 @@ public:
   scaled         GetX(void) const { return position.x; }
   scaled         GetY(void) const { return position.y; }
   const BoundingBox& GetBoundingBox(void) const { return box; }
+  Rectangle      GetRectangle(void) const;
   virtual scaled GetLeftEdge(void) const = 0;
   virtual scaled GetRightEdge(void) const = 0;
 
@@ -60,8 +61,6 @@ public:
   void         	 ResetDirty(void) { dirty = dirtyChildren = dirtyBackground = 0; }
   void           ResetDirtyLayout(void) { dirtyLayout = 0; }
   virtual void   SetDirtyLayout(bool = false);  
-
-  virtual BreakId GetBreakability(void) const;
 
 protected:
   Coords      position;

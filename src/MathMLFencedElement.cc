@@ -24,6 +24,8 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "Globals.hh"
+#include "ChildList.hh"
 #include "stringAux.hh"
 #include "allocTextNode.hh"
 #include "StringUnicode.hh"
@@ -41,7 +43,7 @@ MathMLFencedElement::MathMLFencedElement()
 
 #if defined(HAVE_GMETADOM)
 MathMLFencedElement::MathMLFencedElement(const GMetaDOM::Element& node)
-  : MathMLLinearContainerElement(node)
+  : MathMLBinContainerElement(node)
 {
   normalized = false;
   openFence = closeFence = separators = NULL;
@@ -66,9 +68,24 @@ MathMLFencedElement::GetAttributeSignature(AttributeId id) const
   };
 
   const AttributeSignature* signature = GetAttributeSignatureAux(id, sig);
-  if (signature == NULL) signature = MathMLLinearContainerElement::GetAttributeSignature(id);
+  if (signature == NULL) signature = MathMLBinContainerElement::GetAttributeSignature(id);
 
   return signature;
+}
+
+void
+MathMLFencedElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+      // normalization is delayed after setup, because it depends on
+      // the value of some attributes
+      // maybe it can be optimized if it knows that none of its children were
+      // added or removed, because that way it can just propagate the
+      // normalization method
+      normalized = false;
+      ResetDirtyStructure();
+    }
 }
 
 void
@@ -93,90 +110,93 @@ MathMLFencedElement::Setup(RenderingEnvironment* env)
   else separators = NULL;
   delete value;
 
-  if (!normalized) {
-    NormalizeFencedElement();
-    normalized = true;
-  }
+  DelayedNormalize();
 
-  MathMLLinearContainerElement::Setup(env);
+  MathMLBinContainerElement::Setup(env);
 }
 
 void
-MathMLFencedElement::Normalize()
+MathMLFencedElement::DelayedNormalize()
 {
-  //MathMLContainerElement::Normalize();
-}
+  if (!normalized)
+    {
+#if defined(HAVE_GMETADOM)
+      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+      unsigned nChildren = children.get_length();
 
-void
-MathMLFencedElement::NormalizeFencedElement()
-{
-  Ptr<MathMLRowElement> mainRow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
-  assert(mainRow != 0);
+      for (unsigned i = 0; i < nChildren; i++)
+	{
+	  GMetaDOM::Node node = children.item(i);
+	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  assert(elem != 0);
+	  // we detach the element from its parent, which can be an
+	  // element created by mfenced when it expanded
+	  elem->SetParent(0);
+	}
+#endif // HAVE_GMETADOM
 
-  Ptr<MathMLRowElement> mrow = 0;
-  Ptr<MathMLOperatorElement> fence = 0;
+      Ptr<MathMLRowElement> mainRow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
+      assert(mainRow != 0);
 
-  if (openFence != 0 && openFence->GetLength() > 0) {
-    fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
-    assert(fence != 0);
+      Ptr<MathMLRowElement> mrow = 0;
+      Ptr<MathMLOperatorElement> fence = 0;
 
-    fence->Append(openFence);
-    fence->SetFence();
-    fence->SetParent(mainRow);
-    mainRow->Append(fence);
-  }
+      if (openFence != 0 && openFence->GetLength() > 0)
+	{
+	  fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
+	  assert(fence != 0);
+	  fence->Append(openFence);
+	  fence->SetFence();
+	  mainRow->Append(fence);
+	}
 
-  bool moreArguments = content.GetSize() > 1;
+#if defined(HAVE_GMETADOM)
+      bool moreArguments = nChildren > 1;
 
-  if (moreArguments) mrow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
-  else mrow = mainRow;
-  assert(mrow != 0);
+      if (moreArguments) mrow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
+      else mrow = mainRow;
+      assert(mrow != 0);
 
-  unsigned i = 0;
-  while (content.GetSize() > 0) {
-    Ptr<MathMLElement> arg = content.RemoveFirst();
-    assert(arg != 0);
+      for (unsigned i = 0; i < nChildren; i++)
+	{
+	  GMetaDOM::Node node = children.item(i);
+	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  Ptr<MathMLElement> arg = MathMLElement::getRenderingInterface(node);
+	  assert(arg != 0);
 
-    arg->SetParent(mrow);
-    mrow->Append(arg);
+	  mrow->Append(arg);
 
-    if (separators != NULL
-	&& separators->GetLength() > 0
-	&& content.GetSize() > 0) {
-      unsigned offset = (i < separators->GetLength()) ? i : separators->GetLength() - 1;
-      const String* sep = allocString(*separators, offset, 1);
-      assert(sep != NULL);
+	  if (separators != NULL && separators->GetLength() > 0 && i < nChildren - 1)
+	    {
+	      unsigned offset = (i < separators->GetLength()) ? i : separators->GetLength() - 1;
+	      const String* sep = allocString(*separators, offset, 1);
+	      assert(sep != NULL);
 
-      Ptr<MathMLOperatorElement> separator = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
-      assert(separator != 0);
+	      Ptr<MathMLOperatorElement> separator = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
+	      assert(separator != 0);
 
-      separator->SetSeparator();
-      separator->Append(sep);
-      separator->SetParent(mrow);
-      mrow->Append(separator);
+	      separator->SetSeparator();
+	      separator->Append(sep);
+	      mrow->Append(separator);
+	    }
+	}
+
+      if (moreArguments) mainRow->Append(mrow);
+#endif // HAVE_GMETADOM
+
+      if (closeFence != NULL && closeFence->GetLength() > 0)
+	{
+	  fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
+	  assert(fence != 0);
+	  fence->Append(closeFence);
+	  fence->SetFence();
+	  mainRow->Append(fence);
+	}
+
+      mainRow->Normalize();
+      SetChild(mainRow);
+
+      normalized = true;
     }
-
-    i++;
-  }
-
-  if (moreArguments) {
-    mrow->SetParent(mainRow);
-    mainRow->Append(mrow);
-  }
-
-  if (closeFence != NULL && closeFence->GetLength() > 0) {
-    fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
-    assert(fence != 0);
-
-    fence->Append(closeFence);
-    fence->SetFence();
-    fence->SetParent(mainRow);
-    mainRow->Append(fence);
-  }
-
-  mainRow->Normalize();
-
-  assert(content.GetSize() == 0);
-  mainRow->SetParent(this);
-  Append(mainRow);
 }

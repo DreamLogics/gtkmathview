@@ -28,6 +28,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLEmbellishedOperatorElement::
 MathMLEmbellishedOperatorElement(const Ptr<MathMLOperatorElement>& op)
@@ -70,7 +71,7 @@ MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLEmbellishedOperatorElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
@@ -79,7 +80,7 @@ MathMLEmbellishedOperatorElement::DoLayout(LayoutId id, scaled availWidth)
 
   scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
-  child->DoLayout(id, scaledMax(0, availWidth - totalPadding));
+  child->DoLayout(ctxt);
   box = child->GetBoundingBox();
 
   // WARNING: maybe in this case we should ask for the LAST char node...
@@ -98,7 +99,7 @@ MathMLEmbellishedOperatorElement::DoLayout(LayoutId id, scaled availWidth)
   box.tDescent += coreOp->GetBottomPadding();
 #endif // ENABLE_EXTENSIONS
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

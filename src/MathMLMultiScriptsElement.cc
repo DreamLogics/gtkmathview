@@ -30,6 +30,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLMultiScriptsElement.hh"
+#include "FormattingContext.hh"
 
 MathMLMultiScriptsElement::MathMLMultiScriptsElement()
 {
@@ -142,7 +143,7 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLMultiScriptsElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
@@ -151,7 +152,7 @@ MathMLMultiScriptsElement::DoLayout(LayoutId id, scaled availWidth)
   unsigned n = 1 + nPre / 2 + nPost / 2;
   assert(n > 0);
 
-  base->DoLayout(id, availWidth / n);
+  base->DoLayout(ctxt);
 
   BoundingBox subScriptBox;
   BoundingBox superScriptBox;
@@ -170,7 +171,7 @@ MathMLMultiScriptsElement::DoLayout(LayoutId id, scaled availWidth)
     {
       assert(elem() != 0);
 
-      elem()->DoLayout(id, availWidth / n);
+      elem()->DoLayout(ctxt);
 
       if (!preScript && elem()->IsA() == TAG_MPRESCRIPTS)
 	{
@@ -215,7 +216,7 @@ MathMLMultiScriptsElement::DoLayout(LayoutId id, scaled availWidth)
       box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
     }
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

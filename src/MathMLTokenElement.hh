@@ -53,14 +53,13 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void   Normalize(void);
   virtual void 	 Setup(class RenderingEnvironment*);
-  virtual void 	 DoLayout(LayoutId, scaled);
+  virtual void 	 DoLayout(const class FormattingContext&);
+  virtual void   SetPosition(scaled, scaled);
   virtual void 	 Render(const class DrawingArea&);
 
   void           Append(const String*);
   void           Append(const Ptr<class MathMLTextNode>&);
 
-  virtual bool   IsLast(void) const;
-  virtual bool 	 IsToken(void) const;
   bool           IsNonMarking(void) const;
   virtual void 	 SetDirty(const Rectangle* = NULL);
 

@@ -48,7 +48,7 @@ public:
 
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void Render(const DrawingArea&);
 };
 

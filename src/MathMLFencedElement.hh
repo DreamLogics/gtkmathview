@@ -27,9 +27,9 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLBinContainerElement.hh"
 
-class MathMLFencedElement: public MathMLLinearContainerElement
+class MathMLFencedElement: public MathMLBinContainerElement
 {
 protected:
   MathMLFencedElement(void);
@@ -51,7 +51,7 @@ public:
   virtual void Setup(RenderingEnvironment*);
 
 private:
-  void NormalizeFencedElement(void);
+  void DelayedNormalize(void);
 
   bool normalized;
   const String* openFence;

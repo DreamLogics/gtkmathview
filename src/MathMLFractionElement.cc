@@ -30,6 +30,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLFractionElement.hh"
 #include "MathMLOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLFractionElement::MathMLFractionElement()
 {
@@ -183,7 +184,7 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLFractionElement::DoLayout(LayoutId id, scaled maxWidth)
+MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
@@ -193,8 +194,8 @@ MathMLFractionElement::DoLayout(LayoutId id, scaled maxWidth)
 
   if (bevelled) {
     // the fraction is bevelled
-    num->DoLayout(id, maxWidth / 3);
-    denom->DoLayout(id, maxWidth / 3);
+    num->DoLayout(ctxt);
+    denom->DoLayout(ctxt);
 
     const BoundingBox& numBox   = num->GetBoundingBox();
     const BoundingBox& denomBox = denom->GetBoundingBox();
@@ -206,8 +207,8 @@ MathMLFractionElement::DoLayout(LayoutId id, scaled maxWidth)
     box.Append(numBox);
     box.Append(denomBox);
   } else {
-    num->DoLayout(id, maxWidth);
-    denom->DoLayout(id, maxWidth);
+    num->DoLayout(ctxt);
+    denom->DoLayout(ctxt);
 
     const BoundingBox& numBox   = num->GetBoundingBox();
     const BoundingBox& denomBox = denom->GetBoundingBox();
@@ -254,7 +255,7 @@ MathMLFractionElement::DoLayout(LayoutId id, scaled maxWidth)
     box.width = scaledMax(box.width, box.rBearing);
   }
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

@@ -52,9 +52,11 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(RenderingEnvironment*);
   virtual void SetPosition(scaled, scaled);
+  virtual void DoLayout(const class FormattingContext&);
 
   void SetAlignmentScope(bool b) { alignmentScope = b; }
 
+  scaled   GetMinWidth(void) const { return minWidth; }
   unsigned GetRowIndex(void) const { return rowIndex; }
   unsigned GetColumnIndex(void) const { return columnIndex; }
   unsigned GetRowSpan(void) const { return rowSpan; }
@@ -77,6 +79,7 @@ protected:
   void SetupCell(class TableCell*);
 
 private:
+  scaled   minWidth;
   unsigned rowSpan;
   unsigned columnSpan;
 

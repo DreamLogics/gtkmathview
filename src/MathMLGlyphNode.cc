@@ -67,7 +67,7 @@ MathMLGlyphNode::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLGlyphNode::DoLayout()
+MathMLGlyphNode::DoLayout(const FormattingContext&)
 {
   if (font != NULL) font->CharBox(nch, box);
   else box.Null();
@@ -81,7 +81,7 @@ MathMLGlyphNode::Render(const DrawingArea& area)
   if (font != NULL)
     {
       assert(GetParent() != 0);
-      assert(GetParent()->IsToken());
+      assert(is_a<MathMLTokenElement>(GetParent()));
       Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(GetParent());
       assert(token != 0);
 

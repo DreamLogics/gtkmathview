@@ -37,15 +37,14 @@ public:
   { return Ptr<MathMLCharNode>(new MathMLCharNode(c)); }
 
   virtual void 	   Setup(class RenderingEnvironment*);
-  virtual void 	   DoLayout(void);
+  virtual void 	   DoLayout(const class FormattingContext&);
   virtual void 	   Render(const DrawingArea&);
 
   Char             GetChar(void) const { return ch; }
   virtual String*  GetRawContent(void) const;
   virtual unsigned GetLogicalContentLength(void) const;
 
-  virtual bool     IsChar(void) const;
-  virtual bool     IsStretchyChar(void) const;
+  bool             IsStretchyChar(void) const;
   virtual bool     HasDecimalPoint(void) const;
   virtual scaled   GetDecimalPointEdge(void) const;
 

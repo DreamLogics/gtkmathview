@@ -48,17 +48,15 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);
-  virtual void Freeze(void);
   virtual void Render(const DrawingArea&);
 
   virtual void SetDirtyLayout(bool = false);
   virtual void SetDirty(const Rectangle* = NULL);  
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
-  virtual void ResetLast(void);
 
   virtual bool IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const;

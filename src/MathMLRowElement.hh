@@ -48,8 +48,9 @@ public:
 
   // virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
+  virtual void SetPosition(scaled, scaled);
 
   virtual bool IsSpaceLike(void) const;
   virtual bool IsExpanding(void) const;

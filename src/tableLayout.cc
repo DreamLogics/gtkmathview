@@ -30,30 +30,31 @@
 #include "MathMLTableElement.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLTableCellElement.hh"
+#include "FormattingContext.hh"
 
 void
-MathMLTableElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
+MathMLTableElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
-  scaled aAvailWidth = PrepareLabelsLayout(id, availWidth);
+  scaled aAvailWidth = PrepareLabelsLayout(ctxt);
 
-  if (id == LAYOUT_MIN) DoHorizontalMinimumLayout();
-  else DoHorizontalLayout(id, bid, aAvailWidth);
+  if (ctxt.GetLayoutType() == LAYOUT_MIN) DoHorizontalMinimumLayout();
+  else DoHorizontalLayout(ctxt);
 
-  if (HasLabels()) DoLabelsLayout(id, availWidth);
+  if (HasLabels()) DoLabelsLayout(ctxt);
 
-  if (id == LAYOUT_AUTO) {
+  if (ctxt.GetLayoutType() == LAYOUT_AUTO) {
     StretchyCellsLayout();
-    AdjustTableWidth(availWidth);
+    AdjustTableWidth(ctxt.GetAvailableWidth());
   }
 
-  DoVerticalLayout(id);
+  DoVerticalLayout(ctxt.GetLayoutType());
 
   box.Set(GetTableWidth(), 0, 0);
   AlignTable(GetTableHeight(), box);
 
-  if (HasLabels()) AdjustTableLayoutWithLabels(id, availWidth);
+  if (HasLabels()) AdjustTableLayoutWithLabels(ctxt);
 
 #if 0
   cout << "`mtable' DoBoxedLayout (" << id << ',' << bid << ',' << sp2ipx(availWidth);
@@ -74,16 +75,14 @@ MathMLTableElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
     }
   }
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, availWidth);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void
-MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWidth)
+MathMLTableElement::DoHorizontalLayout(const FormattingContext& ctxt)
 {
   // ok, the available width cannot be negative
-  availWidth = scaledMax(0, availWidth);
+  scaled availWidth = scaledMax(0, ctxt.GetAvailableWidth());
 
   unsigned j;
 
@@ -101,14 +100,14 @@ MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWid
     scaled avail = scaledMax(0, availWidth - GetSpacingWidth());
     scaled availPerColumn = avail / nColumns;
 
-    if (id == LAYOUT_AUTO) {
+    if (ctxt.GetLayoutType() == LAYOUT_AUTO) {
       // in any case all columns must be rendered to the max of the minimum widths!!!!!!
       for (j = 0; j < nColumns; j++)
 	availPerColumn = scaledMax(availPerColumn, column[j].minimumWidth);
     }
 
     // then we render each column with a portion of the available space
-    for (j = 0; j < nColumns; j++) ColumnLayout(j, id, bid, availPerColumn);
+    for (j = 0; j < nColumns; j++) ColumnLayout(j, FormattingContext(ctxt.GetLayoutType(), availPerColumn));
 
     if (nFit == 0 && widthType == WIDTH_AUTO) {
       // oh, the table has no fit columns, so it could be smaller than the
@@ -129,7 +128,7 @@ MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWid
   } else {
     for (j = 0; j < nColumns; j++)
       if (column[j].widthType == COLUMN_WIDTH_FIXED) {
-	ColumnLayout(j, id, BREAK_GOOD, column[j].fixedWidth);
+	ColumnLayout(j, FormattingContext(ctxt.GetLayoutType(), column[j].fixedWidth));
 	column[j].width = scaledMax(column[j].contentWidth, column[j].fixedWidth);
       }
 
@@ -140,7 +139,7 @@ MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWid
       maxTableWidth = float2sp(fixedWidth / (1 - wScale));
     }
 
-    ScaleColumnsLayout(id, (nAuto + nFit == 0) ? BREAK_GOOD : bid, maxTableWidth);
+    ScaleColumnsLayout(FormattingContext(ctxt.GetLayoutType(), maxTableWidth));
     ConfirmHorizontalScaleSpacing(maxTableWidth);
 
 #if 0
@@ -159,7 +158,7 @@ MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWid
 
     for (j = 0; j < nColumns; j++) {
       if (column[j].widthType == COLUMN_WIDTH_AUTO) {
-	ColumnLayout(j, id, bid, avail / n);
+	ColumnLayout(j, FormattingContext(ctxt.GetLayoutType(), avail / n));
 	avail = scaledMax(0, avail - column[j].contentWidth);
 	n--;
       }
@@ -210,7 +209,7 @@ MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWid
 
       for (j = 0; j < nColumns; j++) {
 	if (column[j].widthType == COLUMN_WIDTH_FIT) {
-	  ColumnLayout(j, id, bid, float2sp(sp2float(avail) / n));
+	  ColumnLayout(j, FormattingContext(ctxt.GetLayoutType(), float2sp(sp2float(avail) / n)));
 	  avail = scaledMax(0, avail - scaledMax(column[j].contentWidth, column[j].width));
 	  n--;
 	}
@@ -218,7 +217,7 @@ MathMLTableElement::DoHorizontalLayout(LayoutId id, BreakId bid, scaled availWid
     }
   }
 
-  SpannedCellsLayout(id);
+  SpannedCellsLayout(ctxt);
 }
 
 void
@@ -234,7 +233,7 @@ MathMLTableElement::DoHorizontalMinimumLayout()
 
   for (j = 0; j < nColumns; j++) {
     column[j].minimumWidth = 0;
-    ColumnLayout(j, LAYOUT_MIN, BREAK_GOOD, 0);
+    ColumnLayout(j, FormattingContext(LAYOUT_MIN, 0));
     column[j].minimumWidth = column[j].contentWidth;
   }
 
@@ -243,8 +242,8 @@ MathMLTableElement::DoHorizontalMinimumLayout()
       unsigned n = cell[i][j].colSpan;
       if (cell[i][j].mtd != NULL && !cell[i][j].spanned && n > 1) {
 	scaled minWidth = GetMinimumWidth(j, cell[i][j].colSpan);
-	cell[i][j].mtd->DoBoxedLayout(LAYOUT_MIN, BREAK_GOOD, 0);
-	scaled cellWidth = cell[i][j].mtd->GetMinBoundingBox().width;
+	cell[i][j].mtd->DoLayout(FormattingContext(LAYOUT_MIN, 0));
+	scaled cellWidth = cell[i][j].mtd->GetBoundingBox().width;
 	if (cellWidth > minWidth) {
 	  for (unsigned k = 0; k < n; k++) 
 	    if (minWidth < SP_EPSILON || equalColumns)
@@ -488,7 +487,7 @@ MathMLTableElement::GetContentWidth(ColumnWidthId id) const
 }
 
 void
-MathMLTableElement::ColumnLayout(unsigned j, LayoutId id, BreakId bid, scaled width)
+MathMLTableElement::ColumnLayout(unsigned j, const FormattingContext& ctxt)
 {
   scaled columnWidth = 0;
 
@@ -497,7 +496,7 @@ MathMLTableElement::ColumnLayout(unsigned j, LayoutId id, BreakId bid, scaled wi
     if (tableCell.mtd != NULL &&
 	!tableCell.spanned && tableCell.colSpan == 1) {
 
-      if (id != LAYOUT_AUTO || !tableCell.mtd->IsStretchyOperator())
+      if (ctxt.GetLayoutType() != LAYOUT_AUTO || !tableCell.mtd->IsStretchyOperator())
 	{
 	  // CONFLICT: well, hard to explain. It is obvious that group
 	  // alignment must be taken into account here, because we want to
@@ -525,30 +524,30 @@ MathMLTableElement::ColumnLayout(unsigned j, LayoutId id, BreakId bid, scaled wi
 	  if (tableCell.nAlignGroup > 0)
 	    {
 	      // since this cell is subject to alignment we cannot break its content
-	      tableCell.mtd->DoBoxedLayout(id, BREAK_NO, width);
+	      tableCell.mtd->DoLayout(FormattingContext(ctxt.GetLayoutType(), width));
 	      tableCell.mtd->CalcGroupsExtent();
 	    } 
 	  else
-	    tableCell.mtd->DoBoxedLayout(id, bid, width);
+	    tableCell.mtd->DoLayout(FormattingContext(ctxt.GetLayoutType(), width));
 	}
 
       const BoundingBox& cellBox =
 	tableCell.mtd->IsStretchyOperator() ?
-	tableCell.mtd->GetMaxBoundingBox() :
+	tableCell.mtd->GetBoundingBox() :
 	tableCell.mtd->GetBoundingBox();
 
       if (cellBox.width > columnWidth) columnWidth = cellBox.width;
     }
   }
 
-  columnWidth = scaledMax(columnWidth, ColumnGroupsLayout(j, id));
+  columnWidth = scaledMax(columnWidth, ColumnGroupsLayout(j, ctxt));
 
   column[j].contentWidth = scaledMax(columnWidth, column[j].minimumWidth);
   column[j].width = scaledMax(column[j].contentWidth, width);
 }
 
 scaled
-MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
+MathMLTableElement::ColumnGroupsLayout(unsigned j, const FormattingContext& ctxt)
 {
   unsigned nAlignGroup = column[j].nAlignGroup;
   if (nAlignGroup == 0) return 0;
@@ -581,7 +580,7 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
   for (k = 0; k < nAlignGroup; k++)
     alignedCellWidth += gExtent[k].left + gExtent[k].right;
 
-  if (id == LAYOUT_AUTO)
+  if (ctxt.GetLayoutType() == LAYOUT_AUTO)
     {
       for (i = 0; i < nRows; i++) {
 	TableCell& tableCell = cell[i][j];
@@ -598,10 +597,11 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
 		if (k > 0) rightPrev = gExtent[k - 1].right - tableCell.aGroup[k - 1].extent.right;
 
 		tableCell.aGroup[k].group->SetWidth(rightPrev + gExtent[k].left - tableCell.aGroup[k].extent.left);
-		tableCell.aGroup[k].group->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, 0);
+		tableCell.aGroup[k].group->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
 	      }
 	  }
 
+#if 0
 	// ok, a little explanation: it is not necessary that every cell has exactly the same
 	// number of alignment groups, furthermore it is almost impossibile that even
 	// two cells with the same number of alignment groups have exaclty the same
@@ -611,6 +611,7 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
 	// aligned within their column, then they must have the same width to preserve
 	// alignment inside groups.
 	tableCell.mtd->RecalcBoundingBox(id, alignedCellWidth);
+#endif
       }
     }
   
@@ -620,30 +621,30 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
 }
 
 void
-MathMLTableElement::ScaleColumnsLayout(LayoutId id, BreakId bid, scaled tableWidth)
+MathMLTableElement::ScaleColumnsLayout(const FormattingContext& ctxt)
 {
   for (unsigned j = 0; j < nColumns; j++)
     if (column[j].widthType == COLUMN_WIDTH_PERCENTAGE) {
-      ColumnLayout(j, id, bid, float2sp(tableWidth * column[j].scaleWidth));
+      ColumnLayout(j, FormattingContext(ctxt.GetLayoutType(), float2sp(tableWidth * column[j].scaleWidth)));
     }
 }
 
 void
-MathMLTableElement::SpannedCellsLayout(LayoutId id)
+MathMLTableElement::SpannedCellsLayout(const FormattingContext& ctxt)
 {
   for (unsigned i = 0; i < nRows; i++) {
     for (unsigned j = 0; j < nColumns; j++) {
       if (cell[i][j].mtd != NULL &&
 	  !cell[i][j].spanned && cell[i][j].colSpan > 1) {
-	if (id == LAYOUT_MIN) {
-	  cell[i][j].mtd->DoBoxedLayout(LAYOUT_MIN, BREAK_GOOD, 0);
-	  const BoundingBox& cellBox = cell[i][j].mtd->GetMinBoundingBox();
+	if (ctxt.GetLayoutType() == LAYOUT_MIN) {
+	  cell[i][j].mtd->DoLayout(FormattingContext(LAYOUT_MIN, 0));
+	  const BoundingBox& cellBox = cell[i][j].mtd->GetBoundingBox();
 	  scaled widthPerColumn = scaledMax(0, cellBox.width / cell[i][j].colSpan);
 	  for (unsigned k = 0; k < cell[i][j].colSpan; k++)
 	    column[j].minimumWidth = scaledMax(column[j].minimumWidth, widthPerColumn);
 	} else {
 	  scaled spannedWidth = GetColumnWidth(j, cell[i][j].colSpan);
-	  cell[i][j].mtd->DoBoxedLayout(id, BREAK_GOOD, spannedWidth);
+	  cell[i][j].mtd->DoLayout(FormattingContext(ctxt.GetLayoutType(), spannedWidth));
 	}
       }
     }
@@ -677,7 +678,7 @@ MathMLTableElement::StretchyCellsLayout()
 		      op->HorizontalStretchTo(width);
 		    }
 
-		  cell[i][j].mtd->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, width);
+		  cell[i][j].mtd->DoLayout(FormattingContext(LAYOUT_AUTO, width));
 		}
 	    }
 	}
@@ -1021,12 +1022,12 @@ MathMLTableElement::AlignTable(scaled height, BoundingBox& box)
 // deciding that, the method will return the effective available width
 // to render the table.
 scaled
-MathMLTableElement::PrepareLabelsLayout(LayoutId id, scaled availWidth)
+MathMLTableElement::PrepareLabelsLayout(const FormattingContext& ctxt)
 {
   // overlappingLabels = false;
-  scaled aAvailWidth = availWidth;
+  scaled aAvailWidth = ctxt.GetAvailableWidth();
 
-  if (id == LAYOUT_AUTO && HasLabels()) {
+  if (ctxt.GetLayoutType() == LAYOUT_AUTO && HasLabels()) {
     // FIXME: what if the minLabelSpacing is a percentage value?
     assert(minLabelSpacingType == SPACING_FIXED);
     minLabelSpacing = scaledMax(0, minLabelFixedSpacing);
@@ -1062,27 +1063,27 @@ MathMLTableElement::GetMaxLabelWidth() const
   scaled width = 0;
   for (unsigned i = 0; i < nRows; i++) {
     if (rowLabel[i].labelElement != NULL)
-      width = scaledMax(width, rowLabel[i].labelElement->GetMaxBoundingBox().width);
+      width = scaledMax(width, rowLabel[i].labelElement->GetBoundingBox().width);
   }
 
   return width;
 }
 
 void
-MathMLTableElement::DoLabelsLayout(LayoutId id, scaled availWidth)
+MathMLTableElement::DoLabelsLayout(const FormattingContext& ctxt)
 {
   assert(rowLabel != NULL);
 
-  scaled availForLabels = scaledMax(0, availWidth - GetTableWidth() - minLabelFixedSpacing);
+  scaled availForLabels = scaledMax(0, ctxt.GetAvailableWidth() - GetTableWidth() - minLabelFixedSpacing);
 
   for (unsigned i = 0; i < nRows; i++) {
     if (rowLabel[i].labelElement != NULL)
-      rowLabel[i].labelElement->DoBoxedLayout(id, BREAK_NO, availForLabels);
+      rowLabel[i].labelElement->DoLayout(FormattingContext(ctxt.GetLayoutType(), availForLabels));
   }
 }
 
 void
-MathMLTableElement::AdjustTableLayoutWithLabels(LayoutId id, scaled availWidth)
+MathMLTableElement::AdjustTableLayoutWithLabels(const FormattingContext& ctxt)
 {
   assert(rowLabel != NULL);
 
@@ -1099,8 +1100,9 @@ MathMLTableElement::AdjustTableLayoutWithLabels(LayoutId id, scaled availWidth)
 
   tableWidth = box.width;
 
-  if (id == LAYOUT_AUTO && availWidth > labelsWidth + minLabelSpacing + tableWidth) {
-    scaled extra = availWidth - tableWidth;
+  if (ctxt.GetLayoutType() == LAYOUT_AUTO &&
+      ctxt.GetAvailableWidth() > labelsWidth + minLabelSpacing + tableWidth) {
+    scaled extra = ctxt.GetAvailableWidth() - tableWidth;
 
     if (extra > (minLabelSpacing + labelsWidth) * 2) {
       leftPadding = extra / 2;
@@ -1111,7 +1113,7 @@ MathMLTableElement::AdjustTableLayoutWithLabels(LayoutId id, scaled availWidth)
 	leftPadding = extra - minLabelSpacing - labelsWidth;
     }
 
-    box.width = scaledMax(availWidth, tableWidth + labelsWidth + minLabelSpacing);
+    box.width = scaledMax(ctxt.GetAvailableWidth(), tableWidth + labelsWidth + minLabelSpacing);
   } else {
     if (side == TABLE_SIDE_LEFT || side == TABLE_SIDE_LEFTOVERLAP)
       leftPadding = labelsWidth + minLabelSpacing;

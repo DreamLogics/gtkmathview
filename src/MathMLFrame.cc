@@ -98,3 +98,8 @@ MathMLFrame::SetPosition(scaled x, scaled y)
   position.y = y;
 }
 
+Rectangle
+MathMLFrame::GetRectangle() const
+{
+  return GetBoundingBox().GetRectangle(GetX(), GetY());
+}

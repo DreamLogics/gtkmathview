@@ -34,7 +34,7 @@ protected:
 
 public:
   virtual void 	   Setup(class RenderingEnvironment*) = 0;
-  virtual void 	   DoLayout(void) = 0;
+  virtual void 	   DoLayout(const class FormattingContext&) = 0;
   virtual void 	   SetPosition(scaled, scaled);
   virtual void 	   Render(const DrawingArea&) = 0;
 

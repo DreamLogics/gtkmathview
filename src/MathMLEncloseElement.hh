@@ -55,7 +55,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
 

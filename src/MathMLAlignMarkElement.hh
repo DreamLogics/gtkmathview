@@ -50,7 +50,7 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
 
   virtual bool IsSpaceLike(void) const;
   virtual void SetDirty(const Rectangle* = NULL);

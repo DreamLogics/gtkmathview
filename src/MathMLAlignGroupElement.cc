@@ -27,6 +27,7 @@
 #include "MathMLTokenElement.hh"
 #include "MathMLAlignMarkElement.hh"
 #include "MathMLAlignGroupElement.hh"
+#include "FormattingContext.hh"
 
 MathMLAlignGroupElement::MathMLAlignGroupElement()
 {
@@ -52,11 +53,11 @@ MathMLAlignGroupElement::~MathMLAlignGroupElement()
 }
 
 void
-MathMLAlignGroupElement::DoLayout(LayoutId id, scaled)
+MathMLAlignGroupElement::DoLayout(const FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
   box.Set(width, 0, 0);
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

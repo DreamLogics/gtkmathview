@@ -44,7 +44,7 @@ MathMLSpaceNode::Setup(class RenderingEnvironment*)
 }
 
 void
-MathMLSpaceNode::DoLayout()
+MathMLSpaceNode::DoLayout(const FormattingContext&)
 {
 }
 

@@ -31,6 +31,7 @@ ChildList::ChildList(const GMetaDOM::Element& root0,
 		     const GMetaDOM::DOMString& name0)
   : root(root0), ns(ns0), name(name0)
 {
+  assert(root != 0);
 }
 
 GMetaDOM::Node
@@ -56,8 +57,6 @@ ChildList::item(unsigned long i) const
 unsigned long
 ChildList::get_length() const
 {
-  if (root == 0) return 0;
-
   unsigned long length = 0;
   GMetaDOM::Node p = root.get_firstChild();
 

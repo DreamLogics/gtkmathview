@@ -32,6 +32,7 @@
 #include "MathMLUnderOverElement.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLUnderOverElement::MathMLUnderOverElement()
 {
@@ -195,7 +196,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
+MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
@@ -206,9 +207,9 @@ MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
 
   if (scriptize)
     {
-      base->DoLayout(id, maxWidth / 2);
-      if (overScript != NULL) overScript->DoLayout(id, maxWidth / 2);
-      if (underScript != NULL) underScript->DoLayout(id, maxWidth / 2);
+      base->DoLayout(ctxt);
+      if (overScript != NULL) overScript->DoLayout(ctxt);
+      if (underScript != NULL) underScript->DoLayout(ctxt);
 
       const BoundingBox& baseBox = base->GetBoundingBox();
       BoundingBox underBox;
@@ -227,11 +228,11 @@ MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
     } 
   else
     {    
-      if (id != LAYOUT_AUTO)
+      if (ctxt.GetLayoutType() != LAYOUT_AUTO)
 	{
-	  base->DoLayout(id);
-	  if (underScript != 0) underScript->DoLayout(id);
-	  if (overScript != 0) overScript->DoLayout(id);
+	  base->DoLayout(ctxt);
+	  if (underScript != 0) underScript->DoLayout(ctxt);
+	  if (overScript != 0) overScript->DoLayout(ctxt);
 	} 
       else
 	{
@@ -247,9 +248,9 @@ MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
 
 	  Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
 
-	  if (baseOp == 0) base->DoLayout(id, maxWidth);
-	  if (underScript != 0 && underOp == 0) underScript->DoLayout(id, maxWidth);
-	  if (overScript != 0 && overOp == 0) overScript->DoLayout(id, maxWidth);
+	  if (baseOp == 0) base->DoLayout(ctxt);
+	  if (underScript != 0 && underOp == 0) underScript->DoLayout(ctxt);
+	  if (overScript != 0 && overOp == 0) overScript->DoLayout(ctxt);
 
 	  if (baseOp == 0)
 	    {
@@ -298,9 +299,9 @@ MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
 	    if (overOp != 0) overOp->HorizontalStretchTo(w);
 	  }
 
-	  if (baseOp != 0) base->DoLayout(id);
-	  if (underScript != 0 && underOp != 0) underScript->DoLayout(id);
-	  if (overScript != 0 && overOp != 0) overScript->DoLayout(id);
+	  if (baseOp != 0) base->DoLayout(ctxt);
+	  if (underScript != 0 && underOp != 0) underScript->DoLayout(ctxt);
+	  if (overScript != 0 && overOp != 0) overScript->DoLayout(ctxt);
 	}
 
       const BoundingBox& baseBox = base->GetBoundingBox();
@@ -415,7 +416,7 @@ MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
       box.ascent += overClearance;
     }
   
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

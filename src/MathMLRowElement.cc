@@ -34,6 +34,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLRowElement::MathMLRowElement()
 {
@@ -65,14 +66,14 @@ MathMLRowElement::Setup(RenderingEnvironment* env)
   Iterator< Ptr<MathMLElement> > i(content);
   i.ResetLast();
   while (i.More() && i() != 0 &&
-	 (i()->IsSpaceLike() || i()->IsEmbellishedOperator()))
+	 (i()->IsSpaceLike() || is_a<MathMLEmbellishedOperatorElement>(i())))
     i.Prev();
 	      
   if (i.More() && i() != NULL) lastElement = i();
 }
 
 void
-MathMLRowElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
@@ -81,11 +82,13 @@ MathMLRowElement::DoLayout(LayoutId id, scaled availWidth)
     {
       Ptr<MathMLElement> elem = i();
       assert(elem != 0);
-      elem->DoLayout(id, availWidth);
+      elem->DoLayout(ctxt);
       box.Append(elem->GetBoundingBox());
     }
 
-  ResetDirtyLayout(id);
+  DoStretchyLayout();
+
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void
@@ -137,9 +140,21 @@ MathMLRowElement::DoStretchyLayout()
 	  if (op != 0)
 	    {
 	      op->VerticalStretchTo(toAscent, toDescent);
-	      elem()->DoLayout(LAYOUT_AUTO, 0);
+	      elem()->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
 	    }
 	}
+    }
+}
+
+void
+MathMLRowElement::SetPosition(scaled x, scaled y)
+{
+  MathMLLinearContainerElement::SetPosition(x, y);
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->SetPosition(x, y);
+      x += elem()->GetBoundingBox().width;
     }
 }
 

@@ -36,7 +36,7 @@ public:
   { return Ptr<MathMLSpaceNode>(new MathMLSpaceNode(s)); }
 
   virtual void     Setup(class RenderingEnvironment*);
-  virtual void     DoLayout(void);
+  virtual void     DoLayout(const class FormattingContext&);
   virtual void     Render(const DrawingArea&);
 
   virtual unsigned GetLogicalContentLength(void) const;

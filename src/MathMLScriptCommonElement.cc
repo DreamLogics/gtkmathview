@@ -63,15 +63,15 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
   assert(rel != 0);
 
   Ptr<MathMLOperatorElement> coreOp = 0;
-  if (rel->IsOperator()) coreOp = smart_cast<MathMLOperatorElement>(rel);
-  else if (rel->IsEmbellishedOperator())
+  if (is_a<MathMLOperatorElement>(rel)) coreOp = smart_cast<MathMLOperatorElement>(rel);
+  else if (is_a<MathMLEmbellishedOperatorElement>(rel))
     {
       Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(rel);
       assert(eOp != 0);
       coreOp = eOp->GetCoreOperator();
     }
 
-  if ((rel->IsToken() && coreOp == 0) ||
+  if ((is_a<MathMLTokenElement>(rel) && coreOp == 0) ||
       (coreOp != 0 && !coreOp->IsStretchy() && coreOp->IsFence()))
     {
       u = v = 0;

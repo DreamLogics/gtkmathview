@@ -30,6 +30,7 @@
 #include "MathMLDummyElement.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
+#include "FormattingContext.hh"
 
 MathMLNormalizingContainerElement::MathMLNormalizingContainerElement()
 {
@@ -86,24 +87,16 @@ MathMLNormalizingContainerElement::Normalize()
 }
 
 void
-MathMLNormalizingContainerElement::DoLayout(LayoutId id, scaled maxWidth)
+MathMLNormalizingContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   assert(child != 0);
 
-  child->DoLayout(id, maxWidth);
+  child->DoLayout(ctxt);
   box = child->GetBoundingBox();
 
-  ResetDirtyLayout(id);
-}
-
-void
-MathMLNormalizingContainerElement::SetPosition(scaled x, scaled y)
-{
-  MathMLContainerElement::SetPosition(x, y);
-  assert(child != 0);
-  child->SetPosition(x, y);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

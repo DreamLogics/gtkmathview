@@ -63,7 +63,7 @@ MathMLInvisibleTimesNode::DoLayout()
 
   box.Set(0, 0, 0);
 
-  if (!GetParent()->IsOperator()) return;
+  if (!is_a<MathMLOperatorElement>(GetParent())) return;
 
   Ptr<MathMLElement> prev = findLeftSibling(GetParent());
   Ptr<MathMLElement> next = findRightSibling(GetParent());

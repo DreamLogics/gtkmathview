@@ -89,13 +89,15 @@ BoundingBox::Max(const BoundingBox& box)
   rBearing = scaledMax(rBearing, box.rBearing);
 }
 
-void
-BoundingBox::ToRectangle(scaled x, scaled y, Rectangle& rect) const
+Rectangle
+BoundingBox::GetRectangle(scaled x, scaled y) const
 {
+  Rectangle rect;
   rect.x = x;
   rect.y = y - ascent;
   rect.width = width;
   rect.height = GetHeight();
+  return rect;
 }
 
 void

@@ -36,6 +36,7 @@
 #include "MathMLStyleElement.hh"
 #include "MathMLAttributeList.hh"
 #include "RenderingEnvironment.hh"
+#include "FormattingContext.hh"
 
 #ifdef DEBUG
 int MathMLElement::counter = 0;
@@ -364,6 +365,12 @@ MathMLElement::Setup(RenderingEnvironment*)
 }
 
 void
+MathMLElement::DoLayout(const FormattingContext& ctxt)
+{
+  ResetDirtyLayout(ctxt.GetLayoutType());
+}
+
+void
 MathMLElement::DoStretchyLayout()
 {
 }
@@ -371,11 +378,12 @@ MathMLElement::DoStretchyLayout()
 void
 MathMLElement::RenderBackground(const DrawingArea& area)
 {
-  if (bGC[IsSelected()] == NULL) {
-    GraphicsContextValues values;
-    values.background = values.foreground = IsSelected() ? area.GetSelectionBackground() : background;
-    bGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
-  }
+  if (bGC[IsSelected()] == NULL)
+    {
+      GraphicsContextValues values;
+      values.background = values.foreground = IsSelected() ? area.GetSelectionBackground() : background;
+      bGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
+    }
 
   if (HasDirtyBackground())
     area.Clear(bGC[IsSelected()], GetX(), GetY(), GetBoundingBox());

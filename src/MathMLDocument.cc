@@ -85,13 +85,14 @@ MathMLDocument::Normalize()
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
-      GMetaDOM::Element node = GetDOMDocument().get_documentElement();
-      assert(node != 0);
-      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-
-      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-      assert(elem != 0);
-      SetChild(elem);
+      GMetaDOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
+      GMetaDOM::Element node = (nodeList.get_length() > 0) ? nodeList.item(0) : 0;
+      if (node != 0)
+	{
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  assert(elem != 0);
+	  SetChild(elem);
+	}	  
 #endif // HAVE_GMETADOM
 
       if (child != 0) child->Normalize();

@@ -33,6 +33,7 @@
 #include "MathMLActionElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLRenderingEngine.hh"
+#include "FormattingContext.hh"
 
 #include "config.dirs"
 
@@ -203,12 +204,12 @@ MathMLRenderingEngine::MinMaxLayout()
   Clock perf;
 
   perf.Start();
-  root->DoLayout(LAYOUT_MIN);
+  root->DoLayout(FormattingContext(LAYOUT_MIN,0));
   perf.Stop();
   Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
 
   perf.Start();
-  root->DoLayout(LAYOUT_MAX);
+  root->DoLayout(FormattingContext(LAYOUT_MAX,0));
   perf.Stop();
   Globals::logger(LOG_INFO, "maximum layout time: %dms", perf());
 }
@@ -222,7 +223,7 @@ MathMLRenderingEngine::Layout()
 
   Clock perf;
   perf.Start();
-  root->DoLayout(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin()));
+  root->DoLayout(FormattingContext(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin())));
   root->SetPosition(area->GetXMargin(), area->GetYMargin() + root->GetBoundingBox().ascent);
   perf.Stop();
   Globals::logger(LOG_INFO, "layout time: %dms", perf());
@@ -278,7 +279,7 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
   if (root != NULL) {
     BoundingBox box;
     GetDocumentBoundingBox(box);
-    box.ToRectangle(root->GetX(), root->GetY(), rect);
+    rect = box.GetRectangle(root->GetX(), root->GetY());
   } else
     rect.Zero();
 }

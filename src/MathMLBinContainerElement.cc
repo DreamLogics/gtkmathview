@@ -25,12 +25,14 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "Globals.hh"
 #include "Layout.hh"
 #include "Iterator.hh"
 #include "ChildList.hh"
 #include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLBinContainerElement.hh"
+#include "FormattingContext.hh"
 
 MathMLBinContainerElement::MathMLBinContainerElement()
 {
@@ -84,17 +86,32 @@ MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLBinContainerElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLBinContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-  if (child != 0) child->DoLayout(id, availWidth);
-  ResetDirtyLayout(id);
+  if (HasDirtyLayout())
+    {
+      box.Null();
+      if (child != 0)
+	{
+	  child->DoLayout(ctxt);
+	  box = child->GetBoundingBox();
+	}
+      ResetDirtyLayout(ctxt.GetLayoutType());
+    }
 }
 
 void
 MathMLBinContainerElement::DoStretchyLayout()
 {
   if (child != 0) child->DoStretchyLayout();
+}
+
+void
+MathMLBinContainerElement::SetPosition(scaled x, scaled y)
+{
+  MathMLContainerElement::SetPosition(x, y);
+  assert(child != 0);
+  child->SetPosition(x, y);
 }
 
 void

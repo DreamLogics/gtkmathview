@@ -29,6 +29,7 @@
 #include "MathMLScriptElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLScriptElement::MathMLScriptElement()
 {
@@ -159,15 +160,15 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLScriptElement::DoLayout(LayoutId id, scaled maxWidth)
+MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   assert(base != 0);
 
-  base->DoLayout(id, maxWidth / 2);
-  if (subScript != 0) subScript->DoLayout(id, maxWidth / 2);
-  if (superScript != 0) superScript->DoLayout(id, maxWidth / 2);
+  base->DoLayout(ctxt);
+  if (subScript != 0) subScript->DoLayout(ctxt);
+  if (superScript != 0) superScript->DoLayout(ctxt);
 
   Ptr<MathMLElement> rel = findRightmostChild(base);
   assert(rel != 0);
@@ -213,7 +214,7 @@ MathMLScriptElement::DoLayout(LayoutId id, scaled maxWidth)
       box.tDescent = scaledMax(box.tDescent, superScriptBox.tDescent - superShiftY);
     }
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

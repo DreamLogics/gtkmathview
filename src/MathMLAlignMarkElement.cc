@@ -26,6 +26,7 @@
 #include "StringUnicode.hh"
 #include "AttributeParser.hh"
 #include "MathMLAlignMarkElement.hh"
+#include "FormattingContext.hh"
 
 MathMLAlignMarkElement::MathMLAlignMarkElement()
 {
@@ -79,10 +80,10 @@ MathMLAlignMarkElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLAlignMarkElement::DoLayout(LayoutId id, scaled)
+MathMLAlignMarkElement::DoLayout(const FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 bool

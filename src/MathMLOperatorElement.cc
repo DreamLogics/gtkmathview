@@ -39,6 +39,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLOperatorElement::MathMLOperatorElement()
 {
@@ -118,7 +119,7 @@ MathMLOperatorElement::Normalize()
 
       // now we have to substitute the root of the embellished operator
       // with the embellished operator object just created
-      assert(p->IsContainer());
+      assert(is_a<MathMLContainerElement>(p));
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
       assert(pContainer != 0);
       pContainer->Replace(root, eOp);
@@ -243,20 +244,20 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
   if (content.GetSize() == 1 && largeOp && env->GetDisplayStyle())
     {
       assert(content.GetFirst() != 0);
-      if (content.GetFirst()->IsStretchyChar())
+      if (is_a<MathMLCharNode>(content.GetFirst()))
 	{
 	  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
 	  assert(sNode != 0);
-	  sNode->SetDefaultLargeGlyph(true);
+	  if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
 	}
     }
 }
 
 void
-MathMLOperatorElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
-  MathMLTokenElement::DoLayout(id, availWidth);
-  if (id == LAYOUT_MIN) minBox = box;
+  MathMLTokenElement::DoLayout(ctxt);
+  if (ctxt.GetLayoutType() == LAYOUT_MIN) minBox = box;
 }
 
 void
@@ -305,12 +306,15 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
-  if (!content.GetFirst()->IsStretchyChar())
+  if (is_a<MathMLCharNode>(content.GetFirst()))
     {
       Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
       assert(cNode != 0);
-      Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
-      return;
+      if (!cNode->IsStretchyChar())
+	{
+	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
+	  return;
+	}
     }
 
   Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
@@ -369,12 +373,15 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
-  if (!content.GetFirst()->IsStretchyChar())
+  if (is_a<MathMLCharNode>(content.GetFirst()))
     {
       Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
       assert(cNode != 0);
-      Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
-      return;
+      if (!cNode->IsStretchyChar())
+	{
+	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
+	  return;
+	}
     }
 
   Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
@@ -505,10 +512,11 @@ MathMLOperatorElement::GetStretch() const
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != 0);
 
-  if (!content.GetFirst()->IsStretchyChar()) return STRETCH_NO;
-
+  if (!is_a<MathMLCharNode>(content.GetFirst())) return STRETCH_NO;
   Ptr<MathMLCharNode> sChar = smart_cast<MathMLCharNode>(content.GetFirst());
   assert(sChar != 0);
+
+  if (!sChar->IsStretchyChar()) return STRETCH_NO;
 
   return sChar->GetStretch();
 }

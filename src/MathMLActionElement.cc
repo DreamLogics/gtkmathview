@@ -29,6 +29,7 @@
 #include "StringUnicode.hh"
 #include "AttributeParser.hh"
 #include "MathMLActionElement.hh"
+#include "FormattingContext.hh"
 
 MathMLActionElement::MathMLActionElement(void)
 {
@@ -84,19 +85,19 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLActionElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLActionElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   Ptr<MathMLElement> elem = GetSelectedElement();
 
   if (elem != 0) {
-    elem->DoLayout(id, availWidth);
+    elem->DoLayout(ctxt);
     box = elem->GetBoundingBox();
   } else
     box.Null();
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

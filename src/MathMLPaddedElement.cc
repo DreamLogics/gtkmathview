@@ -28,6 +28,7 @@
 #include "ValueConversion.hh"
 #include "MathMLPaddedElement.hh"
 #include "RenderingEnvironment.hh"
+#include "FormattingContext.hh"
 
 MathMLPaddedElement::MathMLPaddedElement()
 {
@@ -162,13 +163,13 @@ MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
 }
 
 void
-MathMLPaddedElement::DoLayout(LayoutId id, scaled maxWidth)
+MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   assert(child != NULL);
 
-  child->DoLayout(id, maxWidth);
+  child->DoLayout(ctxt);
   const BoundingBox& elemBox = child->GetBoundingBox();
 
   box.Set(EvalLengthDimension(elemBox.width, width, elemBox),
@@ -176,7 +177,7 @@ MathMLPaddedElement::DoLayout(LayoutId id, scaled maxWidth)
 	  EvalLengthDimension(elemBox.descent, depth, elemBox));
   lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

@@ -43,7 +43,7 @@ getFrameLeftSibling(const Ptr<MathMLFrame>& frame)
   assert(frame != 0);
   assert(frame->GetParent() != 0);
 
-  if (frame->GetParent()->IsToken())
+  if (is_a<MathMLTokenElement>(frame->GetParent()))
     {
       Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(frame->GetParent());
       assert(token != 0);
@@ -79,7 +79,7 @@ getFrameRightSibling(const Ptr<MathMLFrame>& frame)
   assert(frame != 0);
   assert(frame->GetParent() != 0);
 
-  if (frame->GetParent()->IsToken())
+  if (is_a<MathMLTokenElement>(frame->GetParent()))
     {
       Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(frame->GetParent());
       assert(token != 0);

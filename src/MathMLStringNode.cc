@@ -57,7 +57,7 @@ MathMLStringNode::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLStringNode::DoLayout()
+MathMLStringNode::DoLayout(const FormattingContext&)
 {
   assert(fContent != NULL);
   fContent->GetBoundingBox(box);
@@ -67,7 +67,7 @@ void
 MathMLStringNode::Render(const DrawingArea& area)
 {
   assert(GetParent() != 0);
-  assert(GetParent()->IsToken());
+  assert(is_a<MathMLTokenElement>(GetParent()));
   assert(fContent != NULL);
 
   if (!HasDirtyChildren()) return;
@@ -98,7 +98,7 @@ MathMLStringNode::GetDecimalPointEdge() const
 {
   assert(content != NULL);
   assert(GetParent() != 0);
-  assert(GetParent()->IsToken());
+  assert(is_a<MathMLTokenElement>(GetParent()));
 
   Ptr<MathMLTokenElement> parent = smart_cast<MathMLTokenElement>(GetParent());
   assert(parent != 0);

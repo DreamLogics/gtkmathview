@@ -42,8 +42,9 @@ protected:
 public:
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
+  virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
@@ -54,7 +55,6 @@ public:
   virtual void ResetSelected(void);
 
   virtual bool IsExpanding(void) const;
-  virtual void GetLinearBoundingBox(BoundingBox&) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 

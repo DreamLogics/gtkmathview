@@ -28,6 +28,7 @@
 #include "MathMLSpaceElement.hh"
 #include "RenderingEnvironment.hh"
 #include "AttributeParser.hh"
+#include "FormattingContext.hh"
 
 MathMLSpaceElement::MathMLSpaceElement()
 {
@@ -127,9 +128,9 @@ MathMLSpaceElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLSpaceElement::DoLayout(LayoutId id, scaled)
+MathMLSpaceElement::DoLayout(const FormattingContext& ctxt)
 {
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 bool

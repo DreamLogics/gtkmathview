@@ -36,6 +36,7 @@
 #include "MathMLActionElement.hh"
 #include "MathMLAlignMarkElement.hh"
 #include "MathMLTableCellElement.hh"
+#include "FormattingContext.hh"
 
 MathMLTableCellElement::MathMLTableCellElement()
 {
@@ -53,6 +54,7 @@ MathMLTableCellElement::MathMLTableCellElement(const GMetaDOM::Element& node)
 void
 MathMLTableCellElement::Init()
 {
+  minWidth = 0;
   rowIndex = 0;
   columnIndex = 0;
   cell = NULL;
@@ -272,6 +274,13 @@ MathMLTableCellElement::SetupCell(TableCell* p)
 {
   assert(p != NULL);
   cell = p;
+}
+
+void
+MathMLTableCellElement::DoLayout(const FormattingContext& ctxt)
+{
+  MathMLNormalizingContainerElement::DoLayout(ctxt);
+  if (ctxt.GetLayoutType() == LAYOUT_MIN) minWidth = box.width;
 }
 
 void

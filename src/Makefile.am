@@ -178,6 +178,7 @@ noinst_HEADERS = \
   Globals.hh \
   MathML.hh \
   ChildList.hh \
+  FormattingContext.hh \
   MathMLRenderingEngine.hh \
   MathMLActionElement.hh \
   MathMLAlignGroupElement.hh \

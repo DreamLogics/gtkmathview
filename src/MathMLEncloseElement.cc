@@ -27,6 +27,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLEncloseElement.hh"
 #include "MathMLRadicalElement.hh"
+#include "FormattingContext.hh"
 
 MathMLEncloseElement::MathMLEncloseElement()
 {
@@ -100,13 +101,13 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLEncloseElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLEncloseElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   assert(child != NULL);
 
-  MathMLNormalizingContainerElement::DoLayout(id, availWidth);
+  MathMLNormalizingContainerElement::DoLayout(ctxt);
   box = child->GetBoundingBox();
 
   if (notation != NOTATION_RADICAL) {
@@ -115,7 +116,7 @@ MathMLEncloseElement::DoLayout(LayoutId id, scaled availWidth)
     box.width += spacing + lineThickness;
   }
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

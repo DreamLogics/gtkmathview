@@ -53,7 +53,7 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, scaled);
+  virtual void DoLayout(const class FormattingContext&);
 
   bool         IsStretchy(void) const { return stretchy != 0; }
   StretchId    GetStretch(void) const;

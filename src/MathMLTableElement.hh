@@ -151,7 +151,7 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(scaled);
+  virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
@@ -188,7 +188,7 @@ protected:
   void         ReleaseAuxStructures(void);
 
   // table layout
-  void         DoHorizontalLayout(LayoutId, BreakId, scaled);
+  void         DoHorizontalLayout(const class FormattingContext&);
   void         DoHorizontalMinimumLayout(void);
   void         DoVerticalLayout(LayoutId);
   void         ConfirmHorizontalFixedSpacing(void);
@@ -197,14 +197,14 @@ protected:
   void         ConfirmVerticalScaleSpacing(scaled);
   void         AdjustTableWidth(scaled);
   void         SpanRowHeight(LayoutId);
-  void         ColumnLayout(unsigned, LayoutId, BreakId, scaled);
-  void         ScaleColumnsLayout(LayoutId, BreakId, scaled);
-  void         SpannedCellsLayout(LayoutId);
+  void         ColumnLayout(unsigned, const class FormattingContext&);
+  void         ScaleColumnsLayout(const class FormattingContext&);
+  void         SpannedCellsLayout(const class FormattingContext&);
   void         StretchyCellsLayout(void);
-  scaled       ColumnGroupsLayout(unsigned, LayoutId);
-  scaled       PrepareLabelsLayout(LayoutId, scaled);
-  void         DoLabelsLayout(LayoutId, scaled);
-  void         AdjustTableLayoutWithLabels(LayoutId, scaled);
+  scaled       ColumnGroupsLayout(unsigned, const class FormattingContext&);
+  scaled       PrepareLabelsLayout(const class FormattingContext&);
+  void         DoLabelsLayout(const class FormattingContext&);
+  void         AdjustTableLayoutWithLabels(const class FormattingContext&);
   void         SetLabelPosition(unsigned, scaled, scaled);
 
   // table invariants

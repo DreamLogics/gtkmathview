@@ -45,6 +45,7 @@
 #include "StringUnicode.hh"
 #include "MathMLMarkNode.hh"
 #include "MathMLCharNode.hh"
+#include "MathMLCombinedCharNode.hh"
 #include "MathMLTextNode.hh"
 #include "mathVariantAux.hh"
 #include "ValueConversion.hh"
@@ -58,6 +59,7 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLIdentifierElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
+#include "FormattingContext.hh"
 
 MathMLTokenElement::MathMLTokenElement()
 {
@@ -172,10 +174,8 @@ MathMLTokenElement::Append(const Ptr<MathMLTextNode>& node)
 void
 MathMLTokenElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if ((HasDirtyStructure() || HasChildWithDirtyStructure()) && GetDOMElement() != 0)
     {
-      assert(GetDOMElement() != 0);
-
       String* sContent = NULL;
       for (GMetaDOM::Node p = GetDOMElement().get_firstChild(); 
 	   p != 0;
@@ -318,7 +318,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 	Ptr<MathMLTextNode> node = content.GetFirst();
 	assert(node != 0);
 
-	if (node->IsChar()) {
+	if (is_a<MathMLCharNode>(node)) {
 	  Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(node);
 	  assert(cNode != 0);
 
@@ -368,30 +368,43 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLTokenElement::DoLayout(LayoutId id, scaled availWidth)
+MathMLTokenElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
   box.Null();
-  for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
+  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      Ptr<MathMLTextNode> text = i();
-      assert(text != 0);
+      assert(text() != 0);
 
       // as the minimum layout, that we have previously done,
       // so we save some work.
-      if (id == LAYOUT_MIN) text->DoLayout();
+      if (ctxt.GetLayoutType() == LAYOUT_MIN) text()->DoLayout(ctxt);
 
       // if we do not insert MathMLSpaceNodes in the layout, they will not be
       // positioned correctly, since positioning is done thru the layout.
       // In such way, If a space node is the first inside a token, it will produce
       // a zero-origin rectangle which is obviously incorrect
-      box.Append(text->GetBoundingBox());
+      box.Append(text()->GetBoundingBox());
+      box.Append((sppm * text()->GetSpacing()) / 18);
     }
 
   AddItalicCorrection();
 
-  ResetDirtyLayout(id);
+  ResetDirtyLayout(ctxt.GetLayoutType());
+}
+
+void
+MathMLTokenElement::SetPosition(scaled x, scaled y)
+{
+  MathMLElement::SetPosition(x, y);
+  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
+    {
+      assert(text() != 0);
+      text()->SetPosition(x, y);
+      x += text()->GetBoundingBox().width;
+      x += (sppm * text()->GetSpacing()) / 18;
+    }
 }
 
 void
@@ -410,10 +423,10 @@ MathMLTokenElement::Render(const DrawingArea& area)
       fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
     }
 
-  for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
+  for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(i() != 0);
-      i()->Render(area);
+      assert(text() != 0);
+      text()->Render(area);
     }
 
   //area.DrawRectangle(fGC[0], *shape);
@@ -421,17 +434,13 @@ MathMLTokenElement::Render(const DrawingArea& area)
   ResetDirty();
 }
 
-bool
-MathMLTokenElement::IsToken() const
-{
-  return true;
-}
-
 void
 MathMLTokenElement::SetDirty(const Rectangle* rect)
 {
   dirtyBackground =
-    (GetParent() != 0 && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() != 0 && 
+     ((GetParent()->IsSelected() != IsSelected()) ||
+      (GetParent()->GetBackgroundColor() != GetBackgroundColor()))) ? 1 : 0;
 
   if (IsDirty()) return;
   if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
@@ -494,7 +503,7 @@ MathMLTokenElement::IsNonMarking() const
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
       assert(text() != 0);
-      if (!text()->IsSpace()) return false;
+      if (!is_a<MathMLSpaceNode>(text())) return false;
     }
 
   return true;
@@ -507,7 +516,7 @@ MathMLTokenElement::GetCharNode() const
 
   Ptr<MathMLTextNode> node = content.GetFirst();
   assert(node != 0);
-  if (!node->IsChar() || node->IsCombinedChar()) return 0;
+  if (!is_a<MathMLCharNode>(node) || is_a<MathMLCombinedCharNode>(node)) return 0;
 
   return smart_cast<MathMLCharNode>(node);
 }

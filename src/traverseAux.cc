@@ -38,7 +38,6 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 
   if (root->GetParent() == 0) return root;
 
-  assert(root->GetParent()->IsContainer());
   Ptr<MathMLContainerElement> rootParent = smart_cast<MathMLContainerElement>(root->GetParent());
   assert(rootParent != 0);
 
@@ -88,7 +87,7 @@ findStretchyOperator(const Ptr<MathMLElement>& elem)
 {
   if (elem == 0) return 0;
 
-  if (elem->IsEmbellishedOperator()) {
+  if (is_a<MathMLEmbellishedOperatorElement>(elem)) {
     Ptr<MathMLEmbellishedOperatorElement> eop = smart_cast<MathMLEmbellishedOperatorElement>(elem);
     assert(eop != 0);
     Ptr<MathMLOperatorElement> op = eop->GetCoreOperator();
@@ -96,8 +95,9 @@ findStretchyOperator(const Ptr<MathMLElement>& elem)
 
     if (op->IsStretchy()) return op;
     else return NULL;
-  } else if (elem->IsOperator()) {
+  } else if (is_a<MathMLOperatorElement>(elem)) {
     Ptr<MathMLOperatorElement> op = smart_cast<MathMLOperatorElement>(elem);
+    assert(op != 0);
     if (op->IsStretchy()) return op;
     else return 0;
   } else
