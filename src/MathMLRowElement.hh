@@ -48,10 +48,9 @@ public:
 
   // virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, class Layout&);
+  virtual void DoLayout(LayoutId, scaled);
   virtual void DoStretchyLayout(void);
 
-  virtual bool IsBreakable(void) const;
   virtual bool IsSpaceLike(void) const;
   virtual bool IsExpanding(void) const;
 
@@ -61,7 +60,5 @@ public:
 private:
   Ptr<MathMLElement> lastElement;
 };
-
-#define TO_ROW(obj) (dynamic_cast<MathMLRowElement*>(obj))
 
 #endif // MathMLRowElement_hh

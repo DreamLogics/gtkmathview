@@ -46,9 +46,3 @@ MathMLContainerElement::~MathMLContainerElement()
 {
 }
 
-bool
-MathMLContainerElement::IsContainer() const
-{
-  return true;
-}
-

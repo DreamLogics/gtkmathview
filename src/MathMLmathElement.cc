@@ -92,9 +92,3 @@ MathMLmathElement::Setup(RenderingEnvironment* env)
   env->Drop();
 }
 
-bool
-MathMLmathElement::IsBreakable() const
-{
-  return true;
-}
-

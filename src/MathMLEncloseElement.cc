@@ -100,13 +100,13 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLEncloseElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
+MathMLEncloseElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(child != NULL);
 
-  MathMLNormalizingContainerElement::DoBoxedLayout(id, BREAK_NO, availWidth);
+  MathMLNormalizingContainerElement::DoLayout(id, availWidth);
   box = child->GetBoundingBox();
 
   if (notation != NOTATION_RADICAL) {
@@ -115,9 +115,7 @@ MathMLEncloseElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
     box.width += spacing + lineThickness;
   }
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, availWidth);
+  ResetDirtyLayout(id);
 }
 
 void

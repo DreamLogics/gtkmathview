@@ -101,48 +101,17 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLLinearContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
+MathMLLinearContainerElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
-  ResetLayout();
-
-  if (IsBreakable()) {
-    layout = new Layout(availWidth, bid);
-    DoLayout(id, *layout);
-    layout->DoLayout(id);
-    if (id == LAYOUT_AUTO) DoStretchyLayout();
-    layout->GetBoundingBox(box, id);
-
-    ConfirmLayout(id);
-
-#if 0
-    cout << '`' << NameOfTagId(IsA()) << '\'';
-    cout << " (" << id << ',' << bid << ',' << sp2ipx(availWidth) << ')';
-    cout << box << endl;
-#endif
-  } else {
-    // an unbreakable container element will have all of its
-    // children boxed, however the minimum box is to be called
-    // by the overriding method!
-    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
-      assert(elem() != 0);
-      elem()->DoBoxedLayout(id, bid, availWidth);
-    }
+  // an unbreakable container element will have all of its
+  // children boxed, however the minimum box is to be called
+  // by the overriding method!
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
+    assert(elem() != 0);
+    elem()->DoLayout(id, availWidth);
   }
-
-  ResetDirtyLayout(id, availWidth);
-}
-
-void
-MathMLLinearContainerElement::DoLayout(LayoutId id, Layout& layout)
-{
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem() != 0);
-      if (elem()->IsBreakable()) elem()->DoLayout(id, layout);
-      else layout.Append(elem(), 0);
-    }
 
   ResetDirtyLayout(id);
 }
@@ -155,29 +124,6 @@ MathMLLinearContainerElement::DoStretchyLayout()
       assert(elem() != 0);
       elem()->DoStretchyLayout();
     }
-}
-
-void
-MathMLLinearContainerElement::Freeze()
-{
-  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-    {
-      assert(elem() != 0);
-      elem()->Freeze();
-    }
-
-  if (!IsBreakable() || HasLayout()) MathMLElement::Freeze();
-  else {
-    if (shape != NULL) delete shape;
-    ShapeFactory shapeFactory;
-    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-      {
-	assert(elem() != 0);
-	shapeFactory.Add(elem()->GetShape());
-	if (elem()->IsLast()) shapeFactory.SetNewRow();
-      }
-    shape = shapeFactory.GetShape();
-  }
 }
 
 void
@@ -194,23 +140,6 @@ MathMLLinearContainerElement::Render(const DrawingArea& area)
     }
 
   ResetDirty();
-}
-
-void
-MathMLLinearContainerElement::GetLinearBoundingBox(BoundingBox& b) const
-{
-  if (!IsBreakable())
-    b = box;
-  else {
-    b.Null();
-    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
-      {
-	assert(elem() != 0);
-	BoundingBox elemBox;
-	elem()->GetLinearBoundingBox(elemBox);
-	b.Append(elemBox);
-      }
-  }
 }
 
 Ptr<MathMLElement>
@@ -245,22 +174,11 @@ MathMLLinearContainerElement::SetDirtyLayout(bool children)
 void
 MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
 {
-  assert(IsShaped());
-
-#if 0
-  if (rect != NULL) {
-    cout << NameOfTagId(IsA()) << " container set dirty: shape " << *shape << " rect " << *rect;
-    cout << " overlaps? " << shape->Overlaps(*rect) << endl;
-  } else {
-    cout << NameOfTagId(IsA()) << " container set dirty!" << endl;
-  }
-#endif
-
   dirtyBackground =
     (GetParent() != 0 && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty()) return;
-  if (rect != NULL && !shape->Overlaps(*rect)) return;
+  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
 
   dirty = 1;
   SetDirtyChildren();
@@ -304,18 +222,6 @@ MathMLLinearContainerElement::ResetSelected()
   selected = 0;
 }
 
-void
-MathMLLinearContainerElement::ResetLast()
-{
-  last = 0;
-  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
-    {
-      Ptr<MathMLElement> elem = i();
-      assert(elem != 0);
-      elem->ResetLast();
-    }  
-}
-
 bool
 MathMLLinearContainerElement::IsExpanding() const
 {
@@ -327,30 +233,6 @@ MathMLLinearContainerElement::IsExpanding() const
     }  
   
   return false;
-}
-
-bool
-MathMLLinearContainerElement::IsLast() const
-{
-  if (last != 0) return true;
-  if (content.GetSize() > 0)
-    {
-      assert(content.GetLast() != 0);
-      return content.GetLast()->IsLast();
-    }
-  else
-    return false;
-}
-
-BreakId
-MathMLLinearContainerElement::GetBreakability() const
-{
-  if (content.GetSize() > 0 &&
-      content.GetLast() != 0 &&
-      IsBreakable())
-    return content.GetLast()->GetBreakability();
-
-  return BREAK_AUTO;
 }
 
 scaled

@@ -303,8 +303,7 @@ MathMLStyleElement::Render(const DrawingArea& area)
 	bGC[0] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
       }
 
-      assert(IsShaped());
-      area.Clear(bGC[0], GetShape());
+      area.Clear(bGC[0], GetRectangle());
     }
   }
 
@@ -323,8 +322,4 @@ MathMLStyleElement::IsSpaceLike() const
   return child->IsSpaceLike();
 }
 
-bool
-MathMLStyleElement::IsBreakable() const
-{
-  return true;
-}
+

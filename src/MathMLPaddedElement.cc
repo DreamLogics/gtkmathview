@@ -162,13 +162,13 @@ MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
 }
 
 void
-MathMLPaddedElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
+MathMLPaddedElement::DoLayout(LayoutId id, scaled maxWidth)
 {
-  if (!HasDirtyLayout(id, maxWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(child != NULL);
 
-  child->DoBoxedLayout(id, bid, maxWidth);
+  child->DoLayout(id, maxWidth);
   const BoundingBox& elemBox = child->GetBoundingBox();
 
   box.Set(EvalLengthDimension(elemBox.width, width, elemBox),
@@ -176,9 +176,7 @@ MathMLPaddedElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
 	  EvalLengthDimension(elemBox.descent, depth, elemBox));
   lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, maxWidth);
+  ResetDirtyLayout(id);
 }
 
 void

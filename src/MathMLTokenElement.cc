@@ -114,34 +114,22 @@ MathMLTokenElement::Append(const String* s)
     }
 
   unsigned i = 0;
-  bool lastBreak = true;
   unsigned sLength = s->GetLength();
   while (i < sLength)
     {
       Ptr<MathMLTextNode> node = 0;
 
       int spacing;
-      BreakId bid;
-      unsigned len = isNonMarkingChar(*s, i, &spacing, &bid);
+      unsigned len = isNonMarkingChar(*s, i, &spacing);
       if (len > 0)
 	{
-	  if (last != NULL && last->GetBreakability() < BREAK_YES)
-	    {
-	      last->AddSpacing(spacing);
-	      last->AddBreakability(bid);
-	    } 
-	  else
-	    node = MathMLSpaceNode::create(spacing, bid);
+	  node = MathMLSpaceNode::create(spacing);
 	  i += len;
-	  lastBreak = true;
 	} 
       else if (i + 1 < sLength && isCombining(s->GetChar(i + 1)))
 	{
 	  node = allocCombinedCharNode(s->GetChar(i), s->GetChar(i + 1));
 	  i += 2;
-
-	  if (last != 0 && !lastBreak) last->SetBreakability(BREAK_NO);
-	  lastBreak = false;
 #if 0
 	}
       else if (iswalnum(s->GetChar(i)))
@@ -152,18 +140,12 @@ MathMLTokenElement::Append(const String* s)
 
 	  const String* sText = allocString(*s, start, i - start);
 	  node = allocTextNode(&sText);
-
-	  if (last != 0 && !lastBreak) last->SetBreakability(BREAK_NO);
-	  lastBreak = false;
 #endif
 	}
       else if (!isVariant(s->GetChar(i)))
 	{
 	  node = allocCharNode(s->GetChar(i));
 	  i++;
-
-	  if (last != 0 && !lastBreak) last->SetBreakability(BREAK_NO);
-	  lastBreak = false;
 	}
       else
 	{
@@ -386,25 +368,16 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLTokenElement::DoLayout(LayoutId id, Layout& layout)
+MathMLTokenElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  Iterator< Ptr<MathMLTextNode> > i(content);
-  while (i.More())
+  if (!HasDirtyLayout()) return;
+
+  box.Null();
+  for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
     {
-      assert(i() != 0);
       Ptr<MathMLTextNode> text = i();
       assert(text != 0);
 
-      scaled spacing = (sppm * text->GetSpacing()) / 18;
-      BreakId breakability = text->GetBreakability();
-    
-      // the breakability after the token will be set by the
-      // surrounding context
-      if (i.IsLast()) breakability = BREAK_NO;
-      else if (breakability == BREAK_AUTO) breakability = BREAK_GOOD;
-    
-      // ok, we do the actual layout of the chunk only if we are
-      // doing minimum layout. In all the other cases the layout is exactly the same
       // as the minimum layout, that we have previously done,
       // so we save some work.
       if (id == LAYOUT_MIN) text->DoLayout();
@@ -413,44 +386,12 @@ MathMLTokenElement::DoLayout(LayoutId id, Layout& layout)
       // positioned correctly, since positioning is done thru the layout.
       // In such way, If a space node is the first inside a token, it will produce
       // a zero-origin rectangle which is obviously incorrect
-      if (text->IsSpace()) layout.SetLastBreakability(breakability);
-      layout.Append(text, spacing, breakability);
-#if 0
-      if (!text->IsSpace())
-	layout.Append(text, spacing, breakability);
-      else
-	{
-	  layout.SetLastBreakability(breakability);
-	  layout.Append(spacing, breakability);
-	}
-#endif
-
-      i.Next();
+      box.Append(text->GetBoundingBox());
     }
 
-  AddItalicCorrection(layout);
+  AddItalicCorrection();
 
   ResetDirtyLayout(id);
-}
-
-void
-MathMLTokenElement::Freeze()
-{
-  if (HasLayout()) MathMLElement::Freeze();
-  else
-    {
-      if (shape != NULL) delete shape;
-      ShapeFactory shapeFactory;
-      for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
-	{
-	  assert(i() != 0);
-	  Rectangle* rect = new Rectangle;
-	  getFrameBoundingBox(i(), LAYOUT_AUTO).ToRectangle(i()->GetX(), i()->GetY(), *rect);
-	  shapeFactory.Add(rect);
-	  if (i()->IsLast()) shapeFactory.SetNewRow();
-	}
-      shape = shapeFactory.GetShape();
-    }
 }
 
 void
@@ -480,58 +421,20 @@ MathMLTokenElement::Render(const DrawingArea& area)
   ResetDirty();
 }
 
-void
-MathMLTokenElement::GetLinearBoundingBox(BoundingBox& b) const
-{
-  b.Null();
-  for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
-    {
-      assert(i() != 0);
-      const BoundingBox& textBox = i()->GetBoundingBox();
-      b.Append(textBox);
-    }
-}
-
 bool
 MathMLTokenElement::IsToken() const
 {
   return true;
 }
 
-bool
-MathMLTokenElement::IsBreakable() const
-{
-  return true;
-}
-
-BreakId
-MathMLTokenElement::GetBreakability() const
-{
-  // we have to skip some empty elements (malignmark) and get
-  // the breakability of the last text node
-
-  Iterator< Ptr<MathMLTextNode> > text(content);
-  text.ResetLast();
-  while (text.More())
-    {
-      assert(text() != 0);
-      if (!text()->IsMark()) break;
-      text.Prev();
-    }
-
-  return text.More() ? text()->GetBreakability() : BREAK_AUTO;
-}
-
 void
 MathMLTokenElement::SetDirty(const Rectangle* rect)
 {
-  assert(IsShaped());
-
   dirtyBackground =
     (GetParent() != 0 && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty()) return;
-  if (rect != NULL && !shape->Overlaps(*rect)) return;
+  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
 
   dirty = 1;
   SetDirtyChildren();
@@ -597,19 +500,6 @@ MathMLTokenElement::IsNonMarking() const
   return true;
 }
 
-bool
-MathMLTokenElement::IsLast() const
-{
-  if (last != 0) return true;
-  if (content.GetSize() > 0)
-    {
-      assert(content.GetLast() != 0);
-      return content.GetLast()->IsLast();
-    }
-  else
-    return false;
-}
-
 Ptr<MathMLCharNode>
 MathMLTokenElement::GetCharNode() const
 {
@@ -623,7 +513,7 @@ MathMLTokenElement::GetCharNode() const
 }
 
 void
-MathMLTokenElement::AddItalicCorrection(Layout& layout)
+MathMLTokenElement::AddItalicCorrection()
 {
   if (!is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this)) &&
       !is_a<MathMLNumberElement>(Ptr<MathMLElement>(this)) &&
@@ -644,9 +534,9 @@ MathMLTokenElement::AddItalicCorrection(Layout& layout)
   bool isFence = op->IsFence();
   if (!isFence) return;
 
-  const BoundingBox& box = lastNode->GetBoundingBox();
+  const BoundingBox& lastBox = lastNode->GetBoundingBox();
   Globals::logger(LOG_DEBUG, "adding italic correction: %d %d", sp2ipx(box.rBearing), sp2ipx(box.width));
-  if (box.rBearing > box.width) layout.Append(box.rBearing - box.width);
+  if (lastBox.rBearing > lastBox.width) box.Append(lastBox.rBearing - lastBox.width);
 }
 
 Ptr<MathMLTextNode>

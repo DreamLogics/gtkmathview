@@ -72,15 +72,8 @@ MathMLElement::Init()
   dirtyStructure = childWithDirtyStructure = 1;
   dirtyAttribute = childWithDirtyAttribute = 1;
 
-  layout = NULL;
-  shape  = NULL;
-
   fGC[0] = fGC[1] = NULL;
   bGC[0] = bGC[1] = NULL;
-
-#ifdef DEBUG
-  counter++;
-#endif //DEBUG
 }
 #endif
 
@@ -94,14 +87,7 @@ MathMLElement::~MathMLElement()
     }
 #endif
 
-  delete layout;
-  delete shape;
-
   ReleaseGCs();
-
-#ifdef DEBUG
-  counter--;
-#endif // DEBUG
 }
 
 #if defined(HAVE_GMETADOM)
@@ -378,93 +364,8 @@ MathMLElement::Setup(RenderingEnvironment*)
 }
 
 void
-MathMLElement::ResetLayout()
-{
-  delete layout;
-  layout = NULL;
-}
-
-bool
-MathMLElement::HasDirtyLayout(LayoutId id, scaled w) const
-{
-  return true || HasDirtyLayout() || (id == LAYOUT_AUTO && !scaledEq(w, lastLayoutWidth));
-}
-
-void
-MathMLElement::ResetDirtyLayout(LayoutId id, scaled w)
-{
-  if (id == LAYOUT_AUTO) {
-    ResetDirtyLayout();
-    lastLayoutWidth = w;
-  }
-}
-
-void
-MathMLElement::ResetDirtyLayout(LayoutId id)
-{
-  if (id == LAYOUT_AUTO) ResetDirtyLayout();
-}
-
-void
-MathMLElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
-{
-  if (!HasDirtyLayout(id, maxWidth)) return;
-
-  ResetLayout();
-
-  layout = new Layout(maxWidth, IsBreakable() ? bid : BREAK_NO);
-  DoLayout(id, *layout);
-  layout->DoLayout(id);
-  if (id == LAYOUT_AUTO) DoStretchyLayout();
-  layout->GetBoundingBox(box, id);
-
-  ConfirmLayout(id);
-
-#if 0
-  cout << '`' << NameOfTagId(IsA()) << "' (" << this << ") DoBoxedLayout " << box << endl;
-#endif
-
-  ResetDirtyLayout(id, maxWidth);
-}
-
-void
-MathMLElement::DoLayout(LayoutId id, Layout&)
-{
-  // Well, there are some empty elements, such as <none/> or <prescripts/>
-  // that do not have a layout, nonetheless they are unbreakable
-  ResetDirtyLayout(id);
-}
-
-void
-MathMLElement::RecalcBoundingBox(LayoutId id, scaled minWidth)
-{
-  if (HasLayout()) layout->GetBoundingBox(box, id);
-  box.width = scaledMax(box.width, minWidth);
-  ConfirmLayout(id);
-}
-
-void
 MathMLElement::DoStretchyLayout()
 {
-}
-
-void
-MathMLElement::SetPosition(scaled x, scaled y)
-{
-  position.x = x;
-  position.y = y;
-  if (HasLayout()) layout->SetPosition(x, y);
-}
-
-void
-MathMLElement::SetPosition(scaled x, scaled y, ColumnAlignId id)
-{
-  if (HasLayout()) {
-      position.x = x;
-      position.y = y;
-      layout->SetPosition(x, y, id);
-  } else
-    SetPosition(x, y);
 }
 
 void
@@ -476,58 +377,21 @@ MathMLElement::RenderBackground(const DrawingArea& area)
     bGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
   }
 
-  if (HasDirtyBackground()) {
-#if 0
-    printf("`%s' has dirty background : shape = ", NameOfTagId(IsA()));
-    shape->Dump();
-    printf("\n");
-#endif
-    assert(IsShaped());
-    area.Clear(bGC[IsSelected()], GetShape());
-  }
+  if (HasDirtyBackground())
+    area.Clear(bGC[IsSelected()], GetX(), GetY(), GetBoundingBox());
 }
 
 void
 MathMLElement::Render(const DrawingArea& area)
 {
   if (!IsDirty()) return;
-
   RenderBackground(area);
-
   ResetDirty();
-}
-
-void
-MathMLElement::Freeze()
-{
-  assert(!IsBreakable() || HasLayout());
-
-  if (shape != NULL) delete shape;
-  
-  Rectangle* rect = new Rectangle;
-  if (!IsBreakable()) GetBoundingBox().ToRectangle(GetX(), GetY(), *rect);
-  else {
-    assert(HasLayout());
-    BoundingBox box;
-    layout->GetBoundingBox(box);
-    box.ToRectangle(GetX(), GetY(), *rect);
-  }
-  shape = new Shape(rect);
-
-#if 0
-  printf("freezing: %s  ", NameOfTagId(IsA()));
-  shape->Dump();
-  printf("\n");
-#endif
-
-  ResetLayout();
 }
 
 void
 MathMLElement::SetDirty(const Rectangle* rect)
 {
-  assert(IsShaped());
-
   dirtyBackground =
     (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 #if 0
@@ -536,7 +400,7 @@ MathMLElement::SetDirty(const Rectangle* rect)
 #endif
 
   if (IsDirty()) return;
-  if (rect != NULL && !shape->Overlaps(*rect)) return;
+  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
 
   dirty = 1;
   SetDirtyChildren();
@@ -549,12 +413,6 @@ MathMLElement::IsSpaceLike() const
 }
 
 bool
-MathMLElement::IsElement() const
-{
-  return true;
-}
-
-bool
 MathMLElement::IsExpanding() const
 {
   return false;
@@ -563,15 +421,7 @@ MathMLElement::IsExpanding() const
 bool
 MathMLElement::IsInside(scaled x, scaled y) const
 {
-  assert(IsShaped());
-  return shape->IsInside(x, y);
-}
-
-void
-MathMLElement::GetLinearBoundingBox(BoundingBox& b) const
-{
-  assert(!IsBreakable());
-  b = box;
+  return GetRectangle().IsInside(x, y);
 }
 
 Ptr<MathMLElement>
@@ -593,20 +443,6 @@ MathMLElement::GetDepth() const
     }
 
   return depth;
-}
-
-const Layout&
-MathMLElement::GetLayout() const
-{
-  assert(HasLayout());
-  return *layout;
-}
-
-const Shape&
-MathMLElement::GetShape() const
-{
-  assert(IsShaped());
-  return *shape;
 }
 
 scaled

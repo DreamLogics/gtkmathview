@@ -142,16 +142,16 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
+MathMLMultiScriptsElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(base != 0);
 
   unsigned n = 1 + nPre / 2 + nPost / 2;
   assert(n > 0);
 
-  base->DoBoxedLayout(id, BREAK_NO, availWidth / n);
+  base->DoLayout(id, availWidth / n);
 
   BoundingBox subScriptBox;
   BoundingBox superScriptBox;
@@ -170,7 +170,7 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
     {
       assert(elem() != 0);
 
-      elem()->DoBoxedLayout(id, BREAK_NO, availWidth / n);
+      elem()->DoLayout(id, availWidth / n);
 
       if (!preScript && elem()->IsA() == TAG_MPRESCRIPTS)
 	{
@@ -215,9 +215,7 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
       box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
     }
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, availWidth);
+  ResetDirtyLayout(id);
 }
 
 void

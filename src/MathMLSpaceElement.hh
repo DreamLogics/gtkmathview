@@ -50,12 +50,11 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void    Normalize(void);
   virtual void    Setup(class RenderingEnvironment*);
-  virtual void    DoBoxedLayout(LayoutId, BreakId, scaled);
+  virtual void    DoLayout(LayoutId, scaled);
 
   virtual bool    IsSpace(void) const;
   virtual bool    IsSpaceLike(void) const;
-  virtual BreakId GetBreakability(void) const;
-
+  BreakId         GetBreakability(void) const { return breakability; }
   virtual scaled  GetRightEdge(void) const;
 
 private:

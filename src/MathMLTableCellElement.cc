@@ -444,10 +444,7 @@ MathMLTableCellElement::SetPosition(scaled x, scaled y)
     break;
   }
 
-  if (cell->nAlignGroup == 0)
-    child->SetPosition(x + cellXOffset, y + cellYOffset, cell->columnAlign);
-  else
-    child->SetPosition(x + cellXOffset, y + cellYOffset);
+  child->SetPosition(x + cellXOffset, y + cellYOffset);
 }
 
 bool

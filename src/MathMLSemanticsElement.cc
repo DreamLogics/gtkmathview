@@ -62,14 +62,6 @@ MathMLSemanticsElement::Normalize()
 }
 
 bool
-MathMLSemanticsElement::IsBreakable() const
-{
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != 0);
-  return content.GetFirst()->IsBreakable();
-}
-
-bool
 MathMLSemanticsElement::IsExpanding() const
 {
   assert(content.GetSize() == 1);

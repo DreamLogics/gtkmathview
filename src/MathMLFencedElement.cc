@@ -180,9 +180,3 @@ MathMLFencedElement::NormalizeFencedElement()
   mainRow->SetParent(this);
   Append(mainRow);
 }
-
-bool
-MathMLFencedElement::IsBreakable() const
-{
-  return true;
-}

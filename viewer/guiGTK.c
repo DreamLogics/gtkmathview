@@ -64,22 +64,17 @@ static void file_re_open(GtkWidget*, gpointer);
 static void file_close(GtkWidget*, gpointer);
 static void options_selection_mode(GtkWidget*, guint);
 static void options_font_size(GtkWidget*, guint);
-#if defined(HAVE_T1LIB)
-static void options_font_manager(GtkWidget*, FontManagerId);
-#endif
 static void options_verbosity(GtkWidget*, guint);
 static void options_kerning(GtkWidget*, gpointer);
 static void options_anti_aliasing(GtkWidget*, gpointer);
 static void options_transparency(GtkWidget*, gpointer);
 static void edit_delete_selection(GtkWidget*, gpointer);
 static void help_about(GtkWidget*, gpointer);
-static void export_to_ps(GtkWidget*);
 
 static GtkItemFactoryEntry menu_items[] = {
   { "/_File",                          NULL,         NULL,          0, "<Branch>" },
   { "/File/_Open...",                  "<control>O", file_open,     0, NULL },
   { "/File/_Reopen",                   NULL,         file_re_open,  0, NULL },
-  { "/File/_Export to PostScript...",  NULL,         export_to_ps,  0, NULL },
   { "/File/_Close",                    "<control>W", file_close,    0, NULL },
   { "/File/sep1",                      NULL,         NULL,          0, "<Separator>" },
   { "/File/_Quit",                     "<control>Q", gtk_main_quit, 0, NULL },
@@ -100,11 +95,6 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/Default Font Size/24pt", NULL, options_font_size,     24, "/Options/Default Font Size/8pt" },
   { "/Options/Default Font Size/48pt", NULL, options_font_size,     48, "/Options/Default Font Size/8pt" },
   { "/Options/Default Font Size/72pt", NULL, options_font_size,     72, "/Options/Default Font Size/8pt" },
-#if defined(HAVE_T1LIB)
-  { "/Options/Font Manager",           NULL, NULL,                  0,  "<Branch>" },
-  { "/Options/Font Manager/_GTK",      NULL, options_font_manager,  FONT_MANAGER_GTK, "<RadioItem>" },
-  { "/Options/Font Manager/_Type 1",   NULL, options_font_manager,  FONT_MANAGER_T1, "/Options/Font Manager/GTK" },
-#endif
   { "/Options/Verbosity",              NULL, NULL,                  0,  "<Branch>" },
   { "/Options/Verbosity/_Errors",      NULL, options_verbosity,     0,  "<RadioItem>" },
   { "/Options/Verbosity/_Warnings",    NULL, options_verbosity,     1,  "/Options/Verbosity/Errors" },
@@ -207,9 +197,6 @@ GUI_init(int* argc, char*** argv, char* title, guint width, guint height)
 
   normal_cursor = gdk_cursor_new(GDK_TOP_LEFT_ARROW);
   link_cursor = gdk_cursor_new(GDK_HAND2);
-#if defined(HAVE_T1LIB)  
-  GUI_set_font_manager(FONT_MANAGER_GTK);
-#endif
 
   cursor_timeout_id = gtk_timeout_add(1000, cursor_blink, NULL);
 }
@@ -272,36 +259,6 @@ GUI_run()
 {
   gtk_main();
 }
-
-#if defined(HAVE_T1LIB)
-void
-GUI_set_font_manager(FontManagerId id)
-{
-  gboolean t1;
-  GtkMathView* math_view;
-
-  g_return_if_fail(id != FONT_MANAGER_UNKNOWN);
-  g_return_if_fail(main_area != NULL);
-  g_return_if_fail(GTK_IS_MATH_VIEW(main_area));
-
-  t1 = id == FONT_MANAGER_T1;
-
-  math_view = GTK_MATH_VIEW(main_area);
-
-  if (id != gtk_math_view_get_font_manager_type(math_view))
-    gtk_math_view_set_font_manager_type(math_view, id);
-
-  gtk_widget_set_sensitive(kerning_item, t1);
-  gtk_widget_set_sensitive(anti_aliasing_item, t1);
-  gtk_widget_set_sensitive(transparency_item, t1);
-
-  if (t1) {
-    gtk_math_view_set_kerning(math_view, GTK_CHECK_MENU_ITEM(kerning_item)->active);
-    gtk_math_view_set_anti_aliasing(math_view, GTK_CHECK_MENU_ITEM(anti_aliasing_item)->active);
-    gtk_math_view_set_transparency(math_view, GTK_CHECK_MENU_ITEM(transparency_item)->active);
-  }
-}
-#endif // HAVE_T1LIB
 
 static void
 store_filename(GtkFileSelection* selector, GtkWidget* user_data)
@@ -366,15 +323,6 @@ options_font_size(GtkWidget* widget, guint size)
   gtk_math_view_set_font_size(math_view, size);
 }
 
-#if defined(HAVE_T1LIB)
-static void
-options_font_manager(GtkWidget* widget, FontManagerId id)
-{
-  g_return_if_fail(id != FONT_MANAGER_UNKNOWN);
-  GUI_set_font_manager(id);
-}
-#endif // HAVE_T1LIB
-
 static void
 options_anti_aliasing(GtkWidget* widget, gpointer data)
 {
@@ -405,36 +353,15 @@ options_verbosity(GtkWidget* widget, guint level)
 static void
 edit_delete_selection(GtkWidget* widget, gpointer data)
 {
-#if 0
-  GdomeElement* elem = gtk_math_view_get_selection(GTK_MATH_VIEW(main_area));
-
-  if (elem != NULL)
+  if (root_selected != NULL)
     {
       GdomeException exc;
-      GdomeNode* parent;
-      GdomeNode* node;
-
-      GdomeDOMString* attrName = gdome_str_mkref("hello");
-      GdomeDOMString* attrValue = gdome_str_mkref("luca");
-
-      gdome_el_setAttribute(elem, attrName, attrValue, &exc);
+      printf("about to remove element %p\n", root_selected);
+      delete_element(root_selected);
+      gdome_el_unref(root_selected, &exc);
       g_assert(exc == 0);
-
-      gtk_math_view_set_selection(GTK_MATH_VIEW(main_area), NULL);
-
-      parent = gdome_n_parentNode((GdomeNode*) elem, &exc);
-      g_assert(exc == 0);
-      g_assert(parent != NULL);
-
-      node = gdome_n_removeChild(parent, (GdomeNode*) elem, &exc);
-      g_assert(exc == 0);
-      g_assert(node == (GdomeNode*) elem);
-
-      gdome_n_unref(parent, &exc);
-      gdome_n_unref(node, &exc);
-      gdome_el_unref(elem, &exc);
+      root_selected = NULL;
     }
-#endif
 }
 
 static void
@@ -456,89 +383,6 @@ help_about(GtkWidget* widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox), label);
 
   gtk_widget_show_all (dialog);
-}
-
-static void
-export_filename(GtkFileSelection* selector, GtkWidget* user_data)
-{
-  FILE* f;
-  GtkMathView* math_view;
-  gchar* selected_filename;
-  
-  selected_filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION(user_data));
-
-  math_view = GTK_MATH_VIEW(main_area);
-
-  f = fopen(selected_filename, "wt");
-  gtk_math_view_export_to_postscript(math_view,
-				     (21 * SCALED_POINTS_PER_CM) / SCALED_POINTS_PER_PX,
-				     (29 * SCALED_POINTS_PER_CM) / SCALED_POINTS_PER_PX,
-				     SCALED_POINTS_PER_IN / SCALED_POINTS_PER_PX,
-				     SCALED_POINTS_PER_IN / SCALED_POINTS_PER_PX,
-				     FALSE,
-				     f);
-  fclose(f);
-}
-
-static void
-export_to_ps_get_file_name(GtkWidget* widget)
-{
-  GtkWidget* fs = gtk_file_selection_new("Export to PostScript");
-
-  gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(fs)->ok_button),
-		      "clicked", GTK_SIGNAL_FUNC (export_filename), (gpointer) fs);
-                             
-  /* Ensure that the dialog box is destroyed when the user clicks a button. */
-     
-  gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION(fs)->ok_button),
-			     "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy),
-			     (gpointer) fs);
-
-  gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION(fs)->cancel_button),
-			     "clicked", GTK_SIGNAL_FUNC (gtk_widget_destroy),
-			     (gpointer) fs);
-     
-  /* Display that dialog */
-     
-  gtk_widget_show (fs);
-}
-
-static void
-export_to_ps(GtkWidget* widget)
-{
-  export_to_ps_get_file_name(widget);
-#if 0
-  static GList* items = NULL;
-
-  GtkWidget* dialog;
-  GtkWidget* tmp;
-
-  if (items == NULL) {
-    items = g_list_append(items, "A4");
-    items = g_list_append(items, "A5");
-  }
-
-  dialog = gtk_dialog_new();
-  tmp = gtk_label_new("Paper size");
-  gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), tmp);
-  tmp = gtk_combo_new();
-  gtk_combo_set_popdown_strings(GTK_COMBO(tmp), items);
-  gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), tmp);
-#if 0
-  tmp = gtk_check_button_new_with_label("Disable Colors");
-  gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), tmp);
-#endif
-
-  tmp = gtk_button_new_with_label("OK");
-  gtk_signal_connect_object(GTK_OBJECT(tmp), "clicked", GTK_SIGNAL_FUNC(export_to_ps_get_file_name), dialog);
-  gtk_signal_connect_object(GTK_OBJECT(tmp), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), dialog);
-  gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->action_area), tmp);
-  tmp = gtk_button_new_with_label("Cancel");
-  gtk_signal_connect_object(GTK_OBJECT(tmp), "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy), dialog);
-  gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->action_area), tmp);
-
-  gtk_widget_show_all(dialog);
-#endif
 }
 
 #if 0

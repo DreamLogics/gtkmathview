@@ -253,6 +253,13 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
 }
 
 void
+MathMLOperatorElement::DoLayout(LayoutId id, scaled availWidth)
+{
+  MathMLTokenElement::DoLayout(id, availWidth);
+  if (id == LAYOUT_MIN) minBox = box;
+}
+
+void
 MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool strict)
 {
   assert(stretchy);
@@ -277,7 +284,7 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 
   // ...however, there may be some contraints over the size of the stretchable
   // operator. adjustedSize will be the final allowed size for the operator
-  scaled minHeight = GetMinBoundingBox().GetHeight();
+  scaled minHeight = minBox.GetHeight();
   Globals::logger(LOG_DEBUG, "the minimum height is %d", sp2ipx(minHeight));
 
   scaled adjustedSize = desiredSize;
@@ -343,7 +350,7 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 
   // ...however, there may be some contraints over the size of the stretchable
   // operator. adjustedSize will be the final allowed size for the operator
-  scaled minWidth = GetMinBoundingBox().width;
+  scaled minWidth = minBox.width;
   scaled adjustedSize = desiredSize;
 
   if (minMultiplier > 0)
@@ -504,18 +511,6 @@ MathMLOperatorElement::GetStretch() const
   assert(sChar != 0);
 
   return sChar->GetStretch();
-}
-
-bool
-MathMLOperatorElement::IsOperator() const
-{
-  return true;
-}
-
-bool
-MathMLOperatorElement::IsBreakable() const
-{
-  return false;
 }
 
 Ptr<MathMLOperatorElement>

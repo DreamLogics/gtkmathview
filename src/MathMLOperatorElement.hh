@@ -51,11 +51,10 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
   virtual void Normalize(void);
+  virtual void Setup(class RenderingEnvironment*);
+  virtual void DoLayout(LayoutId, scaled);
 
-  virtual bool IsOperator(void) const;
-  virtual bool IsBreakable(void) const;
   bool         IsStretchy(void) const { return stretchy != 0; }
   StretchId    GetStretch(void) const;
   bool         IsAccent(void) const { return accent != 0; }
@@ -70,6 +69,7 @@ public:
   void         SetFence(void) { forcedFence = fence = 1; }
   void         SetSeparator(void) { forcedSeparator = separator = 1; }
   void         ResetSymmetric(void) { forcedSymmetric = 1; symmetric = 0; }
+  BoundingBox  GetMinBoundingBox(void) const { return minBox; }
   scaled       GetLeftPadding(void) const { return lSpace; }
   scaled       GetRightPadding(void) const { return rSpace; }
 #ifdef ENABLE_EXTENSIONS
@@ -115,6 +115,8 @@ private:
   scaled maxSize;
   float  minMultiplier;   // if <0 => absolute min size constraint
   scaled minSize;
+
+  BoundingBox minBox;
 };
 
 #endif // MathMLOperatorElement_hh

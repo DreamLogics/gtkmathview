@@ -52,12 +52,11 @@ MathMLAlignGroupElement::~MathMLAlignGroupElement()
 }
 
 void
-MathMLAlignGroupElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
+MathMLAlignGroupElement::DoLayout(LayoutId id, scaled)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
   box.Set(width, 0, 0);
-  ConfirmLayout(id);
-  ResetDirtyLayout(id, availWidth);
+  ResetDirtyLayout(id);
 }
 
 void

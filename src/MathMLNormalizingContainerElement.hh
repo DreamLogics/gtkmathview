@@ -42,11 +42,10 @@ protected:
 
 public:
   virtual void Normalize(void);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
+  virtual void DoLayout(LayoutId, scaled);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
 
-  virtual void RecalcBoundingBox(LayoutId, scaled = 0);
   virtual bool IsExpanding(void) const;
   virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
 };

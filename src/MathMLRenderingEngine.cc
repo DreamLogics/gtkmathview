@@ -203,12 +203,12 @@ MathMLRenderingEngine::MinMaxLayout()
   Clock perf;
 
   perf.Start();
-  root->DoBoxedLayout(LAYOUT_MIN);
+  root->DoLayout(LAYOUT_MIN);
   perf.Stop();
   Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
 
   perf.Start();
-  root->DoBoxedLayout(LAYOUT_MAX);
+  root->DoLayout(LAYOUT_MAX);
   perf.Stop();
   Globals::logger(LOG_INFO, "maximum layout time: %dms", perf());
 }
@@ -222,9 +222,8 @@ MathMLRenderingEngine::Layout()
 
   Clock perf;
   perf.Start();
-  root->DoBoxedLayout(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin()));
+  root->DoLayout(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin()));
   root->SetPosition(area->GetXMargin(), area->GetYMargin() + root->GetBoundingBox().ascent);
-  root->Freeze();
   perf.Stop();
   Globals::logger(LOG_INFO, "layout time: %dms", perf());
 }

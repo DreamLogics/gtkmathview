@@ -86,49 +86,24 @@ MathMLNormalizingContainerElement::Normalize()
 }
 
 void
-MathMLNormalizingContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
+MathMLNormalizingContainerElement::DoLayout(LayoutId id, scaled maxWidth)
 {
-  if (!HasDirtyLayout(id, maxWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(child != 0);
 
-  child->DoBoxedLayout(id, bid, maxWidth);
+  child->DoLayout(id, maxWidth);
   box = child->GetBoundingBox();
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, maxWidth);
-
-#if 0
-  printf("`%s' DoBoxedLayout (%d,%d,%d) [%d,%d]\n",
-	 NameOfTagId(IsA()), id, bid, sp2ipx(maxWidth),
-	 sp2ipx(box.width), sp2ipx(box.GetHeight()));
-#endif  
-}
-
-void
-MathMLNormalizingContainerElement::RecalcBoundingBox(LayoutId id, scaled minWidth)
-{
-  assert(child != NULL);
-
-  child->RecalcBoundingBox(id, minWidth);
-  box = child->GetBoundingBox();
-
-  ConfirmLayout(id);
+  ResetDirtyLayout(id);
 }
 
 void
 MathMLNormalizingContainerElement::SetPosition(scaled x, scaled y)
 {
-  position.x = x;
-  position.y = y;
-
-  if (HasLayout()) layout->SetPosition(x, y);
-  else
-    {
-      assert(child != 0);
-      child->SetPosition(x, y);
-    }
+  MathMLContainerElement::SetPosition(x, y);
+  assert(child != 0);
+  child->SetPosition(x, y);
 }
 
 void

@@ -28,12 +28,12 @@
 class MathMLSpaceNode: public MathMLTextNode
 {
 protected:
-  MathMLSpaceNode(int, BreakId);
+  MathMLSpaceNode(int);
   virtual ~MathMLSpaceNode();
 
 public:
-  static Ptr<MathMLSpaceNode> create(int s = 0, BreakId bid = BREAK_AUTO)
-  { return Ptr<MathMLSpaceNode>(new MathMLSpaceNode(s, bid)); }
+  static Ptr<MathMLSpaceNode> create(int s = 0)
+  { return Ptr<MathMLSpaceNode>(new MathMLSpaceNode(s)); }
 
   virtual void     Setup(class RenderingEnvironment*);
   virtual void     DoLayout(void);

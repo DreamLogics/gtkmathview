@@ -51,7 +51,6 @@ public:
 #endif
 
   virtual void Normalize(void);
-  virtual bool IsDocument(void) const;
 
   Ptr<MathMLElement> GetRoot(void) const { return GetChild(); }
 
@@ -59,19 +58,7 @@ public:
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
   const GMetaDOM::Element& GetDOMRoot(void) const { return DOMroot; }
 protected:
-  class DOMCharacterDataModifiedListener : public GMetaDOM::EventListener
-  {
-  public:
-    virtual void handleEvent(const GMetaDOM::Event&);
-  };
-
-  class DOMNodeInsertedListener : public GMetaDOM::EventListener
-  {
-  public:
-    virtual void handleEvent(const GMetaDOM::Event&);
-  };
-
-  class DOMNodeRemovedListener : public GMetaDOM::EventListener
+  class DOMSubtreeModifiedListener : public GMetaDOM::EventListener
   {
   public:
     virtual void handleEvent(const GMetaDOM::Event&);
@@ -83,9 +70,7 @@ protected:
     virtual void handleEvent(const GMetaDOM::Event&);
   };
 
-  DOMCharacterDataModifiedListener characterDataModifiedListener;
-  DOMNodeInsertedListener nodeInsertedListener;
-  DOMNodeRemovedListener nodeRemovedListener;
+  DOMSubtreeModifiedListener subtreeModifiedListener;
   DOMAttrModifiedListener attrModifiedListener;
 
   GMetaDOM::Document DOMdoc;  // can be 0

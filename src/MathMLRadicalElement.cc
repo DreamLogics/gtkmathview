@@ -109,14 +109,14 @@ MathMLRadicalElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLRadicalElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
+MathMLRadicalElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   Ptr<MathMLElement> base = content.GetFirst();
   assert(base != 0);
 
-  base->DoBoxedLayout(id, BREAK_NO, availWidth / content.GetSize());
+  base->DoLayout(id, availWidth / content.GetSize());
   box = base->GetBoundingBox();
 
   assert(radical != 0);
@@ -136,7 +136,7 @@ MathMLRadicalElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
       Ptr<MathMLElement> script = content.GetLast();
       assert(script != 0);
 
-      script->DoBoxedLayout(id, BREAK_NO, availWidth / 2);
+      script->DoLayout(id, availWidth / 2);
       const BoundingBox& scriptBox = script->GetBoundingBox();
 
       box.width += scriptBox.width;
@@ -148,9 +148,7 @@ MathMLRadicalElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
 	}
     }
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, availWidth);
+  ResetDirtyLayout(id);
 }
 
 void

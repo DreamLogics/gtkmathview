@@ -62,10 +62,8 @@ libgtkmathview_la_SOURCES = \
   Char.cc \
   Clock.cc \
   Configuration.cc \
-  DocumentElement.cc \
   EntitiesTable.cc \
   FontifiedString.cc \
-  Layout.cc \
   Logger.cc \
   Globals.cc \
   ChildList.cc \
@@ -126,8 +124,6 @@ libgtkmathview_la_SOURCES = \
   OperatorDictionary.cc \
   Rectangle.cc \
   RenderingEnvironment.cc \
-  Shape.cc \
-  ShapeFactory.cc \
   String.cc \
   StringFactory.cc \
   StringTokenizer.cc \
@@ -171,7 +167,6 @@ noinst_HEADERS = \
   Container.hh \
   Container.icc \
   Coords.hh \
-  DocumentElement.hh \
   DrawingArea.hh \
   EntitiesTable.hh \
   FontifiedString.hh \
@@ -179,7 +174,6 @@ noinst_HEADERS = \
   FontManager.hh \
   GraphicsContext.hh \
   Iterator.hh \
-  Layout.hh \
   Logger.hh \
   Globals.hh \
   MathML.hh \
@@ -241,8 +235,6 @@ noinst_HEADERS = \
   RGBValue.hh \
   Rectangle.hh \
   RenderingEnvironment.hh \
-  Shape.hh \
-  ShapeFactory.hh \
   Stack.hh \
   String.hh \
   StringFactory.hh \

@@ -26,10 +26,9 @@
 #include "BoundingBox.hh"
 #include "MathMLSpaceNode.hh"
 
-MathMLSpaceNode::MathMLSpaceNode(int s, BreakId bid)
+MathMLSpaceNode::MathMLSpaceNode(int s)
 {
   SetSpacing(s);
-  SetBreakability(bid);
 }
 
 MathMLSpaceNode::~MathMLSpaceNode()

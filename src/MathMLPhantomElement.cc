@@ -49,12 +49,6 @@ MathMLPhantomElement::IsSpaceLike() const
   return child->IsSpaceLike();
 }
 
-bool
-MathMLPhantomElement::IsBreakable() const
-{
-  return true;
-}
-
 void
 MathMLPhantomElement::Render(const DrawingArea&)
 {

@@ -50,8 +50,6 @@ public:
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
 
-  virtual bool IsBreakable(void) const;
-
 private:
   void NormalizeFencedElement(void);
 

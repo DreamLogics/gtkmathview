@@ -31,20 +31,10 @@
 #include "MathMLContainerElement.hh"
 
 const BoundingBox&
-getFrameBoundingBox(const Ptr<MathMLFrame>& frame, LayoutId id)
+getFrameBoundingBox(const Ptr<MathMLFrame>& frame)
 {
-  // why is this cast needed???
   assert(frame != Ptr<MathMLFrame>(0));
-
-  if (id == LAYOUT_AUTO || !frame->IsElement()) 
-    return frame->GetBoundingBox();
-  else
-    {
-      Ptr<MathMLElement> elem = smart_cast<MathMLElement>(frame);
-      assert(elem != 0);
-      if (id == LAYOUT_MIN) return elem->GetMinBoundingBox();
-      else return elem->GetMaxBoundingBox();
-    }
+  return frame->GetBoundingBox();
 }
 
 Ptr<MathMLFrame>

@@ -42,10 +42,8 @@ protected:
 public:
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-  virtual void DoLayout(LayoutId, Layout&);
-  virtual void DoBoxedLayout(LayoutId, BreakId = BREAK_NO, scaled = 0);
+  virtual void DoLayout(LayoutId, scaled);
   virtual void DoStretchyLayout(void);
-  virtual void Freeze(void);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
@@ -54,12 +52,9 @@ public:
   virtual void SetDirty(const Rectangle* = NULL);
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
-  virtual void ResetLast(void);
 
-  virtual bool IsLast(void) const;
   virtual bool IsExpanding(void) const;
   virtual void GetLinearBoundingBox(BoundingBox&) const;
-  virtual BreakId GetBreakability(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 

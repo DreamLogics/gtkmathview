@@ -45,7 +45,7 @@ public:
 #endif
 
   virtual void Setup(RenderingEnvironment*);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
+  virtual void DoLayout(scaled);
   virtual void SetPosition(scaled, scaled);
 
 private:

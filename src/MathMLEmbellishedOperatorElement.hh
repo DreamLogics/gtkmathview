@@ -37,7 +37,7 @@ public:
 
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
+  virtual void DoLayout(LayoutId, scaled);
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsEmbellishedOperator(void) const;
@@ -46,7 +46,7 @@ public:
 
 private:
   Ptr<class MathMLOperatorElement> coreOp;
-  bool  script;
+  bool  script; // ???? what's this for?
 };
 
 #endif // MathMLEmbellishedOperatorElement_hh

@@ -79,11 +79,10 @@ MathMLAlignMarkElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLAlignMarkElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
+MathMLAlignMarkElement::DoLayout(LayoutId id, scaled)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
-  ConfirmLayout(id);
-  ResetDirtyLayout(id, availWidth);
+  if (!HasDirtyLayout()) return;
+  ResetDirtyLayout(id);
 }
 
 bool

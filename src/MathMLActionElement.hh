@@ -48,8 +48,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
-  virtual void DoLayout(LayoutId, class Layout&);
+  virtual void DoLayout(LayoutId, scaled);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);
   virtual void Freeze(void);
@@ -61,10 +60,7 @@ public:
   virtual void ResetSelected(void);
   virtual void ResetLast(void);
 
-  virtual bool IsLast(void) const;
-  virtual bool IsBreakable(void) const;
   virtual bool IsExpanding(void) const;
-  virtual BreakId GetBreakability(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 

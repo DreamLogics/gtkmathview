@@ -84,28 +84,18 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLActionElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
+MathMLActionElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   Ptr<MathMLElement> elem = GetSelectedElement();
 
   if (elem != 0) {
-    elem->DoBoxedLayout(id, bid, availWidth);
+    elem->DoLayout(id, availWidth);
     box = elem->GetBoundingBox();
   } else
     box.Null();
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, availWidth);
-}
-
-void
-MathMLActionElement::DoLayout(LayoutId id, Layout& layout)
-{
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem != 0) elem->DoLayout(id, layout);
   ResetDirtyLayout(id);
 }
 
@@ -124,24 +114,6 @@ MathMLActionElement::SetPosition(scaled x, scaled y)
 
   Ptr<MathMLElement> elem = GetSelectedElement();
   if (elem != 0) elem->SetPosition(x, y);
-}
-
-void
-MathMLActionElement::Freeze()
-{
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  assert(elem != 0);
-
-  elem->Freeze();
-
-  if (!IsBreakable() || HasLayout()) MathMLElement::Freeze();
-  else {
-    if (shape != NULL) delete shape;
-    ShapeFactory shapeFactory;
-    shapeFactory.Add(elem->GetShape());
-    if (elem->IsLast()) shapeFactory.SetNewRow();
-    shape = shapeFactory.GetShape();
-  }
 }
 
 void
@@ -170,25 +142,10 @@ MathMLActionElement::SetDirty(const Rectangle* rect)
 }
 
 bool
-MathMLActionElement::IsBreakable() const
-{
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return (elem != 0) ? elem->IsBreakable() : false;
-}
-
-bool
 MathMLActionElement::IsExpanding() const
 {
   Ptr<MathMLElement> elem = GetSelectedElement();
   return (elem != 0) ? elem->IsExpanding() : false;
-}
-
-bool
-MathMLActionElement::IsLast() const
-{
-  if (last != 0) return true;
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return (elem != 0) ? elem->IsLast() : false;
 }
 
 Ptr<MathMLElement>
@@ -212,13 +169,6 @@ unsigned
 MathMLActionElement::GetSelectedIndex() const
 {
   return (content.GetSize() > 0) ? selection + 1 : 0;
-}
-
-BreakId
-MathMLActionElement::GetBreakability() const
-{
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return (elem != 0) ? elem->GetBreakability() : BREAK_AUTO;
 }
 
 scaled
@@ -268,14 +218,6 @@ MathMLActionElement::ResetSelected()
   if (elem != 0) elem->ResetSelected();
 
   selected = 0;
-}
-
-void
-MathMLActionElement::ResetLast()
-{
-  last = 0;
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem != 0) elem->ResetLast();
 }
 
 void

@@ -72,95 +72,18 @@ MathMLRowElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
+MathMLRowElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  enum { STATE_A, STATE_B, STATE_C, STATE_D, STATE_E } state = STATE_A;
+  if (!HasDirtyLayout()) return;
 
-  layout.In();
-
-  BreakId lastBreakability = BREAK_AUTO;
-
+  box.Null();
   for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
       Ptr<MathMLElement> elem = i();
       assert(elem != 0);
-
-      BreakId bid = BREAK_NO;
-
-      if (elem == lastElement)
-	{
-	  // if elem is the last element but it preceeded by a separator,
-	  // then we have still to set the right breakability after that
-	  // separator, which otherwise would get a BREAK_NO.
-	  if (state == STATE_C && !elem->IsEmbellishedOperator() && !elem->IsSpaceLike()) bid = BREAK_BAD;
-	  state = STATE_E;
-	} 
-      else
-	{
-	  switch (state)
-	    {
-	    case STATE_A:
-	      if (!elem->IsEmbellishedOperator() && !elem->IsSpaceLike()) state = STATE_B;
-	      break;
-	    case STATE_B:
-	      if (elem->IsEmbellishedOperator())
-		{
-		  Ptr<MathMLOperatorElement> op = elem->GetCoreOperator();
-		  assert(op != 0);
-		  // we cannot allow the expression to be broken
-		  // before or after the operator if it is non-marking
-		  // (i.e. it is only made of non-marking characters)
-		  if (!op->IsNonMarking())
-		    {
-		      if (op->IsSeparator()) state = STATE_C;
-		      else
-			{
-			  bid = BREAK_BAD;
-			  state = STATE_D;
-			}
-		    }
-		}
-	      break;
-	    case STATE_C:
-	      if (elem->IsSpaceLike())
-		{
-		  bid = BREAK_BAD;
-		  state = STATE_D;
-		}
-	      else if (elem->IsEmbellishedOperator())
-		{
-		  Ptr<MathMLOperatorElement> op = elem->GetCoreOperator();
-		  assert(op != 0);
-		  if (!op->IsSeparator())
-		    {
-		      bid = BREAK_BAD;
-		      state = STATE_D;
-		    }
-		} 
-	      else
-		{
-		  bid = BREAK_BAD;
-		  state = STATE_B;
-		}
-	      break;
-	    case STATE_D:
-	      if (!elem->IsSpaceLike() && !elem->IsEmbellishedOperator()) state = STATE_B;
-	      break;
-	    case STATE_E:
-	      break;
-	    }
-	}
-
-      if (lastBreakability != BREAK_AUTO) bid = lastBreakability;
-
-      lastBreakability = elem->GetBreakability();
-      layout.SetLastBreakability(bid);
-
-      if (elem->IsBreakable()) elem->DoLayout(id, layout);
-      else layout.Append(elem, 0);
+      elem->DoLayout(id, availWidth);
+      box.Append(elem->GetBoundingBox());
     }
-
-  layout.Out();
 
   ResetDirtyLayout(id);
 }
@@ -181,7 +104,7 @@ MathMLRowElement::DoStretchyLayout()
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
       assert(elem() != 0);
-      BoundingBox elemLinearBox;
+      BoundingBox elemBox;
 
       Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
       if (op != 0)
@@ -191,8 +114,7 @@ MathMLRowElement::DoStretchyLayout()
 	} 
       else
 	{
-	  elem()->GetLinearBoundingBox(elemLinearBox);
-	  rowBox.Append(elemLinearBox);
+	  rowBox.Append(elem()->GetBoundingBox());
 	  nOther++;
 	}
     }
@@ -215,7 +137,7 @@ MathMLRowElement::DoStretchyLayout()
 	  if (op != 0)
 	    {
 	      op->VerticalStretchTo(toAscent, toDescent);
-	      elem()->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, elem()->GetMaxBoundingBox().width);
+	      elem()->DoLayout(LAYOUT_AUTO, 0);
 	    }
 	}
     }
@@ -230,12 +152,6 @@ MathMLRowElement::IsSpaceLike() const
       if (!elem()->IsSpaceLike()) return false;
     }
 
-  return true;
-}
-
-bool
-MathMLRowElement::IsBreakable() const
-{
   return true;
 }
 

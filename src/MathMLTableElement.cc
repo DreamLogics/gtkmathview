@@ -397,7 +397,7 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
     (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty()) return;
-  if (rect != NULL && !shape->Overlaps(*rect)) return;
+  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
 
   if (hasLines) {
     dirty = 1;

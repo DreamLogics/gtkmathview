@@ -60,12 +60,12 @@ MathMLDummyElement::Setup(RenderingEnvironment* env)
   assert(fChar.font != NULL);
   
   fChar.font->GetBoundingBox(box);
+  // memory leak n fChar fields???
 }
 
 void
-MathMLDummyElement::DoBoxedLayout(LayoutId id, BreakId, scaled)
+MathMLDummyElement::DoLayout(LayoutId id, scaled)
 {
-  ConfirmLayout(id);
   ResetDirtyLayout(id);
 }
 
@@ -83,7 +83,7 @@ MathMLDummyElement::Render(const DrawingArea& area)
     fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
   }
 
-  area.DrawRectangle(fGC[IsSelected()], GetShape());
+  area.DrawRectangle(fGC[IsSelected()], GetX(), GetY(), GetBoundingBox());
 
   ResetDirty();
 }

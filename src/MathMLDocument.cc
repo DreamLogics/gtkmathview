@@ -59,9 +59,7 @@ MathMLDocument::Init()
       GMetaDOM::EventTarget et(DOMroot);
       assert(et != 0);
 
-      et.addEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);
-      et.addEventListener("DOMNodeInserted", nodeInsertedListener, false);
-      et.addEventListener("DOMNodeRemoved", nodeRemovedListener, false);
+      et.addEventListener("DOMNodeRemoved", subtreeModifiedListener, false);
       et.addEventListener("DOMAttrModified", attrModifiedListener, false);
     }
 }
@@ -75,9 +73,7 @@ MathMLDocument::~MathMLDocument()
       GMetaDOM::EventTarget et(DOMroot);
       assert(et != 0);
 
-      et.removeEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);
-      et.removeEventListener("DOMNodeInserted", nodeInsertedListener, false);
-      et.removeEventListener("DOMNodeRemoved", nodeRemovedListener, false);
+      et.removeEventListener("DOMSubtreeModified", subtreeModifiedListener, false);
       et.removeEventListener("DOMAttrModified", attrModifiedListener, false);
     }
 #endif
@@ -103,36 +99,14 @@ MathMLDocument::Normalize()
     }
 }
 
-bool
-MathMLDocument::IsDocument() const
-{
-  return true;
-}
-
 #if defined(HAVE_GMETADOM)
 
 void
-MathMLDocument::DOMCharacterDataModifiedListener::handleEvent(const GMetaDOM::Event& ev)
+MathMLDocument::DOMSubtreeModifiedListener::handleEvent(const GMetaDOM::Event& ev)
 {
   const GMetaDOM::MutationEvent& me(ev);
   assert(me != 0);
-  printf("character data modified\n");
-}
-
-void
-MathMLDocument::DOMNodeInsertedListener::handleEvent(const GMetaDOM::Event& ev)
-{
-  const GMetaDOM::MutationEvent& me(ev);
-  assert(me != 0);
-  printf("a node has been inserted\n");
-}
-
-void
-MathMLDocument::DOMNodeRemovedListener::handleEvent(const GMetaDOM::Event& ev)
-{
-  const GMetaDOM::MutationEvent& me(ev);
-  assert(me != 0);
-  printf("a node has been removed\n");
+  printf("subtree modified\n");
 }
 
 void

@@ -202,3 +202,16 @@ find_common_siblings(GdomeElement* first, GdomeElement* last,
   if (firstS != NULL) *firstS = gdome_cast_el(fs.gdome_object());
   if (lastS != NULL) *lastS = gdome_cast_el(ls.gdome_object());
 }
+
+extern "C" void
+delete_element(GdomeElement* elem)
+{
+  GMetaDOM::Element p(elem);
+
+  GMetaDOM::Element parent = p.get_parentNode();
+  assert(parent != 0);
+
+  parent.removeChild(p);
+
+}
+

@@ -50,7 +50,6 @@ public:
   virtual void Setup(class RenderingEnvironment*);
   virtual void Render(const DrawingArea&);
 
-  virtual bool IsBreakable(void) const;
   virtual bool IsSpaceLike(void) const;
 
   bool HasDifferentBackground(void) const { return differentBackground; }

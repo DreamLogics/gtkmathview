@@ -35,7 +35,7 @@
 #include "MathMLIdentifierElement.hh"
 #include "MathMLInvisibleTimesNode.hh"
 
-MathMLInvisibleTimesNode::MathMLInvisibleTimesNode() : MathMLSpaceNode(0, BREAK_NO)
+MathMLInvisibleTimesNode::MathMLInvisibleTimesNode() : MathMLSpaceNode(0)
 {
 }
 

@@ -48,7 +48,6 @@ public:
 
   virtual void Normalize(void);
 
-  virtual bool IsBreakable(void) const;
   virtual bool IsExpanding(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 };

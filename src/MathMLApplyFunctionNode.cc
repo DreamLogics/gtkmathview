@@ -35,7 +35,7 @@
 #include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLFencedElement.hh"
 
-MathMLApplyFunctionNode::MathMLApplyFunctionNode() : MathMLSpaceNode(0, BREAK_NO)
+MathMLApplyFunctionNode::MathMLApplyFunctionNode() : MathMLSpaceNode(0)
 {
 }
 

@@ -70,16 +70,16 @@ MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
+MathMLEmbellishedOperatorElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(child != 0);
   assert(coreOp != 0);
 
   scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
-  child->DoBoxedLayout(id, BREAK_NO, scaledMax(0, availWidth - totalPadding));
+  child->DoLayout(id, scaledMax(0, availWidth - totalPadding));
   box = child->GetBoundingBox();
 
   // WARNING: maybe in this case we should ask for the LAST char node...
@@ -98,24 +98,8 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
   box.tDescent += coreOp->GetBottomPadding();
 #endif // ENABLE_EXTENSIONS
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, availWidth);
+  ResetDirtyLayout(id);
 }
-
-#if 0
-void
-MathMLEmbellishedOperatorElement::DoLayout(LayoutId id, Layout& layout)
-{
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
-  assert(coreOp != NULL);
-
-  layout.Append(coreOp->GetLeftPadding());
-  layout.Append(coreOp);
-  layout.Append(coreOp->GetRightPadding());
-}
-#endif
 
 void
 MathMLEmbellishedOperatorElement::SetPosition(scaled x, scaled y)

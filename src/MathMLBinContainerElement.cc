@@ -84,24 +84,10 @@ MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLBinContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
+MathMLBinContainerElement::DoLayout(LayoutId id, scaled availWidth)
 {
-  if (!HasDirtyLayout(id, availWidth)) return;
-
-  ResetLayout();
-  if (child != 0) child->DoBoxedLayout(id, bid, availWidth);
-  ResetDirtyLayout(id, availWidth);
-}
-
-void
-MathMLBinContainerElement::DoLayout(LayoutId id, Layout& layout)
-{
-  if (child != 0)
-    {
-      if (child->IsBreakable()) child->DoLayout(id, layout);
-      else layout.Append(child, 0);
-    }
-
+  if (!HasDirtyLayout()) return;
+  if (child != 0) child->DoLayout(id, availWidth);
   ResetDirtyLayout(id);
 }
 
@@ -112,25 +98,6 @@ MathMLBinContainerElement::DoStretchyLayout()
 }
 
 void
-MathMLBinContainerElement::Freeze()
-{
-  if (child != 0) child->Freeze();
-
-  if (!IsBreakable() || HasLayout()) MathMLElement::Freeze();
-  else
-    {
-      if (shape != NULL) delete shape;
-      ShapeFactory shapeFactory;
-      if (child != 0)
-	{
-	  shapeFactory.Add(child->GetShape());
-	  if (child->IsLast()) shapeFactory.SetNewRow();
-	}
-      shape = shapeFactory.GetShape();
-    }
-}
-
-void
 MathMLBinContainerElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
@@ -138,23 +105,6 @@ MathMLBinContainerElement::Render(const DrawingArea& area)
   RenderBackground(area);
   if (child != 0) child->Render(area);
   ResetDirty();
-}
-
-void
-MathMLBinContainerElement::GetLinearBoundingBox(BoundingBox& b) const
-{
-  if (!IsBreakable())
-    b = box;
-  else
-    {
-      b.Null();
-      if (child != 0) 
-	{
-	  BoundingBox elemBox;
-	  child->GetLinearBoundingBox(elemBox);
-	  b.Append(elemBox);
-	}
-    }
 }
 
 Ptr<MathMLElement>
@@ -181,13 +131,11 @@ MathMLBinContainerElement::SetDirtyLayout(bool children)
 void
 MathMLBinContainerElement::SetDirty(const Rectangle* rect)
 {
-  assert(IsShaped());
-
   dirtyBackground =
     (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty()) return;
-  if (rect != NULL && !shape->Overlaps(*rect)) return;
+  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
 
   dirty = 1;
   SetDirtyChildren();
@@ -217,35 +165,11 @@ MathMLBinContainerElement::ResetSelected()
   selected = 0;
 }
 
-void
-MathMLBinContainerElement::ResetLast()
-{
-  last = 0;
-  if (child != 0) child->ResetLast();
-}
-
 bool
 MathMLBinContainerElement::IsExpanding() const
 {
   if (child != 0) return child->IsExpanding();
   return false;
-}
-
-bool
-MathMLBinContainerElement::IsLast() const
-{
-  if (last != 0) return true;
-  if (child != 0) return child->IsLast();
-  return false;
-}
-
-BreakId
-MathMLBinContainerElement::GetBreakability() const
-{
-  if (child != 0 && IsBreakable())
-    return child->GetBreakability();
-
-  return BREAK_AUTO;
 }
 
 scaled

@@ -40,21 +40,11 @@ protected:
   virtual ~MathMLContainerElement();
 
 public:
-  virtual void Normalize(void) = 0;
-  virtual void Setup(RenderingEnvironment*) = 0;
-  virtual void DoLayout(LayoutId, Layout&) = 0;
-  virtual void DoBoxedLayout(LayoutId, BreakId = BREAK_NO, scaled = 0) = 0;
-  virtual void DoStretchyLayout(void) = 0;
-  virtual void Freeze(void) = 0;
   virtual void Render(const DrawingArea&) = 0;
   virtual void ReleaseGCs(void) = 0;
-  virtual bool IsContainer(void) const;
   virtual Ptr<MathMLElement> Inside(scaled, scaled) = 0;
 
-  virtual bool IsLast(void) const = 0;
   virtual bool IsExpanding(void) const = 0;
-  virtual void GetLinearBoundingBox(BoundingBox&) const = 0;
-  virtual BreakId GetBreakability(void) const = 0;
   virtual scaled GetLeftEdge(void) const = 0;
   virtual scaled GetRightEdge(void) const = 0;
 

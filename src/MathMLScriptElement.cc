@@ -159,15 +159,15 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
+MathMLScriptElement::DoLayout(LayoutId id, scaled maxWidth)
 {
-  if (!HasDirtyLayout(id, maxWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(base != 0);
 
-  base->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
-  if (subScript != 0) subScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
-  if (superScript != 0) superScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
+  base->DoLayout(id, maxWidth / 2);
+  if (subScript != 0) subScript->DoLayout(id, maxWidth / 2);
+  if (superScript != 0) superScript->DoLayout(id, maxWidth / 2);
 
   Ptr<MathMLElement> rel = findRightmostChild(base);
   assert(rel != 0);
@@ -213,9 +213,7 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
       box.tDescent = scaledMax(box.tDescent, superScriptBox.tDescent - superShiftY);
     }
 
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, maxWidth);
+  ResetDirtyLayout(id);
 }
 
 void

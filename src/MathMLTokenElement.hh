@@ -53,8 +53,7 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void   Normalize(void);
   virtual void 	 Setup(class RenderingEnvironment*);
-  virtual void 	 DoLayout(LayoutId, class Layout&);
-  virtual void 	 Freeze(void);
+  virtual void 	 DoLayout(LayoutId, scaled);
   virtual void 	 Render(const class DrawingArea&);
 
   void           Append(const String*);
@@ -62,11 +61,8 @@ public:
 
   virtual bool   IsLast(void) const;
   virtual bool 	 IsToken(void) const;
-  virtual bool 	 IsBreakable(void) const;
   bool           IsNonMarking(void) const;
-  virtual void 	 GetLinearBoundingBox(BoundingBox&) const;
   virtual void 	 SetDirty(const Rectangle* = NULL);
-  virtual BreakId GetBreakability(void) const;
 
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
@@ -83,7 +79,7 @@ protected:
   static Ptr<class MathMLTextNode> SubstituteMGlyphElement(const GMetaDOM::Element&);
   static Ptr<class MathMLTextNode> SubstituteAlignMarkElement(const GMetaDOM::Element&);
   
-  void AddItalicCorrection(Layout&);
+  void AddItalicCorrection(void);
 
   // for tokens the content is protected so that users have to
   // use the Append methods. For read-only operations there is

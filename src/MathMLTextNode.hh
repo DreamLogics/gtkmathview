@@ -48,9 +48,6 @@ public:
   void             SetSpacing(int);
   void             AddSpacing(int);
   int              GetSpacing(void) const { return spacing; }
-  void             SetBreakability(BreakId);
-  void             AddBreakability(BreakId);
-  virtual BreakId  GetBreakability(void) const;
 
   virtual scaled   GetLeftEdge(void) const;
   virtual scaled   GetRightEdge(void) const;
@@ -58,7 +55,6 @@ public:
 
 protected:
   int spacing : 13;     // overall spacing after the node
-  int breakability : 3; // breakability after the node
 };
 
 #endif // MathMLTextNode_hh

@@ -49,15 +49,8 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void) = 0;
   virtual void Setup(class RenderingEnvironment*); // setup attributes
-  void         DoBoxedLayout(LayoutId id) { DoBoxedLayout(id, (id == LAYOUT_MAX) ? BREAK_NO : BREAK_GOOD); }
-  void         DoBoxedLayout(LayoutId id, BreakId bid) { DoBoxedLayout(id, bid, 0); }
-  void         DoBoxedLayout(LayoutId id, scaled w) { DoBoxedLayout(id, BREAK_GOOD, w); }
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
-  virtual void DoLayout(LayoutId, class Layout&);   // layout as breakable
-  virtual void DoStretchyLayout(void);          // layout stretchy components
-  virtual void SetPosition(scaled, scaled);
-  virtual void SetPosition(scaled, scaled, ColumnAlignId);
-  virtual void Freeze(void);
+  virtual void DoLayout(LayoutId, scaled = 0);
+  virtual void DoStretchyLayout(void);
   virtual void RenderBackground(const DrawingArea&);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
@@ -83,29 +76,19 @@ public:
 			      int = -1, int = -1);
   bool IsSet(AttributeId) const;
 
-  // bounding boxes
-  const BoundingBox& GetMinBoundingBox(void) const { return minBox; }
-  const BoundingBox& GetMaxBoundingBox(void) const { return maxBox; }
-  virtual void   GetLinearBoundingBox(BoundingBox&) const;
-  virtual void   RecalcBoundingBox(LayoutId, scaled = 0);
-
   // some queries
   TagId        	 IsA(void) const;
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Element& GetDOMElement(void) const { return node; }
   static Ptr<MathMLElement> getRenderingInterface(const GMetaDOM::Element&);
 #endif
-
+  Rectangle      GetRectangle(void) const;
   virtual bool 	 IsSpaceLike(void) const;
   virtual bool 	 IsExpanding(void) const;
   virtual bool 	 IsInside(scaled, scaled) const;
-  bool         	 HasLayout(void) const { return layout != NULL; }
-  bool         	 IsShaped(void) const { return shape != NULL; }
   bool           HasLink(void) const;
   RGBValue     	 GetBackgroundColor(void) const { return background; }
   unsigned     	 GetDepth(void) const;
-  const Layout&  GetLayout(void) const;
-  const Shape&   GetShape(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
@@ -113,18 +96,11 @@ public:
   bool HasDirtyLayout(void) const { return MathMLFrame::HasDirtyLayout(); }
   void ResetDirtyLayout(void) { MathMLFrame::ResetDirtyLayout(); }
   bool HasDirtyLayout(LayoutId, scaled) const;
-  void ResetDirtyLayout(LayoutId, scaled);
-  void ResetDirtyLayout(LayoutId);
-
-#ifdef DEBUG
-  static int GetCounter(void) { return counter; }
-#endif // DEBUG
+  void ResetDirtyLayout(LayoutId id) { if (id == LAYOUT_AUTO) MathMLFrame::ResetDirtyLayout(); }
 
 protected:
-  void ResetLayout(void);
   const AttributeSignature* GetAttributeSignatureAux(AttributeId,
 						     AttributeSignature[]) const;
-  void ConfirmLayout(LayoutId);
 
 public:
   virtual void SetDirtyStructure(void);
@@ -143,12 +119,6 @@ protected:
   unsigned    dirtyAttribute : 1;
   unsigned    childWithDirtyAttribute : 1;
 
-  scaled      lastLayoutWidth;
-  BoundingBox minBox;
-  BoundingBox maxBox;
-  class Layout* layout;
-  const class Shape* shape;
-
   const class GraphicsContext* fGC[2];
   const class GraphicsContext* bGC[2];
 
@@ -158,25 +128,6 @@ private:
 #if defined(HAVE_GMETADOM)
   GMetaDOM::Element node; // reference to the DOM node
 #endif
-
-#ifdef DEBUG
-  static int counter;
-#endif // DEBUG
 };
-
-inline void
-MathMLElement::ConfirmLayout(LayoutId id)
-{
-  switch (id) {
-  case LAYOUT_AUTO:
-    break;
-  case LAYOUT_MIN:
-    minBox = box;
-    break;
-  case LAYOUT_MAX:
-    maxBox = box;
-    break;
-  }
-}
 
 #endif // MathMLElement_hh

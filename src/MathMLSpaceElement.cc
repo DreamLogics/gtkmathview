@@ -127,9 +127,8 @@ MathMLSpaceElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLSpaceElement::DoBoxedLayout(LayoutId id, BreakId, scaled)
+MathMLSpaceElement::DoLayout(LayoutId id, scaled)
 {
-  ConfirmLayout(id);
   ResetDirtyLayout(id);
 }
 
@@ -143,12 +142,6 @@ bool
 MathMLSpaceElement::IsSpaceLike() const
 {
   return true;
-}
-
-BreakId
-MathMLSpaceElement::GetBreakability() const
-{
-  return breakability;
 }
 
 scaled

@@ -195,9 +195,9 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
+MathMLUnderOverElement::DoLayout(LayoutId id, scaled maxWidth)
 {
-  if (!HasDirtyLayout(id, maxWidth)) return;
+  if (!HasDirtyLayout()) return;
 
   assert(base != NULL);
 
@@ -206,9 +206,9 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 
   if (scriptize)
     {
-      base->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
-      if (overScript != NULL) overScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
-      if (underScript != NULL) underScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
+      base->DoLayout(id, maxWidth / 2);
+      if (overScript != NULL) overScript->DoLayout(id, maxWidth / 2);
+      if (underScript != NULL) underScript->DoLayout(id, maxWidth / 2);
 
       const BoundingBox& baseBox = base->GetBoundingBox();
       BoundingBox underBox;
@@ -229,9 +229,9 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
     {    
       if (id != LAYOUT_AUTO)
 	{
-	  base->DoBoxedLayout(id, BREAK_NO);
-	  if (underScript != 0) underScript->DoBoxedLayout(id, BREAK_NO);
-	  if (overScript != 0) overScript->DoBoxedLayout(id, BREAK_NO);
+	  base->DoLayout(id);
+	  if (underScript != 0) underScript->DoLayout(id);
+	  if (overScript != 0) overScript->DoLayout(id);
 	} 
       else
 	{
@@ -247,9 +247,9 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 
 	  Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
 
-	  if (baseOp == 0) base->DoBoxedLayout(id, BREAK_NO, maxWidth);
-	  if (underScript != 0 && underOp == 0) underScript->DoBoxedLayout(id, BREAK_NO, maxWidth);
-	  if (overScript != 0 && overOp == 0) overScript->DoBoxedLayout(id, BREAK_NO, maxWidth);
+	  if (baseOp == 0) base->DoLayout(id, maxWidth);
+	  if (underScript != 0 && underOp == 0) underScript->DoLayout(id, maxWidth);
+	  if (overScript != 0 && overOp == 0) overScript->DoLayout(id, maxWidth);
 
 	  if (baseOp == 0)
 	    {
@@ -258,7 +258,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	    } 
 	  else
 	    {
-	      wOp = base->GetMinBoundingBox().width;
+	      wOp = baseOp->GetMinBoundingBox().width;
 	      nOp++;
 	    }
 
@@ -271,7 +271,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 		} 
 	      else
 		{
-		  wOp = scaledMax(wOp, underScript->GetMinBoundingBox().width);
+		  wOp = scaledMax(wOp, underOp->GetMinBoundingBox().width);
 		  nOp++;
 		}
 	    }
@@ -285,7 +285,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 		} 
 	      else
 		{
-		  wOp = scaledMax(wOp, overScript->GetMinBoundingBox().width);
+		  wOp = scaledMax(wOp, overOp->GetMinBoundingBox().width);
 		  nOp++;
 		}
 	    }
@@ -298,9 +298,9 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	    if (overOp != 0) overOp->HorizontalStretchTo(w);
 	  }
 
-	  if (baseOp != 0) base->DoBoxedLayout(id, BREAK_NO);
-	  if (underScript != 0 && underOp != 0) underScript->DoBoxedLayout(id, BREAK_NO);
-	  if (overScript != 0 && overOp != 0) overScript->DoBoxedLayout(id, BREAK_NO);
+	  if (baseOp != 0) base->DoLayout(id);
+	  if (underScript != 0 && underOp != 0) underScript->DoLayout(id);
+	  if (overScript != 0 && overOp != 0) overScript->DoLayout(id);
 	}
 
       const BoundingBox& baseBox = base->GetBoundingBox();
@@ -320,6 +320,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 
 	      underShiftY = -underShiftY;
 
+#if defined(ENABLE_EXTENSIONS)
 	      if (underScript->IsEmbellishedOperator())
 		{
 		  Ptr<MathMLEmbellishedOperatorElement> eOp =
@@ -329,6 +330,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 		  assert(coreOp != 0);
 		  underShiftY += coreOp->GetTopPadding();
 		}
+#endif
 	    } 
 	  else
 	    {
@@ -352,6 +354,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	      Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
 			      cChar->GetChar(), bChar->GetChar());
 
+#if defined(ENABLE_EXTENSIONS)
 	      if (overScript->IsEmbellishedOperator())
 		{
 		  Ptr<MathMLEmbellishedOperatorElement> eOp =
@@ -362,6 +365,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 		  Globals::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
 		  overShiftY += coreOp->GetBottomPadding();
 		}
+#endif
 	    } 
 	  else
 	    {
@@ -411,9 +415,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
       box.ascent += overClearance;
     }
   
-  ConfirmLayout(id);
-
-  ResetDirtyLayout(id, maxWidth);
+  ResetDirtyLayout(id);
 }
 
 void

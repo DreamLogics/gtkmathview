@@ -28,7 +28,7 @@
 
 MathMLFrame::MathMLFrame()
 {
-  selected = last = dirty = dirtyChildren = dirtyBackground = 0;
+  selected = dirty = dirtyChildren = dirtyBackground = 0;
   dirtyLayout = 0;
 }
 
@@ -40,12 +40,6 @@ bool
 MathMLFrame::IsFrame() const
 {
   return true;
-}
-
-bool
-MathMLFrame::IsLast() const
-{
-  return last != 0;
 }
 
 void
@@ -98,13 +92,9 @@ MathMLFrame::ResetSelected()
 }
 
 void
-MathMLFrame::ResetLast()
+MathMLFrame::SetPosition(scaled x, scaled y)
 {
-  last = 0;
+  position.x = x;
+  position.y = y;
 }
 
-BreakId
-MathMLFrame::GetBreakability() const
-{
-  return BREAK_AUTO;
-}

@@ -48,7 +48,6 @@ public:
 
   virtual void Render(const DrawingArea&);
 
-  virtual bool IsBreakable(void) const;
   virtual bool IsSpaceLike(void) const;
 };
 

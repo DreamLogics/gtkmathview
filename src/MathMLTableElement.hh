@@ -151,7 +151,7 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
+  virtual void DoLayout(scaled);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
