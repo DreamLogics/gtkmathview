@@ -92,11 +92,14 @@ libgtkmathview_la_SOURCES = \
   MathMLFrame.cc \
   MathMLGlyphNode.cc \
   MathMLHorizBarNode.cc \
+  MathMLIdentifierElement.cc \
   MathMLInvisibleTimesNode.cc \
+  MathMLLabeledTableRowElement.cc \
   MathMLMarkNode.cc \
   MathMLMultiScriptsElement.cc \
   MathMLNode.cc \
   MathMLNormalizingContainerElement.cc \
+  MathMLNumberElement.cc \
   MathMLObject.cc \
   MathMLOperatorElement.cc \
   MathMLPaddedElement.cc \
@@ -204,6 +207,7 @@ noinst_HEADERS = \
   MathMLFrame.hh \
   MathMLGlyphNode.hh \
   MathMLHorizBarNode.hh \
+  MathMLIdentifierElement.hh \
   MathMLInvisibleTimesNode.hh \
   MathMLMarkNode.hh \
   MathMLMultiScriptsElement.hh \

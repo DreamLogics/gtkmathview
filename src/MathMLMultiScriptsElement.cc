@@ -25,6 +25,7 @@
 #include <stddef.h>
 
 #include "Iterator.hh"
+#include "ChildList.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
@@ -65,13 +66,14 @@ MathMLMultiScriptsElement::Normalize()
 	      SetChild(0, mdummy);
 	    }
 	  else
-
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-	  // it might be that we get a NULL. In that case it would probably make
-	  // sense to create a dummy element, because we filtered MathML
-	  // elements only
-	  assert(elem != 0);
-	  SetChild(i, elem);
+	    {
+	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	      // it might be that we get a NULL. In that case it would probably make
+	      // sense to create a dummy element, because we filtered MathML
+	      // elements only
+	      assert(elem != 0);
+	      SetChild(i, elem);
+	    }
 	}
 
       // the following is to be sure that no spurious elements remain at the

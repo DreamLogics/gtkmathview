@@ -32,6 +32,7 @@
 #include "MathMLTableElement.hh"
 #include "MathMLTableRowElement.hh"
 #include "MathMLTableCellElement.hh"
+#include "MathMLLabeledTableRowElement.hh"
 
 MathMLTableRowElement::MathMLTableRowElement()
 {
@@ -71,37 +72,33 @@ MathMLTableRowElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLTableRowElement::Normalize()
 {
-  if (is_a<MathML() == TAG_MLABELEDTR &&
-      (content.GetSize() == 0 ||
-       (content.GetSize() > 0 &&
-	content.GetFirst() != 0 &&
-	content.GetFirst()->IsA() == TAG_MTD)))
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
-      mdummy->SetParent(this);
-      content.AddFirst(mdummy);
-      Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
-    }
+      MathMLLinearContainerElement::Normalize();
 
-  for (unsigned i = 0; i < content.GetSize(); i++)
-    {
-      Ptr<MathMLElement> elem = content.RemoveFirst();
-      assert(elem != 0);
-
-      // if this is a labeled row, then the first child is always the label
-      // because of normalization (see above)
-      if (elem->IsA() != TAG_MTD && (IsA() == TAG_MTR || i > 0))
+      for (unsigned i = 0; i < content.GetSize(); i++)
 	{
-	  Ptr<MathMLTableCellElement> inferredTableCell =
-	    smart_cast<MathMLTableCellElement>(MathMLTableCellElement::create());
-	  assert(inferredTableCell != 0);
-	  inferredTableCell->SetParent(this);
-	  inferredTableCell->SetChild(elem);
-	  elem = inferredTableCell;
+	  Ptr<MathMLElement> elem = content.RemoveFirst();
+	  assert(elem != 0);
+	  
+	  // if this is a labeled row, then the first child is always the label
+	  // because of normalization (see above)
+	  if (!is_a<MathMLTableCellElement>(elem) &&
+	      (is_a<MathMLLabeledTableRowElement>(Ptr<MathMLElement>(this)) || i > 0))
+	    {
+	      Ptr<MathMLTableCellElement> inferredTableCell =
+		smart_cast<MathMLTableCellElement>(MathMLTableCellElement::create());
+	      assert(inferredTableCell != 0);
+	      inferredTableCell->SetParent(this);
+	      inferredTableCell->SetChild(elem);
+	      elem = inferredTableCell;
+	    }
+	  elem->Normalize();
+
+	  content.Append(elem);
 	}
-      elem->Normalize();
-      content.Append(elem);
+
+      ResetDirtyStructure();
     }
 }
 
@@ -180,12 +177,6 @@ MathMLTableRowElement::IsInside(scaled x, scaled y) const
 Ptr<MathMLElement>
 MathMLTableRowElement::GetLabel(void) const
 {
-  if (IsA() != TAG_MLABELEDTR) return 0;
-
-  assert(content.GetSize() > 0);
-  assert(content.GetFirst() != 0);
-  assert(content.GetFirst()->IsA() != TAG_MTD);
-
-  return content.GetFirst();
+  return 0;
 }
 

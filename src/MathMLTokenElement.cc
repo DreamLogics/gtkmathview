@@ -51,9 +51,12 @@
 #include "MathMLGlyphNode.hh"
 #include "MathMLSpaceNode.hh"
 #include "MathMLStringNode.hh"
+#include "MathMLTextElement.hh"
 #include "MathMLTokenElement.hh"
+#include "MathMLNumberElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
+#include "MathMLIdentifierElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLTokenElement::MathMLTokenElement()
@@ -271,7 +274,8 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 
   env->Push();
 
-  if (!is_a<MathMLIdentifierElement>(this) && !is_a<MathMLOperatorElement>(this))
+  if (!is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this)) &&
+      !is_a<MathMLOperatorElement>(Ptr<MathMLElement>(this)))
     env->SetFontMode(FONT_MODE_TEXT);
 
   const Value* value = NULL;
@@ -327,7 +331,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
     if (value != NULL) {
       Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
       env->SetFontStyle(ToFontStyleId(value));
-    } else if (is_a<MathMLIdentifierElement>(this)) {
+    } else if (is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this))) {
       if (GetLogicalContentLength() == 1) {
 	Ptr<MathMLTextNode> node = content.GetFirst();
 	assert(node != 0);
@@ -621,9 +625,9 @@ MathMLTokenElement::GetCharNode() const
 void
 MathMLTokenElement::AddItalicCorrection(Layout& layout)
 {
-  if (!is_a<MathMLIdentifierElement>(this) &&
-      !is_a<MathMLNumberElement>(this) &&
-      !is_a<MathMLTextElement>(this)) return;
+  if (!is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this)) &&
+      !is_a<MathMLNumberElement>(Ptr<MathMLElement>(this)) &&
+      !is_a<MathMLTextElement>(Ptr<MathMLElement>(this))) return;
   
   if (content.GetSize() == 0) return;
 
