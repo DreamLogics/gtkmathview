@@ -47,10 +47,15 @@ static gchar* doc_name = NULL;
 static GdomeElement* root_selected = NULL;
 static GdomeElement* first_selected = NULL;
 static GdomeElement* last_selected = NULL;
+static GdomeElement* cursor = NULL;
 static gboolean selecting = FALSE;
 static gboolean button_pressed = FALSE;
 
 static guint statusbar_context;
+
+static guint         cursor_timeout_id;
+static GdomeElement* cursor_ptr = NULL;
+static gboolean      cursor_active = FALSE;
 
 static void create_widget_set(void);
 static GtkWidget* get_main_menu(void);
@@ -150,6 +155,43 @@ load_error_msg(const char* name)
   g_free(msg);
 }
 
+static void
+cursor_off()
+{
+  if (cursor_active)
+    {
+      cursor_active = FALSE;
+      if (cursor_ptr != NULL &&
+	  gtk_math_view_is_selected(main_area, cursor_ptr))
+	gtk_math_view_reset_selection(main_area, cursor_ptr);
+    }
+}
+
+static void
+cursor_on()
+{
+  if (!cursor_active)
+    {
+      cursor_active = FALSE;
+      if (cursor_ptr != NULL &&
+	  !gtk_math_view_is_selected(main_area, cursor_ptr))
+	gtk_math_view_set_selection(main_area, cursor_ptr);
+      cursor_active = TRUE;
+    }
+}
+
+static gint
+cursor_blink(gpointer data)
+{
+  if (cursor_active && cursor_ptr != NULL)
+    {
+      if (gtk_math_view_is_selected(main_area, cursor_ptr))
+	gtk_math_view_reset_selection(main_area, cursor_ptr);
+      else
+	gtk_math_view_set_selection(main_area, cursor_ptr);
+    }
+}
+
 void
 GUI_init(int* argc, char*** argv, char* title, guint width, guint height)
 {
@@ -168,11 +210,14 @@ GUI_init(int* argc, char*** argv, char* title, guint width, guint height)
 #if defined(HAVE_T1LIB)  
   GUI_set_font_manager(FONT_MANAGER_GTK);
 #endif
+
+  cursor_timeout_id = gtk_timeout_add(1000, cursor_blink, NULL);
 }
 
 void
 GUI_uninit()
 {
+  gtk_timeout_remove(cursor_timeout_id);
 }
 
 int
@@ -541,6 +586,10 @@ selection_changed(GtkMathView* math_view, GdomeElement* node)
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
   gtk_math_view_set_selection(math_view, node);
+
+  cursor_off();
+  cursor_ptr = node;
+  cursor_on();
 }
 
 #if defined(HAVE_GMETADOM)
@@ -584,6 +633,8 @@ button_press_event(GtkWidget* widget,
   if (event->button == 1)
     {
       GdomeException exc;
+
+      cursor_off();
 
       if (root_selected != NULL)
 	{
@@ -682,7 +733,8 @@ button_release_event(GtkWidget* widget,
     {
       if (!selecting)
 	{
-	  // click!
+	  cursor_ptr = first_selected;
+	  cursor_on();
 	}
 
       button_pressed = FALSE;
