@@ -22,7 +22,7 @@
 
 #include <config.h>
 
-#define MATHML2PS_VERSION "0.0.5"
+#define MATHML2PS_VERSION "0.0.6"
 
 #include <assert.h>
 #include <getopt.h>
@@ -51,6 +51,7 @@ enum CommandLineOptionId {
   OPTION_MARGINS,
   OPTION_FONT_SIZE,
   OPTION_COLORS,
+  OPTION_SUBSETTING,
   //OPTION_KERNING,
   OPTION_CONFIG
 };
@@ -64,6 +65,7 @@ static double xMargin = 2;
 static double yMargin = 2;
 static double fontSize = 10;
 static bool   colors = false;
+static bool   subsetting = true;
 //static bool   kerning = false;
 static const char* configPath = NULL;
 static int logLevel = LOG_ERROR;
@@ -93,6 +95,7 @@ Usage: mathml2ps [options] file ...\n\n\
   -f, --font-size=<float>         Default font size (in pt, default=10)\n\
   -k, --kerning[=yes|no]          Enable/disable kerning (default='no')\n\
   -c, --colors[=yes|no]           Enable/disable colors (default='no')\n\
+  -s, --subsetting[=yes|no]       Enable/disable font subsetting (default='yes')\n\
   --config=<path>                 Configuration file path\n\
   --verbose[=0-3]                 Display messages\n\n\
 Valid units are:\n\n\
@@ -247,13 +250,14 @@ main(int argc, char *argv[])
       { "margins",       required_argument, NULL, OPTION_MARGINS },
       { "font-size",     required_argument, NULL, OPTION_FONT_SIZE },
       { "colors",        optional_argument, NULL, OPTION_COLORS },
+      { "subsetting",    optional_argument, NULL, OPTION_SUBSETTING },
       //{ "kerning",       optional_argument, NULL, OPTION_KERNING },
       { "config",        required_argument, NULL, OPTION_CONFIG },
 
       { NULL,            no_argument, NULL, 0 }
     };
 
-    int c = getopt_long(argc, argv, "vhg:u:m:f:k::c::", long_options, &option_index);
+    int c = getopt_long(argc, argv, "vhg:u:m:f:k::c::s::", long_options, &option_index);
 
     if (c == -1) break;
 
@@ -301,6 +305,12 @@ main(int argc, char *argv[])
     case 'c':
       if (optarg == NULL) colors = true;
       else if (!parseBoolean(optarg, colors)) parseError("colors");
+      break;
+
+    case OPTION_SUBSETTING:
+    case 's':
+      if (optarg == NULL) subsetting = true;
+      else if (!parseBoolean(optarg, subsetting)) parseError("subsetting");
       break;
 
 #if 0
@@ -402,7 +412,7 @@ main(int argc, char *argv[])
       area.SetOutputFile(outFile);
 
       area.DumpHeader(appName, argv[optind], rect);
-      fm.DumpFontDictionary(outFile);
+      fm.DumpFontDictionary(outFile, subsetting);
 
       area.DumpPreamble();
       //area.DumpGrid();

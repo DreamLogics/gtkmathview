@@ -279,6 +279,21 @@ PS_DrawingArea::SetFont(const AFont* font) const
 void
 PS_DrawingArea::SetOutputFile(FILE* f)
 {
+  // the next line needs some explanations: this method is usually
+  // used to allow a null traversal of the document tree without
+  // producing any output (setting output to NULL), so to know which
+  // chars for each font are actually used. The, output is set again to
+  // the wanted output file and another traversal is done. But due
+  // to the caching mechanism for fonts, if the document is such that
+  // the first and the last symbols draw are taken from the same font,
+  // the on the second traversal (the important one for having the
+  // output generated) the font is not set at the beginning of the
+  // postscript file, and this usually means that a symbol is not
+  // draw. Maybe this line should go somewhere else, but I don't want
+  // to make a method for just this silly thing, so I'll keep it here
+  // until something better comes to my mind.
+  if (output != f) lastFont = NULL;
+
   output = f;
 }
 

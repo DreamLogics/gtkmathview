@@ -3,7 +3,7 @@ AC_INIT(src/MathMLObject.cc)
 
 MATHVIEW_MAJOR_VERSION=0
 MATHVIEW_MINOR_VERSION=2
-MATHVIEW_MICRO_VERSION=6
+MATHVIEW_MICRO_VERSION=7
 MATHVIEW_VERSION=$MATHVIEW_MAJOR_VERSION.$MATHVIEW_MINOR_VERSION.$MATHVIEW_MICRO_VERSION
 MATHVIEW_VERSION_INFO=`expr $MATHVIEW_MAJOR_VERSION + $MATHVIEW_MINOR_VERSION`:$MATHVIEW_MICRO_VERSION:$MATHVIEW_MINOR_VERSION
 
@@ -70,22 +70,17 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_LN_S
 AC_ISC_POSIX
-AC_CHECK_PROG(HAVE_PFB2PFA, pfb2pfa, yes, no)
 AC_CHECK_PROG(HAVE_COLORGCC, colorgcc, yes, no)
 AC_CHECK_PROG(HAVE_ICONV, iconv, yes, no)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
 AC_CHECK_HEADER(wctype.h,,AC_MSG_ERROR(could not find required header file `wctype.h'))
 AC_CHECK_HEADER(iconv.h,,AC_MSG_ERROR(could not find required header file `iconv.h'))
-AC_CHECK_HEADERS(unistd.h)
-AC_FUNC_VFORK
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_BIGENDIAN
-AC_TYPE_PID_T
 
 dnl Check for iconv and code names
 AC_MSG_CHECKING(for iconv encodings)
@@ -190,10 +185,7 @@ if test "(" $t1lib = "no" ")" -a "(" $export_PS = "yes" ")"; then
 	export_PS=no
 fi
 
-if test "(" $export_PS = "auto" ")" -a "(" $HAVE_PFB2PFA = "no" ")"; then
-	AC_MSG_WARN(cannot export to PostScript if 'pfb2pfa' is not installed)
-	export_PS=no
-else
+if test "(" $export_PS = "auto" ")"; then
 	export_PS=yes
 fi
 

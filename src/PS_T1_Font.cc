@@ -45,7 +45,6 @@ PS_T1_Font::UseChars(const char* s, unsigned length) const
   for (unsigned i = 0; i < length; i++) {
     assert(((unsigned char) s[i]) < 256);
     used[((unsigned char) s[i])] = 1;
-    MathEngine::logger(LOG_DEBUG, "using char %d in font %d\n", s[i], GetNativeFontId());
   }
 }
 
