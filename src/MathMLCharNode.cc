@@ -548,13 +548,10 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
 
     float ia = (M_PI * (90 + fChar.font->GetItalicAngle())) / 180;
 
-    if (shiftY > 0) {
-      scaled correction = float2sp(sp2float(box.ascent) * cos(ia));
-      shiftX = correction + (box.width - cBox.rBearing + cBox.lBearing) / 2 - cBox.lBearing;
-    } else
-      shiftX = 0;
+    scaled correction = (shiftY > 0) ? float2sp(sp2float(box.ascent) * cos(ia)) : 0;
 
-    printf("%04x ic: %f height: %f\n", GetChar(), scaledMax(0, box.rBearing - box.width), box.ascent);
+    shiftX = correction + (box.width - cBox.rBearing + cBox.lBearing) / 2 - cBox.lBearing;
+    //printf("%04x ic: %f height: %f\n", GetChar(), scaledMax(0, box.rBearing - box.width), box.ascent);
   }
 
   return true;

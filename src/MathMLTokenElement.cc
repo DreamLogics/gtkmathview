@@ -516,9 +516,11 @@ void
 MathMLTokenElement::AddItalicCorrection(Layout& layout)
 {
   if (IsA() != TAG_MI && IsA() != TAG_MN && IsA() != TAG_MTEXT) return;
+  
+  if (content.GetSize() == 0) return;
 
   MathMLTextNode* lastNode = content.GetLast();
-  if (lastNode == NULL) return;
+  assert(lastNode != NULL);
 
   MathMLElement* next = findRightSibling(this);
   if (next == NULL || next->IsA() != TAG_MO) return;

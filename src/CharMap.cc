@@ -47,7 +47,11 @@ CharMap::MapsChar(Char ch) const
     res = ch == single.code;
     break;
   case CHAR_MAP_STRETCHY:
-    res = ch == stretchy.code;
+    // res = ch == stretchy.code;
+    res = false;
+    break;
+  default:
+    assert(IMPOSSIBLE);
     break;
   }
 

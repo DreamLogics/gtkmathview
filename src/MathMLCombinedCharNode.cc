@@ -70,7 +70,7 @@ MathMLCombinedCharNode::DoLayout()
   assert(cChar != NULL);
   cChar->DoLayout();
 
-  if (cChar->IsFontified()) {
+  if (IsFontified() && cChar->IsFontified()) {
     const BoundingBox& cBox = cChar->GetBoundingBox();
 
     bool res = CombineWith(cChar, shiftX, shiftY);

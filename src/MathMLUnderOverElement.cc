@@ -300,7 +300,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
       } else {
 	const BoundingBox& scriptBox = overScript->GetBoundingBox();
 
-	overShiftX = (baseBox.width - scriptBox.width) / 2;
+	overShiftX = (baseBox.width - scriptBox.width) / 2 + scaledMax(0, baseBox.rBearing - baseBox.width);
 	overShiftY = baseBox.ascent + overSpacing + scriptBox.descent;
 	overClearance = ruleThickness;
       }
