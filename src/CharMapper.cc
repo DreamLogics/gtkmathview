@@ -380,7 +380,9 @@ CharMapper::ParseMap(mDOMNodeRef node)
 
   mDOMStringRef value = mdom_node_get_attribute(node, DOM_CONST_STRING("id"));
   if (value == NULL) return;
+#if 0
   else MathEngine::logger(LOG_DEBUG, "parsing font map `%s'", value);
+#endif
 
   FontMap* fontMap = new FontMap;
   fontMap->id = C_CONST_STRING(value);

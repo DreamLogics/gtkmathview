@@ -392,6 +392,13 @@ main(int argc, char *argv[])
   values.lineStyle = LINE_STYLE_SOLID;
   values.lineWidth = px2sp(1);
 
+  PS_DrawingArea area(values, x0, y0);
+  area.SetSize(w, h);
+  if (!colors) area.DisableColors();
+
+  PS_T1_FontManager fm;
+  engine.Init(&area, &fm);
+
   while (optind < argc) {
     MathEngine::logger(LOG_INFO, "Processing `%s'...", argv[optind]);
 
@@ -404,19 +411,16 @@ main(int argc, char *argv[])
       exit(1);
     }
 
-    PS_DrawingArea area(values, x0, y0, outFile);
-    area.SetSize(w, h);
-    if (!colors) area.DisableColors();
+    area.SetOutputFile(outFile);
 
-    PS_T1_FontManager fm;
-
-    engine.Init(&area, &fm);
     engine.SetVerbosity(logLevel);
     engine.SetDefaultFontSize(fontSize);
     MathEngine::DrawMissingCharacter(showMissing);
 #if 0
     engine.SetKerning(kerning);
 #endif
+
+    fm.ResetUsedFonts();
     if (engine.Load(argv[optind])) {
       engine.Layout();
 

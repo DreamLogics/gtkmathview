@@ -61,9 +61,9 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
     assert(fChar.font != NULL);
     assert(fChar.charMap != NULL);
 
-#ifdef DEBUG
+#if 0
     MathEngine::logger(LOG_DEBUG, "successful layout for U+%04x simple index %02x", ch, fChar.nch);
-#endif // DEBUG
+#endif
   }
 
   FontifiedChar sChar;
@@ -72,9 +72,9 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
     assert(sChar.font != NULL);
     assert(sChar.charMap != NULL);
     
-#ifdef DEBUG
+#if 0
     MathEngine::logger(LOG_DEBUG, "successful stretchy layout for U+%04x simple index %02x", ch, sChar.nch);
-#endif // DEBUG
+#endif
     
     layout = new StretchyCharLayout;
     layout->sChar = sChar;
@@ -114,7 +114,9 @@ MathMLCharNode::DoLayout()
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
+#if 0
   MathEngine::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
+#endif
 
   if (box.descent > box.ascent && fChar.charMap->GetStretch() != STRETCH_NO) {
     MathEngine::logger(LOG_DEBUG, "WARNING Texish code here");

@@ -91,6 +91,8 @@ T1_FontManager::SearchT1FontId(const char* fileName) const
     }
     MathEngine::logger(LOG_INFO, "loading font ID: %d", i);
     T1_LoadFont(i);
+  } else {
+    MathEngine::logger(LOG_INFO, "font file `%s' already loaded in the database", fileName);
   }
 
   return i;
