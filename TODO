@@ -72,3 +72,4 @@ Bugs
   lowercase letters are not mapped, see mono.xml)
 * cannot make the full documentation because texinfo.tex is not updated
   (think it is in the automake package)
+* cannot select phantom elements

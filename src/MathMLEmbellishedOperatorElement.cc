@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "Layout.hh"
+#include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 
@@ -33,10 +34,19 @@ MathMLEmbellishedOperatorElement(MathMLOperatorElement* op) // the core operator
 {
   assert(op != NULL);
   coreOp = op;
+  script = false;
 }
 
 MathMLEmbellishedOperatorElement::~MathMLEmbellishedOperatorElement()
 {
+}
+
+void
+MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
+{
+  assert(env != NULL);
+  script = env->GetScriptLevel() > 0;
+  MathMLContainerElement::Setup(env);
 }
 
 void
@@ -48,7 +58,7 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
   assert(content.GetFirst() != NULL);
   assert(coreOp != NULL);
 
-  scaled totalPadding = coreOp->GetLeftPadding() + coreOp->GetRightPadding();
+  scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
   content.GetFirst()->DoBoxedLayout(id, BREAK_NO, scaledMax(0, availWidth - totalPadding));
   box = content.GetFirst()->GetBoundingBox();
@@ -83,7 +93,7 @@ MathMLEmbellishedOperatorElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  content.GetFirst()->SetPosition(x + coreOp->GetLeftPadding(), y);
+  content.GetFirst()->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y);
 }
 
 bool

@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "unidefs.h"
 #include "MathEngine.hh"
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
@@ -31,7 +32,7 @@
 
 MathMLHorizBarNode::MathMLHorizBarNode(Char c) : MathMLCharNode(c)
 {
-  assert(c == 0x00af || c == 0x0332);
+  assert(c == U_OVERLINE || c == U_UNDERLINE);
   thickness = 0;
 }
 

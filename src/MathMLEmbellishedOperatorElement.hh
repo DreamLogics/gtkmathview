@@ -28,6 +28,7 @@
 class MathMLEmbellishedOperatorElement: public MathMLContainerElement {
 public:
   MathMLEmbellishedOperatorElement(class MathMLOperatorElement*);
+  virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
   virtual ~MathMLEmbellishedOperatorElement();
@@ -37,6 +38,7 @@ public:
 
 private:
   class MathMLOperatorElement* coreOp;
+  bool  script;
 };
 
 typedef MathMLEmbellishedOperatorElement* MathMLEmbellishedOperatorElementPtr;

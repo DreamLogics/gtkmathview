@@ -187,6 +187,17 @@ RenderingEnvironment::AddScriptLevel(int delta)
   SetFontSize(newFontSize);
 }
 
+int
+RenderingEnvironment::GetScriptLevel() const
+{
+  assert(!level.IsEmpty());
+
+  AttributeLevel* top = level.Top();
+  assert(top != NULL);
+
+  return top->scriptLevel;
+}
+
 void
 RenderingEnvironment::SetFontFamily(const char* family)
 {

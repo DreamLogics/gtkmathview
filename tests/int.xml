@@ -1,6 +1,7 @@
 <math display="block">
   <mrow>
     <mo largeop="true">&Integral;</mo>
+ <!--
     <mrow>
       <mi>W</mi>
       <mo>&it;</mo>
@@ -9,5 +10,6 @@
         <mi>x</mi>
       </mrow>
     </mrow>
+ -->
   </mrow>
 </math>

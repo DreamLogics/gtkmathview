@@ -92,7 +92,7 @@ CharMap::Map(Char ch, bool large) const
   case CHAR_MAP_STRETCHY:
     if (large) {
       unsigned i;
-      for (i = 0; stretchy.simple[i] != NULLCHAR && i < MAX_SIMPLE_CHARS; i++) ;
+      for (i = 0; i < MAX_SIMPLE_CHARS && stretchy.simple[i] != NULLCHAR; i++) ;
       res = stretchy.simple[i / 2];
     } else      
       res = stretchy.simple[0];

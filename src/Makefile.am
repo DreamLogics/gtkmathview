@@ -237,6 +237,7 @@ noinst_HEADERS = \
   traverseAux.hh \
   mathVariantAux.hh \
   scaled.hh \
+  unidefs.h \
   $(GTKHEADERS) \
   $(T1HEADERS) \
   $(PSHEADERS)

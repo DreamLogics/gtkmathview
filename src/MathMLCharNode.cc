@@ -75,7 +75,8 @@ MathMLCharNode::SetDefaultLargeGlyph(bool large)
   assert(layout != NULL);
   assert(layout->sChar.font != NULL);
   assert(layout->sChar.charMap != NULL);
-  layout->sChar.nch = layout->sChar.charMap->Map(ch, large);
+  fChar.nch = layout->sChar.nch = layout->sChar.charMap->Map(ch, large);
+  MathEngine::logger(LOG_DEBUG, "char %x with large %d set to %x\n", ch, large, layout->sChar.nch);
 }
 
 void

@@ -20,24 +20,26 @@
 // http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
 #include <assert.h>
 
 #include "String.hh"
+#include "unidefs.h"
 #include "CharMapper.hh"
 #include "allocTextNode.hh"
 #include "MathMLTextNode.hh"
 #include "MathMLCharNode.hh"
+#include "MathMLHorizBarNode.hh"
 #include "MathMLCombinedCharNode.hh"
 #include "MathMLStringNode.hh"
 
 MathMLTextNode*
 allocCharNode(Char ch)
 {
-  return new MathMLCharNode(ch);
+  if (ch == U_UNDERLINE || ch == U_OVERLINE)
+    return new MathMLHorizBarNode(ch);
+  else
+    return new MathMLCharNode(ch);
 }
 
 MathMLTextNode*
