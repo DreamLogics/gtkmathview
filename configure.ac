@@ -239,14 +239,11 @@ PKG_CHECK_MODULES(GTK, gtk+,, AC_MSG_ERROR(could not find GTK+))
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
-PKG_CHECK_MODULES(DOM, gdome2-cpp-smart >= 0.1.8,, AC_MSG_ERROR(could not find GMetaDOM))
+PKG_CHECK_MODULES(DOM, gdome2-cpp-smart >= 0.1.8,
+  AC_DEFINE(HAVE_GMETADOM,1,[Define to 1 to compile with GMetaDOM]),
+  AC_MSG_ERROR(could not find GMetaDOM))
 AC_SUBST(DOM_CFLAGS)
 AC_SUBST(DOM_LIBS)
-
-DOM_IMPLEMENTATION="GMETADOM"
-AC_SUBST(DOM_IMPLEMENTATION)
-
-AC_DEFINE(HAVE_GMETADOM,1,[Define to 1 to compile with GMetaDOM (recommended)])
 
 if test $t1lib = "auto"; then
 	AC_CHECK_LIB(t1, T1_InitLib, t1lib="yes", t1lib="no", -lm)
