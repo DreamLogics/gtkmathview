@@ -8,7 +8,7 @@
  <!-- the following, IMHO, is the real overline char -->
  <operator name="&#x0305;" form="infix" stretchy="true" lspace="0em" rspace="0em" accent="false"/>
 
- <operator name="/" form="infix" stretchy="true" lspace="veryverythinmathspace" rspace="veryverythinmathspace"/>
+ <operator name="/" form="infix" stretchy="false" lspace="veryverythinmathspace" rspace="veryverythinmathspace"/>
  
  <operator name="&Sqrt;" form="prefix" stretchy="false" symmetric="false"/>
 

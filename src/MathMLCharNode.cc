@@ -57,23 +57,32 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
   delete layout;
   layout = NULL;
 
-  fChar.font = NULL;
-  fChar.charMap = NULL;
-  env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), ch);
-  if (fChar.font != NULL) {
+  if (env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), ch)) {
+    assert(fChar.font != NULL);
     assert(fChar.charMap != NULL);
 
-    FontifiedChar sChar;
-    sChar.font = NULL;
-    sChar.charMap = NULL;
-    env->charMapper.FontifyStretchyChar(sChar, env->GetFontAttributes(), ch);
-    if (sChar.font != NULL && sChar.charMap != NULL) {
-      layout = new StretchyCharLayout;
-      layout->sChar = sChar;
-      layout->simple = NULLCHAR;
-      layout->n = 0;
-    }
-  } else {
+#ifdef DEBUG
+    MathEngine::logger(LOG_DEBUG, "successful layout for U+%04x simple index %02x", ch, fChar.nch);
+#endif // DEBUG
+  }
+
+  FontifiedChar sChar;
+
+  if (env->charMapper.FontifyStretchyChar(sChar, env->GetFontAttributes(), ch)) {
+    assert(sChar.font != NULL);
+    assert(sChar.charMap != NULL);
+    
+#ifdef DEBUG
+    MathEngine::logger(LOG_DEBUG, "successful stretchy layout for U+%04x simple index %02x", ch, sChar.nch);
+#endif // DEBUG
+    
+    layout = new StretchyCharLayout;
+    layout->sChar = sChar;
+    layout->simple = NULLCHAR;
+    layout->n = 0;
+  }
+  
+  if (fChar.font == NULL && layout == NULL) {
     // no glyph found
     scaled sppex = env->GetScaledPointsPerEx();
     box.Set(sppex, (2 * sppex) / 3, sppex / 3);
@@ -87,9 +96,14 @@ MathMLCharNode::SetDefaultLargeGlyph(bool large)
   assert(layout != NULL);
   assert(layout->sChar.font != NULL);
   assert(layout->sChar.charMap != NULL);
+#ifdef DEBUG
   MathEngine::logger(LOG_DEBUG, "before setting large was %x", layout->sChar.nch);
-  fChar.nch = layout->sChar.nch = layout->sChar.charMap->Map(ch, large);
+#endif // DEBUG
+  layout->sChar.nch = layout->sChar.charMap->Map(ch, large);
+  fChar = layout->sChar;
+#ifdef DEBUG
   MathEngine::logger(LOG_DEBUG, "char %x with large %d set to %x", ch, large, layout->sChar.nch);
+#endif // DEBUG
 }
 
 void

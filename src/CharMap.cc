@@ -69,17 +69,16 @@ CharMap::MapsChar(Char ch, bool stretchy) const
 bool
 CharMap::MapsSimpleChar(Char ch) const
 {
-  bool res = MapsChar(ch);
-
-  if (res && type == CHAR_MAP_STRETCHY && stretchy.simple[0] == NULLCHAR) res = false;
-
-  return res;
+  if (MapsChar(ch)) return true;
+  return (type == CHAR_MAP_STRETCHY && stretchy.code == ch && stretchy.simple[0] != NULLCHAR);
 }
 
 char
 CharMap::Map(Char ch, bool large) const
 {
-  if (!MapsChar(ch)) return NULLCHAR;
+  // WARNING: the following test has been suppressed. It is supposed that
+  // who's calling Map has already checked that this CharMap can render the char
+  //if (!MapsChar(ch)) return NULLCHAR;
 
   char res = NULLCHAR;
 

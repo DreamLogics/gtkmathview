@@ -35,6 +35,8 @@ class MathMLElement*         findCommonAncestor(class MathMLElement*, class Math
 class MathMLActionElement*   findActionElement(class MathMLElement*);
 mDOMNodeRef                  findDOMNode(class MathMLElement*);
 class MathMLElement*         findMathMLElement(mDOMNodeRef);
+class MathMLElement*         findRightmostChild(class MathMLElement*);
+class MathMLElement*         findLeftmostChild(class MathMLElement*);
 class MathMLElement*         findRightSibling(class MathMLElement*);
 class MathMLElement*         findLeftSibling(class MathMLElement*);
 

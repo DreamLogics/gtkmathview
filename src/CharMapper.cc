@@ -182,12 +182,15 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
       // the other are not considered any more. Finally, the availability of the
       // font is a call to a virtual function.
       if (i()->fontMap != NULL) {
+#if 0
+	MathEngine::logger(LOG_DEBUG, "asking for a charmap for U+%04x stretchy %d", ch, stretchy);
+#endif
 	const CharMap* charMap = i()->fontMap->GetCharMap(ch, stretchy);
 	if (charMap != NULL) {
 	  unsigned eval = i()->attributes.Compare(myfa);
 
 #if 0
-	  MathEngine::logger(LOG_DEBUG, "comparing with: ");
+	  MathEngine::logger(LOG_DEBUG, "char: U+%04x comparing with: ", ch);
 	  i()->attributes.Dump();
 	  MathEngine::logger(LOG_DEBUG, "comparison = %d", eval);
 #endif
@@ -196,12 +199,21 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
 	    bestEval = eval;
 	    bestCharMap = charMap;
 	    bestDesc = i();
+	  } else if (eval < bestEval) {
+#ifdef DEBUG
+	    MathEngine::logger(LOG_DEBUG, "found a better font, but it's not available");
+	    i()->extraAttributes.Dump();
+#endif // DEBUG
 	  }
 	}
       }
     }
 
-    if (bestDesc != NULL) bestFont = fontManager.GetFont(myfa, &bestDesc->extraAttributes);
+    if (bestDesc != NULL) {
+      bestFont = fontManager.GetFont(myfa, &bestDesc->extraAttributes);
+      if (bestFont == NULL)
+	MathEngine::logger(LOG_WARNING, "a font for char U+%04x was configured, but the actual font file was not found", ch);
+    }
   } while (bestFont == NULL && myfa.DownGrade());
 
 #if 0
@@ -368,6 +380,7 @@ CharMapper::ParseMap(mDOMNodeRef node)
 
   mDOMStringRef value = mdom_node_get_attribute(node, DOM_CONST_STRING("id"));
   if (value == NULL) return;
+  else MathEngine::logger(LOG_DEBUG, "parsing font map `%s'", value);
 
   FontMap* fontMap = new FontMap;
   fontMap->id = C_CONST_STRING(value);
@@ -562,7 +575,7 @@ CharMapper::ParseStretchySimple(mDOMNodeRef node, CharMap* charMap)
   const char* ptr = C_CONST_STRING(value);
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS && ptr != NULL && *ptr != '\0'; i++) {
     char* newPtr;
-    if (i < 4) charMap->stretchy.simple[i] = strtol(ptr, &newPtr, 0);
+    charMap->stretchy.simple[i] = strtol(ptr, &newPtr, 0);
     ptr = newPtr;
   }
 
@@ -597,6 +610,9 @@ CharMapper::PatchConfiguration()
     assert(i() != NULL);
     assert(i()->fontMapId != NULL);
     i()->fontMap = SearchMapping(i()->fontMapId);
+#if 0
+    MathEngine::logger(LOG_DEBUG, "patching font with map `%s', results %p", i()->fontMapId, i()->fontMap);
+#endif
   }
 }
 

@@ -54,8 +54,11 @@ FontAttributes::DownGrade()
 {
   bool res = true;
 
+#if 0
   if (HasMode()) mode = FONT_MODE_ANY;
-  else if (HasWeight()) weight = FONT_WEIGHT_NOTVALID;
+  else
+#endif
+    if (HasWeight()) weight = FONT_WEIGHT_NOTVALID;
   else if (HasStyle()) style = FONT_STYLE_NOTVALID;
   else if (HasFamily()) family = NULL;
   else if (HasSize()) size.Null();
@@ -199,4 +202,18 @@ ExtraFontAttributes::AddProperty(const char* name, const char* value)
   attribute->value = value;
 
   content.Append(attribute);
+}
+
+void
+ExtraFontAttributes::Dump() const
+{
+  MathEngine::logger(LOG_DEBUG, "extra font attributes dump:");
+
+  for (Iterator<ExtraFontAttribute*> i(content); i.More(); i.Next()) {
+    assert(i() != NULL);
+    assert(i()->name != NULL);
+    assert(i()->value != NULL);
+
+    MathEngine::logger(LOG_DEBUG, "%s = '%s'", i()->name, i()->value);
+  }
 }

@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "traverseAux.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLScriptElement.hh"
 #include "RenderingEnvironment.hh"
@@ -155,7 +156,14 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
   if (subScript != NULL) subScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
   if (superScript != NULL) superScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
 
+  const MathMLElement* rel = findRightmostChild(base);
+  assert(rel != NULL);
+
   const BoundingBox& baseBox = base->GetBoundingBox();
+  BoundingBox relBox = rel->GetBoundingBox();
+  relBox.rBearing = baseBox.rBearing;
+  relBox.width = baseBox.width;
+
   BoundingBox subScriptBox;
   BoundingBox superScriptBox;
 
@@ -165,7 +173,7 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
   superScriptBox.Null();
   if (superScript != NULL) superScriptBox = superScript->GetBoundingBox();
 
-  DoScriptLayout(baseBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
+  DoScriptLayout(relBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
 
   box = baseBox;
 
