@@ -244,6 +244,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x25a0" index="0x82"/>
     <single code="0x25a1" index="0x83"/>
     <single code="0x25aa" index="0x9f"/>
+    <single code="0x25ca" index="0xe0"/>
     <single code="0x2660" index="0xaa"/>
     <single code="0x2661" index="0xa9"/>
     <single code="0x2662" index="0xa8"/>

@@ -573,7 +573,13 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
     shiftY = box.ascent - cFont->GetEx();
 
     float ia = (M_PI * (90 + fChar.font->GetItalicAngle())) / 180;
+    printf("ia = %f\n", cos(ia));
 
+#if 0
+    scaled correction = pt2sp(sp2pt(shiftY) * cos(ia));
+
+    shiftX = correction + (box.width - cBox.width) / 2;
+#endif
     scaled correction = (shiftY > 0) ? float2sp(sp2float(box.ascent) * cos(ia)) : 0;
 
     shiftX = correction + (box.width - cBox.rBearing + cBox.lBearing) / 2 - cBox.lBearing;
