@@ -45,7 +45,6 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
   assert(env != NULL);
 
   MathMLCharNode::Setup(env);
-  assert(fChar.charMap != NULL);
 
   if (!env->charMapper.FontifyChar(cChar, env->GetFontAttributes(), cch)) {
     cChar.font = NULL;

@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "MathEngine.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
 #include "MathMLDummyElement.hh"
@@ -116,7 +117,9 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   const MathMLOperatorElement* op = findCoreOperator(base);
 
   if (op != NULL) {
-    scriptize = (env->GetDisplayStyle() == false) && op->HasMovableLimits();
+    scriptize = !env->GetDisplayStyle() && op->HasMovableLimits();
+    MathEngine::logger(LOG_DEBUG, "display style: %d  movable limits: %d  scriptize: %d\n",
+		    	env->GetDisplayStyle(), op->HasMovableLimits(), scriptize);
   } else
     scriptize = false;
 
