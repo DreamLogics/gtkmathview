@@ -75,6 +75,9 @@
 #define ICONV_UCS4 "UCS-4"
 #endif
 
+/* Define if you have getopt_long */
+#undef HAVE_GETOPT_LONG
+
 @BOTTOM@
 
 #endif /* config_h */

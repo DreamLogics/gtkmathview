@@ -26,7 +26,6 @@
 #include <wctype.h>
 #include <string.h>
 #include <malloc.h>
-#include <glib.h>
 
 #include "stringAux.hh"
 #include "StringUnicode.hh"
