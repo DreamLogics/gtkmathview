@@ -98,11 +98,11 @@ struct _GtkMathViewClass {
 
 #if defined(HAVE_MINIDOM)
   void (*clicked)           (GtkMathView*, mDOMNodeRef);
-  void (*selection_changed) (GtkMathView*, mDOMNodeRef, mDOMNodeRef);
+  void (*press_move)        (GtkMathView*, mDOMNodeRef, mDOMNodeRef);
   void (*element_changed)   (GtkMathView*, mDOMNodeRef);
 #elif defined(HAVE_GMETADOM)
   void (*clicked)           (GtkMathView*, GdomeElement*);
-  void (*selection_changed) (GtkMathView*, GdomeElement*, GdomeElement*);
+  void (*press_move)        (GtkMathView*, GdomeElement*, GdomeElement*);
   void (*element_changed)   (GtkMathView*, GdomeElement*);
 #endif
 };
@@ -130,7 +130,7 @@ static void     gtk_math_view_size_request(GtkWidget*, GtkRequisition*);
 
 #if defined(HAVE_GMETADOM)
 static void gtk_math_view_clicked(GtkMathView*, GdomeElement*);
-static void gtk_math_view_selection_changed(GtkMathView*, GdomeElement*, GdomeElement*);
+static void gtk_math_view_press_move(GtkMathView*, GdomeElement*, GdomeElement*);
 static void gtk_math_view_element_changed(GtkMathView*, GdomeElement*);
 #endif
 
@@ -144,7 +144,7 @@ static void reset_adjustments(GtkMathView*);
 
 static GtkEventBoxClass* parent_class = NULL;
 static guint clicked_signal = 0;
-static guint selection_changed_signal = 0;
+static guint press_move_signal = 0;
 static guint element_changed_signal = 0;
 
 /* widget implementation */
@@ -320,7 +320,7 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
   GtkWidgetClass* widget_class = (GtkWidgetClass*) klass;
 
   klass->clicked = gtk_math_view_clicked;
-  klass->selection_changed = gtk_math_view_selection_changed;
+  klass->press_move = gtk_math_view_press_move;
   klass->element_changed = gtk_math_view_element_changed;
   klass->set_scroll_adjustments = gtk_math_view_set_adjustments;
 
@@ -346,14 +346,14 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
 		   GTK_TYPE_NONE, 1, GTK_TYPE_POINTER);
   gtk_object_class_add_signals(object_class, &clicked_signal, 1);
 
-  selection_changed_signal = 
-    gtk_signal_new("selection_changed",
+  press_move_signal = 
+    gtk_signal_new("press_move",
 		   GTK_RUN_FIRST,
 		   object_class->type,
-		   GTK_SIGNAL_OFFSET(GtkMathViewClass, selection_changed),
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, press_move),
 		   gtk_marshal_NONE__POINTER_POINTER,
 		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_POINTER);
-  gtk_object_class_add_signals(object_class, &selection_changed_signal, 1);
+  gtk_object_class_add_signals(object_class, &press_move_signal, 1);
 
   element_changed_signal = 
     gtk_signal_new("element_changed",
@@ -655,7 +655,7 @@ gtk_math_view_motion_notify_event(GtkWidget* widget,
        abs(math_view->button_press_time - event->time) > CLICK_TIME_RANGE))
     {
       if (math_view->selecting == FALSE || math_view->current_elem != elem)
-	gtk_signal_emit(GTK_OBJECT(math_view), selection_changed_signal, math_view->first_elem, elem);
+	gtk_signal_emit(GTK_OBJECT(math_view), press_move_signal, math_view->first_elem, elem);
       math_view->selecting = TRUE;
     }
 
@@ -733,7 +733,7 @@ gtk_math_view_clicked(GtkMathView* math_view, GdomeElement*)
 }
 
 static void
-gtk_math_view_selection_changed(GtkMathView* math_view, GdomeElement*, GdomeElement*)
+gtk_math_view_press_move(GtkMathView* math_view, GdomeElement*, GdomeElement*)
 {
   g_return_if_fail(math_view != NULL);
   // noop
@@ -985,7 +985,7 @@ gtk_math_view_get_font_size(GtkMathView* math_view)
 }
 
 extern "C" void
-gtk_math_view_set_selection(GtkMathView* math_view, GdomeElement* elem)
+gtk_math_view_select(GtkMathView* math_view, GdomeElement* elem)
 {
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(math_view->interface != NULL);
@@ -997,7 +997,7 @@ gtk_math_view_set_selection(GtkMathView* math_view, GdomeElement* elem)
 }
 
 extern "C" void
-gtk_math_view_reset_selection(GtkMathView* math_view, GdomeElement* elem)
+gtk_math_view_unselect(GtkMathView* math_view, GdomeElement* elem)
 {
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(math_view->interface != NULL);

@@ -338,7 +338,7 @@ selection_parent(GtkWidget* widget, gpointer data)
       gdome_el_unref(root_selected, &exc);
       g_assert(exc == 0);
       root_selected = parent;
-      gtk_math_view_set_selection(GTK_MATH_VIEW(main_area), root_selected);
+      gtk_math_view_select(GTK_MATH_VIEW(main_area), root_selected);
     }
 }
 
@@ -348,7 +348,7 @@ selection_reset(GtkWidget* widget, gpointer data)
   if (root_selected != NULL)
     {
       GdomeException exc = 0;
-      gtk_math_view_reset_selection(GTK_MATH_VIEW(main_area), root_selected);
+      gtk_math_view_unselect(GTK_MATH_VIEW(main_area), root_selected);
       gdome_el_unref(root_selected, &exc);
       g_assert(exc == 0);
       root_selected = NULL;
@@ -457,7 +457,7 @@ element_changed(GtkMathView* math_view, GdomeElement* elem)
 #endif
 
 static void
-selection_changed(GtkMathView* math_view, GdomeElement* first, GdomeElement* last)
+press_move(GtkMathView* math_view, GdomeElement* first, GdomeElement* last)
 {
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
@@ -477,7 +477,7 @@ selection_changed(GtkMathView* math_view, GdomeElement* first, GdomeElement* las
 
       root_selected = find_common_ancestor(first, last);
 /*       printf("selecting root %p\n", first, last, root_selected); */
-      gtk_math_view_set_selection(math_view, root_selected);
+      gtk_math_view_select(math_view, root_selected);
       g_assert(exc == 0);
     }
 }
@@ -538,7 +538,7 @@ create_widget_set()
   gtk_widget_show(main_area);
 
   gtk_signal_connect_object (GTK_OBJECT (main_area),
-			     "selection_changed", GTK_SIGNAL_FUNC (selection_changed),
+			     "press_move", GTK_SIGNAL_FUNC (press_move),
 			     (gpointer) main_area);
 
   gtk_signal_connect_object (GTK_OBJECT (main_area),

@@ -67,8 +67,8 @@ extern "C" {
 #endif
   void           gtk_math_view_unload(GtkMathView*);
 #if defined(HAVE_GMETADOM)
-  void           gtk_math_view_set_selection(GtkMathView*, GdomeElement*);
-  void           gtk_math_view_reset_selection(GtkMathView*, GdomeElement*);
+  void           gtk_math_view_select(GtkMathView*, GdomeElement*);
+  void           gtk_math_view_unselect(GtkMathView*, GdomeElement*);
   gboolean       gtk_math_view_is_selected(GtkMathView*, GdomeElement*);
   GdomeElement*  gtk_math_view_get_element_at(GtkMathView*, gint, gint);
   gboolean       gtk_math_view_get_element_coords(GtkMathView*, GdomeElement*, gint*, gint*);
@@ -95,15 +95,6 @@ extern "C" {
   void           gtk_math_view_export_to_postscript(GtkMathView*, gint, gint, gint, gint, gboolean, FILE*);
   void           gtk_math_view_set_font_manager_type(GtkMathView*, FontManagerId);
   FontManagerId  gtk_math_view_get_font_manager_type(GtkMathView*);
-
-#if 0
-#if defined(HAVE_GMETADOM)
-  guint          gtk_math_view_action_get_selected(GtkMathView*, GdomeElement*);
-  void           gtk_math_view_action_set_selected(GtkMathView*, GdomeElement*, guint);
-  void           gtk_math_view_action_toggle(GtkMathView*, GdomeElement*);
-#endif
-#endif
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
