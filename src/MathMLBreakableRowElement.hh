@@ -47,9 +47,12 @@ public:
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
 
+  Ptr<VerticalLayout> GetLayout(void) const;
   scaled GetExitBaseline(void) const;
 
 protected:
+  void DoBreakableLayout(const class FormattingContext&, const Ptr<VerticalLayout>&);
+
   Ptr<VerticalLayout> layout;
 };
 

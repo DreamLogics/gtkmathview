@@ -30,8 +30,8 @@ MathMLBreakableRowElement::Setup(RenderingEnvironment& env)
 {
   if (DirtyAttribute() || DirtyAttributeP())
     {
-      if (!layout) layout = VerticalLayout::create();
-      layout->SetSpacing(env.GetScaledPointsPerEm(), env.GetScaledPointsPerEx() / 2);
+      if (!layout && !GetLayout()) layout = VerticalLayout::create();
+      if (layout) layout->SetSpacing(env.GetScaledPointsPerEm(), env.GetScaledPointsPerEx() / 2);
       MathMLRowElement::Setup(env);
       ResetDirtyAttribute();
     }  
@@ -42,22 +42,37 @@ MathMLBreakableRowElement::DoLayout(const FormattingContext& ctxt)
 {
   if (DirtyLayout(ctxt))
     {
-      assert(layout);
-      layout->RemoveAll();
+      Ptr<VerticalLayout> l = GetLayout();
+      assert(l);
 
-      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-	   elem != content.end();
-	   elem++)
+      l->RemoveAll();
+      DoBreakableLayout(ctxt, l);
+
+      box = l->GetBoundingBox();
+      DoEmbellishmentLayout(this, box);
+    }
+}
+
+void
+MathMLBreakableRowElement::DoBreakableLayout(const FormattingContext& ctxt, const Ptr<VerticalLayout>& l)
+{
+  assert(l);
+
+  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    {
+      if (Ptr<MathMLBreakableRowElement> brow = smart_cast<MathMLBreakableRowElement>(*elem))
+	brow->DoBreakableLayout(ctxt, l);
+      else
 	{
 	  (*elem)->DoLayout(ctxt);
-	  layout->Add(*elem);
+	  l->Add(*elem);
 	}
-
-      box = layout->GetBoundingBox();
-      DoStretchyLayout();
-      DoEmbellishmentLayout(this, box);
-      ResetDirtyLayout(ctxt);
     }
+
+  DoStretchyLayout();
+  ResetDirtyLayout(ctxt);
 }
 
 void
@@ -68,6 +83,17 @@ MathMLBreakableRowElement::SetPosition(scaled x, scaled y)
   position.y = y;
   SetEmbellishmentPosition(this, x, y);
   layout->SetPosition(x, y);
+}
+
+Ptr<VerticalLayout>
+MathMLBreakableRowElement::GetLayout() const
+{
+  if (layout)
+    return layout;
+  else if (Ptr<MathMLBreakableRowElement> parent = smart_cast<MathMLBreakableRowElement>(GetParent()))
+    return parent->GetLayout();
+  else
+    return 0;
 }
 
 scaled
