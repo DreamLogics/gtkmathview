@@ -1,4 +1,4 @@
-// Copyright (C) 2000, Luca Padovani <luca.padovani@cs.unibo.it>.
+// Copyright (C) 2001, Luca Padovani <luca.padovani@cs.unibo.it>.
 // 
 // This file is part of GtkMathView, a Gtk widget for MathML.
 // 
@@ -20,40 +20,39 @@
 // http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#ifndef PS_T1_FontManager_hh
-#define PS_T1_FontManager_hh
+#include <config.h>
 
 #ifdef HAVE_LIBT1
 
-#include "T1_FontManager.hh"
+#include <assert.h>
 
-class PS_T1_FontManager : public T1_FontManager {
-public:
-  PS_T1_FontManager(void);
-  virtual ~PS_T1_FontManager();
+#include "PS_T1_Font.hh"
+#include "MathEngine.hh"
 
-  void DumpFontDictionary(FILE*, bool = true) const;
-  void ResetUsedChars(void) const;
+PS_T1_Font::PS_T1_Font(unsigned id, float s) : T1_Font(id, s)
+{
+  ResetUsedChars();
+}
 
-protected:
-#if 0
-  const char* GetFontFilePath(unsigned) const;
-#endif
-  virtual const class AFont* SearchNativeFont(const FontAttributes&,
-                                              const ExtraFontAttributes*) const;
+PS_T1_Font::~PS_T1_Font()
+{
+}
 
-private:
-  struct T1_FontDesc {
-    unsigned id;
-    char used[256];
-  };
+void
+PS_T1_Font::UseChars(const char* s, unsigned length) const
+{
+  assert(s != NULL);
+  for (unsigned i = 0; i < length; i++) {
+    assert(((unsigned char) s[i]) < 256);
+    used[((unsigned char) s[i])] = 1;
+    MathEngine::logger(LOG_DEBUG, "using char %d in font %d\n", s[i], GetNativeFontId());
+  }
+}
 
-  static void SetUsedChars(Container<T1_FontDesc*>&, unsigned);
-  static void SetUsedChars(Container<T1_FontDesc*>&, unsigned, const char[]);
-};
-
-#define TO_PS_T1_FONT_MANAGER(fm) (dynamic_cast<PS_T1_FontManager*>(fm))
+void
+PS_T1_Font::ResetUsedChars() const
+{
+  for (unsigned i = 0; i < 256; i++) used[i] = 0;
+}
 
 #endif // HAVE_LIBT1
-
-#endif // PS_T1_FontManager

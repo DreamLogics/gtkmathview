@@ -388,14 +388,21 @@ main(int argc, char *argv[])
 
       Rectangle rect;
       engine.GetDocumentRectangle(rect);
-      area.DumpHeader(appName, argv[optind], rect);
-      fm.DumpFontDictionary(outFile);
 
       Rectangle sheet;
       sheet.x = 0;
       sheet.y = 0;
       sheet.width = w;
       sheet.height = h;
+
+      // the following invocations are needed just to mark the chars actually used :(
+      fm.ResetUsedChars();
+      area.SetOutputFile(NULL);
+      engine.Render(&sheet);
+      area.SetOutputFile(outFile);
+
+      area.DumpHeader(appName, argv[optind], rect);
+      fm.DumpFontDictionary(outFile);
 
       area.DumpPreamble();
       //area.DumpGrid();

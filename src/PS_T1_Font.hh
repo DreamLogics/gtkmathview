@@ -1,4 +1,4 @@
-// Copyright (C) 2000, Luca Padovani <luca.padovani@cs.unibo.it>.
+// Copyright (C) 2001, Luca Padovani <luca.padovani@cs.unibo.it>.
 // 
 // This file is part of GtkMathView, a Gtk widget for MathML.
 // 
@@ -20,40 +20,31 @@
 // http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#ifndef PS_T1_FontManager_hh
-#define PS_T1_FontManager_hh
+#ifndef PS_T1_Font_hh
+#define PS_T1_Font_hh
 
 #ifdef HAVE_LIBT1
 
-#include "T1_FontManager.hh"
+#include "T1_Font.hh"
 
-class PS_T1_FontManager : public T1_FontManager {
+class PS_T1_Font : public T1_Font {
 public:
-  PS_T1_FontManager(void);
-  virtual ~PS_T1_FontManager();
+  PS_T1_Font(unsigned, float);
+  virtual ~PS_T1_Font();
 
-  void DumpFontDictionary(FILE*, bool = true) const;
   void ResetUsedChars(void) const;
-
-protected:
-#if 0
-  const char* GetFontFilePath(unsigned) const;
-#endif
-  virtual const class AFont* SearchNativeFont(const FontAttributes&,
-                                              const ExtraFontAttributes*) const;
+  void UseChar(char ch) const { UseChars(&ch, 1); }
+  void UseChars(const char*, unsigned) const;
+  const char* GetUsedChars(void) const { return used; }
 
 private:
-  struct T1_FontDesc {
-    unsigned id;
-    char used[256];
-  };
-
-  static void SetUsedChars(Container<T1_FontDesc*>&, unsigned);
-  static void SetUsedChars(Container<T1_FontDesc*>&, unsigned, const char[]);
+  // the following array is used to mark chars which are actually used in the font,
+  // in order to optimize the exported PostScript
+  mutable char used[256];
 };
 
-#define TO_PS_T1_FONT_MANAGER(fm) (dynamic_cast<PS_T1_FontManager*>(fm))
+#define TO_PS_T1_FONT(font) (dynamic_cast<const PS_T1_Font*>(font))
 
 #endif // HAVE_LIBT1
 
-#endif // PS_T1_FontManager
+#endif // PS_T1_Font_hh

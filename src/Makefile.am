@@ -26,10 +26,12 @@ T1HEADERS = \
   T1_Gtk_DrawingArea.hh
 
 PSSOURCES = \
+  PS_T1_Font.cc \
   PS_DrawingArea.cc \
   PS_T1_FontManager.cc
 
 PSHEADERS = \
+  PS_T1_Font.hh \
   PS_DrawingArea.hh \
   PS_T1_FontManager.hh
 
