@@ -50,9 +50,9 @@ dictionary.xml: makeDictionary dictionary.in
 	@echo Making operator dictionary...
 	@( \
 	./makeDictionary <dictionary.in | \
-	tr -s '\t' ' ' | tr -s ' ' ' ' >dictionary.xml \
+	tr -s '\t' ' ' | tr -s ' ' ' ' >$@ \
 	)
 
 entities-table.xml: entities-table.in
 	@echo Making entities table...
-	$(SCRIPTDIR)/makeEntitiesTable <entities-table.in >entities-table.xml
+	$(SCRIPTDIR)/makeEntitiesTable <entities-table.in >$@

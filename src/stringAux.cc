@@ -29,9 +29,6 @@
 
 #include "stringAux.hh"
 #include "StringUnicode.hh"
-#include "allocTextNode.hh"
-#include "MathMLCharNode.hh"
-#include "MathMLStringNode.hh"
 
 union endian_union {
   Char8 b[4];

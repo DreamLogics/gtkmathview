@@ -66,6 +66,7 @@ MathMLTableElement::Setup(RenderingEnvironment* env)
 #endif
 
   color = env->GetColor();
+  lineThickness = env->GetRuleThickness();
 }
 
 void
