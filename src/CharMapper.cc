@@ -200,10 +200,10 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
 	    bestCharMap = charMap;
 	    bestDesc = i();
 	  } else if (eval < bestEval) {
-#ifdef DEBUG
+#if 0
 	    MathEngine::logger(LOG_DEBUG, "found a better font, but it's not available");
 	    i()->extraAttributes.Dump();
-#endif // DEBUG
+#endif
 	  }
 	}
       }

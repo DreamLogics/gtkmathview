@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "traverseAux.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLScriptCommonElement.hh"
 
@@ -57,7 +58,10 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
   scaled u;
   scaled v;
 
-  if (base->IsToken() && base->IsA() != TAG_MO) {
+  const MathMLElement* rel = findRightmostChild(base);
+  assert(rel != NULL);
+
+  if (rel->IsToken()) {
     u = v = 0;
   } else {
     u = baseBox.ascent - scriptAxis;

@@ -111,7 +111,7 @@ findCoreOperator(MathMLElement* root)
 	}
       }
 
-      return findCoreOperator(core);
+      return (core != NULL) ? findCoreOperator(core) : NULL;
     }
   case TAG_MSUP:
   case TAG_MSUB:
