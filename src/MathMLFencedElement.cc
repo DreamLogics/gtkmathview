@@ -33,16 +33,20 @@
 #include "MathMLFencedElement.hh"
 #include "MathMLOperatorElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLFencedElement::MathMLFencedElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
+MathMLFencedElement::MathMLFencedElement()
+{
+  normalized = false;
+  openFence = closeFence = separators = NULL;  
+}
+
+#if defined(HAVE_GMETADOM)
 MathMLFencedElement::MathMLFencedElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLNormalizingContainerElement(node, TAG_MFENCED)
+  : MathMLLinearContainerElement(node)
 {
   normalized = false;
   openFence = closeFence = separators = NULL;
 }
+#endif
 
 MathMLFencedElement::~MathMLFencedElement()
 {
@@ -62,7 +66,7 @@ MathMLFencedElement::GetAttributeSignature(AttributeId id) const
   };
 
   const AttributeSignature* signature = GetAttributeSignatureAux(id, sig);
-  if (signature == NULL) signature = MathMLNormalizingContainerElement::GetAttributeSignature(id);
+  if (signature == NULL) signature = MathMLLinearContainerElement::GetAttributeSignature(id);
 
   return signature;
 }
@@ -94,7 +98,7 @@ MathMLFencedElement::Setup(RenderingEnvironment* env)
     normalized = true;
   }
 
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
 }
 
 void
@@ -106,22 +110,27 @@ MathMLFencedElement::Normalize()
 void
 MathMLFencedElement::NormalizeFencedElement()
 {
-  MathMLRowElement* mainRow = new MathMLRowElement(NULL);
+  MathMLRowElement* mainRow = TO_ROW(MathMLRowElement::create());
+  assert(mainRow != 0);
+
   MathMLRowElement* mrow = NULL;
   MathMLOperatorElement* fence = NULL;
 
   if (openFence != NULL && openFence->GetLength() > 0) {
-    fence = new MathMLOperatorElement(NULL);
+    fence = TO_OPERATOR(MathMLOperatorElement::create());
+    assert(fence != 0);
+
     fence->Append(openFence);
     fence->SetFence();
     fence->SetParent(mainRow);
-    mainRow->content.Append(fence);
+    mainRow->Append(fence);
   }
 
   bool moreArguments = content.GetSize() > 1;
 
-  if (moreArguments) mrow = new MathMLRowElement(NULL);
+  if (moreArguments) mrow = TO_ROW(MathMLRowElement::create());
   else mrow = mainRow;
+  assert(mrow != 0);
 
   unsigned i = 0;
   while (content.GetSize() > 0) {
@@ -129,7 +138,7 @@ MathMLFencedElement::NormalizeFencedElement()
     assert(arg != NULL);
 
     arg->SetParent(mrow);
-    mrow->content.Append(arg);
+    mrow->Append(arg);
 
     if (separators != NULL
 	&& separators->GetLength() > 0
@@ -138,11 +147,13 @@ MathMLFencedElement::NormalizeFencedElement()
       const String* sep = allocString(*separators, offset, 1);
       assert(sep != NULL);
 
-      MathMLOperatorElement* separator = new MathMLOperatorElement(NULL);
+      MathMLOperatorElement* separator = TO_OPERATOR(MathMLOperatorElement::create());
+      assert(separator != 0);
+
       separator->SetSeparator();
       separator->Append(sep);
       separator->SetParent(mrow);
-      mrow->content.Append(separator);
+      mrow->Append(separator);
     }
 
     i++;
@@ -150,22 +161,24 @@ MathMLFencedElement::NormalizeFencedElement()
 
   if (moreArguments) {
     mrow->SetParent(mainRow);
-    mainRow->content.Append(mrow);
+    mainRow->Append(mrow);
   }
 
   if (closeFence != NULL && closeFence->GetLength() > 0) {
-    fence = new MathMLOperatorElement(NULL);
+    fence = TO_OPERATOR(MathMLOperatorElement::create());
+    assert(fence != 0);
+
     fence->Append(closeFence);
     fence->SetFence();
     fence->SetParent(mainRow);
-    mainRow->content.Append(fence);
+    mainRow->Append(fence);
   }
 
   mainRow->Normalize();
 
   assert(content.GetSize() == 0);
   mainRow->SetParent(this);
-  content.Append(mainRow);
+  Append(mainRow);
 }
 
 bool

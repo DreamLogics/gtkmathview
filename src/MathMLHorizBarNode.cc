@@ -24,7 +24,7 @@
 #include <assert.h>
 
 #include "unidefs.h"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
 #include "MathMLHorizBarNode.hh"

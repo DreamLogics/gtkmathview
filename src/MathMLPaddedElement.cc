@@ -29,15 +29,18 @@
 #include "MathMLPaddedElement.hh"
 #include "RenderingEnvironment.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLPaddedElement::MathMLPaddedElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLPaddedElement::MathMLPaddedElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLNormalizingContainerElement(node, TAG_MPADDED)
+MathMLPaddedElement::MathMLPaddedElement()
 {
   width.valid = lSpace.valid = height.valid = depth.valid = false;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLPaddedElement::MathMLPaddedElement(const GMetaDOM::Element& node)
+  : MathMLNormalizingContainerElement(node)
+{
+  width.valid = lSpace.valid = height.valid = depth.valid = false;
+}
+#endif
 
 MathMLPaddedElement::~MathMLPaddedElement()
 {
@@ -162,17 +165,15 @@ MathMLPaddedElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
 {
   if (!HasDirtyLayout(id, maxWidth)) return;
 
-  assert(content.GetSize() == 1);
-  MathMLElement* elem = content.GetFirst();
-  assert(elem != NULL);
+  assert(child != NULL);
 
-  elem->DoBoxedLayout(id, bid, maxWidth);
-  const BoundingBox& elemBox = elem->GetBoundingBox();
+  child->DoBoxedLayout(id, bid, maxWidth);
+  const BoundingBox& elemBox = child->GetBoundingBox();
 
   box.Set(EvalLengthDimension(elemBox.width, width, elemBox),
 	  EvalLengthDimension(elemBox.ascent, height, elemBox),
 	  EvalLengthDimension(elemBox.descent, depth, elemBox));
-  lSpaceE     = EvalLengthDimension(0, lSpace, elemBox);
+  lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
 
   ConfirmLayout(id);
 

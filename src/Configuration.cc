@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "StringUnicode.hh"
 #include "Configuration.hh"
 #include "AttributeParser.hh"
@@ -66,7 +66,7 @@ Configuration::Load(const char* confPath)
 {
   assert(confPath != NULL);
 
-  MathEngine::logger(LOG_DEBUG, "loading configuration from `%s'...", confPath);
+  Globals::logger(LOG_DEBUG, "loading configuration from `%s'...", confPath);
 
   mDOMDocRef doc = MathMLParseFile(confPath, false);
   if (doc == NULL) return false;
@@ -74,13 +74,13 @@ Configuration::Load(const char* confPath)
   mDOMNodeRef root = mdom_doc_get_root_node(doc);
   if (root == NULL) {
     mdom_doc_free(doc);
-    MathEngine::logger(LOG_WARNING, "configuration file `%s' has no root node", confPath);
+    Globals::logger(LOG_WARNING, "configuration file `%s' has no root node", confPath);
     return false;
   }
 
   if (!mdom_string_eq(mdom_node_get_name(root), DOM_CONST_STRING("math-engine-configuration"))) {
     mdom_doc_free(doc);
-    MathEngine::logger(LOG_WARNING, "configuration file `%s': could not find root element", confPath);
+    Globals::logger(LOG_WARNING, "configuration file `%s': could not find root element", confPath);
     return false;
   }
 
@@ -104,7 +104,7 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
     if (mdom_string_eq(name, DOM_CONST_STRING("dictionary-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
       if (path != NULL) {
-	MathEngine::logger(LOG_DEBUG, "found dictionary path `%s'", C_STRING(path));
+	Globals::logger(LOG_DEBUG, "found dictionary path `%s'", C_STRING(path));
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
@@ -113,7 +113,7 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
     } else if (mdom_string_eq(name, DOM_CONST_STRING("font-configuration-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
       if (path != NULL) {
-	MathEngine::logger(LOG_DEBUG, "found font configuration path `%s'", C_STRING(path));
+	Globals::logger(LOG_DEBUG, "found font configuration path `%s'", C_STRING(path));
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
@@ -122,7 +122,7 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
     } else if (mdom_string_eq(name, DOM_CONST_STRING("entities-table-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
       if (path != NULL) {
-	MathEngine::logger(LOG_DEBUG, "found entities table path `%s'", C_STRING(path));
+	Globals::logger(LOG_DEBUG, "found entities table path `%s'", C_STRING(path));
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
@@ -131,7 +131,7 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
     } else if (mdom_string_eq(name, DOM_CONST_STRING("t1-config-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
       if (path != NULL && t1Configs.GetSize() == 0) {
-	MathEngine::logger(LOG_DEBUG, "found t1lib config path `%s'", C_STRING(path));
+	Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", C_STRING(path));
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
@@ -140,26 +140,26 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
     } else if (mdom_string_eq(name, DOM_CONST_STRING("font-size"))) {
       mDOMStringRef attr = mdom_node_get_attribute(p, DOM_CONST_STRING("size"));
       if (attr == NULL) {
-	MathEngine::logger(LOG_WARNING, "malformed `font-size' element, cannot find `size' attribute");
+	Globals::logger(LOG_WARNING, "malformed `font-size' element, cannot find `size' attribute");
       } else {
 	fontSize = atoi(C_STRING(attr));
-	MathEngine::logger(LOG_DEBUG, "default font size set to %d points", fontSize);
+	Globals::logger(LOG_DEBUG, "default font size set to %d points", fontSize);
 	fontSizeSet = true;
       }
     } else if (mdom_string_eq(name, DOM_CONST_STRING("color"))) {
       colorSet = ParseColor(p, foreground, background);
-      if (colorSet) MathEngine::logger(LOG_DEBUG, "default color set to %06x %06x", foreground, background);
-      else MathEngine::logger(LOG_WARNING, "color parsing error in configuration file");
+      if (colorSet) Globals::logger(LOG_DEBUG, "default color set to %06x %06x", foreground, background);
+      else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
     } else if (mdom_string_eq(name, DOM_CONST_STRING("link-color"))) {
       linkColorSet = ParseColor(p, linkForeground, linkBackground);
-      if (linkColorSet) MathEngine::logger(LOG_DEBUG, "default link color set to %06x %06x", linkForeground, linkBackground);
-      else MathEngine::logger(LOG_WARNING, "color parsing error in configuration file");
+      if (linkColorSet) Globals::logger(LOG_DEBUG, "default link color set to %06x %06x", linkForeground, linkBackground);
+      else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
     } else if (mdom_string_eq(name, DOM_CONST_STRING("select-color"))) {
       selectColorSet = ParseColor(p, selectForeground, selectBackground);
-      if (selectColorSet) MathEngine::logger(LOG_DEBUG, "default selection color set to %06x %06x", selectForeground, selectBackground);
-      else MathEngine::logger(LOG_WARNING, "color parsing error in configuration file");
+      if (selectColorSet) Globals::logger(LOG_DEBUG, "default selection color set to %06x %06x", selectForeground, selectBackground);
+      else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
     } else if (!mdom_node_is_blank(p)) {
-      MathEngine::logger(LOG_WARNING, "unrecognized entry %s in configuration file (ignored)",
+      Globals::logger(LOG_WARNING, "unrecognized entry %s in configuration file (ignored)",
 			 C_STRING(mdom_node_get_name(p)));
     }
   }
@@ -174,7 +174,7 @@ Configuration::ParseColor(mDOMNodeRef node, RGBValue& f, RGBValue& b)
   mDOMStringRef bs = mdom_node_get_attribute(node, DOM_STRING("background"));
 
   if (fs == NULL || bs == NULL) {
-    MathEngine::logger(LOG_WARNING, "malformed `%s' element in configuration file",
+    Globals::logger(LOG_WARNING, "malformed `%s' element in configuration file",
 		       mdom_node_get_name(node));
     return false;
   }
@@ -192,7 +192,7 @@ Configuration::ParseColor(mDOMNodeRef node, RGBValue& f, RGBValue& b)
     delete fv;
     delete bv;
 
-    MathEngine::logger(LOG_WARNING, "malformed color attribute in configuration file, `%s' element",
+    Globals::logger(LOG_WARNING, "malformed color attribute in configuration file, `%s' element",
 		       mdom_node_get_name(node));
 
     return false;
@@ -214,19 +214,19 @@ Configuration::Load(const char* confPath)
 {
   assert(confPath != NULL);
 
-  MathEngine::logger(LOG_DEBUG, "loading configuration from `%s'...", confPath);
+  Globals::logger(LOG_DEBUG, "loading configuration from `%s'...", confPath);
 
   try {
     GMetaDOM::Document doc = MathMLParseFile(confPath, false);
 
     GMetaDOM::Element root = doc.get_documentElement();
     if (root == 0) {
-      MathEngine::logger(LOG_WARNING, "configuration file `%s' has no root node", confPath);
+      Globals::logger(LOG_WARNING, "configuration file `%s' has no root node", confPath);
       return false;
     }
 
     if (root.get_nodeName() != "math-engine-configuration") {
-      MathEngine::logger(LOG_WARNING, "configuration file `%s': could not find root element", confPath);
+      Globals::logger(LOG_WARNING, "configuration file `%s': could not find root element", confPath);
       return false;
     }
 
@@ -250,7 +250,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	GMetaDOM::DOMString path = elementValue(elem);
 	if (!path.isEmpty()) {
 	  char* s_path = path.toC();
-	  MathEngine::logger(LOG_DEBUG, "found dictionary path `%s'", s_path);
+	  Globals::logger(LOG_DEBUG, "found dictionary path `%s'", s_path);
 	  String* s = new StringC(s_path);
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
@@ -261,7 +261,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	GMetaDOM::DOMString path = elementValue(elem);
 	if (!path.isEmpty()) {
 	  char* s_path = path.toC();
-	  MathEngine::logger(LOG_DEBUG, "found font configuration path `%s'", s_path);
+	  Globals::logger(LOG_DEBUG, "found font configuration path `%s'", s_path);
 	  String* s = new StringC(s_path);
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
@@ -272,7 +272,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	GMetaDOM::DOMString path = elementValue(elem);
 	if (!path.isEmpty()) {
 	  char* s_path = path.toC();
-	  MathEngine::logger(LOG_DEBUG, "found entities table path `%s'", s_path);
+	  Globals::logger(LOG_DEBUG, "found entities table path `%s'", s_path);
 	  String* s = new StringC(s_path);
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
@@ -283,7 +283,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	GMetaDOM::DOMString path = elementValue(elem);
 	if (!path.isEmpty() && t1Configs.GetSize() == 0) {
 	  char* s_path = path.toC();
-	  MathEngine::logger(LOG_DEBUG, "found t1lib config path `%s'", s_path);
+	  Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", s_path);
 	  String* s = new StringC(s_path);
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
@@ -293,33 +293,33 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
       } else if (name == "font-size") {
 	GMetaDOM::DOMString attr = elem.getAttribute("size");
 	if (attr.isEmpty()) {
-	  MathEngine::logger(LOG_WARNING, "malformed `font-size' element, cannot find `size' attribute");
+	  Globals::logger(LOG_WARNING, "malformed `font-size' element, cannot find `size' attribute");
 	} else {
 	  char* s_attr = attr.toC();
 	  fontSize = atoi(s_attr);
-	  MathEngine::logger(LOG_DEBUG, "default font size set to %d points", fontSize);
+	  Globals::logger(LOG_DEBUG, "default font size set to %d points", fontSize);
 	  fontSizeSet = true;
 	  delete [] s_attr;
 	}
       } else if (name == "color") {
 	colorSet = ParseColor(elem, foreground, background);
-	if (colorSet) MathEngine::logger(LOG_DEBUG, "default color set to %06x %06x", foreground, background);
-	else MathEngine::logger(LOG_WARNING, "color parsing error in configuration file");
+	if (colorSet) Globals::logger(LOG_DEBUG, "default color set to %06x %06x", foreground, background);
+	else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
       } else if (name == "link-color") {
 	linkColorSet = ParseColor(elem, linkForeground, linkBackground);
-	if (linkColorSet) MathEngine::logger(LOG_DEBUG, "default link color set to %06x %06x", linkForeground, linkBackground);
-	else MathEngine::logger(LOG_WARNING, "color parsing error in configuration file");
+	if (linkColorSet) Globals::logger(LOG_DEBUG, "default link color set to %06x %06x", linkForeground, linkBackground);
+	else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
       } else if (name == "select-color") {
 	selectColorSet = ParseColor(elem, selectForeground, selectBackground);
-	if (selectColorSet) MathEngine::logger(LOG_DEBUG, "default selection color set to %06x %06x", selectForeground, selectBackground);
-	else MathEngine::logger(LOG_WARNING, "color parsing error in configuration file");
+	if (selectColorSet) Globals::logger(LOG_DEBUG, "default selection color set to %06x %06x", selectForeground, selectBackground);
+	else Globals::logger(LOG_WARNING, "color parsing error in configuration file");
       } else {
 	char* s_name = name.toC();
-	MathEngine::logger(LOG_WARNING, "unrecognized element `%s' in configuration file (ignored)", s_name);
+	Globals::logger(LOG_WARNING, "unrecognized element `%s' in configuration file (ignored)", s_name);
 	delete [] s_name;
       }
     } else if (!GMetaDOM::nodeIsBlank(p)) {
-      MathEngine::logger(LOG_WARNING, "unrecognized node type `%d' in configuration file (ignored)", p.get_nodeType());
+      Globals::logger(LOG_WARNING, "unrecognized node type `%d' in configuration file (ignored)", p.get_nodeType());
     }
   }
 }
@@ -332,7 +332,7 @@ Configuration::ParseColor(const GMetaDOM::Element& node, RGBValue& f, RGBValue& 
 
   if (fs.isEmpty() || bs.isEmpty()) {
     char* s_name = node.get_nodeName().toC();
-    MathEngine::logger(LOG_WARNING, "malformed `%s' element in configuration file", s_name);
+    Globals::logger(LOG_WARNING, "malformed `%s' element in configuration file", s_name);
     delete [] s_name;
     return false;
   }
@@ -355,7 +355,7 @@ Configuration::ParseColor(const GMetaDOM::Element& node, RGBValue& f, RGBValue& 
     delete bv;
 
     char* s_name = node.get_nodeName().toC();
-    MathEngine::logger(LOG_WARNING, "malformed color attribute in configuration file, `%s' element", s_name);
+    Globals::logger(LOG_WARNING, "malformed color attribute in configuration file, `%s' element", s_name);
     delete [] s_name;
 
     return false;

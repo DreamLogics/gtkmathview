@@ -23,9 +23,7 @@
 #ifndef MathMLmathElement_hh
 #define MathMLmathElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -33,19 +31,23 @@
 
 class MathMLmathElement: public MathMLNormalizingContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLmathElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLmathElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLmathElement(const GMetaDOM::Element&);
 #endif
-  virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
   virtual ~MathMLmathElement();
 
-  virtual bool IsBreakable(void) const;
+public:
+  static MathMLElement* create(void) { return new MathMLmathElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLmathElement(el); }
+#endif
 
-protected:
+  virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
+  virtual void Setup(class RenderingEnvironment*);
+
+  virtual bool IsBreakable(void) const;
 };
 
 #endif // MathMLmathElement_hh

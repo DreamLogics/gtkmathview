@@ -29,7 +29,7 @@
 
 #include "Gtk_Font.hh"
 #include "Iterator.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "Gtk_FontManager.hh"
 
 Gtk_FontManager::Gtk_FontManager()
@@ -137,10 +137,10 @@ Gtk_FontManager::SearchNativeFont(const FontAttributes& fa,
 	     hres, vres, spacing, avgwidth, registry, encoding);
 
   GdkFont* font = gdk_font_load(fontName);
-  MathEngine::logger(LOG_DEBUG, "loading font: %s --> %p", fontName, font);
+  Globals::logger(LOG_DEBUG, "loading font: %s --> %p", fontName, font);
 
   if (font == NULL)
-    MathEngine::logger(LOG_WARNING, "unable to find X font `%s'", fontName);
+    Globals::logger(LOG_WARNING, "unable to find X font `%s'", fontName);
 
   AFont* f = (font != NULL) ? new Gtk_Font(font) : NULL;
 

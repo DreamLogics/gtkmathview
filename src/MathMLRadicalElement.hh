@@ -23,28 +23,32 @@
 #ifndef MathMLRadicalElement_hh
 #define MathMLRadicalElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLNormalizingContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 
-class MathMLRadicalElement : public MathMLNormalizingContainerElement
+class MathMLRadicalElement : public MathMLLinearContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLRadicalElement(mDOMNodeRef, TagId);
-#elif defined(HAVE_GMETADOM)
-  MathMLRadicalElement(const GMetaDOM::Element&, TagId);
+protected:
+  MathMLRadicalElement(void);
+#if defined(HAVE_GMETADOM)
+  MathMLRadicalElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLRadicalElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLRadicalElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLRadicalElement(el); }
+#endif
+
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
-  virtual ~MathMLRadicalElement();
 
   virtual bool IsExpanding(void) const;
   virtual scaled GetLeftEdge(void) const;

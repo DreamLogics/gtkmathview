@@ -23,31 +23,37 @@
 #ifndef MathMLUnderOverElement_hh
 #define MathMLUnderOverElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLUnderOverElement : public MathMLContainerElement, public MathMLScriptCommonElement
+class MathMLUnderOverElement : public MathMLLinearContainerElement, public MathMLScriptCommonElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLUnderOverElement(mDOMNodeRef, TagId);
-#elif defined(HAVE_GMETADOM)
-  MathMLUnderOverElement(const GMetaDOM::Element&, TagId);
+protected:
+  MathMLUnderOverElement(void);
+#if defined(HAVE_GMETADOM)
+  MathMLUnderOverElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLUnderOverElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLUnderOverElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLUnderOverElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
-  virtual ~MathMLUnderOverElement();
 
   virtual bool IsExpanding(void) const;
+
+  virtual class MathMLOperatorElement* GetCoreOperator(void);
 
 protected:
   bool   scriptize;

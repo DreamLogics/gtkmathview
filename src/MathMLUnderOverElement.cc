@@ -23,7 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
 #include "MathMLCharNode.hh"
@@ -33,16 +33,18 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLUnderOverElement::MathMLUnderOverElement(mDOMNodeRef node, TagId id)
-#elif defined(HAVE_GMETADOM)
-MathMLUnderOverElement::MathMLUnderOverElement(const GMetaDOM::Element& node, TagId id)
-#endif
-  : MathMLContainerElement(node, id)
+MathMLUnderOverElement::MathMLUnderOverElement()
 {
-  assert(id == TAG_MUNDER || id == TAG_MOVER || id == TAG_MUNDEROVER);
-  underScript = overScript = NULL;
+  underScript = overScript = 0;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLUnderOverElement::MathMLUnderOverElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  underScript = overScript = 0;
+}
+#endif
 
 MathMLUnderOverElement::~MathMLUnderOverElement()
 {
@@ -67,7 +69,7 @@ MathMLUnderOverElement::GetAttributeSignature(AttributeId id) const
   if (signature == NULL && (IsA() == TAG_MOVER || IsA() == TAG_MUNDEROVER))
     signature = GetAttributeSignatureAux(id, overSig);    
   if (signature == NULL)
-    signature = MathMLContainerElement::GetAttributeSignature(id);
+    signature = MathMLLinearContainerElement::GetAttributeSignature(id);
   
   return signature;
 }
@@ -79,17 +81,18 @@ MathMLUnderOverElement::Normalize()
 
   while (content.GetSize() > n) {
     MathMLElement* elem = content.RemoveLast();
-    delete elem;
+    elem->Release();
   }
 
   while (content.GetSize() < n) {
-    MathMLElement* mdummy = new MathMLDummyElement();
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != 0);
     Append(mdummy);
   }
 
   // BEWARE: normalization has to be done here, since it may
   // change the content!!!
-  MathMLContainerElement::Normalize();
+  MathMLLinearContainerElement::Normalize();
 
   base = content.GetFirst();
   assert(base != NULL);
@@ -116,9 +119,15 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   scaled bigSpacing   = 3 * ruleThickness;
 
   base->Setup(env);
-  const MathMLOperatorElement* op = findCoreOperator(base);
+  const MathMLOperatorElement* op = base->GetCoreOperator();
 
-  scriptize = op != NULL && !displayStyle && op->HasMovableLimits();
+  if (op != NULL)
+    {
+      scriptize = !displayStyle && op->HasMovableLimits();
+      op->Release();
+    }
+  else
+    scriptize = false;
 
   env->Push();
   env->SetDisplayStyle(false);
@@ -130,10 +139,11 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
       const Value* value = GetAttributeValue(ATTR_ACCENTUNDER, env, false);
       if (value != NULL) accentUnder = value->ToBoolean();
       else {
-	const MathMLOperatorElement* op = findCoreOperator(underScript);
+	const MathMLOperatorElement* op = underScript->GetCoreOperator();
 	if (op != NULL) {
 	  underScript->Setup(env);
 	  accentUnder = op->IsAccent();
+	  op->Release();
 	}
       }
     }
@@ -157,10 +167,11 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
       const Value* value = GetAttributeValue(ATTR_ACCENT, env, false);
       if (value != NULL) accent = value->ToBoolean();
       else {
-	const MathMLOperatorElement* op = findCoreOperator(overScript);
+	const MathMLOperatorElement* op = overScript->GetCoreOperator();
 	if (op != NULL) {
 	  overScript->Setup(env);
 	  accent = op->IsAccent();
+	  op->Release();
 	}
       }
     }
@@ -222,7 +233,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
       MathMLOperatorElement* underOp = findStretchyOperator(underScript, STRETCH_HORIZONTAL);
       MathMLOperatorElement* overOp  = findStretchyOperator(overScript, STRETCH_HORIZONTAL);
 
-      MathEngine::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
+      Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
 
       if (baseOp == NULL) base->DoBoxedLayout(id, BREAK_NO, maxWidth);
       if (underScript != NULL && underOp == NULL) underScript->DoBoxedLayout(id, BREAK_NO, maxWidth);
@@ -279,7 +290,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	  bChar != NULL && cChar != NULL &&
 	  isCombiningBelow(cChar->GetChar()) &&
 	  bChar->CombineWith(cChar, underShiftX, underShiftY)) {
-	MathEngine::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent under U+%04X",
+	Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent under U+%04X",
 			   cChar->GetChar(), bChar->GetChar());
 
 	underShiftY = -underShiftY;
@@ -307,7 +318,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	  bChar != NULL && cChar != NULL &&
 	  isCombiningAbove(cChar->GetChar()) &&
 	  bChar->CombineWith(cChar, overShiftX, overShiftY)) {
-	MathEngine::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
+	Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
 			   cChar->GetChar(), bChar->GetChar());
 
 	if (overScript->IsEmbellishedOperator()) {
@@ -315,7 +326,7 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 	  assert(eOp != NULL);
 	  MathMLOperatorElement* coreOp = eOp->GetCoreOperator();
 	  assert(coreOp != NULL);
-	  MathEngine::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
+	  Globals::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
 	  overShiftY += coreOp->GetBottomPadding();
 	}
       } else {
@@ -390,4 +401,11 @@ MathMLUnderOverElement::IsExpanding() const
 {
   assert(base != NULL);
   return base->IsExpanding();
+}
+
+class MathMLOperatorElement*
+MathMLUnderOverElement::GetCoreOperator()
+{
+  assert(base != NULL);
+  return base->GetCoreOperator();
 }

@@ -32,7 +32,7 @@
 #endif
 
 #include "String.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 
 #ifdef DEBUG
 int String::counter = 0;
@@ -95,7 +95,7 @@ String::ToCAux(char *dest) const
   for (unsigned i = 0; i < GetLength(); i++) {
     Char ch = GetChar(i);
     if (!isPlain(ch))
-      MathEngine::logger(LOG_WARNING, "c-izing a Unicode string with extended chars!");
+      Globals::logger(LOG_WARNING, "c-izing a Unicode string with extended chars!");
     dest[i] = ch & 0xff;
   }
 

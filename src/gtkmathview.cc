@@ -34,9 +34,9 @@
 #include <gtk/gtksignal.h>
 #include <gtk/gtkdrawingarea.h>
 
+#include "Globals.hh"
 #include "Rectangle.hh"
 #include "gtkmathview.h"
-#include "MathEngine.hh"
 #include "traverseAux.hh"
 #include "MathMLElement.hh"
 #include "PS_DrawingArea.hh"
@@ -44,6 +44,7 @@
 #include "PS_T1_FontManager.hh"
 #include "T1_Gtk_DrawingArea.hh"
 #include "MathMLActionElement.hh"
+#include "MathMLRenderingEngine.hh"
 
 /* structures */
 
@@ -85,7 +86,7 @@ struct _GtkMathView {
 
   FontManager*     font_manager;
   Gtk_DrawingArea* drawing_area;
-  MathEngine*      interface;
+  MathMLRenderingEngine* interface;
 };
 
 struct _GtkMathViewClass {
@@ -382,7 +383,7 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
 
   gtk_object_class_add_signals(object_class, &action_changed_signal, 1);
 
-  MathEngine::InitGlobalData(getenv("MATHENGINECONF"));
+  Globals::InitGlobalData(getenv("MATHENGINECONF"));
 }
 
 static void
@@ -448,7 +449,7 @@ gtk_math_view_new(GtkAdjustment* hadj, GtkAdjustment* vadj)
 
   math_view->top_x = math_view->top_y = 0;
   math_view->old_top_x = math_view->old_top_y = 0;
-  math_view->interface = new MathEngine();
+  math_view->interface = new MathMLRenderingEngine();
 
   gtk_math_view_set_font_manager_type(math_view, FONT_MANAGER_GTK);
 
@@ -470,7 +471,7 @@ gtk_math_view_destroy(GtkObject* object)
   MathMLElement* root = math_view->interface->GetRoot();
   if (root != NULL) root->ReleaseGCs();
 
-  MathEngine::logger(LOG_DEBUG, "destroying the widget");
+  Globals::logger(LOG_DEBUG, "destroying the widget");
 
   delete math_view->interface;
   delete math_view->font_manager;
@@ -1105,7 +1106,7 @@ gtk_math_view_set_selection(GtkMathView* math_view, GdomeElement* node)
 #if defined(HAVE_MINIDOM)
   MathMLElement* elem = (node != NULL) ? getMathMLElement(node) : NULL;
 #elif defined(HAVE_GMETADOM)
-  MathMLElement* elem = (node != NULL) ? getMathMLElement(node) : NULL;
+  MathMLElement* elem = (node != NULL) ? getRenderingInterface(node) : NULL;
 #endif
   math_view->interface->SetSelected(elem);
 }
@@ -1220,19 +1221,13 @@ gtk_math_view_set_top(GtkMathView* math_view, gint x, gint y)
 extern "C" void
 gtk_math_view_set_log_verbosity(GtkMathView* math_view, gint level)
 {
-  g_return_if_fail(math_view != NULL);
-  g_return_if_fail(math_view->interface != NULL);
-  
-  math_view->interface->SetVerbosity(level);
+  Globals::SetVerbosity(level);
 }
 
 extern "C" gint
 gtk_math_view_get_log_verbosity(GtkMathView* math_view)
 {
-  g_return_val_if_fail(math_view != NULL, 0);
-  g_return_val_if_fail(math_view->interface != NULL, 0);
-
-  return math_view->interface->GetVerbosity();
+  Globals::GetVerbosity();
 }
 
 extern "C" void
@@ -1256,8 +1251,8 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
   math_view->font_manager_id = id;
 
   GraphicsContextValues values;
-  values.foreground = MathEngine::configuration.GetForeground();
-  values.background = MathEngine::configuration.GetBackground();
+  values.foreground = Globals::configuration.GetForeground();
+  values.background = Globals::configuration.GetBackground();
   values.lineStyle  = LINE_STYLE_SOLID;
   values.lineWidth  = px2sp(1);
 
@@ -1267,23 +1262,23 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
     math_view->font_manager = new PS_T1_FontManager;
     math_view->drawing_area = new T1_Gtk_DrawingArea(values, px2sp(5), px2sp(5),
 						     GTK_WIDGET(math_view->area),
-						     MathEngine::configuration.GetSelectForeground(),
-						     MathEngine::configuration.GetSelectBackground());
+						     Globals::configuration.GetSelectForeground(),
+						     Globals::configuration.GetSelectBackground());
     math_view->drawing_area->SetPixmap(math_view->pixmap);
     break;
 #else
-    MathEngine::logger(LOG_WARNING, "the widget was compiled without support for T1 fonts, falling back to GTK fonts");
+    Globals::logger(LOG_WARNING, "the widget was compiled without support for T1 fonts, falling back to GTK fonts");
 #endif // HAVE_LIBT1
   case FONT_MANAGER_GTK:
     math_view->font_manager = new Gtk_FontManager;
     math_view->drawing_area = new Gtk_DrawingArea(values, px2sp(5), px2sp(5),
 						  GTK_WIDGET(math_view->area),
-						  MathEngine::configuration.GetSelectForeground(),
-						  MathEngine::configuration.GetSelectBackground());
+						  Globals::configuration.GetSelectForeground(),
+						  Globals::configuration.GetSelectBackground());
     math_view->drawing_area->SetPixmap(math_view->pixmap);
     break;
   default:
-    MathEngine::logger(LOG_ERROR, "could not switch to font manager type %d", id);
+    Globals::logger(LOG_ERROR, "could not switch to font manager type %d", id);
     break;
   }
 
@@ -1316,7 +1311,7 @@ gtk_math_view_export_to_postscript(GtkMathView* math_view,
   g_return_if_fail(math_view->drawing_area != NULL);
 
   if (math_view->font_manager_id != FONT_MANAGER_T1) {
-    MathEngine::logger(LOG_ERROR, "cannot export to PostScript if the Type1 Font Manager is not available");
+    Globals::logger(LOG_ERROR, "cannot export to PostScript if the Type1 Font Manager is not available");
     return;
   }
 
@@ -1442,7 +1437,7 @@ gtk_math_view_action_toggle(GtkMathView* math_view)
 #endif
   assert(action_element != NULL);
   guint idx = action_element->GetSelectedIndex();
-  if (idx < action_element->content.GetSize())
+  if (idx < action_element->GetContent().GetSize())
     idx++;
   else
     idx = 1;

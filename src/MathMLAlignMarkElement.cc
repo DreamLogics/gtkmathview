@@ -27,15 +27,18 @@
 #include "AttributeParser.hh"
 #include "MathMLAlignMarkElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLAlignMarkElement::MathMLAlignMarkElement(mDOMNodeRef node) : 
-#elif defined(HAVE_GMETADOM)
-MathMLAlignMarkElement::MathMLAlignMarkElement(const GMetaDOM::Element& node) : 
-#endif
-  MathMLElement(node, TAG_MALIGNMARK)
+MathMLAlignMarkElement::MathMLAlignMarkElement()
 {
   edge = MARK_ALIGN_NOTVALID;
 }
+ 
+#if defined(HAVE_GMETADOM)
+MathMLAlignMarkElement::MathMLAlignMarkElement(const GMetaDOM::Element& node)
+  : MathMLElement(node)
+{
+  edge = MARK_ALIGN_NOTVALID;
+}
+#endif
 
 MathMLAlignMarkElement::~MathMLAlignMarkElement()
 {
@@ -53,6 +56,13 @@ MathMLAlignMarkElement::GetAttributeSignature(AttributeId id) const
   if (signature == NULL) signature = MathMLElement::GetAttributeSignature(id);
 
   return signature;
+}
+
+void
+MathMLAlignMarkElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    ResetDirtyStructure();
 }
 
 void

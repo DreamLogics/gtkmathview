@@ -23,31 +23,38 @@
 #ifndef MathMLRowElement_hh
 #define MathMLRowElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 
-class MathMLRowElement: public MathMLContainerElement
+class MathMLRowElement: public MathMLLinearContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLRowElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLRowElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLRowElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLRowElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLRowElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLRowElement(el); }
+#endif
+
   // virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
   virtual void DoLayout(LayoutId, class Layout&);
   virtual void DoStretchyLayout(void);
-  virtual ~MathMLRowElement();
 
   virtual bool IsBreakable(void) const;
   virtual bool IsSpaceLike(void) const;
   virtual bool IsExpanding(void) const;
+
+  OperatorFormId GetOperatorForm(MathMLElement*) const;
+  virtual class MathMLOperatorElement* GetCoreOperator();
 
 private:
   MathMLElement* lastElement;

@@ -22,6 +22,7 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <stdio.h>
 
 #include "MathMLObject.hh"
@@ -33,6 +34,7 @@ int MathMLObject::counter = 0;
 
 MathMLObject::MathMLObject()
 {
+  refCounter = 1;
 #ifdef DEBUG
   counter++;
 #endif
@@ -40,9 +42,22 @@ MathMLObject::MathMLObject()
 
 MathMLObject::~MathMLObject()
 {
+  assert(refCounter == 0);
 #ifdef DEBUG
   counter--;
 #endif
+}
+
+void
+MathMLObject::AddRef() const
+{
+  refCounter++;
+}
+
+void
+MathMLObject::Release() const
+{
+  if (--refCounter == 0) delete this;
 }
 
 void

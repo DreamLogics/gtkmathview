@@ -26,7 +26,7 @@
 
 #include "Iterator.hh"
 #include "frameAux.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "operatorAux.hh"
 #include "StringUnicode.hh"
 #include "MathMLMarkNode.hh"
@@ -36,12 +36,21 @@
 #include "MathMLAlignMarkElement.hh"
 #include "MathMLTableCellElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLTableCellElement::MathMLTableCellElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
+MathMLTableCellElement::MathMLTableCellElement()
+{
+  Init();
+}
+
+#if defined(HAVE_GMETADOM)
 MathMLTableCellElement::MathMLTableCellElement(const GMetaDOM::Element& node)
+  : MathMLNormalizingContainerElement(node)
+{
+  Init();
+}
 #endif
-  : MathMLNormalizingContainerElement(node, TAG_MTD)
+
+void
+MathMLTableCellElement::Init()
 {
   rowIndex = 0;
   columnIndex = 0;
@@ -76,6 +85,9 @@ MathMLTableCellElement::SetupGroups(MathMLElement* elem,
 				    bool countGroups,
 				    TableCell& status)
 {
+  // this static method is probably to be rewritten completely
+  // as a set of virtual methods in the various Element classes
+#if 0
   assert(elem != NULL);
 
   // if countGroups == TRUE  requires: normalization, alignment scopes
@@ -182,6 +194,7 @@ MathMLTableCellElement::SetupGroups(MathMLElement* elem,
       break;
     }
   }
+#endif
 }
 
 void
@@ -232,7 +245,7 @@ MathMLTableCellElement::SetupCellPosition(unsigned i, unsigned j, unsigned nRows
   columnIndex = j;
 
   if (i + rowSpan > nRows) {
-    MathEngine::logger(LOG_WARNING, "`mtd' spans over the last row (truncated)");
+    Globals::logger(LOG_WARNING, "`mtd' spans over the last row (truncated)");
     rowSpan = nRows - i;
   }
 }
@@ -353,11 +366,9 @@ void
 MathMLTableCellElement::SetPosition(scaled x, scaled y)
 {
   assert(cell != NULL);
+  assert(child != NULL);
 
-  MathMLElement* elem = GetContent();
-  assert(elem != NULL);
-
-  const BoundingBox& elemBox = elem->GetBoundingBox();
+  const BoundingBox& elemBox = child->GetBoundingBox();
 
   position.x = x;
   position.y = y;
@@ -402,16 +413,14 @@ MathMLTableCellElement::SetPosition(scaled x, scaled y)
   }
 
   if (cell->nAlignGroup == 0)
-    elem->SetPosition(x + cellXOffset, y + cellYOffset, cell->columnAlign);
+    child->SetPosition(x + cellXOffset, y + cellYOffset, cell->columnAlign);
   else
-    elem->SetPosition(x + cellXOffset, y + cellYOffset);
+    child->SetPosition(x + cellXOffset, y + cellYOffset);
 }
 
 bool
 MathMLTableCellElement::IsStretchyOperator() const
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
-
-  return isStretchyOperator(content.GetFirst());
+  assert(child != 0);
+  return isStretchyOperator(child);
 }

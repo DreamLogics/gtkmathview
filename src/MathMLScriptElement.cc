@@ -29,15 +29,18 @@
 #include "MathMLScriptElement.hh"
 #include "RenderingEnvironment.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLScriptElement::MathMLScriptElement(mDOMNodeRef node, TagId id)
-#elif defined(HAVE_GMETADOM)
-MathMLScriptElement::MathMLScriptElement(const GMetaDOM::Element& node, TagId id)
-#endif
-  : MathMLContainerElement(node, id)
+MathMLScriptElement::MathMLScriptElement()
 {
-  subScript = superScript = NULL;
+  subScript = superScript = 0;  
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLScriptElement::MathMLScriptElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  subScript = superScript = 0;
+}
+#endif
 
 MathMLScriptElement::~MathMLScriptElement()
 {
@@ -62,7 +65,7 @@ MathMLScriptElement::GetAttributeSignature(AttributeId id) const
   if ((IsA() == TAG_MSUP || IsA() == TAG_MSUBSUP || IsA() == TAG_MMULTISCRIPTS) && signature == NULL)
     signature = GetAttributeSignatureAux(id, supSig);
 
-  if (signature == NULL) signature = MathMLContainerElement::GetAttributeSignature(id);
+  if (signature == NULL) signature = MathMLLinearContainerElement::GetAttributeSignature(id);
 
   return signature;
 }
@@ -74,18 +77,19 @@ MathMLScriptElement::Normalize()
 
   while (content.GetSize() > n) {
     MathMLElement* elem = content.RemoveLast();
-    delete elem;
+    elem->Release();
   }
 
   while (content.GetSize() < n) {
-    MathMLElement* mdummy = new MathMLDummyElement();
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != 0);
     mdummy->SetParent(this);
     content.Append(mdummy);
   }
 
   // BEWARE: normalization has to be done here, since it may
   // change the content!!!
-  MathMLContainerElement::Normalize();
+  MathMLLinearContainerElement::Normalize();
 
   base = content.GetFirst();
   assert(base != NULL);
@@ -222,4 +226,11 @@ MathMLScriptElement::SetPosition(scaled x, scaled y)
 
   if (superScript != NULL)
     superScript->SetPosition(x + superShiftX, y - superShiftY);
+}
+
+class MathMLOperatorElement*
+MathMLScriptElement::GetCoreOperator()
+{
+  assert(base != NULL);
+  return base->GetCoreOperator();
 }

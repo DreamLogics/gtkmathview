@@ -23,14 +23,12 @@
 #ifndef MathMLTableElement_hh
 #define MathMLTableElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
 #include "MathMLTableRowElement.hh"
-#include "MathMLContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 #include "MathMLAlignGroupElement.hh"
 
 #define MIN_COLUMN_SPACING (float2sp(3 * SCALED_POINTS_PER_PX))
@@ -129,14 +127,24 @@ struct RowLabel {
   ColumnAlignId  columnAlign;
 };
 
-class MathMLTableElement: public MathMLContainerElement
+class MathMLTableElement: public MathMLLinearContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLTableElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLTableElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLTableElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLTableElement();
+
+private:
+  void Init(void);
+
+public:
+  static MathMLElement* create(void) { return new MathMLTableElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTableElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
@@ -144,7 +152,6 @@ public:
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
-  virtual ~MathMLTableElement();
 
   virtual MathMLElement* Inside(scaled x, scaled y);
 

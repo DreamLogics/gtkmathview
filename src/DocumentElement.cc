@@ -24,9 +24,7 @@
 #include <assert.h>
 #include <stddef.h>
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -34,14 +32,17 @@
 #include "DocumentElement.hh"
 #include "RenderingEnvironment.hh"
 
-#if defined(HAVE_MINIDOM)
-DocumentElement::DocumentElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-  DocumentElement::DocumentElement(const GMetaDOM::Document&)
-#endif
-  : MathMLContainerElement(0, TAG_DOCUMENT)
+DocumentElement::DocumentElement()
+  : MathMLLinearContainerElement(0)
 {
 }
+
+#if defined(HAVE_GMETADOM)
+DocumentElement::DocumentElement(const GMetaDOM::Document& doc)
+  : MathMLLinearContainerElement(doc.get_documentElement())
+{
+}
+#endif
 
 DocumentElement::~DocumentElement()
 {
@@ -52,7 +53,7 @@ DocumentElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
   sppm = env->GetScaledPointsPerEm();
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
 }
 
 void

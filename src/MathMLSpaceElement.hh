@@ -23,9 +23,7 @@
 #ifndef MathMLSpaceElement_hh
 #define MathMLSpaceElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -34,16 +32,23 @@
 
 class MathMLSpaceElement: public MathMLElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLSpaceElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLSpaceElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLSpaceElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLSpaceElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLSpaceElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLSpaceElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
+  virtual void    Normalize(void);
   virtual void    Setup(class RenderingEnvironment*);
   virtual void    DoBoxedLayout(LayoutId, BreakId, scaled);
-  virtual ~MathMLSpaceElement();
 
   virtual bool    IsSpace(void) const;
   virtual bool    IsSpaceLike(void) const;

@@ -23,26 +23,30 @@
 #ifndef MathMLFencedElement_hh
 #define MathMLFencedElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLNormalizingContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 
-class MathMLFencedElement: public MathMLNormalizingContainerElement
+class MathMLFencedElement: public MathMLLinearContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLFencedElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLFencedElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLFencedElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLFencedElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLFencedElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLFencedElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-  virtual ~MathMLFencedElement();
 
   virtual bool IsBreakable(void) const;
 

@@ -25,13 +25,19 @@
 
 #include "MathMLTextNode.hh"
 
-class MathMLGlyphNode: public MathMLTextNode {
-public:
+class MathMLGlyphNode: public MathMLTextNode
+{
+protected:
   MathMLGlyphNode(const char*, const char*, char);
+  virtual ~MathMLGlyphNode();
+
+public:
+  static MathMLGlyphNode* create(const char* alt, const char* family, char ch)
+  { return new MathMLGlyphNode(alt, family, ch); }
+
   virtual void 	 Setup(class RenderingEnvironment*);
   virtual void 	 DoLayout(void);
   virtual void 	 Render(const DrawingArea&);
-  virtual ~MathMLGlyphNode();
 
 protected:
   char*        name;

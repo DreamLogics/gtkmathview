@@ -29,14 +29,16 @@
 #include "MathMLDummyElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLNormalizingContainerElement::MathMLNormalizingContainerElement(mDOMNodeRef node, TagId t)
-#elif defined(HAVE_GMETADOM)
-MathMLNormalizingContainerElement::MathMLNormalizingContainerElement(const GMetaDOM::Element& node, TagId t)
-#endif
-  : MathMLContainerElement(node, t)
+MathMLNormalizingContainerElement::MathMLNormalizingContainerElement()
 {
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLNormalizingContainerElement::MathMLNormalizingContainerElement(const GMetaDOM::Element& node)
+  : MathMLBinContainerElement(node)
+{
+}
+#endif
 
 MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 {
@@ -45,23 +47,13 @@ MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 void
 MathMLNormalizingContainerElement::Normalize()
 {
-  if (content.GetSize() == 0) {
-    MathMLElement* mdummy = new MathMLDummyElement();
-    mdummy->SetParent(this);
-    content.Append(mdummy);
-  } else if (content.GetSize() > 1) {
-    MathMLContainerElement* mrow = new MathMLRowElement(NULL);
-    mrow->SetParent(this);
-
-    while (!content.IsEmpty()) {
-      MathMLElement* elem = content.RemoveFirst();
-      elem->SetParent(mrow);
-      mrow->content.Append(elem);
-    }
-    content.Append(mrow);
+  if (child == NULL) {
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != NULL);
+    SetChild(mdummy);
   }
   
-  MathMLContainerElement::Normalize();
+  MathMLBinContainerElement::Normalize();
 }
 
 void
@@ -69,11 +61,10 @@ MathMLNormalizingContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scale
 {
   if (!HasDirtyLayout(id, maxWidth)) return;
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(child != NULL);
 
-  content.GetFirst()->DoBoxedLayout(id, bid, maxWidth);
-  box = content.GetFirst()->GetBoundingBox();
+  child->DoBoxedLayout(id, bid, maxWidth);
+  box = child->GetBoundingBox();
 
   ConfirmLayout(id);
 
@@ -89,11 +80,10 @@ MathMLNormalizingContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scale
 void
 MathMLNormalizingContainerElement::RecalcBoundingBox(LayoutId id, scaled minWidth)
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(child != NULL);
 
-  content.GetFirst()->RecalcBoundingBox(id, minWidth);
-  box = content.GetFirst()->GetBoundingBox();
+  child->RecalcBoundingBox(id, minWidth);
+  box = child->GetBoundingBox();
 
   ConfirmLayout(id);
 }
@@ -106,9 +96,8 @@ MathMLNormalizingContainerElement::SetPosition(scaled x, scaled y)
 
   if (HasLayout()) layout->SetPosition(x, y);
   else {
-    MathMLElement* elem = GetContent();
-    assert(elem != NULL);
-    elem->SetPosition(x, y);
+    assert(child != NULL);
+    child->SetPosition(x, y);
   }
 }
 
@@ -119,11 +108,8 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
 
   RenderBackground(area);
 
-  assert(content.GetSize() == 1);
-  MathMLElement* elem = content.GetFirst();
-  assert(elem != NULL);
-
-  elem->Render(area);
+  assert(child != 0);
+  child->Render(area);
 
   ResetDirty();
 }
@@ -131,16 +117,22 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
 bool
 MathMLNormalizingContainerElement::IsExpanding() const
 {
-  MathMLElement* elem = content.GetFirst();
-  assert(elem != NULL);
-  return elem->IsExpanding();
+  assert(child != NULL);
+  return child->IsExpanding();
 }
 
-MathMLElement*
-MathMLNormalizingContainerElement::GetContent() const
+class MathMLOperatorElement*
+MathMLNormalizingContainerElement::GetCoreOperator()
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
-  return content.GetFirst();
-}
+  assert(child != NULL);
 
+  switch (IsA())
+    {
+    case TAG_MSTYLE:
+    case TAG_MPHANTOM:
+    case TAG_MPADDED:
+      return child->GetCoreOperator();
+    default:
+      return NULL;
+    }
+}

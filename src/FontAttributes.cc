@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "Iterator.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "FontAttributes.hh"
 
 FontAttributes::FontAttributes()
@@ -169,7 +169,7 @@ FontAttributes::Dump() const
   const char* s[] = { "_", "normal", "italic" };
   const char* m[] = { "*", "text", "math" };
 
-  MathEngine::logger(LOG_DEBUG, "font(%dpt,%s,%s,%s,%s)",
+  Globals::logger(LOG_DEBUG, "font(%dpt,%s,%s,%s,%s)",
 		     HasSize() ? truncFloat(sp2pt(size.ToScaledPoints())) : -1,
 		     HasFamily() ? family : "_", w[weight + 1], s[style + 1], m[mode]);
 }
@@ -207,13 +207,13 @@ ExtraFontAttributes::AddProperty(const char* name, const char* value)
 void
 ExtraFontAttributes::Dump() const
 {
-  MathEngine::logger(LOG_DEBUG, "extra font attributes dump:");
+  Globals::logger(LOG_DEBUG, "extra font attributes dump:");
 
   for (Iterator<ExtraFontAttribute*> i(content); i.More(); i.Next()) {
     assert(i() != NULL);
     assert(i()->name != NULL);
     assert(i()->value != NULL);
 
-    MathEngine::logger(LOG_DEBUG, "%s = '%s'", i()->name, i()->value);
+    Globals::logger(LOG_DEBUG, "%s = '%s'", i()->name, i()->value);
   }
 }

@@ -24,9 +24,11 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "MathML.hh"
 #include "Layout.hh"
 #include "stringAux.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
+#include "traverseAux.hh"
 #include "DrawingArea.hh"
 #include "MathMLElement.hh"
 #include "MathMLDocument.hh"
@@ -39,24 +41,31 @@
 int MathMLElement::counter = 0;
 #endif // DEBUG
 
+MathMLElement::MathMLElement()
+#if defined(HAVE_GMETADOM)
+  : node(0)
+#endif
+{
+  Init();
+}
+
 // MathMLElement: this is the base class for every MathML presentation element.
 // It implements the basic skeleton of every such element, moreover it handles
 // the attributes and provides some facility functions to access and parse
 // attributes.
-#if defined(HAVE_MINIDOM)
-MathMLElement::MathMLElement(mDOMNodeRef n, TagId t)
-#elif defined(HAVE_GMETADOM)
-MathMLElement::MathMLElement(const GMetaDOM::Element& n, TagId t)
-#endif
+#if defined(HAVE_GMETADOM)
+MathMLElement::MathMLElement(const GMetaDOM::Element& n)
   : node(n)
 {
-#if defined(HAVE_MINIDOM)
-  if (node != NULL) mdom_node_set_user_data(node, this);
-#elif defined(HAVE_GMETADOM)
-  if (node != 0) node.set_userData(this);
-#endif
+  ::setRenderingInterface(n, this);
+  Init();
+}
 
-  tag  = t;
+void
+MathMLElement::Init()
+{
+  dirtyStructure = childWithDirtyStructure = 1;
+  dirtyAttribute = childWithDirtyAttribute = 1;
 
   layout = NULL;
   shape  = NULL;
@@ -68,10 +77,11 @@ MathMLElement::MathMLElement(const GMetaDOM::Element& n, TagId t)
   counter++;
 #endif //DEBUG
 }
+#endif
 
 MathMLElement::~MathMLElement()
 {
-  //MathEngine::logger(LOG_DEBUG, "destroying `%s' (DOM %p)", NameOfTagId(IsA()), node);
+  //Globals::logger(LOG_DEBUG, "destroying `%s' (DOM %p)", NameOfTagId(IsA()), node);
 #if defined(HAVE_MINIDOM)
   if (node != NULL) mdom_node_set_user_data(node, NULL);
 #elif defined(HAVE_GMETADOM)
@@ -87,6 +97,88 @@ MathMLElement::~MathMLElement()
   counter--;
 #endif // DEBUG
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLElement*
+MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
+{
+  assert(el != 0);
+
+  MathMLElement* elem = 0;
+
+  elem = ::getRenderingInterface(el);
+  if (elem != 0)
+    {
+      elem->AddRef();
+      return elem;
+    }
+
+  char* s_tag = NULL;
+  if (el.get_namespaceURI() == 0)
+    s_tag = el.get_nodeName().toC();
+  else
+    s_tag = el.get_localName().toC();
+
+  TagId tag = TagIdOfName(s_tag);
+  delete [] s_tag;
+
+  if (tag == TAG_NOTVALID)
+    {
+      Globals::logger(LOG_WARNING, "skipping unrecognized element");
+      return 0;
+    }
+
+  static struct
+  {
+    TagId tag;
+    MathMLElement* (*create)(const GMetaDOM::Element&);
+  } tab[] = {
+    { TAG_MATH,          &MathMLmathElement::create },
+    { TAG_MI,            &MathMLTokenElement::create },
+    { TAG_MN,            &MathMLTokenElement::create },
+    { TAG_MO,            &MathMLOperatorElement::create },
+    { TAG_MTEXT,         &MathMLTextElement::create },
+    { TAG_MSPACE,        &MathMLSpaceElement::create },
+    { TAG_MS,            &MathMLStringLitElement::create },
+    { TAG_MROW,          &MathMLRowElement::create },
+    { TAG_MFRAC,         &MathMLFractionElement::create },
+    { TAG_MSQRT,         &MathMLRadicalElement::create },
+    { TAG_MROOT,         &MathMLRadicalElement::create },
+    { TAG_MSTYLE,        &MathMLStyleElement::create },
+    { TAG_MERROR,        &MathMLErrorElement::create },
+    { TAG_MPADDED,       &MathMLPaddedElement::create },
+    { TAG_MPHANTOM,      &MathMLPhantomElement::create },
+    { TAG_MFENCED,       &MathMLFencedElement::create },
+    { TAG_MSUB,          &MathMLScriptElement::create },
+    { TAG_MSUP,          &MathMLScriptElement::create },
+    { TAG_MSUBSUP,       &MathMLScriptElement::create },
+    { TAG_MUNDER,        &MathMLUnderOverElement::create },
+    { TAG_MOVER,         &MathMLUnderOverElement::create },
+    { TAG_MUNDEROVER,    &MathMLUnderOverElement::create },
+    { TAG_MMULTISCRIPTS, &MathMLMultiScriptsElement::create },
+    { TAG_MTABLE,        &MathMLTableElement::create },
+    { TAG_MTR,           &MathMLTableRowElement::create },
+    { TAG_MLABELEDTR,    &MathMLTableRowElement::create },
+    { TAG_MTD,           &MathMLTableCellElement::create },
+    { TAG_MALIGNGROUP,   &MathMLAlignGroupElement::create },
+    { TAG_MALIGNMARK,    &MathMLAlignMarkElement::create },
+    { TAG_MACTION,       &MathMLActionElement::create },
+    { TAG_MENCLOSE,      &MathMLEncloseElement::create },
+    { TAG_SEMANTICS,     &MathMLSemanticsElement::create },
+
+    { TAG_NOTVALID,      0 }
+  };
+
+  unsigned i;
+  for (i = 0; tab[i].tag != TAG_NOTVALID && tab[i].tag != tag; i++) ;
+  assert(tab[i].create != 0);
+
+  elem = tab[i].create(el);
+  assert(elem != 0);
+
+  return elem;
+}
+#endif // HAVE_GMETADOM
 
 // GetAttributeSignatureAux: this is an auxiliary function used to retrieve
 // the signature of the attribute with id ID given an array of attribute
@@ -115,12 +207,6 @@ MathMLElement::GetAttributeSignature(AttributeId id) const
   };
 
   return GetAttributeSignatureAux(id, sig);
-}
-
-void
-MathMLElement::Normalize()
-{
-  // nothing to normalize since nothing has been parsed
 }
 
 const String*
@@ -210,7 +296,7 @@ MathMLElement::GetAttributeValue(AttributeId id,
     value = parser(st);
 
     if (value == NULL) {
-      MathEngine::logger(LOG_WARNING, "in element `%s' parsing error in attribute `%s'",
+      Globals::logger(LOG_WARNING, "in element `%s' parsing error in attribute `%s'",
 			 NameOfTagId(IsA()), NameOfAttributeId(id));
     }
 
@@ -282,12 +368,16 @@ MathMLElement::IsSet(AttributeId id) const
 void
 MathMLElement::Setup(RenderingEnvironment*)
 {
-  // this function is defined to be empty but not pure-virtual
-  // because some "space-like" elements such as <mspace>
-  // <maligngroup>, <malignmark> effectively do nothing.
-  // So we don't have to implement this function as empty
-  // in every such element.
-  // The same holds for Render below.
+  if (HasDirtyAttribute() || HasChildWithDirtyAttribute())
+    {
+      // this function is defined to be empty but not pure-virtual
+      // because some "space-like" elements such as <mspace>
+      // <maligngroup>, <malignmark> effectively do nothing.
+      // So we don't have to implement this function as empty
+      // in every such element.
+      // The same holds for Render below.
+      ResetDirtyAttribute();
+    }
 }
 
 void
@@ -560,4 +650,56 @@ MathMLElement::HasLink() const
 
   return p != 0;
 #endif // HAVE_GMETADOM
+}
+
+MathMLOperatorElement*
+MathMLElement::GetCoreOperator()
+{
+  // it's not clear whether this should be an abstract method, since
+  // many elements share this trivial implementation
+  return 0;
+}
+
+TagId
+MathMLElement::IsA() const
+{
+  if (node == 0) return TAG_NOTVALID;
+
+  char* s_tag = node.get_nodeName().toC();
+  assert(s_tag != NULL);
+
+  TagId res = TagIdOfName(s_tag);
+  delete [] s_tag;
+
+  return res;
+}
+
+void
+MathMLElement::SetDirtyStructure()
+{
+  dirtyStructure = 1;
+  
+  MathMLElement* parent = GetParent();
+  while (parent != NULL)
+    {
+      parent->childWithDirtyStructure = 1;
+      MathMLElement* grandParent = parent->GetParent();
+      parent->Release();
+      parent = grandParent;
+    }
+}
+
+void
+MathMLElement::SetDirtyAttribute()
+{
+  dirtyAttribute = 1;
+
+  MathMLElement* parent = GetParent();
+  while (parent != NULL)
+    {
+      parent->childWithDirtyAttribute = 1;
+      MathMLElement* grandParent = parent->GetParent();
+      parent->Release();
+      parent = grandParent;
+    }
 }

@@ -55,7 +55,7 @@ MathMLTableElement::Setup(RenderingEnvironment* env)
 
   SetupTableAttributes(env);
   SetupLabels();
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
   SetupAlignMarks();
 
 #if 0
@@ -494,9 +494,12 @@ MathMLTableElement::SetupGroups()
       cell[i][j].aGroup      = NULL;
 
       if (!cell[i][j].spanned && cell[i][j].mtd != NULL) {
+#if 0
+	// to be restored
 	MathMLTableCellElement::SetupGroups(cell[i][j].mtd->content.GetFirst(),
 					    true, true,
 					    cell[i][j]);
+#endif
 
 	if (cell[i][j].nAlignGroup > column[j].nAlignGroup) 
 	  column[j].nAlignGroup = cell[i][j].nAlignGroup;
@@ -554,9 +557,12 @@ MathMLTableElement::SetupAlignMarks()
   for (unsigned i = 0; i < nRows; i++)
     for (unsigned j = 0; j < nColumns; j++)
       if (!cell[i][j].spanned && cell[i][j].mtd != NULL) {
+#if 0
+	// to be restored
 	MathMLTableCellElement::SetupGroups(cell[i][j].mtd->content.GetFirst(),
 					    true, false,
 					    cell[i][j]);
+#endif
       }
 }
 

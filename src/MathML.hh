@@ -64,4 +64,3 @@
 #include "MathMLmathElement.hh"
 
 #endif // MathML_hh
-

@@ -25,7 +25,7 @@
 
 #include <math.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
 #include "MathMLCharNode.hh"
@@ -62,7 +62,7 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
     assert(fChar.charMap != NULL);
 
 #ifdef DEBUG
-    MathEngine::logger(LOG_DEBUG, "successful layout for U+%04x simple index %02x", ch, fChar.nch);
+    Globals::logger(LOG_DEBUG, "successful layout for U+%04x simple index %02x", ch, fChar.nch);
 #endif // DEBUG
   }
 
@@ -73,7 +73,7 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
     assert(sChar.charMap != NULL);
     
 #ifdef DEBUG
-    MathEngine::logger(LOG_DEBUG, "successful stretchy layout for U+%04x simple index %02x", ch, sChar.nch);
+    Globals::logger(LOG_DEBUG, "successful stretchy layout for U+%04x simple index %02x", ch, sChar.nch);
 #endif // DEBUG
     
     layout = new StretchyCharLayout;
@@ -97,12 +97,12 @@ MathMLCharNode::SetDefaultLargeGlyph(bool large)
   assert(layout->sChar.font != NULL);
   assert(layout->sChar.charMap != NULL);
 #ifdef DEBUG
-  MathEngine::logger(LOG_DEBUG, "before setting large was %x", layout->sChar.nch);
+  Globals::logger(LOG_DEBUG, "before setting large was %x", layout->sChar.nch);
 #endif // DEBUG
   layout->sChar.nch = layout->sChar.charMap->Map(ch, large);
   fChar = layout->sChar;
 #ifdef DEBUG
-  MathEngine::logger(LOG_DEBUG, "char %x with large %d set to %x", ch, large, layout->sChar.nch);
+  Globals::logger(LOG_DEBUG, "char %x with large %d set to %x", ch, large, layout->sChar.nch);
 #endif // DEBUG
 }
 
@@ -115,12 +115,12 @@ MathMLCharNode::DoLayout()
   box = charBox;
 
 #ifdef DEBUG
-  MathEngine::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
+  Globals::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
 #endif // DEBUG
 
 #if 1
   if (box.descent > box.ascent && fChar.charMap->GetStretch() != STRETCH_NO) {
-    MathEngine::logger(LOG_DEBUG, "WARNING Texish code here");
+    Globals::logger(LOG_DEBUG, "WARNING Texish code here");
     // BEWARE!
     // vertical stretchy char may have a meaningless bounding box. For example,
     // stretchy chars inside cmex font (for TeX) all have a (quasi) zero ascent.
@@ -184,7 +184,7 @@ MathMLCharNode::DoVerticalStretchyLayoutAux(scaled desiredSize, bool)
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS && nch[i] != NULLCHAR; i++) {
     layout->simple = nch[i];
 #if 0
-    MathEngine::logger(LOG_DEBUG, "trying simple char %x for desire %d", layout->simple, sp2ipx(desiredSize));
+    Globals::logger(LOG_DEBUG, "trying simple char %x for desire %d", layout->simple, sp2ipx(desiredSize));
 #endif
     font->CharBox(layout->simple, charBox);
     if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
@@ -352,7 +352,7 @@ MathMLCharNode::Render(const DrawingArea& area)
 
   if (IsStretchyFontified() && (layout->simple != NULLCHAR || layout->n > 0)) {
 #ifdef DEBUG
-    MathEngine::logger(LOG_DEBUG, "rendering stretchy char U+%04X with simple %02x and n %d", ch, layout->simple, layout->n);
+    Globals::logger(LOG_DEBUG, "rendering stretchy char U+%04X with simple %02x and n %d", ch, layout->simple, layout->n);
 #endif // DEBUG
     if (layout->sChar.charMap->GetStretch() == STRETCH_VERTICAL)
       RenderVerticalStretchyChar(area, gc, GetX(), GetY() + box.descent);
@@ -362,7 +362,7 @@ MathMLCharNode::Render(const DrawingArea& area)
     area.DrawChar(gc, fChar.font, GetX(), GetY() + box.descent - charBox.descent, fChar.nch);
   } else {
     // no glyph available
-    if (MathEngine::DrawMissingCharacter())
+    if (Globals::DrawMissingCharacter())
       RenderMissingCharacter(area, gc);
   }
 
@@ -385,7 +385,7 @@ MathMLCharNode::RenderVerticalStretchyChar(const DrawingArea& area,
   if (layout->simple != NULLCHAR) {
     y -= charBox.descent;
 #ifdef DEBUG
-    MathEngine::logger(LOG_DEBUG, "rendering vertical stretchy char %x", layout->simple);
+    Globals::logger(LOG_DEBUG, "rendering vertical stretchy char %x", layout->simple);
 #endif // DEBUG
     area.DrawChar(gc, font, x, y, layout->simple);
     return;

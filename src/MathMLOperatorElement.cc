@@ -26,7 +26,7 @@
 #include <stdio.h>
 
 #include "Iterator.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
 #include "ValueSequence.hh"
@@ -40,12 +40,21 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLOperatorElement::MathMLOperatorElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
+MathMLOperatorElement::MathMLOperatorElement()
+{
+  Init();
+}
+
+#if defined(HAVE_GMETADOM)
 MathMLOperatorElement::MathMLOperatorElement(const GMetaDOM::Element& node)
+  : MathMLTokenElement(node)
+{
+  Init();
+}
 #endif
-  : MathMLTokenElement(node, TAG_MO)
+
+void
+MathMLOperatorElement::Init()
 {
   eOp = NULL;
   defaults = NULL;
@@ -119,9 +128,9 @@ MathMLOperatorElement::Normalize()
   delete nameFactory;
   nameFactory = NULL;
 
-  MathMLEmbellishedOperatorElement* op = new MathMLEmbellishedOperatorElement(this);
+  MathMLEmbellishedOperatorElement* op = MathMLEmbellishedOperatorElement::create(this);
   op->SetParent(p);
-  op->content.Append(root);
+  op->SetChild(root);
   eOp = op;
 
   // now we have to substitute the root of the embellished operator
@@ -129,7 +138,7 @@ MathMLOperatorElement::Normalize()
   assert(p->IsContainer());
   MathMLContainerElement* pContainer = TO_CONTAINER(p);
   assert(pContainer != NULL);
-  pContainer->content.Substitute(root, eOp);
+  pContainer->Replace(root, eOp);
   // Important!!! The root of the embellished operator now has
   // the "embellishment" as parent
   root->SetParent(eOp);
@@ -157,7 +166,7 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
   const MathMLAttributeList* postfix = NULL;
   
   if (operatorName != NULL)
-    MathEngine::dictionary.Search(operatorName, &prefix, &infix, &postfix);
+    Globals::dictionary.Search(operatorName, &prefix, &infix, &postfix);
 
   if      (form == OP_FORM_PREFIX && prefix != NULL) defaults = prefix;
   else if (form == OP_FORM_INFIX && infix != NULL) defaults = infix;
@@ -272,17 +281,17 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   desiredSize = symmetric ? (2 * scaledMax(height, depth)) : (height + depth);
 
   // actually a slightly smaller fence is usually enough when symmetric is true
-  MathEngine::logger(LOG_DEBUG, "request for stretch to %d...", sp2ipx(desiredSize));
+  Globals::logger(LOG_DEBUG, "request for stretch to %d...", sp2ipx(desiredSize));
   if (true || symmetric)
     desiredSize = scaledMax(desiredSize - pt2sp(5), ((desiredSize * 901) / 1000));
-  MathEngine::logger(LOG_DEBUG, "%d will be enough!", sp2ipx(desiredSize));
+  Globals::logger(LOG_DEBUG, "%d will be enough!", sp2ipx(desiredSize));
 
   desiredSize = scaledMax(SP_EPSILON, desiredSize);
 
   // ...however, there may be some contraints over the size of the stretchable
   // operator. adjustedSize will be the final allowed size for the operator
   scaled minHeight = GetMinBoundingBox().GetHeight();
-  MathEngine::logger(LOG_DEBUG, "the minimum height is %d", sp2ipx(minHeight));
+  Globals::logger(LOG_DEBUG, "the minimum height is %d", sp2ipx(minHeight));
 
   scaled adjustedSize = desiredSize;
 
@@ -303,7 +312,7 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
   if (!content.GetFirst()->IsStretchyChar()) {
-    MathEngine::logger(LOG_WARNING, "character `U+%04x' could not be stretched", operatorName->GetChar(0));
+    Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", operatorName->GetChar(0));
     return;
   }
 
@@ -321,7 +330,7 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
     adjustedDepth = scaledProp(depth, adjustedSize, desiredSize);
   }
 
-  MathEngine::logger(LOG_DEBUG, "adjusted stretchy size %d", sp2ipx(adjustedSize));
+  Globals::logger(LOG_DEBUG, "adjusted stretchy size %d", sp2ipx(adjustedSize));
 
   sNode->DoVerticalStretchyLayout(adjustedHeight, adjustedDepth, axis, strict);
 
@@ -361,7 +370,7 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
   if (!content.GetFirst()->IsStretchyChar()) {
-    MathEngine::logger(LOG_WARNING, "character `U+%04x' could not be stretched", operatorName->GetChar(0));
+    Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", operatorName->GetChar(0));
     return;
   }
 
@@ -411,7 +420,7 @@ MathMLOperatorElement::ParseLimitValue(const Value* value,
       siz.Set(v->ToNumber(), ToUnitId(unitV));
 
       if (siz.IsPercentage()) {
-	MathEngine::logger(LOG_WARNING, "percentage value specified in maxsize attribute (mo) (ignored)");
+	Globals::logger(LOG_WARNING, "percentage value specified in maxsize attribute (mo) (ignored)");
 	multiplier = floatMax(EPSILON, siz.GetValue());
       } else {
 	multiplier = -1;
@@ -469,23 +478,7 @@ MathMLOperatorElement::InferOperatorForm() const
   if (elem->IsA() == TAG_MROW) {
     MathMLRowElement* row = TO_ROW(elem);
     assert(row != NULL);
-
-    unsigned rowLength = 0;
-    unsigned position  = 0;
-    for (Iterator<MathMLElement*> i(row->content); i.More(); i.Next()) {
-      const MathMLElement* p = i();
-      assert(p != NULL);
-
-      if (!p->IsSpaceLike()) {
-	if (p == eOp) position = rowLength;
-	rowLength++;
-      }
-    }
-    
-    if (rowLength > 1) {
-      if (position == 0) res = OP_FORM_PREFIX;
-      else if (position == rowLength - 1) res = OP_FORM_POSTFIX;
-    }
+    res = row->GetOperatorForm(eOp);
   }
 
   return res;
@@ -519,3 +512,8 @@ MathMLOperatorElement::IsBreakable() const
   return false;
 }
 
+MathMLOperatorElement*
+MathMLOperatorElement::GetCoreOperator()
+{
+  return this;
+}

@@ -21,8 +21,10 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef HAVE_WCTYPE_H
 #include <wctype.h>
 #endif
@@ -35,7 +37,7 @@
 #include "frameAux.hh"
 #include "Iterator.hh"
 #include "stringAux.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "traverseAux.hh"
 #include "ShapeFactory.hh"
 #include "allocTextNode.hh"
@@ -45,6 +47,7 @@
 #include "MathMLTextNode.hh"
 #include "mathVariantAux.hh"
 #include "ValueConversion.hh"
+#include "MathMLGlyphNode.hh"
 #include "MathMLSpaceNode.hh"
 #include "MathMLStringNode.hh"
 #include "MathMLTokenElement.hh"
@@ -52,15 +55,18 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLTokenElement::MathMLTokenElement(mDOMNodeRef node, TagId t)
-#elif defined(HAVE_GMETADOM)
-MathMLTokenElement::MathMLTokenElement(const GMetaDOM::Element& node, TagId t)
-#endif
-  : MathMLElement(node, t)
+MathMLTokenElement::MathMLTokenElement()
 {
   rawContentLength = 0;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLTokenElement::MathMLTokenElement(const GMetaDOM::Element& node)
+  : MathMLElement(node)
+{
+  rawContentLength = 0;
+}
+#endif
 
 MathMLTokenElement::~MathMLTokenElement()
 {
@@ -159,7 +165,7 @@ MathMLTokenElement::Append(const String* s)
       if (last != NULL && !lastBreak) last->SetBreakability(BREAK_NO);
       lastBreak = false;
     } else {
-      MathEngine::logger(LOG_WARNING, "ignoring variant modifier char U+%04x", s->GetChar(i));
+      Globals::logger(LOG_WARNING, "ignoring variant modifier char U+%04x", s->GetChar(i));
       i++;
       rawContentLength++;
     }
@@ -180,6 +186,85 @@ MathMLTokenElement::Append(MathMLTextNode* node)
 }
 
 void
+MathMLTokenElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+      assert(GetDOMNode() != 0);
+
+      String* sContent = NULL;
+      for (GMetaDOM::Node p = GetDOMNode().get_firstChild(); 
+	   p != 0;
+	   p = p.get_nextSibling()) 
+	{
+	  switch (p.get_nodeType()) {
+	  case GMetaDOM::Node::TEXT_NODE:
+	    {
+	      // ok, we have a chunk of text
+	      GMetaDOM::DOMString content = p.get_nodeValue();
+	      String* s = allocString(content);
+	      assert(s != NULL);
+	      
+	      // white-spaces are always collapsed...
+	      s->CollapseSpaces();
+	      
+	      // ...but spaces at the at the beginning (end) are deleted only if this
+	      // is the very first (last) chunk in the token.
+	      if (p.get_previousSibling() == 0) s->TrimSpacesLeft();
+	      if (p.get_nextSibling() == 0) s->TrimSpacesRight();
+
+	      Append(s);
+	      delete s;
+	    }
+	  break;
+
+#if 0
+	  // to be rewritten or deleted
+	  case GMetaDOM::Node::ENTITY_REFERENCE_NODE:
+	    for (GMetaDOM::Node p = node.get_firstChild(); p != 0; p = p.get_nextSibling())
+	      MathMLizeTokenContent(p, parent);
+	    break;
+#endif 0
+
+	  case GMetaDOM::Node::ELEMENT_NODE:
+	    {	    
+	      if (p.get_namespaceURI() == MATHML_NS_URI)
+		{
+		  if (p.get_nodeName() == "mglyph")
+		    {
+		      MathMLTextNode* text = SubstituteMGlyphElement(p);
+		      if (text != NULL) Append(text);
+		    }
+		  else if (p.get_nodeName() == "malignmark")
+		    {
+		      MathMLTextNode* text = SubstituteAlignMarkElement(p);
+		      if (text != NULL) Append(text);
+		    }
+		  else
+		    {
+		      char* s_name = p.get_nodeName().toC();
+		      Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name);
+		      delete [] s_name;
+		    }
+		} else
+		  {
+		    char* s_name = p.get_nodeName().toC();
+		    Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name);
+		    delete [] s_name;
+		  }
+	    }
+	  break;
+	  
+	  default:
+	    break;
+	  }
+	}
+
+      ResetDirtyStructure();
+    }
+}
+
+void
 MathMLTokenElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
@@ -195,7 +280,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
   value = GetAttributeValue(ATTR_MATHSIZE, NULL, false);
   if (value != NULL) {
     if (IsSet(ATTR_FONTSIZE))
-      MathEngine::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
+      Globals::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
     
     if (value->IsKeyword(KW_SMALL)) env->AddScriptLevel(1);
     else if (value->IsKeyword(KW_BIG)) env->AddScriptLevel(-1);
@@ -204,7 +289,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
   } else {
     value = GetAttributeValue(ATTR_FONTSIZE, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
+      Globals::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
       env->SetFontSize(value->ToNumberUnit());
     }
   }
@@ -221,27 +306,27 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
     env->SetFontStyle(attr.style);
 
     if (IsSet(ATTR_FONTFAMILY) || IsSet(ATTR_FONTWEIGHT) || IsSet(ATTR_FONTSTYLE))
-      MathEngine::logger(LOG_WARNING, "attribute `mathvariant' overrides deprecated font-related attributes");
+      Globals::logger(LOG_WARNING, "attribute `mathvariant' overrides deprecated font-related attributes");
 
     delete value;
   } else {
     value = GetAttributeValue(ATTR_FONTFAMILY, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontfamily' is deprecated in MathML 2");
+      Globals::logger(LOG_WARNING, "the attribute `fontfamily' is deprecated in MathML 2");
       env->SetFontFamily(value->ToString());
     }
     delete value;
 
     value = GetAttributeValue(ATTR_FONTWEIGHT, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontweight' is deprecated in MathML 2");
+      Globals::logger(LOG_WARNING, "the attribute `fontweight' is deprecated in MathML 2");
       env->SetFontWeight(ToFontWeightId(value));
     }
     delete value;
 
     value = GetAttributeValue(ATTR_FONTSTYLE, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
+      Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
       env->SetFontStyle(ToFontStyleId(value));
     } else if (IsA() == TAG_MI) {
       if (rawContentLength == 1) {
@@ -267,21 +352,21 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
   value = GetAttributeValue(ATTR_MATHCOLOR, NULL, false);
   if (value != NULL) {
     if (IsSet(ATTR_COLOR))
-      MathEngine::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
+      Globals::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
     env->SetColor(ToRGB(value));
   } else {
     value = GetAttributeValue(ATTR_COLOR, NULL, false);
     if (value != NULL) {
-      MathEngine::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
+      Globals::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
       env->SetColor(ToRGB(value));
     } else
-      if (HasLink()) env->SetColor(MathEngine::configuration.GetLinkForeground());
+      if (HasLink()) env->SetColor(Globals::configuration.GetLinkForeground());
   }
   delete value;
 
   value = GetAttributeValue(ATTR_MATHBACKGROUND, NULL, false);
   if (value != NULL) env->SetBackgroundColor(ToRGB(value));
-  else if (HasLink()) env->SetBackgroundColor(MathEngine::configuration.GetLinkBackground());
+  else if (HasLink()) env->SetBackgroundColor(Globals::configuration.GetLinkBackground());
   delete value;
 
   color      = env->GetColor();
@@ -532,11 +617,70 @@ MathMLTokenElement::AddItalicCorrection(Layout& layout)
   MathMLElement* next = findRightSibling(this);
   if (next == NULL || next->IsA() != TAG_MO) return;
 
-  MathMLOperatorElement* op = findCoreOperator(next);
+  MathMLOperatorElement* op = next->GetCoreOperator();
   if (op == NULL) return;
-  if (!op->IsFence()) return;
+  bool isFence = op->IsFence();
+  op->Release();
+  if (!isFence) return;
 
   const BoundingBox& box = lastNode->GetBoundingBox();
-  MathEngine::logger(LOG_DEBUG, "adding italic correction: %d %d", sp2ipx(box.rBearing), sp2ipx(box.width));
+  Globals::logger(LOG_DEBUG, "adding italic correction: %d %d", sp2ipx(box.rBearing), sp2ipx(box.width));
   if (box.rBearing > box.width) layout.Append(box.rBearing - box.width);
+}
+
+MathMLTextNode*
+MathMLTokenElement::SubstituteMGlyphElement(const GMetaDOM::Element& node)
+{
+  assert(node != 0);
+
+  GMetaDOM::DOMString alt        = node.getAttribute("alt");
+  GMetaDOM::DOMString fontFamily = node.getAttribute("fontfamily");
+  GMetaDOM::DOMString index      = node.getAttribute("index");
+
+  if (alt.isEmpty() || fontFamily.isEmpty() || index.isEmpty()) {
+    Globals::logger(LOG_WARNING, "malformed `mglyph' element (some required attribute is missing)\n");
+    return new MathMLCharNode('?');
+  }
+
+  char* s_index = index.toC();
+  char* endPtr;
+  unsigned nch = strtoul(s_index, &endPtr, 10);
+  delete [] s_index;
+
+  if (endPtr == NULL || *endPtr != '\0') {
+    Globals::logger(LOG_WARNING, "malformed `mglyph' element (parsing error in `index' attribute)\n");
+    nch = '?';
+  }
+
+  char* s_alt = alt.toC();
+  char* s_fontFamily = fontFamily.toC();
+  MathMLGlyphNode* glyph = MathMLGlyphNode::create(s_alt, s_fontFamily, nch);
+  delete [] s_alt;
+  delete [] s_fontFamily;
+
+  return glyph;
+}
+
+MathMLTextNode*
+MathMLTokenElement::SubstituteAlignMarkElement(const GMetaDOM::Element& node)
+{
+  assert(node != 0);
+
+  GMetaDOM::DOMString edge = node.getAttribute("edge");
+
+  MarkAlignType align = MARK_ALIGN_NOTVALID;
+
+  if (!edge.isEmpty()) {
+    if      (edge == "left") align = MARK_ALIGN_LEFT;
+    else if (edge == "right") align = MARK_ALIGN_RIGHT;
+    else {
+      char* s_edge = edge.toC();
+      Globals::logger(LOG_WARNING,
+			 "malformed `malignmark' element, attribute `edge' has invalid value `%s' (ignored)",
+			 s_edge);
+      delete [] s_edge;
+    }
+  }
+
+  return new MathMLMarkNode(align);
 }

@@ -29,12 +29,21 @@
 #include "MathMLTableElement.hh"
 #include "MathMLTableCellElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLTableElement::MathMLTableElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
+MathMLTableElement::MathMLTableElement()
+{
+  Init();
+}
+
+#if defined(HAVE_GMETADOM)
 MathMLTableElement::MathMLTableElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  Init();
+}
 #endif
-  : MathMLContainerElement(node, TAG_MTABLE)
+
+void
+MathMLTableElement::Init()
 {
   nRows    = 0;
   nColumns = 0;
@@ -72,7 +81,7 @@ MathMLTableElement::GetAttributeSignature(AttributeId id) const
   };
 
   const AttributeSignature* signature = GetAttributeSignatureAux(id, sig);
-  if (signature == NULL) signature = MathMLContainerElement::GetAttributeSignature(id);
+  if (signature == NULL) signature = MathMLLinearContainerElement::GetAttributeSignature(id);
 
   return signature;
 }
@@ -239,7 +248,7 @@ MathMLTableElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  MathMLContainerElement::Render(area);
+  MathMLLinearContainerElement::Render(area);
 
   if (fGC[IsSelected()] == NULL) {
     GraphicsContextValues values;
@@ -349,7 +358,7 @@ MathMLTableElement::Inside(scaled x, scaled y)
 	if (inside != NULL) return inside;
       }
 
-  return MathMLContainerElement::Inside(x, y);
+  return MathMLLinearContainerElement::Inside(x, y);
 }
 
 bool
@@ -393,6 +402,6 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
 void
 MathMLTableElement::ReleaseGCs()
 {
-  MathMLContainerElement::ReleaseGCs();
+  MathMLLinearContainerElement::ReleaseGCs();
   dGC[0] = dGC[1] = NULL;
 }

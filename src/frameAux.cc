@@ -50,27 +50,32 @@ getFrameLeftSibling(const MathMLFrame* frame)
   assert(frame != NULL);
   assert(frame->GetParent() != NULL);
 
-  if (frame->GetParent()->IsToken()) {
-    MathMLTokenElement* token = TO_TOKEN(frame->GetParent());
-    assert(token != NULL);
+  if (frame->GetParent()->IsToken())
+    {
+      MathMLTokenElement* token = TO_TOKEN(frame->GetParent());
+      assert(token != NULL);
 
-    MathMLFrame* left = NULL;
-    for (Iterator<MathMLTextNode*> p(token->GetContent()); p.More(); p.Next()) {
-      if (p() == frame) return left;
-      left = p();
+      MathMLFrame* left = NULL;
+      for (Iterator<MathMLTextNode*> p(token->GetContent()); p.More(); p.Next()) {
+	if (p() == frame) return left;
+	left = p();
+      }
     }
-  } else if (frame->GetParent()->IsContainer()) {
-    MathMLContainerElement* container = TO_CONTAINER(frame->GetParent());
-    assert(container != NULL);
+#if 0
+  // to be reimplemented when things stabilize again
+  else if (frame->GetParent()->IsA() == TAG_MROW)
+    {
+      MathMLRowElement* row = TO_ROW(frame->GetParent());
+      assert(row != NULL);
 
-    MathMLElement* left = NULL;
-    for (Iterator<MathMLElement*> p(container->content); p.More(); p.Next()) {
-      if (p() == frame) return left;
-      left = p();
+      MathMLElement* left = NULL;
+      for (Iterator<MathMLElement*> p(container->content); p.More(); p.Next()) {
+	if (p() == frame) return left;
+	left = p();
+      }
     }
-  }
+#endif
 
-  assert(IMPOSSIBLE);
   return NULL;
 }
 
@@ -80,25 +85,31 @@ getFrameRightSibling(const MathMLFrame* frame)
   assert(frame != NULL);
   assert(frame->GetParent() != NULL);
 
-  if (frame->GetParent()->IsToken()) {
-    MathMLTokenElement* token = TO_TOKEN(frame->GetParent());
-    assert(token != NULL);
+  if (frame->GetParent()->IsToken())
+    {
+      MathMLTokenElement* token = TO_TOKEN(frame->GetParent());
+      assert(token != NULL);
 
-    for (Iterator<MathMLTextNode*> p(token->GetContent()); p.More(); p.Next())
-      if (p() == frame) {
-	p.Next();
-	if (p.More()) return p();
-      }
-  } else if (frame->GetParent()->IsContainer()) {
-    MathMLContainerElement* container = TO_CONTAINER(frame->GetParent());
-    assert(container != NULL);
+      for (Iterator<MathMLTextNode*> p(token->GetContent()); p.More(); p.Next())
+	if (p() == frame) {
+	  p.Next();
+	  if (p.More()) return p();
+	}
+    } 
+#if 0
+  // to be reimplemented when things stabilize again
+  else if (frame->GetParent()->IsContainer())
+    {
+      MathMLContainerElement* container = TO_CONTAINER(frame->GetParent());
+      assert(container != NULL);
 
-    for (Iterator<MathMLElement*> p(container->content); p.More(); p.Next())
-      if (p() == frame) {
-	p.Next();
-	if (p.More()) return p();
-      }
-  }
+      for (Iterator<MathMLElement*> p(container->content); p.More(); p.Next())
+	if (p() == frame) {
+	  p.Next();
+	  if (p.More()) return p();
+	}
+    }
+#endif
 
   return NULL;
 }

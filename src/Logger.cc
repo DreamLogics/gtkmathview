@@ -75,3 +75,4 @@ Logger::operator()(LogLevelId id, const char* fmt, ...) const
   fprintf(logFile, "\n");
   va_end(args);
 }
+

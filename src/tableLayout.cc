@@ -496,41 +496,44 @@ MathMLTableElement::ColumnLayout(unsigned j, LayoutId id, BreakId bid, scaled wi
     TableCell& tableCell = cell[i][j];
     if (tableCell.mtd != NULL &&
 	!tableCell.spanned && tableCell.colSpan == 1) {
-      bool stretchyCell = isStretchyOperator(tableCell.mtd->content.GetFirst());
 
-      if (id != LAYOUT_AUTO || !stretchyCell) {
-	// CONFLICT: well, hard to explain. It is obvious that group
-	// alignment must be taken into account here, because we want to
-	// know the width of the column for subsequent computations, but
-	// as we see stretchy cells are delayed. What if an alignment
-	// group is inside a stretchy cell? This is only possible inside
-	// an mrow element with one or more space-like elements (among
-	// which the alignment group(s)) and the stretchy operator. However,
-	// such an alignment group makes little sense, because if the
-	// operator is horizontal then it should stretch to cover all the
-	// available width, so alignment is useless. If the operator is
-	// vertical, then it is usually inside a vertical spanned cell, and
-	// again it is hard to imagine a situation where alignment is useful
-	// for such a cell. For these reasons, we DO NOT consider group
-	// alignment within stretchy cells.
+      if (id != LAYOUT_AUTO || !tableCell.mtd->IsStretchyOperator())
+	{
+	  // CONFLICT: well, hard to explain. It is obvious that group
+	  // alignment must be taken into account here, because we want to
+	  // know the width of the column for subsequent computations, but
+	  // as we see stretchy cells are delayed. What if an alignment
+	  // group is inside a stretchy cell? This is only possible inside
+	  // an mrow element with one or more space-like elements (among
+	  // which the alignment group(s)) and the stretchy operator. However,
+	  // such an alignment group makes little sense, because if the
+	  // operator is horizontal then it should stretch to cover all the
+	  // available width, so alignment is useless. If the operator is
+	  // vertical, then it is usually inside a vertical spanned cell, and
+	  // again it is hard to imagine a situation where alignment is useful
+	  // for such a cell. For these reasons, we DO NOT consider group
+	  // alignment within stretchy cells.
 
-	// first of all we reset all the alignment group so that they have
-	// 0 width for the subsequent layout
-	for (unsigned k = 0; k < tableCell.nAlignGroup; k++) {
-	  assert(tableCell.aGroup[k].group != NULL);
-	  tableCell.aGroup[k].group->SetWidth(0);
+	  // first of all we reset all the alignment group so that they have
+	  // 0 width for the subsequent layout
+	  for (unsigned k = 0; k < tableCell.nAlignGroup; k++)
+	    {
+	      assert(tableCell.aGroup[k].group != NULL);
+	      tableCell.aGroup[k].group->SetWidth(0);
+	    }
+
+	  if (tableCell.nAlignGroup > 0)
+	    {
+	      // since this cell is subject to alignment we cannot break its content
+	      tableCell.mtd->DoBoxedLayout(id, BREAK_NO, width);
+	      tableCell.mtd->CalcGroupsExtent();
+	    } 
+	  else
+	    tableCell.mtd->DoBoxedLayout(id, bid, width);
 	}
 
-	if (tableCell.nAlignGroup > 0) {
-	  // since this cell is subject to alignment we cannot break its content
-	  tableCell.mtd->DoBoxedLayout(id, BREAK_NO, width);
-	  tableCell.mtd->CalcGroupsExtent();
-	} else
-	  tableCell.mtd->DoBoxedLayout(id, bid, width);
-      }
-
       const BoundingBox& cellBox =
-	stretchyCell ?
+	tableCell.mtd->IsStretchyOperator() ?
 	tableCell.mtd->GetMaxBoundingBox() :
 	tableCell.mtd->GetBoundingBox();
 
@@ -558,42 +561,46 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
   for (k = 0; k < nAlignGroup; k++)
     gExtent[k].left = gExtent[k].right = 0;
 
-  for (i = 0; i < nRows; i++) {
-    TableCell& tableCell = cell[i][j];
-    if (tableCell.mtd != NULL &&
-	!tableCell.spanned && tableCell.colSpan == 1) {
-      bool stretchyCell = isStretchyOperator(tableCell.mtd->content.GetFirst());
-
-      if (!stretchyCell) {
-	for (k = 0; k < tableCell.nAlignGroup; k++) {
-	  gExtent[k].left = scaledMax(gExtent[k].left, tableCell.aGroup[k].extent.left);
-	  gExtent[k].right = scaledMax(gExtent[k].right, tableCell.aGroup[k].extent.right);
+  for (i = 0; i < nRows; i++)
+    {
+      TableCell& tableCell = cell[i][j];
+      if (tableCell.mtd != NULL &&
+	  !tableCell.spanned &&
+	  tableCell.colSpan == 1 &&
+	  !tableCell.mtd->IsStretchyOperator()) 
+	{
+	  for (k = 0; k < tableCell.nAlignGroup; k++)
+	    {
+	      gExtent[k].left = scaledMax(gExtent[k].left, tableCell.aGroup[k].extent.left);
+	      gExtent[k].right = scaledMax(gExtent[k].right, tableCell.aGroup[k].extent.right);
+	    }
 	}
-      }
     }
-  }
 
   scaled alignedCellWidth = 0;
   for (k = 0; k < nAlignGroup; k++)
     alignedCellWidth += gExtent[k].left + gExtent[k].right;
 
-  if (id == LAYOUT_AUTO) {
-    for (i = 0; i < nRows; i++) {
-      TableCell& tableCell = cell[i][j];
-      if (tableCell.mtd != NULL && !tableCell.spanned && tableCell.colSpan == 1) {
-	bool stretchyCell = isStretchyOperator(tableCell.mtd->content.GetFirst());
-	
-	if (!stretchyCell) {
-	  for (k = 0; k < tableCell.nAlignGroup; k++) {
-	    assert(tableCell.aGroup[k].group != NULL);
+  if (id == LAYOUT_AUTO)
+    {
+      for (i = 0; i < nRows; i++) {
+	TableCell& tableCell = cell[i][j];
+	if (tableCell.mtd != NULL &&
+	    !tableCell.spanned &&
+	    tableCell.colSpan == 1 &&
+	    !tableCell.mtd->IsStretchyOperator())
+	  {
+	    for (k = 0; k < tableCell.nAlignGroup; k++)
+	      {
+		assert(tableCell.aGroup[k].group != NULL);
 
-	    scaled rightPrev = 0;
-	    if (k > 0) rightPrev = gExtent[k - 1].right - tableCell.aGroup[k - 1].extent.right;
+		scaled rightPrev = 0;
+		if (k > 0) rightPrev = gExtent[k - 1].right - tableCell.aGroup[k - 1].extent.right;
 
-	    tableCell.aGroup[k].group->SetWidth(rightPrev + gExtent[k].left - tableCell.aGroup[k].extent.left);
-	    tableCell.aGroup[k].group->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, 0);
+		tableCell.aGroup[k].group->SetWidth(rightPrev + gExtent[k].left - tableCell.aGroup[k].extent.left);
+		tableCell.aGroup[k].group->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, 0);
+	      }
 	  }
-	}
 
 	// ok, a little explanation: it is not necessary that every cell has exactly the same
 	// number of alignment groups, furthermore it is almost impossibile that even
@@ -606,7 +613,6 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, LayoutId id)
 	tableCell.mtd->RecalcBoundingBox(id, alignedCellWidth);
       }
     }
-  }
   
   delete [] gExtent;
 
@@ -647,25 +653,36 @@ MathMLTableElement::SpannedCellsLayout(LayoutId id)
 void
 MathMLTableElement::StretchyCellsLayout()
 {
-  for (unsigned i = 0; i < nRows; i++) {
-    for (unsigned j = 0; j < nColumns; j++) {
-      if (cell[i][j].mtd != NULL && !cell[i][j].spanned) {
-	MathMLOperatorElement* op = findStretchyOperator(cell[i][j].mtd->content.GetFirst());
-	if (op != NULL) {
-	  scaled width = GetColumnWidth(j, cell[i][j].colSpan);
+  for (unsigned i = 0; i < nRows; i++)
+    {
+      for (unsigned j = 0; j < nColumns; j++)
+	{
+	  if (cell[i][j].mtd != NULL && !cell[i][j].spanned)
+	    {
+	      MathMLElement* cellElem = cell[i][j].mtd->GetChild();
+	      assert(cellElem != 0);
+	      MathMLOperatorElement* op = findStretchyOperator(cellElem);
+	      cellElem->Release();
 
-	  if (op->GetStretch() == STRETCH_VERTICAL) {
-	    scaled height = GetRowHeight(i, cell[i][j].rowSpan);
-	    op->VerticalStretchTo(row[i].ascent, height - row[i].ascent);
-	  } else {
-	    op->HorizontalStretchTo(width);
-	  }
+	      if (op != NULL)
+		{
+		  scaled width = GetColumnWidth(j, cell[i][j].colSpan);
 
-	  cell[i][j].mtd->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, width);
+		  if (op->GetStretch() == STRETCH_VERTICAL)
+		    {
+		      scaled height = GetRowHeight(i, cell[i][j].rowSpan);
+		      op->VerticalStretchTo(row[i].ascent, height - row[i].ascent);
+		    } 
+		  else 
+		    {
+		      op->HorizontalStretchTo(width);
+		    }
+
+		  cell[i][j].mtd->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, width);
+		}
+	    }
 	}
-      }
     }
-  }
 }
 
 void

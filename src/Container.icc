@@ -115,6 +115,22 @@ Type Container<Type>::RemoveLast()
 }
 
 template <class Type>
+void Container<Type>::Remove(Type obj)
+{
+  Wrapper* w = Search(obj);
+  assert(w != 0);
+
+  if (w->prev == 0) first = w->next;
+  else w->prev->next = w->next;
+
+  if (w->next == 0) last = w->prev;
+  else w->next->prev = w->prev;
+
+  delete w;
+  n--;
+}
+
+template <class Type>
 inline Type Container<Type>::GetFirst() const
 {
   assert(first != 0);
@@ -126,6 +142,17 @@ inline Type Container<Type>::GetLast() const
 {
   assert(last != 0);
   return last->obj;
+}
+
+template <class Type>
+inline void Container<Type>::Set(unsigned i, Type obj)
+{
+  assert(i < GetSize());
+
+  Wrapper* w = Search(i);
+  assert(w != 0);
+
+  w->obj = obj;
 }
 
 template <class Type>
@@ -157,8 +184,7 @@ template <class Type>
 inline int Container<Type>::IndexOf(Type obj) const
 {
   int index = -1;
-  Wrapper* w = Search(obj, &index);
-  
+  Search(obj, &index);
   return index;
 }
 
@@ -181,4 +207,18 @@ Container<Type>::Wrapper* Container<Type>::Search(const Type obj, int* index) co
   return w;
 }
 
-#endif
+template <class Type>
+Container<Type>::Wrapper* Container<Type>::Search(unsigned i) const
+{	
+  Wrapper* w = first;
+
+  while (w != 0 && i > 0)
+    {
+      i--;
+      w = w->next;
+    }
+
+  return w;
+}
+
+#endif // Container_icc

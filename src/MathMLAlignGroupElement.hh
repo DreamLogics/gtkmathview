@@ -23,9 +23,7 @@
 #ifndef MathMLAlignGroupElement_hh
 #define MathMLAlignGroupElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -33,14 +31,22 @@
 
 class MathMLAlignGroupElement: public MathMLElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLAlignGroupElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLAlignGroupElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLAlignGroupElement(const GMetaDOM::Element&);
 #endif
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual ~MathMLAlignGroupElement();
+private:
+  void Init(void);
+
+public:
+  static MathMLElement* create(void) { return new MathMLAlignGroupElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLAlignGroupElement(el); }
+#endif
+
+  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
 
   void SetWidth(scaled);
   void SetDecimalPoint(class MathMLTokenElement*);
@@ -51,6 +57,7 @@ public:
   class MathMLAlignMarkElement* GetAlignmentMarkElement(void) const { return alignMarkElement; }
   class MathMLTokenElement* GetDecimalPoint(void) const { return decimalPoint; }
 
+  virtual void Normalize(void);
   virtual bool IsSpaceLike(void) const;
 
 private:

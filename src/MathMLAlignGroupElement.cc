@@ -25,12 +25,21 @@
 
 #include "MathMLAlignGroupElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLAlignGroupElement::MathMLAlignGroupElement(mDOMNodeRef node) :
-#elif defined(HAVE_GMETADOM)
-MathMLAlignGroupElement::MathMLAlignGroupElement(const GMetaDOM::Element& node) :
+MathMLAlignGroupElement::MathMLAlignGroupElement()
+{
+  Init();
+}
+
+#if defined(HAVE_GMETADOM)
+MathMLAlignGroupElement::MathMLAlignGroupElement(const GMetaDOM::Element& node)
+  : MathMLElement(node)
+{
+  Init();
+}
 #endif
-  MathMLElement(node, TAG_MALIGNGROUP)
+
+void
+MathMLAlignGroupElement::Init()
 {
   width = 0;
   decimalPoint = NULL;
@@ -73,6 +82,13 @@ MathMLAlignGroupElement::SetAlignmentMark(class MathMLAlignMarkElement* mark)
   assert(mark != NULL);
   assert(alignMarkElement == NULL);
   alignMarkElement = mark;
+}
+
+void
+MathMLAlignGroupElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    ResetDirtyStructure();
 }
 
 bool

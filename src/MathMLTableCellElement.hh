@@ -23,9 +23,7 @@
 #ifndef MathMLTableCellElement_hh
 #define MathMLTableCellElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -34,16 +32,25 @@
 
 class MathMLTableCellElement: public MathMLNormalizingContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLTableCellElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLTableCellElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLTableCellElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLTableCellElement();
+
+private:
+  void Init(void);
+
+public:
+  static MathMLElement* create(void) { return new MathMLTableCellElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTableCellElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(RenderingEnvironment*);
   virtual void SetPosition(scaled, scaled);
-  virtual ~MathMLTableCellElement();
 
   void SetAlignmentScope(bool b) { alignmentScope = b; }
 

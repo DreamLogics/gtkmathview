@@ -46,6 +46,7 @@ public:
   void 	   Substitute(Type, Type);
   int      IndexOf(Type) const;
 
+  void     Set(unsigned, Type);
   Type     Get(unsigned) const;
   Type 	   GetFirst(void) const;
   Type 	   GetLast(void) const;
@@ -60,6 +61,7 @@ private:
   };
 
   Wrapper* Search(const Type, int* = NULL) const;
+  Wrapper* Search(unsigned) const;
 
   unsigned n;
   Wrapper* first;

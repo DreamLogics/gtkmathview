@@ -23,9 +23,7 @@
 #ifndef MathMLTextElement_hh
 #define MathMLTextElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -33,18 +31,20 @@
 
 class MathMLTextElement: public MathMLTokenElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLTextElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLTextElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLTextElement(const GMetaDOM::Element&);
 #endif
-
   virtual ~MathMLTextElement();
 
-  virtual bool IsSpaceLike(void) const;
+public:
+  static MathMLElement* create(void) { return new MathMLTextElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTextElement(el); }
+#endif
 
-private:
+  virtual bool IsSpaceLike(void) const;
 };
 
 #endif // MathMLTextElement_hh

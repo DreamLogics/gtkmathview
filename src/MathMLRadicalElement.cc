@@ -26,7 +26,7 @@
 
 #include "unidefs.h"
 #include "stringAux.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "StringUnicode.hh"
 #include "EntitiesTable.hh"
 #include "MathMLCharNode.hh"
@@ -36,41 +36,47 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLRadicalElement::MathMLRadicalElement(mDOMNodeRef node, TagId id)
-#elif defined(HAVE_GMETADOM)
-MathMLRadicalElement::MathMLRadicalElement(const GMetaDOM::Element& node, TagId id)
-#endif
-  : MathMLNormalizingContainerElement(node, id)
+MathMLRadicalElement::MathMLRadicalElement()
 {
-  assert(id == TAG_MSQRT || id == TAG_MROOT);
   radical = NULL;
 }
 
+#if defined(HAVE_GMETADOM)
+MathMLRadicalElement::MathMLRadicalElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  radical = NULL;
+}
+#endif
+
 MathMLRadicalElement::~MathMLRadicalElement()
 {
-  delete radical;
+  if (radical != NULL) {
+    radical->Release();
+    radical = NULL;
+  }
 }
 
 void
 MathMLRadicalElement::Normalize()
 {
   if (IsA() == TAG_MSQRT)
-    MathMLNormalizingContainerElement::Normalize();
+    MathMLLinearContainerElement::Normalize();
   else {
     assert(IsA() == TAG_MROOT);
 
     while (content.GetSize() < 2) {
-      MathMLElement* mdummy = new MathMLDummyElement();
+      MathMLElement* mdummy = MathMLDummyElement::create();
+      assert(mdummy != 0);
       Append(mdummy);
     }
     
     while (content.GetSize() > 2) {
       MathMLElement* elem = content.RemoveLast();
-      delete elem;
+      elem->Release();
     }
 
-    MathMLContainerElement::Normalize();
+    MathMLLinearContainerElement::Normalize();
   }
 
   if (radical != NULL) delete radical;
@@ -184,7 +190,7 @@ MathMLRadicalElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  MathMLContainerElement::Render(area);
+  MathMLLinearContainerElement::Render(area);
 
   if (fGC[IsSelected()] == NULL) {
     GraphicsContextValues values;
@@ -221,5 +227,5 @@ scaled
 MathMLRadicalElement::GetLeftEdge() const
 {
   assert(radical != NULL);
-  return scaledMin(MathMLContainerElement::GetLeftEdge(), radical->GetLeftEdge());
+  return scaledMin(MathMLLinearContainerElement::GetLeftEdge(), radical->GetLeftEdge());
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2000, Luca Padovani <luca.padovani@cs.unibo.it>.
+// Copyright (C) 2000-2002, Luca Padovani <luca.padovani@cs.unibo.it>.
 // 
 // This file is part of GtkMathView, a Gtk widget for MathML.
 // 
@@ -20,63 +20,59 @@
 // http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#ifndef MathMLActionElement_hh
-#define MathMLActionElement_hh
+#ifndef MathMLBinContainerElement_hh
+#define MathMLBinContainerElement_hh
 
 #if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 
-class MathMLActionElement : public MathMLLinearContainerElement
+// base class for every non-empty MathML container element
+class MathMLBinContainerElement: public MathMLContainerElement
 {
 protected:
-  MathMLActionElement(void);
+  MathMLBinContainerElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLActionElement(const GMetaDOM::Element&);
+  MathMLBinContainerElement(const GMetaDOM::Element&);
 #endif
-  virtual ~MathMLActionElement();
+  virtual ~MathMLBinContainerElement();
 
 public:
-#if defined(HAVE_MINIDOM)
-  static MathMLElement* create(mDOMNodeRef el) { return new MathMLActionElement(el); }
-#elif defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLActionElement(el); }
-#endif
-
-  virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
-  virtual void DoLayout(LayoutId, class Layout&);
+  virtual void Normalize(void);
+  virtual void Setup(RenderingEnvironment*);
+  virtual void DoLayout(LayoutId, Layout&);
+  virtual void DoBoxedLayout(LayoutId, BreakId = BREAK_NO, scaled = 0);
   virtual void DoStretchyLayout(void);
-  virtual void SetPosition(scaled, scaled);
   virtual void Freeze(void);
   virtual void Render(const DrawingArea&);
+  virtual void ReleaseGCs(void);
+  virtual MathMLElement* Inside(scaled, scaled);
 
   virtual void SetDirtyLayout(bool = false);
-  virtual void SetDirty(const Rectangle* = NULL);  
+  virtual void SetDirty(const Rectangle* = NULL);
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
   virtual void ResetLast(void);
 
   virtual bool IsLast(void) const;
-  virtual bool IsBreakable(void) const;
   virtual bool IsExpanding(void) const;
+  virtual void GetLinearBoundingBox(BoundingBox&) const;
   virtual BreakId GetBreakability(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 
-  virtual MathMLElement* Inside(scaled, scaled);
-  MathMLElement* GetSelectedElement(void) const;
+  virtual void Remove(MathMLElement*);
+  virtual void Replace(MathMLElement*, MathMLElement*);
 
-  unsigned GetSelectedIndex(void) const;
-  void     SetSelectedIndex(unsigned);
+  MathMLElement* GetChild(void) const;
+  void         SetChild(MathMLElement*);
 
-private:
-  unsigned selection;
+protected:
+  MathMLElement* child;
 };
 
-#define TO_ACTION(obj) (dynamic_cast<MathMLActionElement*>(obj))
+#define TO_BIN_CONTAINER(object) (dynamic_cast<MathMLBinContainerElement*>(object))
 
-#endif // MathMLActionElement_hh
+#endif // MathMLContainerElement_hh

@@ -24,49 +24,26 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "MathMLDocument.hh"
-#include "DocumentElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLDocument::MathMLDocument(mDOMDocRef doc)
-#elif defined(HAVE_GMETADOM)
+MathMLDocument::MathMLDocument()
+  : DOMdoc(0)
+{
+}
+
+#if defined(HAVE_GMETADOM)
 MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
-#endif
-  : MathMLContainerElement(0)
+  : MathMLBinContainerElement(0)
   , DOMdoc(doc)
 {
   assert(doc != 0);
 }
+#endif
 
 MathMLDocument::~MathMLDocument()
 {
   DOMdoc = 0;
-}
-
-void
-MathMLDocument::Normalize()
-{
-  if (content.GetSize() == 0 || content.GetSize() > 1) {
-    DocumentElement* doc = new DocumentElement(NULL);
-    doc->SetParent(this);
-    while (content.GetSize() > 0) {
-      MathMLElement* elem = content.RemoveFirst();
-      elem->SetParent(doc);
-      doc->content.Append(elem);
-    }
-    content.Append(doc);
-  } 
-
-  MathMLContainerElement::Normalize();
-}
-
-MathMLElement*
-MathMLDocument::GetRoot(void) const
-{
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
-  return content.GetFirst();
 }
 
 bool

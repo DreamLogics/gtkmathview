@@ -26,7 +26,7 @@
 #include "keyword.hh"
 #include "Iterator.hh"
 #include "stringAux.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "MathMLAttribute.hh"
 #include "MathMLParseFile.hh"
 #include "OperatorDictionary.hh"
@@ -89,13 +89,13 @@ OperatorDictionary::Load(const char* fileName)
   mDOMNodeRef root = mdom_doc_get_root_node(doc);
   if (root == NULL) {
     mdom_doc_free(doc);
-    MathEngine::logger(LOG_WARNING, "operator dictionary `%s': parse error", fileName);
+    Globals::logger(LOG_WARNING, "operator dictionary `%s': parse error", fileName);
     return false;
   }
 
   if (!mdom_string_eq(mdom_node_get_name(root), DOM_CONST_STRING("dictionary"))) {
     mdom_doc_free(doc);
-    MathEngine::logger(LOG_WARNING, "operator dictionary `%s': could not find root element", fileName);
+    Globals::logger(LOG_WARNING, "operator dictionary `%s': could not find root element", fileName);
     return false;
   }
 
@@ -137,10 +137,10 @@ OperatorDictionary::Load(const char* fileName)
 
 	items.AddFirst(item);
       } else {
-	MathEngine::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
+	Globals::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
       }
     } else if (!mdom_node_is_blank(op)) {
-      MathEngine::logger(LOG_WARNING, "operator dictionary `%s': unknown element `%s'", fileName,
+      Globals::logger(LOG_WARNING, "operator dictionary `%s': unknown element `%s'", fileName,
 			 C_CONST_STRING(mdom_node_get_name(op)));
     }
   }
@@ -160,12 +160,12 @@ OperatorDictionary::Load(const char* fileName)
 
     GMetaDOM::Element root = doc.get_documentElement();
     if (root == 0) {
-      MathEngine::logger(LOG_WARNING, "operator dictionary `%s': parse error", fileName);
+      Globals::logger(LOG_WARNING, "operator dictionary `%s': parse error", fileName);
       return false;
     }
 
     if (root.get_nodeName() != "dictionary") {
-      MathEngine::logger(LOG_WARNING, "operator dictionary `%s': could not find root element", fileName);
+      Globals::logger(LOG_WARNING, "operator dictionary `%s': could not find root element", fileName);
       return false;
     }
 
@@ -206,11 +206,11 @@ OperatorDictionary::Load(const char* fileName)
 
 	  items.AddFirst(item);
 	} else {
-	  MathEngine::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
+	  Globals::logger(LOG_WARNING, "operator dictionary `%s': could not find operator name", fileName);
 	}
       } else if (!GMetaDOM::nodeIsBlank(op)) {
 	char* s_name = op.get_nodeName().toC();
-	MathEngine::logger(LOG_WARNING, "operator dictionary `%s': unknown element `%s'", fileName, s_name);
+	Globals::logger(LOG_WARNING, "operator dictionary `%s': unknown element `%s'", fileName, s_name);
 	delete [] s_name;
       }
     }
@@ -272,7 +272,7 @@ OperatorDictionary::Search(const String* opName,
 	else if (*infix == NULL && form->Equal("infix")) *infix = p()->defaults;
 	else if (*postfix == NULL && form->Equal("postfix")) *postfix = p()->defaults;
       } else
-	MathEngine::logger(LOG_WARNING, 
+	Globals::logger(LOG_WARNING, 
 			   "entry for `%s' in operator dictionary has no mandatory `form' attribute",
 			   p()->name->ToStaticC());
     }

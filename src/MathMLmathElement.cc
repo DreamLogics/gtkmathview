@@ -23,19 +23,21 @@
 #include <config.h>
 #include <assert.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "StringUnicode.hh"
 #include "MathMLmathElement.hh"
 #include "RenderingEnvironment.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLmathElement::MathMLmathElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLmathElement::MathMLmathElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLNormalizingContainerElement(node, TAG_MATH)
+MathMLmathElement::MathMLmathElement()
 {
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLmathElement::MathMLmathElement(const GMetaDOM::Element& node)
+  : MathMLNormalizingContainerElement(node)
+{
+}
+#endif
 
 MathMLmathElement::~MathMLmathElement()
 {
@@ -73,7 +75,7 @@ MathMLmathElement::Setup(RenderingEnvironment* env)
     if (value->IsKeyword(KW_BLOCK)) env->SetDisplayStyle(true);
     else env->SetDisplayStyle(false);
   } else {
-    MathEngine::logger(LOG_WARNING, "attribute `mode' is deprecated in MathML 2");
+    Globals::logger(LOG_WARNING, "attribute `mode' is deprecated in MathML 2");
     value = GetAttributeValue(ATTR_MODE, env, true);
     assert(value != NULL);
     if (value->IsKeyword(KW_DISPLAY)) env->SetDisplayStyle(true);
@@ -83,7 +85,7 @@ MathMLmathElement::Setup(RenderingEnvironment* env)
   delete value;
 
   if (IsSet(ATTR_MODE) && IsSet(ATTR_DISPLAY))
-    MathEngine::logger(LOG_WARNING, "both `mode' and `display' attributes set in `math' element");
+    Globals::logger(LOG_WARNING, "both `mode' and `display' attributes set in `math' element");
 
   MathMLNormalizingContainerElement::Setup(env);
 

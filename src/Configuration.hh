@@ -34,7 +34,8 @@
 #include "RGBValue.hh"
 #include "Container.hh"
 
-class Configuration {
+class Configuration
+{
 public:
   Configuration(void);
   ~Configuration();

@@ -23,26 +23,30 @@
 #ifndef MathMLTableRowElement_hh
 #define MathMLTableRowElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 
-class MathMLTableRowElement: public MathMLContainerElement
+class MathMLTableRowElement: public MathMLLinearContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLTableRowElement(mDOMNodeRef, TagId = TAG_MTR);
-#elif defined(HAVE_GMETADOM)
-  MathMLTableRowElement(const GMetaDOM::Element&, TagId = TAG_MTR);
+protected:
+  MathMLTableRowElement(void);
+#if defined(HAVE_GMETADOM)
+  MathMLTableRowElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLTableRowElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLTableRowElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTableRowElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-  virtual ~MathMLTableRowElement();
 
   virtual void SetDirty(const Rectangle*);
   virtual bool IsInside(scaled, scaled) const;

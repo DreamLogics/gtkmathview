@@ -23,32 +23,32 @@
 #ifndef MathMLDocument_hh
 #define MathMLDocument_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLContainerElement.hh"
+#include "MathMLBinContainerElement.hh"
 
-class MathMLDocument: public MathMLContainerElement
+class MathMLDocument: public MathMLBinContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLDocument(mDOMDocRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLDocument(void);
+#if defined(HAVE_GMETADOM)
   MathMLDocument(const GMetaDOM::Document&);
 #endif
-  virtual void Normalize(void);
-  virtual bool IsDocument(void) const;
   virtual ~MathMLDocument();
 
-  MathMLElement* GetRoot(void) const;
-#if defined(HAVE_MINIDOM)
-  mDOMDocRef     GetDOMDocument(void) const { return DOMdoc; }
-protected:
-  mDOMDocRef DOMdoc;
-#elif defined(HAVE_GMETADOM)
+public:
+  static MathMLDocument* create(void) { return new MathMLDocument(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLDocument* create(const GMetaDOM::Document& doc) { return new MathMLDocument(doc); }
+#endif
+
+  virtual bool IsDocument(void) const;
+
+  MathMLElement* GetRoot(void) const { return GetChild(); }
+
+#if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
 protected:
   GMetaDOM::Document DOMdoc;

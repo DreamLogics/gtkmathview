@@ -29,15 +29,18 @@
 #include "RenderingEnvironment.hh"
 #include "AttributeParser.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLSpaceElement::MathMLSpaceElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLSpaceElement::MathMLSpaceElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLElement(node, TAG_MSPACE)
+MathMLSpaceElement::MathMLSpaceElement()
 {
   breakability = BREAK_AUTO;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLSpaceElement::MathMLSpaceElement(const GMetaDOM::Element& node)
+  : MathMLElement(node)
+{
+  breakability = BREAK_AUTO;
+}
+#endif
 
 MathMLSpaceElement::~MathMLSpaceElement()
 {
@@ -58,6 +61,13 @@ MathMLSpaceElement::GetAttributeSignature(AttributeId id) const
   if (signature == NULL) signature = MathMLElement::GetAttributeSignature(id);
 
   return signature;
+}
+
+void
+MathMLSpaceElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    ResetDirtyStructure();
 }
 
 void

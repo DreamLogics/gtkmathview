@@ -23,9 +23,7 @@
 #ifndef MathMLTokenElement_hh
 #define MathMLTokenElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -37,18 +35,25 @@
 // and a very limited set of other MathML elements (e.g. <malignmark>)
 class MathMLTokenElement : public MathMLElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLTokenElement(mDOMNodeRef, TagId t = TAG_NOTVALID);
-#elif defined(HAVE_GMETADOM)
-  MathMLTokenElement(const GMetaDOM::Element&, TagId t = TAG_NOTVALID);
+protected:
+  MathMLTokenElement(void);
+#if defined(HAVE_GMETADOM)
+  MathMLTokenElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLTokenElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLTokenElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTokenElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
+  virtual void   Normalize(void);
   virtual void 	 Setup(class RenderingEnvironment*);
   virtual void 	 DoLayout(LayoutId, class Layout&);
   virtual void 	 Freeze(void);
   virtual void 	 Render(const class DrawingArea&);
-  virtual ~MathMLTokenElement();
 
   virtual void   Append(const String*);
   void           Append(class MathMLTextNode*);
@@ -72,6 +77,9 @@ public:
   unsigned       GetRawContentLength(void) const { return rawContentLength; }
 
 protected:
+  static class MathMLTextNode* SubstituteMGlyphElement(const GMetaDOM::Element&);
+  static class MathMLTextNode* SubstituteAlignMarkElement(const GMetaDOM::Element&);
+  
   void Free(void);
   void AddItalicCorrection(Layout&);
 

@@ -25,7 +25,8 @@
 
 #include "MathMLElement.hh"
 
-class MathMLScriptCommonElement {
+class MathMLScriptCommonElement
+{
 public:
   MathMLScriptCommonElement(void);
   void ScriptSetup(class RenderingEnvironment*);

@@ -23,9 +23,7 @@
 #ifndef MathMLPaddedElement_hh
 #define MathMLPaddedElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -33,17 +31,23 @@
 
 class MathMLPaddedElement: public MathMLNormalizingContainerElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLPaddedElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLPaddedElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLPaddedElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLPaddedElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLPaddedElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLPaddedElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
-  virtual ~MathMLPaddedElement();
 
 private:
   struct LengthDimension {

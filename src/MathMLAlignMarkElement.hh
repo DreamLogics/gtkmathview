@@ -23,9 +23,7 @@
 #ifndef MathMLAlignMarkElement_hh
 #define MathMLAlignMarkElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -34,16 +32,23 @@
 
 class MathMLAlignMarkElement: public MathMLElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLAlignMarkElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLAlignMarkElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLAlignMarkElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLAlignMarkElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLAlignMarkElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLAlignMarkElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
+  virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
-  virtual ~MathMLAlignMarkElement();
 
   virtual bool IsSpaceLike(void) const;
   virtual void SetDirty(const Rectangle* = NULL);

@@ -23,14 +23,35 @@
 #include <config.h>
 
 #include "MathMLNode.hh"
+#include "MathMLElement.hh"
 
 MathMLNode::MathMLNode()
 {
-  parent = NULL;
+  parent = 0;
 }
 
 MathMLNode::~MathMLNode()
 {
+  if (parent != 0)
+    {
+      parent->Release();
+      parent = 0;
+    }
+}
+
+MathMLElement*
+MathMLNode::GetParent() const
+{
+  if (parent != 0) parent->AddRef();
+  return parent;
+}
+
+void
+MathMLNode::SetParent(MathMLElement* p)
+{
+  if (p != 0) p->AddRef();
+  if (parent != 0) parent->Release();
+  parent = p;
 }
 
 bool
@@ -42,5 +63,5 @@ MathMLNode::IsNode() const
 const class MathMLCharNode*
 MathMLNode::GetCharNode() const
 {
-  return NULL;
+  return 0;
 }

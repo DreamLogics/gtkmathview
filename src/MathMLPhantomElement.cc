@@ -21,19 +21,22 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
 #include <assert.h>
 #include <stddef.h>
 
 #include "MathMLPhantomElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLPhantomElement::MathMLPhantomElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLPhantomElement::MathMLPhantomElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLNormalizingContainerElement(node, TAG_MPHANTOM)
+MathMLPhantomElement::MathMLPhantomElement()
 {
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLPhantomElement::MathMLPhantomElement(const GMetaDOM::Element& node)
+  : MathMLNormalizingContainerElement(node)
+{
+}
+#endif
 
 MathMLPhantomElement::~MathMLPhantomElement()
 {
@@ -42,12 +45,8 @@ MathMLPhantomElement::~MathMLPhantomElement()
 bool
 MathMLPhantomElement::IsSpaceLike() const
 {
-  assert(content.GetSize() == 1);
-
-  MathMLElement* elem = content.GetFirst();
-  assert(elem != NULL);
-
-  return elem->IsSpaceLike();
+  assert(child != NULL);
+  return child->IsSpaceLike();
 }
 
 bool

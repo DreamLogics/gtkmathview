@@ -20,63 +20,69 @@
 // http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 // <luca.padovani@cs.unibo.it>
 
-#ifndef MathMLActionElement_hh
-#define MathMLActionElement_hh
+#ifndef MathMLLinearContainerElement_hh
+#define MathMLLinearContainerElement_hh
 
 #if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 
-class MathMLActionElement : public MathMLLinearContainerElement
+class MathMLLinearContainerElement: public MathMLContainerElement
 {
 protected:
-  MathMLActionElement(void);
+  MathMLLinearContainerElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLActionElement(const GMetaDOM::Element&);
+  MathMLLinearContainerElement(const GMetaDOM::Element&);
 #endif
-  virtual ~MathMLActionElement();
+  virtual ~MathMLLinearContainerElement();
 
 public:
-#if defined(HAVE_MINIDOM)
-  static MathMLElement* create(mDOMNodeRef el) { return new MathMLActionElement(el); }
-#elif defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLActionElement(el); }
-#endif
-
-  virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
-  virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
-  virtual void DoLayout(LayoutId, class Layout&);
+  virtual void Normalize(void);
+  virtual void Setup(RenderingEnvironment*);
+  virtual void DoLayout(LayoutId, Layout&);
+  virtual void DoBoxedLayout(LayoutId, BreakId = BREAK_NO, scaled = 0);
   virtual void DoStretchyLayout(void);
-  virtual void SetPosition(scaled, scaled);
   virtual void Freeze(void);
   virtual void Render(const DrawingArea&);
+  virtual void ReleaseGCs(void);
+  virtual MathMLElement* Inside(scaled, scaled);
 
   virtual void SetDirtyLayout(bool = false);
-  virtual void SetDirty(const Rectangle* = NULL);  
+  virtual void SetDirty(const Rectangle* = NULL);
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
   virtual void ResetLast(void);
 
   virtual bool IsLast(void) const;
-  virtual bool IsBreakable(void) const;
   virtual bool IsExpanding(void) const;
+  virtual void GetLinearBoundingBox(BoundingBox&) const;
   virtual BreakId GetBreakability(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 
-  virtual MathMLElement* Inside(scaled, scaled);
-  MathMLElement* GetSelectedElement(void) const;
+  // the content can be accessed directly, but only in a read-only
+  // way, because other operation involves SetParent and other
+  // memory-management issues
+  const Container<MathMLElement*>& GetContent(void) const { return content; }
 
-  unsigned GetSelectedIndex(void) const;
-  void     SetSelectedIndex(unsigned);
+  unsigned GetSize(void) const { return content.GetSize(); }
+  void     SetSize(unsigned);
+  MathMLElement* GetChild(unsigned) const;
+  void     SetChild(unsigned, MathMLElement*);
 
-private:
-  unsigned selection;
+  virtual void Append(MathMLElement*);
+  virtual void Remove(MathMLElement*);
+  virtual void Replace(MathMLElement*, MathMLElement*);
+  void         Prepend(MathMLElement*);
+  void         RemoveFirst(void);
+  void         RemoveLast(void);
+
+protected:
+  Container<MathMLElement*> content;
 };
 
-#define TO_ACTION(obj) (dynamic_cast<MathMLActionElement*>(obj))
+#define TO_LINEAR_CONTAINER(object) (dynamic_cast<MathMLLinearContainerElement*>(object))
 
-#endif // MathMLActionElement_hh
+#endif // MathMLLinearContainerElement_hh

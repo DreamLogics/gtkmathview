@@ -23,23 +23,28 @@
 #ifndef MathMLErrorElement_hh
 #define MathMLErrorElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
 #include "MathMLNormalizingContainerElement.hh"
 
-class MathMLErrorElement: public MathMLNormalizingContainerElement {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLErrorElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+class MathMLErrorElement: public MathMLNormalizingContainerElement
+{
+protected:
+  MathMLErrorElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLErrorElement(const GMetaDOM::Element&);
 #endif
-  virtual void Setup(RenderingEnvironment*);
   virtual ~MathMLErrorElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLErrorElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLErrorElement(el); }
+#endif
+
+  virtual void Setup(RenderingEnvironment*);
 };
 
 #endif // MathMLErrorElement_hh

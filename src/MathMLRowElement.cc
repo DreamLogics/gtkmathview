@@ -35,15 +35,18 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLRowElement::MathMLRowElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLRowElement::MathMLRowElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLContainerElement(node, TAG_MROW)
+MathMLRowElement::MathMLRowElement()
 {
   lastElement = NULL;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLRowElement::MathMLRowElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  lastElement = NULL;
+}
+#endif
 
 MathMLRowElement::~MathMLRowElement()
 {
@@ -59,7 +62,7 @@ MathMLRowElement::Normalize()
 void
 MathMLRowElement::Setup(RenderingEnvironment* env)
 {
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
 
   Iterator<MathMLElement*> i(content);
   i.ResetLast();
@@ -99,7 +102,7 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
 	break;
       case STATE_B:
 	if (elem->IsEmbellishedOperator()) {
-	  MathMLOperatorElement* op = findCoreOperator(elem);
+	  MathMLOperatorElement* op = elem->GetCoreOperator();
 	  assert(op != NULL);
 	  // we cannot allow the expression to be broken
 	  // before or after the operator if it is non-marking
@@ -111,6 +114,7 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
 	      state = STATE_D;
 	    }
 	  }
+	  op->Release();
 	}
 	break;
       case STATE_C:
@@ -118,11 +122,12 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
 	  bid = BREAK_BAD;
 	  state = STATE_D;
 	} else if (elem->IsEmbellishedOperator()) {
-	  MathMLOperatorElement* op = findCoreOperator(elem);
+	  MathMLOperatorElement* op = elem->GetCoreOperator();
 	  assert(op != NULL);
 	  if (!op->IsSeparator()) {
 	    bid = BREAK_BAD;
 	    state = STATE_D;
+	    op->Release();
 	  }
 	} else {
 	  bid = BREAK_BAD;
@@ -154,7 +159,7 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
 void
 MathMLRowElement::DoStretchyLayout()
 {
-  MathMLContainerElement::DoStretchyLayout();
+  MathMLLinearContainerElement::DoStretchyLayout();
 
   unsigned nStretchy = 0; // # of stretchy operators in this line
   unsigned nOther    = 0; // # of non-stretchy elements in this line
@@ -226,4 +231,53 @@ MathMLRowElement::IsExpanding() const
   }
 
   return false;
+}
+
+OperatorFormId
+MathMLRowElement::GetOperatorForm(MathMLElement* eOp) const
+{
+  assert(eOp != 0);
+
+  OperatorFormId res = OP_FORM_INFIX;
+
+  unsigned rowLength = 0;
+  unsigned position  = 0;
+  for (Iterator<MathMLElement*> i(content); i.More(); i.Next())
+    {
+      const MathMLElement* p = i();
+      assert(p != NULL);
+
+      if (!p->IsSpaceLike())
+	{
+	  if (p == eOp) position = rowLength;
+	  rowLength++;
+	}
+    }
+    
+  if (rowLength > 1) 
+    {
+      if (position == 0) res = OP_FORM_PREFIX;
+      else if (position == rowLength - 1) res = OP_FORM_POSTFIX;
+    }
+
+  return res;
+}
+
+class MathMLOperatorElement*
+MathMLRowElement::GetCoreOperator()
+{
+  MathMLElement* core = NULL;
+
+  for (Iterator<MathMLElement*> i(content); i.More(); i.Next())
+    {
+      MathMLElement* elem = i();
+      assert(elem != NULL);
+
+      if (!elem->IsSpaceLike()) {
+	if (core == NULL) core = elem;
+	else return NULL;
+      }
+    }
+
+  return (core != NULL) ? core->GetCoreOperator() : NULL;
 }

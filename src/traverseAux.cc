@@ -45,12 +45,15 @@ findEmbellishedOperatorRoot(MathMLElement* root)
   switch (rootParent->IsA()) {
   case TAG_MROW:
     {
-      for (Iterator<MathMLElement*> i(rootParent->content); i.More(); i.Next()) {
-	MathMLElement* elem = i();
-	assert(elem != NULL);
+      MathMLRowElement* row = TO_ROW(rootParent);
+      assert(row != 0);
 
-	if (!elem->IsSpaceLike() && root != elem) return root;
-      }
+      for (Iterator<MathMLElement*> i(row->GetContent()); i.More(); i.Next())
+	{
+	  MathMLElement* elem = i();
+	  assert(elem != NULL);
+	  if (!elem->IsSpaceLike() && root != elem) return root;
+	}
 
       return findEmbellishedOperatorRoot(rootParent);
     }
@@ -64,8 +67,11 @@ findEmbellishedOperatorRoot(MathMLElement* root)
   case TAG_MFRAC:
   case TAG_SEMANTICS:
     {
-      if (rootParent->content.GetSize() > 0 &&
-	  rootParent->content.GetFirst() != root) return root;
+      MathMLLinearContainerElement* cont = TO_LINEAR_CONTAINER(rootParent);
+      assert(cont != 0);
+
+      if (cont->GetContent().GetSize() > 0 &&
+	  cont->GetContent().GetFirst() != root) return root;
       else return findEmbellishedOperatorRoot(rootParent);
     }
   case TAG_MSTYLE:
@@ -74,66 +80,6 @@ findEmbellishedOperatorRoot(MathMLElement* root)
     return findEmbellishedOperatorRoot(rootParent);
   default:
     return root;
-  }
-}
-
-MathMLOperatorElement*
-findCoreOperator(MathMLElement* root)
-{
-  assert(root != NULL);
-
-  if (root->IsOperator()) return TO_OPERATOR(root);
-
-  if (!root->IsContainer()) return NULL;
-
-  MathMLContainerElement* rootContainer = TO_CONTAINER(root);
-  assert(rootContainer != NULL);
-
-  switch (rootContainer->IsA()) {
-  case TAG_MO:
-    // WARNING: this is an embellished operator! We cannot use the
-    // GetCoreOperator because it returns a const ptr
-    {
-      assert(rootContainer->content.GetSize() > 0);
-      return findCoreOperator(rootContainer->content.GetFirst());
-    }
-  case TAG_MROW:
-    {
-      MathMLElement* core = NULL;
-
-      for (Iterator<MathMLElement*> i(rootContainer->content); i.More(); i.Next()) {
-	MathMLElement* elem = i();
-	assert(elem != NULL);
-
-	if (!elem->IsSpaceLike()) {
-	  if (core == NULL) core = elem;
-	  else return NULL;
-	}
-      }
-
-      return (core != NULL) ? findCoreOperator(core) : NULL;
-    }
-  case TAG_MSUP:
-  case TAG_MSUB:
-  case TAG_MSUBSUP:
-  case TAG_MUNDER:
-  case TAG_MOVER:
-  case TAG_MUNDEROVER:
-  case TAG_MMULTISCRIPTS:
-  case TAG_MFRAC:
-  case TAG_SEMANTICS:
-  case TAG_MSTYLE:
-  case TAG_MPHANTOM:
-  case TAG_MPADDED:
-    {
-      if (rootContainer->content.GetSize() > 0 &&
-	  rootContainer->content.GetFirst() != NULL)
-	return findCoreOperator(rootContainer->content.GetFirst());
-      else
-	return NULL;
-    }
-  default:
-    return NULL;
   }
 }
 
@@ -207,43 +153,7 @@ findActionElement(MathMLElement* elem)
   return (elem != NULL) ? TO_ACTION(elem) : NULL;
 }
 
-#if defined(HAVE_MINIDOM)
-
-mDOMNodeRef
-findDOMNode(MathMLElement* elem)
-{
-  while (elem != NULL && elem->GetDOMNode() == NULL) elem = elem->GetParent();
-  return (elem != NULL) ? elem->GetDOMNode() : NULL;
-}
-
-MathMLElement*
-getMathMLElement(mDOMNodeRef node)
-{
-  assert(node != NULL);
-  // WARNING: the following is a very dangerous operation. It relies
-  // of the assumption that the user will NEVER modify the user data field
-  // in the DOM tree elements!!!
-  MathMLElement* elem = (MathMLElement*) mdom_node_get_user_data(node);
-  assert(elem != NULL);
-  assert(elem->GetDOMNode() == node);
-  return elem;
-}
-
-MathMLElement*
-findMathMLElement(mDOMNodeRef node)
-{
-  MathMLElement* elem = getMathMLElement(node);
-  assert(elem != NULL);
-
-  while (elem->IsA() == TAG_MROW && TO_CONTAINER(elem)->content.GetSize() == 1) {
-    elem = TO_CONTAINER(elem)->content.GetFirst();
-    assert(elem != NULL);
-  }
-
-  return elem;
-}
-
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 
 GMetaDOM::Element
 findDOMNode(MathMLElement* elem)
@@ -253,26 +163,43 @@ findDOMNode(MathMLElement* elem)
 }
 
 MathMLElement*
-getMathMLElement(const GMetaDOM::Element& node)
+getRenderingInterface(const GMetaDOM::Element& node)
 {
   // WARNING: the following is a very dangerous operation. It relies
   // of the assumption that the user will NEVER modify the user data field
   // in the DOM tree elements!!!
   MathMLElement* elem = (MathMLElement*) node.get_userData();
-  assert(elem != NULL);
+  if (elem == 0) return 0;
   assert(elem->GetDOMNode() == node);
   return elem;
+}
+
+void
+setRenderingInterface(const GMetaDOM::Element& node, MathMLElement* elem)
+{
+  assert(node != 0);
+
+  MathMLElement* oldElem = ::getRenderingInterface(node);
+  if (elem != 0) elem->AddRef();
+  if (oldElem != 0) oldElem->Release();
+
+  node.set_userData(elem);
 }
 
 MathMLElement*
 findMathMLElement(const GMetaDOM::Element& node)
 {
-  MathMLElement* elem = getMathMLElement(node);
+  MathMLElement* elem = ::getRenderingInterface(node);
   assert(elem != NULL);
 
-  while (elem->IsA() == TAG_MROW && TO_CONTAINER(elem)->content.GetSize() == 1) {
-    elem = TO_CONTAINER(elem)->content.GetFirst();
-    assert(elem != NULL);
+  while (elem->IsA() == TAG_MROW && TO_ROW(elem)->GetContent().GetSize() == 1) {
+    MathMLRowElement* row = TO_ROW(elem);
+    assert(row != NULL);
+    MathMLElement* child = row->GetContent().GetFirst();
+    assert(child != NULL);
+    child->AddRef();
+    elem->Release();
+    elem = child;
   }
 
   return elem;
@@ -283,21 +210,45 @@ findMathMLElement(const GMetaDOM::Element& node)
 MathMLElement*
 findRightmostChild(MathMLElement* elem)
 {
-  if (elem == NULL || elem->IsA() != TAG_MROW) return elem;
+  if (elem == NULL) return NULL;
+
+  if (elem->IsA() != TAG_MROW)
+    {
+      elem->AddRef();
+      return elem;
+    }
+
   MathMLRowElement* row = TO_ROW(elem);
   assert(row != NULL);
-  if (row->content.GetSize() == 0) return elem;
-  else return findRightmostChild(row->content.GetLast());
+  if (row->GetContent().GetSize() == 0)
+    {
+      elem->AddRef();
+      return elem;
+    }
+
+  return findRightmostChild(row->GetContent().GetLast());
 }
 
 MathMLElement*
 findLeftmostChild(MathMLElement* elem)
 {
-  if (elem == NULL || elem->IsA() != TAG_MROW) return elem;
+  if (elem == NULL) return NULL;
+
+  if (elem->IsA() != TAG_MROW)
+    {
+      elem->AddRef();
+      return elem;
+    }
+
   MathMLRowElement* row = TO_ROW(elem);
   assert(row != NULL);
-  if (row->content.GetSize() == 0) return elem;
-  else return findLeftmostChild(row->content.GetFirst());
+  if (row->GetContent().GetSize() == 0)
+    {
+      elem->AddRef();
+      return elem;
+    }
+
+  return findLeftmostChild(row->GetContent().GetFirst());
 }
 
 #if defined(HAVE_MINIDOM)

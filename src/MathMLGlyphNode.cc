@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
 #include "MathMLGlyphNode.hh"

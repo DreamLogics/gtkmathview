@@ -26,14 +26,16 @@
 #include "MathMLDummyElement.hh"
 #include "MathMLSemanticsElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLSemanticsElement::MathMLSemanticsElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLSemanticsElement::MathMLSemanticsElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLContainerElement(node, TAG_SEMANTICS)
+MathMLSemanticsElement::MathMLSemanticsElement()
 {
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLSemanticsElement::MathMLSemanticsElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+}
+#endif
 
 MathMLSemanticsElement::~MathMLSemanticsElement()
 {
@@ -44,11 +46,13 @@ MathMLSemanticsElement::Normalize()
 {
   while (content.GetSize() > 1) {
     MathMLElement* elem = content.RemoveLast();
-    delete elem;
+    assert(elem != 0);
+    elem->Release();
   }
 
   if (content.GetSize() == 0) {
-    MathMLElement* mdummy = new MathMLDummyElement();
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != 0);
     mdummy->SetParent(this);
     content.Append(mdummy);
   }
@@ -72,4 +76,12 @@ MathMLSemanticsElement::IsExpanding() const
   assert(content.GetSize() == 1);
   assert(content.GetFirst() != NULL);
   return content.GetFirst()->IsExpanding();
+}
+
+class MathMLOperatorElement*
+MathMLSemanticsElement::GetCoreOperator()
+{
+  assert(content.GetSize() == 1);
+  assert(content.GetFirst() != NULL);
+  return content.GetFirst()->GetCoreOperator();
 }

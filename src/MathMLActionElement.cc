@@ -24,21 +24,24 @@
 #include <config.h>
 #include <assert.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "ShapeFactory.hh"
 #include "StringUnicode.hh"
 #include "AttributeParser.hh"
 #include "MathMLActionElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLActionElement::MathMLActionElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-  MathMLActionElement::MathMLActionElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLContainerElement(node, TAG_MACTION)
+MathMLActionElement::MathMLActionElement(void)
 {
   selection = 0;
 }
+
+#if defined(HAVE_GMETADOM)
+  MathMLActionElement::MathMLActionElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  selection = 0;
+}
+#endif
 
 MathMLActionElement::~MathMLActionElement()
 {
@@ -67,9 +70,9 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
   const String* sValue = GetAttribute(ATTR_ACTIONTYPE, env, false);
   if (sValue != NULL) {
     if (!sValue->Equal("toggle"))
-      MathEngine::logger(LOG_WARNING, "action `%s' is not supported (ignored)", sValue->ToStaticC());
+      Globals::logger(LOG_WARNING, "action `%s' is not supported (ignored)", sValue->ToStaticC());
   } else
-    MathEngine::logger(LOG_WARNING, "no action specified for `maction' element");
+    Globals::logger(LOG_WARNING, "no action specified for `maction' element");
 
   const Value* value = GetAttributeValue(ATTR_SELECTION, env);
   if (value != NULL) {
@@ -77,7 +80,7 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
     if (selection >= content.GetSize()) selection = content.GetSize() - 1;
   }
 
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
 }
 
 void

@@ -23,26 +23,34 @@
 #ifndef MathMLOperatorElement_hh
 #define MathMLOperatorElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
 #include "CharMap.hh"
 #include "MathMLTokenElement.hh"
 
-class MathMLOperatorElement: public MathMLTokenElement {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLOperatorElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+class MathMLOperatorElement: public MathMLTokenElement
+{
+protected:
+  MathMLOperatorElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLOperatorElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLOperatorElement();
+
+private:
+  void Init(void);
+
+public:
+  static MathMLElement* create(void) { return new MathMLOperatorElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLOperatorElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(class RenderingEnvironment*);
   virtual void Normalize(void);
-  virtual ~MathMLOperatorElement();
 
   virtual void Append(const String*);
 
@@ -73,6 +81,7 @@ public:
   void         VerticalStretchTo(scaled, scaled, bool = false);
 
   const String* GetOperatorName(void) const { return operatorName; }
+  virtual MathMLOperatorElement* GetCoreOperator(void);
 
 private:
   OperatorFormId InferOperatorForm(void) const;

@@ -27,17 +27,26 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLDummyElement::MathMLDummyElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLDummyElement::MathMLDummyElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLElement(node, TAG_DUMMY)
+MathMLDummyElement::MathMLDummyElement()
 {
 }
 
+#if defined(HAVE_GMETADOM)
+MathMLDummyElement::MathMLDummyElement(const GMetaDOM::Element& node)
+  : MathMLElement(node)
+{
+}
+#endif
+
 MathMLDummyElement::~MathMLDummyElement()
 {
+}
+
+void
+MathMLDummyElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    ResetDirtyStructure();
 }
 
 void

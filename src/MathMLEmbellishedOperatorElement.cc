@@ -31,7 +31,6 @@
 
 MathMLEmbellishedOperatorElement::
 MathMLEmbellishedOperatorElement(MathMLOperatorElement* op) // the core operator
-  : MathMLContainerElement(NULL, TAG_MO)
 {
   assert(op != NULL);
   coreOp = op;
@@ -47,7 +46,7 @@ MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
   script = env->GetScriptLevel() > 0;
-  MathMLContainerElement::Setup(env);
+  MathMLBinContainerElement::Setup(env);
 }
 
 void
@@ -55,14 +54,13 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
 {
   if (!HasDirtyLayout(id, availWidth)) return;
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
-  assert(coreOp != NULL);
+  assert(child != 0);
+  assert(coreOp != 0);
 
   scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
-  content.GetFirst()->DoBoxedLayout(id, BREAK_NO, scaledMax(0, availWidth - totalPadding));
-  box = content.GetFirst()->GetBoundingBox();
+  child->DoBoxedLayout(id, BREAK_NO, scaledMax(0, availWidth - totalPadding));
+  box = child->GetBoundingBox();
 
   // WARNING: maybe in this case we should ask for the LAST char node...
   const MathMLCharNode* node = coreOp->GetCharNode();
@@ -102,17 +100,16 @@ MathMLEmbellishedOperatorElement::DoLayout(LayoutId id, Layout& layout)
 void
 MathMLEmbellishedOperatorElement::SetPosition(scaled x, scaled y)
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
-  assert(coreOp != NULL);
+  assert(coreOp != 0);
+  assert(child != 0);
 
   position.x = x;
   position.y = y;
 
 #ifdef ENABLE_EXTENSIONS
-  content.GetFirst()->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y + coreOp->GetTopPadding());
+  child->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y + coreOp->GetTopPadding());
 #else
-  content.GetFirst()->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y);
+  child->SetPosition(x + (script ? 0 : coreOp->GetLeftPadding()), y);
 #endif // ENABLE_EXTENSIONS
 }
 
@@ -125,8 +122,15 @@ MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
 const MathMLCharNode*
 MathMLEmbellishedOperatorElement::GetCharNode() const
 {
-  if (content.GetSize() != 1 || coreOp == NULL || content.GetFirst() != coreOp)
+  if (coreOp == NULL || child != coreOp)
     return NULL;
 
   return coreOp->GetCharNode();
+}
+
+MathMLOperatorElement*
+MathMLEmbellishedOperatorElement::GetCoreOperator()
+{
+  if (coreOp != 0) coreOp->AddRef();
+  return coreOp;
 }

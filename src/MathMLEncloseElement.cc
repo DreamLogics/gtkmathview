@@ -28,15 +28,18 @@
 #include "MathMLEncloseElement.hh"
 #include "MathMLRadicalElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLEncloseElement::MathMLEncloseElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLEncloseElement::MathMLEncloseElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLNormalizingContainerElement(node, TAG_MENCLOSE)
+MathMLEncloseElement::MathMLEncloseElement()
 {
   normalized = false;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLEncloseElement::MathMLEncloseElement(const GMetaDOM::Element& node)
+  : MathMLNormalizingContainerElement(node)
+{
+  normalized = false;
+}
+#endif
 
 MathMLEncloseElement::~MathMLEncloseElement()
 {
@@ -59,18 +62,15 @@ MathMLEncloseElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLEncloseElement::NormalizeRadicalElement()
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(child != NULL);
 
-  MathMLElement* child = content.RemoveFirst();
-
-  MathMLContainerElement* sqrt = new MathMLRadicalElement(NULL, TAG_MSQRT);
-  sqrt->content.Append(child);
+  MathMLLinearContainerElement* sqrt = TO_LINEAR_CONTAINER(MathMLRadicalElement::create());
+  sqrt->Append(child);
   child->SetParent(sqrt);
   sqrt->SetParent(this);
   sqrt->Normalize();
 
-  content.Append(sqrt);
+  SetChild(sqrt);
 }
 
 void
@@ -95,7 +95,7 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
     normalized = true;
   }
 
-  MathMLContainerElement::Setup(env);
+  MathMLNormalizingContainerElement::Setup(env);
 }
 
 void
@@ -103,14 +103,13 @@ MathMLEncloseElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
 {
   if (!HasDirtyLayout(id, availWidth)) return;
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(child != NULL);
 
   MathMLNormalizingContainerElement::DoBoxedLayout(id, BREAK_NO, availWidth);
-  box = content.GetFirst()->GetBoundingBox();
+  box = child->GetBoundingBox();
 
   if (notation != NOTATION_RADICAL) {
-    box = content.GetFirst()->GetBoundingBox();
+    box = child->GetBoundingBox();
     box.ascent += spacing + lineThickness;
     box.width += spacing + lineThickness;
   }
@@ -123,19 +122,18 @@ MathMLEncloseElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
 void
 MathMLEncloseElement::SetPosition(scaled x, scaled y)
 {
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(child != NULL);
 
   position.x = x;
   position.y = y;
 
   if (notation == NOTATION_RADICAL)
-    content.GetFirst()->SetPosition(x, y);
+    child->SetPosition(x, y);
   else {
     if (notation == NOTATION_LONGDIV)
-      content.GetFirst()->SetPosition(x + spacing + lineThickness, y);
+      child->SetPosition(x + spacing + lineThickness, y);
     else
-      content.GetFirst()->SetPosition(x, y);
+      child->SetPosition(x, y);
   }
 }
 
@@ -144,8 +142,7 @@ MathMLEncloseElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(child != NULL);
 
   MathMLNormalizingContainerElement::Render(area);
 

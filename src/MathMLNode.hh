@@ -27,13 +27,15 @@
 
 class MathMLNode: public MathMLObject
 {
-public:
+protected:
   MathMLNode(void);
-  virtual bool IsNode(void) const;
   virtual ~MathMLNode();
 
-  void SetParent(class MathMLElement* p) { parent = p; }
-  class MathMLElement* GetParent(void) const { return parent; }
+public:
+  virtual bool IsNode(void) const;
+
+  void SetParent(class MathMLElement*);
+  class MathMLElement* GetParent(void) const;
 
   virtual const class MathMLCharNode* GetCharNode(void) const;
 

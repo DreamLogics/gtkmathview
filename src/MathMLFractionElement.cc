@@ -23,21 +23,23 @@
 #include <config.h>
 #include <assert.h>
 
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLFractionElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLFractionElement::MathMLFractionElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLFractionElement::MathMLFractionElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLContainerElement(node, TAG_MFRAC)
+MathMLFractionElement::MathMLFractionElement()
 {
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLFractionElement::MathMLFractionElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+}
+#endif
 
 MathMLFractionElement::~MathMLFractionElement()
 {
@@ -65,16 +67,18 @@ MathMLFractionElement::Normalize()
 {
   while (content.GetSize() > 2) {
     MathMLElement* elem = content.RemoveLast();
-    if (elem != NULL) delete elem;
+    if (elem != NULL) elem->Release();
   }
 
   while (content.GetSize() < 2) {
-    MathMLElement* mdummy = new MathMLDummyElement;
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != 0);
+
     mdummy->SetParent(this);
     content.Append(mdummy);
   }
 
-  MathMLContainerElement::Normalize();
+  MathMLLinearContainerElement::Normalize();
 }
 
 void
@@ -120,7 +124,7 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 	assert(unit->IsKeyword());
 	UnitId unitId = ToUnitId(unit);
 	if (unitId == UNIT_PERCENTAGE) {
-	  MathEngine::logger(LOG_WARNING, "line thickness given as percentage in `mfrac' element (taking default)");
+	  Globals::logger(LOG_WARNING, "line thickness given as percentage in `mfrac' element (taking default)");
 	  lineThickness = defaultRuleThickness;
 	} else {
 	  UnitValue unitValue;
@@ -174,7 +178,7 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
   env->Push();
   if (!displayStyle) env->AddScriptLevel(1);
   else env->SetDisplayStyle(false);
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
   env->Drop();
 }
 
@@ -312,7 +316,7 @@ MathMLFractionElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  MathMLContainerElement::Render(area);
+  MathMLLinearContainerElement::Render(area);
 
   if (fGC[IsSelected()] == NULL) {
     GraphicsContextValues values;
@@ -358,4 +362,12 @@ MathMLFractionElement::IsExpanding() const
   if (denom->IsExpanding()) return true;
 
   return false;
+}
+
+class MathMLOperatorElement*
+MathMLFractionElement::GetCoreOperator()
+{
+  MathMLElement* num = content.GetFirst();
+  assert(num != NULL);
+  return num->GetCoreOperator();
 }

@@ -23,9 +23,7 @@
 #ifndef MathMLElement_hh
 #define MathMLElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
@@ -38,14 +36,22 @@
 // MathMLElement: base class for every MathML Element
 class MathMLElement: public MathMLFrame
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLElement(mDOMNodeRef = NULL, TagId = TAG_NOTVALID);
-#elif defined(HAVE_GMETADOM)
-  MathMLElement(const GMetaDOM::Element&, TagId = TAG_NOTVALID);
+protected:
+  MathMLElement(void);
+#if defined(HAVE_GMETADOM)
+  MathMLElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLElement();
+private:
+  void Init(void);
+
+public:
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* getRenderingInterface(const GMetaDOM::Element&);
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Normalize(void);
+  virtual void Normalize(void) = 0;
   virtual void Setup(class RenderingEnvironment*); // setup attributes
   void         DoBoxedLayout(LayoutId id) { DoBoxedLayout(id, (id == LAYOUT_MAX) ? BREAK_NO : BREAK_GOOD); }
   void         DoBoxedLayout(LayoutId id, BreakId bid) { DoBoxedLayout(id, bid, 0); }
@@ -62,7 +68,6 @@ public:
   virtual void SetDirty(const Rectangle* = NULL);
   virtual MathMLElement* Inside(scaled, scaled);
   virtual bool IsElement(void) const;
-  virtual ~MathMLElement();
 
   const class GraphicsContext* GetForegroundGC(void) const { return fGC[IsSelected()]; }
   const class GraphicsContext* GetBackgroundGC(void) const { return bGC[IsSelected()]; }
@@ -89,10 +94,8 @@ public:
   virtual void   RecalcBoundingBox(LayoutId, scaled = 0);
 
   // some queries
-  TagId        	 IsA(void) const { return tag; }
-#if defined(HAVE_MINIDOM)
-  mDOMNodeRef    GetDOMNode(void) const { return node; }
-#elif defined(HAVE_GMETADOM)
+  TagId        	 IsA(void) const;
+#if defined(HAVE_GMETADOM)
   const GMetaDOM::Element& GetDOMNode(void) const { return node; }
 #endif
   virtual bool 	 IsSpaceLike(void) const;
@@ -107,6 +110,7 @@ public:
   const Shape&   GetShape(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
+  virtual class MathMLOperatorElement* GetCoreOperator(void);
 
   bool HasDirtyLayout(void) const { return MathMLFrame::HasDirtyLayout(); }
   void ResetDirtyLayout(void) { MathMLFrame::ResetDirtyLayout(); }
@@ -124,6 +128,23 @@ protected:
 						     AttributeSignature[]) const;
   void ConfirmLayout(LayoutId);
 
+public:
+  virtual void SetDirtyStructure(void);
+  void         ResetDirtyStructure(void) { dirtyStructure = childWithDirtyStructure = 0; }
+  bool         HasDirtyStructure(void) const { return dirtyStructure != 0; }
+  bool         HasChildWithDirtyStructure(void) const { return childWithDirtyStructure != 0; }
+
+  virtual void SetDirtyAttribute(void);
+  void         ResetDirtyAttribute(void) { dirtyAttribute = childWithDirtyAttribute = 0; }
+  bool         HasDirtyAttribute(void) const { return dirtyAttribute != 0; }
+  bool         HasChildWithDirtyAttribute(void) const { return childWithDirtyAttribute != 0; }
+
+protected:
+  unsigned    dirtyStructure : 1;
+  unsigned    childWithDirtyStructure : 1;
+  unsigned    dirtyAttribute : 1;
+  unsigned    childWithDirtyAttribute : 1;
+
   scaled      lastLayoutWidth;
   BoundingBox minBox;
   BoundingBox maxBox;
@@ -136,12 +157,9 @@ protected:
   RGBValue background; // background color
 
 private:
-#if defined(HAVE_MINIDOM)
-  mDOMNodeRef node; // reference to the DOM node
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
   GMetaDOM::Element node; // reference to the DOM node
 #endif
-  TagId       tag;
 
 #ifdef DEBUG
   static int counter;

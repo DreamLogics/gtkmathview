@@ -23,18 +23,24 @@
 #ifndef MathMLEmbellishedOperatorElement_hh
 #define MathMLEmbellishedOperatorElement_hh
 
-#include "MathMLContainerElement.hh"
+#include "MathMLBinContainerElement.hh"
 
-class MathMLEmbellishedOperatorElement: public MathMLContainerElement {
-public:
+class MathMLEmbellishedOperatorElement: public MathMLBinContainerElement
+{
+protected:
   MathMLEmbellishedOperatorElement(class MathMLOperatorElement*);
+  virtual ~MathMLEmbellishedOperatorElement();
+
+public:
+  static MathMLEmbellishedOperatorElement* create(class MathMLOperatorElement* elem)
+  { return new MathMLEmbellishedOperatorElement(elem); }
+
   virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
-  virtual ~MathMLEmbellishedOperatorElement();
 
   virtual bool IsEmbellishedOperator(void) const;
-  class MathMLOperatorElement* GetCoreOperator(void) const { return coreOp; }
+  virtual class MathMLOperatorElement* GetCoreOperator(void);
 
   virtual const class MathMLCharNode* GetCharNode(void) const;
 

@@ -23,28 +23,34 @@
 #ifndef MathMLMultiScriptsElement_hh
 #define MathMLMultiScriptsElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLMultiScriptsElement : public MathMLContainerElement, public MathMLScriptCommonElement
+class MathMLMultiScriptsElement : public MathMLLinearContainerElement, public MathMLScriptCommonElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLMultiScriptsElement(mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
+protected:
+  MathMLMultiScriptsElement(void);
+#if defined(HAVE_GMETADOM)
   MathMLMultiScriptsElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLMultiScriptsElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLMultiScriptsElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLMultiScriptsElement(el); }
+#endif
+
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
-  virtual ~MathMLMultiScriptsElement();
+
+  virtual class MathMLOperatorElement* GetCoreOperator(void);
 
 private:
   unsigned nPre;

@@ -24,7 +24,7 @@
 #include <assert.h>
 
 #include "CharMapper.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "MathMLElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLCombinedCharNode.hh"
@@ -58,7 +58,7 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
   cChar->Setup(env);
 
   if (cChar->GetFont() != fChar.font)
-    MathEngine::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cChar->GetChar());
+    Globals::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cChar->GetChar());
 
   env->Drop();
 }

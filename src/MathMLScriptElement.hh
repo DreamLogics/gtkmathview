@@ -23,29 +23,35 @@
 #ifndef MathMLScriptElement_hh
 #define MathMLScriptElement_hh
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLContainerElement.hh"
+#include "MathMLLinearContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLScriptElement: public MathMLContainerElement, public MathMLScriptCommonElement
+class MathMLScriptElement: public MathMLLinearContainerElement, public MathMLScriptCommonElement
 {
-public:
-#if defined(HAVE_MINIDOM)
-  MathMLScriptElement(mDOMNodeRef, TagId);
-#elif defined(HAVE_GMETADOM)
-  MathMLScriptElement(const GMetaDOM::Element&, TagId);
+protected:
+  MathMLScriptElement(void);
+#if defined(HAVE_GMETADOM)
+  MathMLScriptElement(const GMetaDOM::Element&);
 #endif
+  virtual ~MathMLScriptElement();
+
+public:
+  static MathMLElement* create(void) { return new MathMLScriptElement(); }
+#if defined(HAVE_GMETADOM)
+  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLScriptElement(el); }
+#endif
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
-  virtual ~MathMLScriptElement();
+
+  virtual class MathMLOperatorElement* GetCoreOperator(void);
 
 private:
   MathMLElement* subScript;

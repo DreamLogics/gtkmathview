@@ -29,14 +29,16 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLMultiScriptsElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLMultiScriptsElement::MathMLMultiScriptsElement(mDOMNodeRef node)
-#elif defined(HAVE_GMETADOM)
-MathMLMultiScriptsElement::MathMLMultiScriptsElement(const GMetaDOM::Element& node)
-#endif
-  : MathMLContainerElement(node, TAG_MMULTISCRIPTS)
+MathMLMultiScriptsElement::MathMLMultiScriptsElement()
 {
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLMultiScriptsElement::MathMLMultiScriptsElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+}
+#endif
 
 MathMLMultiScriptsElement::~MathMLMultiScriptsElement()
 {
@@ -48,7 +50,9 @@ MathMLMultiScriptsElement::Normalize()
   if (content.GetSize() == 0 ||
       (content.GetFirst() != NULL && content.GetFirst()->IsA() == TAG_NONE) ||
       (content.GetFirst() != NULL && content.GetFirst()->IsA() == TAG_MPRESCRIPTS)) {
-    MathMLElement* mdummy = new MathMLDummyElement();
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != 0);
+
     mdummy->SetParent(this);
     content.AddFirst(mdummy);
   }
@@ -244,3 +248,9 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
   }
 }
 
+class MathMLOperatorElement*
+MathMLMultiScriptsElement::GetCoreOperator()
+{
+  assert(base != NULL);
+  return base->GetCoreOperator();
+}

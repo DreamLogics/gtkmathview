@@ -25,23 +25,25 @@
 #include <stddef.h>
 
 #include "Iterator.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLTableRowElement.hh"
 #include "MathMLTableCellElement.hh"
 
-#if defined(HAVE_MINIDOM)
-MathMLTableRowElement::MathMLTableRowElement(mDOMNodeRef node, TagId id)
-#elif defined(HAVE_GMETADOM)
-MathMLTableRowElement::MathMLTableRowElement(const GMetaDOM::Element& node, TagId id)
-#endif
-  : MathMLContainerElement(node, id)
+MathMLTableRowElement::MathMLTableRowElement()
 {
-  assert(id == TAG_MTR || id == TAG_MLABELEDTR);
   rowIndex = 0;
 }
+
+#if defined(HAVE_GMETADOM)
+MathMLTableRowElement::MathMLTableRowElement(const GMetaDOM::Element& node)
+  : MathMLLinearContainerElement(node)
+{
+  rowIndex = 0;
+}
+#endif
 
 MathMLTableRowElement::~MathMLTableRowElement()
 {
@@ -73,8 +75,9 @@ MathMLTableRowElement::Normalize()
        (content.GetSize() > 0 &&
 	content.GetFirst() != NULL &&
 	content.GetFirst()->IsA() == TAG_MTD))) {
-    MathEngine::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
-    MathMLElement* mdummy = new MathMLDummyElement();
+    Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
+    MathMLElement* mdummy = MathMLDummyElement::create();
+    assert(mdummy != 0);
     mdummy->SetParent(this);
     content.AddFirst(mdummy);
   }
@@ -88,9 +91,7 @@ MathMLTableRowElement::Normalize()
     if (elem->IsA() != TAG_MTD && (IsA() == TAG_MTR || i > 0)) {
       MathMLTableCellElement* inferredTableCell = new MathMLTableCellElement(NULL);
       inferredTableCell->SetParent(this);
-      inferredTableCell->content.Append(elem);
-
-      elem->SetParent(inferredTableCell);
+      inferredTableCell->SetChild(elem);
       elem = inferredTableCell;
     }
     elem->Normalize();
@@ -139,7 +140,7 @@ MathMLTableRowElement::Setup(RenderingEnvironment* env)
   value = GetAttributeValue(ATTR_GROUPALIGN, NULL, false);
   if (value != NULL) mtable->SetupGroupAlignAux(value, rowIndex, 1);
 
-  MathMLContainerElement::Setup(env);
+  MathMLLinearContainerElement::Setup(env);
 }
 
 void

@@ -33,7 +33,7 @@
 
 #include "Iterator.hh"
 #include "Container.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "PS_T1_Font.hh"
 #include "PS_T1_FontManager.hh"
 
@@ -128,12 +128,12 @@ PS_T1_FontManager::DumpFontDictionary(FILE* output, bool subset) const
     T1_FontDesc* desc = fontDesc.RemoveFirst();
     assert(desc != NULL);
 
-    MathEngine::logger(LOG_DEBUG, "subset font `%d'", desc->id);
+    Globals::logger(LOG_DEBUG, "subset font `%d'", desc->id);
 
     unsigned count = 0;
     for (unsigned i = 0; i < 256; i++)
       if (desc->used[i]) count++;
-    MathEngine::logger(LOG_DEBUG, "subsetting %d chars", count);
+    Globals::logger(LOG_DEBUG, "subsetting %d chars", count);
 
     unsigned long bufSize;
     char* dump = T1_SubsetFont(desc->id, desc->used,
@@ -143,7 +143,7 @@ PS_T1_FontManager::DumpFontDictionary(FILE* output, bool subset) const
     fprintf(output, "%%%%BeginResource: font %s\n", T1_GetFontName(desc->id));
     fwrite(dump, 1, bufSize, output);
     fprintf(output, "%%%%EndResource\n\n");
-    MathEngine::logger(LOG_DEBUG, "done!");
+    Globals::logger(LOG_DEBUG, "done!");
     free(dump);
 
     delete desc;
@@ -183,11 +183,11 @@ PS_T1_FontManager::DumpFontDictionary(FILE* output, bool subset) const
 	fprintf(output, "%%%%EndResource\n\n");
 	fclose(f);	
       } else
-	MathEngine::logger(LOG_WARNING, "could not include font file `%s'", path);
+	Globals::logger(LOG_WARNING, "could not include font file `%s'", path);
 
       delete [] path;
     } else {
-      MathEngine::logger(LOG_WARNING, "could not find file for font `%s'", T1_GetFontName(id()));
+      Globals::logger(LOG_WARNING, "could not find file for font `%s'", T1_GetFontName(id()));
     }
   }
 #endif
@@ -269,7 +269,7 @@ getFontFilePath(unsigned fontId)
     if (path[strlen(path) - 1] != '/') strcat(path, "/");
     strcat(path, fontFileName);
 
-    MathEngine::logger(LOG_DEBUG, "trying to find font file `%s'", path);
+    Globals::logger(LOG_DEBUG, "trying to find font file `%s'", path);
     FILE* f = fopen(path, "rb");
     if (f != NULL) {
       fclose(f);
@@ -305,20 +305,20 @@ convertToPFA(const char* source, const char* target)
   assert(source != NULL);
   assert(target != NULL);
 
-  MathEngine::logger(LOG_DEBUG, "found font file `%s', converting...", source);
+  Globals::logger(LOG_DEBUG, "found font file `%s', converting...", source);
 
   pid_t child = vfork();
 
-  MathEngine::logger(LOG_DEBUG, "new pid %d", child);
+  Globals::logger(LOG_DEBUG, "new pid %d", child);
 
   if (child == 0) {
     int res = execlp("pfb2pfa", "pfb2pfa", source, target, NULL);  
-    if (res == -1) MathEngine::logger(LOG_ERROR, "unable to convert PFB font to PFA");
+    if (res == -1) Globals::logger(LOG_ERROR, "unable to convert PFB font to PFA");
     exit(-1);
   } else {
-    MathEngine::logger(LOG_DEBUG, "waiting for PID: %d", child);
+    Globals::logger(LOG_DEBUG, "waiting for PID: %d", child);
     waitpid(child, NULL, 0);
-    MathEngine::logger(LOG_DEBUG, "child %d died, returning", child);
+    Globals::logger(LOG_DEBUG, "child %d died, returning", child);
   }
 }
 #endif

@@ -67,7 +67,8 @@ libgtkmathview_la_SOURCES = \
   FontifiedString.cc \
   Layout.cc \
   Logger.cc \
-  MathEngine.cc \
+  Globals.cc \
+  MathMLRenderingEngine.cc \
   MathMLActionElement.cc \
   MathMLAlignGroupElement.cc \
   MathMLAlignMarkElement.cc \
@@ -77,6 +78,8 @@ libgtkmathview_la_SOURCES = \
   MathMLCharNode.cc \
   MathMLCombinedCharNode.cc \
   MathMLContainerElement.cc \
+  MathMLBinContainerElement.cc \
+  MathMLLinearContainerElement.cc \
   MathMLDocument.cc \
   MathMLDummyElement.cc \
   MathMLElement.cc \
@@ -117,7 +120,6 @@ libgtkmathview_la_SOURCES = \
   MathMLUnderOverElement.cc \
   MathMLmathElement.cc \
   OperatorDictionary.cc \
-  MathMLizer.cc \
   Rectangle.cc \
   RenderingEnvironment.cc \
   Shape.cc \
@@ -174,8 +176,9 @@ noinst_HEADERS = \
   Iterator.hh \
   Layout.hh \
   Logger.hh \
+  Globals.hh \
   MathML.hh \
-  MathEngine.hh \
+  MathMLRenderingEngine.hh \
   MathMLActionElement.hh \
   MathMLAlignGroupElement.hh \
   MathMLAlignMarkElement.hh \
@@ -185,6 +188,8 @@ noinst_HEADERS = \
   MathMLCharNode.hh \
   MathMLCombinedCharNode.hh \
   MathMLContainerElement.hh \
+  MathMLBinContainerElement.hh \
+  MathMLLinearContainerElement.hh \
   MathMLDocument.hh \
   MathMLDummyElement.hh \
   MathMLElement.hh \
@@ -226,7 +231,6 @@ noinst_HEADERS = \
   MathMLmathElement.hh \
   MultiString.hh \
   OperatorDictionary.hh \
-  MathMLizer.hh \
   RGBValue.hh \
   Rectangle.hh \
   RenderingEnvironment.hh \

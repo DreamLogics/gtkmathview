@@ -39,7 +39,7 @@
 
 #include "Iterator.hh"
 #include "stringAux.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "CharMapper.hh"
 #include "FontManager.hh"
 #include "StringUnicode.hh"
@@ -138,9 +138,9 @@ CharMapper::FontifyChar(FontifiedChar& fMap, const FontAttributes& fa, Char ch) 
   if (FontifyCharAux(fMap, fa, ch, false)) return true;
 
   if (isPlain(ch)) 
-    MathEngine::logger(LOG_WARNING, "could not find a suitable font for `%c = U+%04x'", ch, ch);
+    Globals::logger(LOG_WARNING, "could not find a suitable font for `%c = U+%04x'", ch, ch);
   else
-    MathEngine::logger(LOG_WARNING, "could not find a suitable font for `U+%04x'", ch);
+    Globals::logger(LOG_WARNING, "could not find a suitable font for `U+%04x'", ch);
 
   return false;
 }
@@ -172,7 +172,7 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
 
   do {
 #if 0
-    MathEngine::logger(LOG_DEBUG, "char: %x stretchy: %d trying attributes:", ch, stretchy);
+    Globals::logger(LOG_DEBUG, "char: %x stretchy: %d trying attributes:", ch, stretchy);
     myfa.Dump();
 #endif
 
@@ -194,16 +194,16 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
       // font is a call to a virtual function.
       if (i()->fontMap != NULL) {
 #if 0
-	MathEngine::logger(LOG_DEBUG, "asking for a charmap for U+%04x stretchy %d", ch, stretchy);
+	Globals::logger(LOG_DEBUG, "asking for a charmap for U+%04x stretchy %d", ch, stretchy);
 #endif
 	const CharMap* charMap = i()->fontMap->GetCharMap(ch, stretchy);
 	if (charMap != NULL) {
 	  unsigned eval = i()->attributes.Compare(myfa);
 
 #if 0
-	  MathEngine::logger(LOG_DEBUG, "char: U+%04x comparing with: ", ch);
+	  Globals::logger(LOG_DEBUG, "char: U+%04x comparing with: ", ch);
 	  i()->attributes.Dump();
-	  MathEngine::logger(LOG_DEBUG, "comparison = %d", eval);
+	  Globals::logger(LOG_DEBUG, "comparison = %d", eval);
 #endif
 
 	  if (eval < bestEval && fontManager.IsAvailable(myfa, &i()->extraAttributes)) {
@@ -212,7 +212,7 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
 	    bestDesc = i();
 	  } else if (eval < bestEval) {
 #if 0
-	    MathEngine::logger(LOG_DEBUG, "found a better font, but it's not available");
+	    Globals::logger(LOG_DEBUG, "found a better font, but it's not available");
 	    i()->extraAttributes.Dump();
 #endif
 	  }
@@ -223,14 +223,14 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
     if (bestDesc != NULL) {
       bestFont = fontManager.GetFont(myfa, &bestDesc->extraAttributes);
       if (bestFont == NULL)
-	MathEngine::logger(LOG_WARNING, "a font for char U+%04x was configured, but the actual font file was not found", ch);
+	Globals::logger(LOG_WARNING, "a font for char U+%04x was configured, but the actual font file was not found", ch);
     }
   } while (bestFont == NULL && myfa.DownGrade());
 
 #if 0
-  MathEngine::logger(LOG_DEBUG, "resulting attributes:");
+  Globals::logger(LOG_DEBUG, "resulting attributes:");
   myfa.Dump();
-  MathEngine::logger(LOG_DEBUG, "\n");
+  Globals::logger(LOG_DEBUG, "\n");
 #endif
 
   if (bestFont == NULL || bestCharMap == NULL) {
@@ -493,14 +493,14 @@ CharMapper::ParseMap(mDOMNodeRef node)
   mDOMStringRef value = mdom_node_get_attribute(node, DOM_CONST_STRING("id"));
   if (value == NULL) return;
 #if 0
-  else MathEngine::logger(LOG_DEBUG, "parsing font map `%s'", value);
+  else Globals::logger(LOG_DEBUG, "parsing font map `%s'", value);
 #endif
 
   FontMap* fontMap = new FontMap;
   fontMap->id = C_CONST_STRING(value);
 
   if (SearchMapping(fontMap->id) != NULL) {
-    MathEngine::logger(LOG_WARNING, "there is already a font map with id `%s' (ignored)", fontMap->id);
+    Globals::logger(LOG_WARNING, "there is already a font map with id `%s' (ignored)", fontMap->id);
     delete fontMap;
     return;
   }
@@ -529,7 +529,7 @@ CharMapper::ParseMap(const GMetaDOM::Element& node)
   fontMap->id = node.getAttribute("id").toC();
 
   if (SearchMapping(fontMap->id) != NULL) {
-    MathEngine::logger(LOG_WARNING, "there is already a font map with id `%s' (ignored)", fontMap->id);
+    Globals::logger(LOG_WARNING, "there is already a font map with id `%s' (ignored)", fontMap->id);
     delete fontMap;
     return;
   }
@@ -980,7 +980,7 @@ CharMapper::PatchConfiguration()
     assert(i()->fontMapId != NULL);
     i()->fontMap = SearchMapping(i()->fontMapId);
 #if 0
-    MathEngine::logger(LOG_DEBUG, "patching font with map `%s', results %p", i()->fontMapId, i()->fontMap);
+    Globals::logger(LOG_DEBUG, "patching font with map `%s', results %p", i()->fontMapId, i()->fontMap);
 #endif
   }
 }
@@ -1016,7 +1016,7 @@ parseCode(mDOMNodeRef node)
     if (*value == '\0') ch = 0;
     else if (*value == '0' && tolower(*(value + 1)) == 'x') ch = strtol(C_CONST_STRING(value), NULL, 0);
     else if (isPlain(*value) && *(value + 1) == '\0') ch = *value;
-    else MathEngine::logger(LOG_WARNING, "UTF8 character(s) inside font configuration file (ignored)");
+    else Globals::logger(LOG_WARNING, "UTF8 character(s) inside font configuration file (ignored)");
     mdom_string_free(value);
 
     return ch;
@@ -1024,7 +1024,7 @@ parseCode(mDOMNodeRef node)
 
   value = mdom_node_get_attribute(node, DOM_CONST_STRING("name"));
   if (value != NULL) {
-    String* s = MathEngine::entitiesTable.GetEntityContent(value);
+    String* s = Globals::entitiesTable.GetEntityContent(value);
     
     Char ch = 0;
     
@@ -1033,7 +1033,7 @@ parseCode(mDOMNodeRef node)
       ch = s->GetChar(0);
       delete s;
     } else
-      if (s == NULL) MathEngine::logger(LOG_WARNING, "unknown entity `%s' in font configuration file (ignored)", value);
+      if (s == NULL) Globals::logger(LOG_WARNING, "unknown entity `%s' in font configuration file (ignored)", value);
 
     mdom_string_free(value);
 
@@ -1058,7 +1058,7 @@ parseCode(const GMetaDOM::Element& node)
     if (*s_value == '\0') ch = 0;
     else if (*s_value == '0' && tolower(*(s_value + 1)) == 'x') ch = strtol(s_value, NULL, 0);
     else if (isPlain(*s_value) && *(s_value + 1) == '\0') ch = *s_value;
-    else MathEngine::logger(LOG_WARNING, "UTF8 character(s) inside font configuration file (ignored)");
+    else Globals::logger(LOG_WARNING, "UTF8 character(s) inside font configuration file (ignored)");
     delete [] s_value;
 
     return ch;
@@ -1067,7 +1067,7 @@ parseCode(const GMetaDOM::Element& node)
 #if 0
   value = node.getAttribute("name");
   if (!value.isEmpty()) {
-    String* s = MathEngine::entitiesTable.GetEntityContent(value);
+    String* s = Globals::entitiesTable.GetEntityContent(value);
     
     Char ch = 0;
     
@@ -1076,7 +1076,7 @@ parseCode(const GMetaDOM::Element& node)
       ch = s->GetChar(0);
       delete s;
     } else
-      if (s == NULL) MathEngine::logger(LOG_WARNING, "unknown entity `%s' in font configuration file (ignored)", value);
+      if (s == NULL) Globals::logger(LOG_WARNING, "unknown entity `%s' in font configuration file (ignored)", value);
 
     return ch;
   }

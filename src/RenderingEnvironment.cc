@@ -28,7 +28,7 @@
 
 #include "Iterator.hh"
 #include "CharMapper.hh"
-#include "MathEngine.hh"
+#include "Globals.hh"
 #include "StringTokenizer.hh"
 #include "ValueConversion.hh"
 #include "RenderingEnvironment.hh"
@@ -44,12 +44,12 @@ RenderingEnvironment::RenderingEnvironment(CharMapper& cm) : charMapper(cm)
   top->scriptSizeMultiplier = 0.71;
 
   top->fontAttributes.family = "serif";
-  top->fontAttributes.size.Set(MathEngine::configuration.GetFontSize(), UNIT_PT);
+  top->fontAttributes.size.Set(Globals::configuration.GetFontSize(), UNIT_PT);
   top->fontAttributes.weight = FONT_WEIGHT_NORMAL;
   top->fontAttributes.style  = FONT_STYLE_NORMAL;
 
-  top->color = MathEngine::configuration.GetForeground();
-  top->background = MathEngine::configuration.GetBackground();
+  top->color = Globals::configuration.GetForeground();
+  top->background = Globals::configuration.GetBackground();
   top->transparentBackground = true;
 
   for (unsigned i = 1; i <= 7; i++)
