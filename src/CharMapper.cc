@@ -376,6 +376,12 @@ CharMapper::ParseMap(mDOMNodeRef node)
   FontMap* fontMap = new FontMap;
   fontMap->id = C_CONST_STRING(value);
 
+  if (SearchMapping(fontMap->id) != NULL) {
+    MathEngine::logger(LOG_WARNING, "there is already a font map with id `%s' (ignored)", fontMap->id);
+    delete fontMap;
+    return;
+  }
+
   for (mDOMNodeRef p = mdom_node_get_first_child(node);
        p != NULL;
        p = mdom_node_get_next_sibling(p)) {
