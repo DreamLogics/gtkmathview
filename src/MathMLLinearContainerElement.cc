@@ -27,6 +27,7 @@
 
 #include "Layout.hh"
 #include "Iterator.hh"
+#include "ChildList.hh"
 #include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLLinearContainerElement.hh"
@@ -57,7 +58,7 @@ MathMLLinearContainerElement::Normalize()
     {
       // editing is supported with GMetaDOM only
 #if defined(HAVE_GMETADOM)
-      GMetaDOM::NodeList children = GetDOMElement().getElementsByTagNameNS(MATHML_NS_URI, "*");
+      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
       for (unsigned i = 0; i < children.get_length(); i++)
 	{
 	  GMetaDOM::Node node = children.item(i);

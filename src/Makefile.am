@@ -68,6 +68,7 @@ libgtkmathview_la_SOURCES = \
   Layout.cc \
   Logger.cc \
   Globals.cc \
+  ChildList.cc \
   MathMLRenderingEngine.cc \
   MathMLActionElement.cc \
   MathMLAlignGroupElement.cc \
@@ -178,6 +179,7 @@ noinst_HEADERS = \
   Logger.hh \
   Globals.hh \
   MathML.hh \
+  ChildList.hh \
   MathMLRenderingEngine.hh \
   MathMLActionElement.hh \
   MathMLAlignGroupElement.hh \

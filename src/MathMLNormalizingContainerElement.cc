@@ -25,6 +25,7 @@
 #include <stddef.h>
 
 #include "Layout.hh"
+#include "ChildList.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
@@ -52,7 +53,7 @@ MathMLNormalizingContainerElement::Normalize()
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
-      GMetaDOM::NodeList children = GetDOMElement().getElementsByTagNameNS(MATHML_NS_URI, "*");
+      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
       if (children.get_length() == 1)
 	{
 	  GMetaDOM::Node node = children.item(0);

@@ -27,6 +27,7 @@
 
 #include "Layout.hh"
 #include "Iterator.hh"
+#include "ChildList.hh"
 #include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLBinContainerElement.hh"
@@ -59,7 +60,7 @@ MathMLBinContainerElement::Normalize()
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
-      GMetaDOM::NodeList children = GetDOMElement().getElementsByTagNameNS(MATHML_NS_URI, "*");
+      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
       if (children.get_length() > 0)
 	{
 	  GMetaDOM::Node node = children.item(0);
