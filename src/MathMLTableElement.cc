@@ -94,35 +94,42 @@ MathMLTableElement::~MathMLTableElement()
 void
 MathMLTableElement::Normalize()
 {
-  if (content.GetSize() == 0)
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
-      mtr->SetParent(this);
-      content.Append(mtr);
+      MathMLLinearContainerElement::Normalize();
 
-      Ptr<MathMLElement> mtd = MathMLTableCellElement::create();
-      mtd->SetParent(mtr);
-      mtr->content.Append(mtd);
-    }
-
-  for (unsigned i = 0; i < content.GetSize(); i++)
-    {
-      Ptr<MathMLElement> elem = content.RemoveFirst();
-      assert(elem != 0);
-
-      if (smart_cast<MathMLTableRowElement>(elem) == 0)
+      if (content.GetSize() == 0)
 	{
-	  Ptr<MathMLTableRowElement> inferredTableRow = 
-	    smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
-	  inferredTableRow->content.Append(elem);
+	  Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
+	  mtr->SetParent(this);
+	  content.Append(mtr);
 
-	  elem->SetParent(inferredTableRow);
-	  inferredTableRow->SetParent(this);
-	  elem = inferredTableRow;
+	  Ptr<MathMLElement> mtd = MathMLTableCellElement::create();
+	  mtd->SetParent(mtr);
+	  mtr->content.Append(mtd);
 	}
 
-      elem->Normalize();
-      content.Append(elem);
+      for (unsigned i = 0; i < content.GetSize(); i++)
+	{
+	  Ptr<MathMLElement> elem = content.RemoveFirst();
+	  assert(elem != 0);
+
+	  if (smart_cast<MathMLTableRowElement>(elem) == 0)
+	    {
+	      Ptr<MathMLTableRowElement> inferredTableRow = 
+		smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
+	      inferredTableRow->content.Append(elem);
+
+	      elem->SetParent(inferredTableRow);
+	      inferredTableRow->SetParent(this);
+	      elem = inferredTableRow;
+	    }
+
+	  elem->Normalize();
+	  content.Append(elem);
+	}
+
+      ResetDirtyStructure();
     }
 }
 
