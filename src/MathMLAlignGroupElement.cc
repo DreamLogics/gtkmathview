@@ -63,24 +63,24 @@ MathMLAlignGroupElement::DoLayout(const FormattingContext& ctxt)
 void
 MathMLAlignGroupElement::SetDecimalPoint(const Ptr<class MathMLTokenElement>& token)
 {
-  assert(token != 0);
-  assert(decimalPoint == 0);
+  assert(token);
+  assert(!decimalPoint);
   decimalPoint = token;
 }
 
 void
 MathMLAlignGroupElement::SetAlignmentMark(const Ptr<class MathMLMarkNode>& mark)
 {
-  assert(mark != 0);
-  assert(alignMarkNode == 0);
+  assert(mark);
+  assert(!alignMarkNode);
   alignMarkNode = mark;
 }
 
 void
 MathMLAlignGroupElement::SetAlignmentMark(const Ptr<class MathMLAlignMarkElement>& mark)
 {
-  assert(mark != 0);
-  assert(alignMarkElement == 0);
+  assert(mark);
+  assert(!alignMarkElement);
   alignMarkElement = mark;
 }
 

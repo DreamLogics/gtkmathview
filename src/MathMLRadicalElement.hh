@@ -29,7 +29,7 @@
 
 #include "MathMLLinearContainerElement.hh"
 
-class MathMLRadicalElement : public MathMLLinearContainerElement
+class MathMLRadicalElement : public MathMLContainerElement
 {
 protected:
   MathMLRadicalElement(void);
@@ -52,8 +52,22 @@ public:
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
 
+  virtual void Remove(const Ptr<class MathMLElement>&);
+  virtual void Replace(const Ptr<class MathMLElement>&, const Ptr<class MathMLElement>&);
+
   virtual bool IsExpanding(void) const;
+  virtual scaled GetRightEdge(void) const;
   virtual scaled GetLeftEdge(void) const;
+  virtual void ReleaseGCs(void);
+  virtual Ptr<class MathMLElement> Inside(scaled, scaled);
+
+  Ptr<class MathMLElement> GetRadicand(void) const { return radicand; }
+  Ptr<class MathMLElement> GetIndex(void) const { return index; }
+  void SetRadicand(const Ptr<class MathMLElement>&);
+  void SetIndex(const Ptr<class MathMLElement>&);
+
+protected:
+  void Init(void);
 
 private:
   Ptr<class MathMLElement> GetNucleus(void) const;
@@ -63,7 +77,9 @@ private:
   scaled spacing;
   scaled lineThickness;
 
-  Ptr<MathMLCharNode> radical;
+  Ptr<class MathMLCharNode> radical;
+  Ptr<class MathMLElement> radicand;
+  Ptr<class MathMLElement> index;
 
   RGBValue color;
 };

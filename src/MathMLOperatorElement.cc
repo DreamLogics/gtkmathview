@@ -102,18 +102,18 @@ MathMLOperatorElement::Normalize()
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
       Ptr<MathMLElement> root = findEmbellishedOperatorRoot(this);
-      assert(root != 0);
+      assert(root);
 
       Ptr<MathMLElement> p = root->GetParent();
-      assert(p != 0);
+      assert(p);
 
-      if (eOp == 0)
+      if (!eOp)
 	{
 	  Ptr<MathMLElement> op = MathMLEmbellishedOperatorElement::create(this);
-	  assert(op != 0);
+	  assert(op);
 	  eOp = smart_cast<MathMLEmbellishedOperatorElement>(op);
 	}
-      assert(eOp != 0);
+      assert(eOp);
 
       eOp->SetChild(root);
 
@@ -121,8 +121,9 @@ MathMLOperatorElement::Normalize()
       // with the embellished operator object just created
       assert(is_a<MathMLContainerElement>(p));
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
-      assert(pContainer != 0);
-      pContainer->Replace(root, eOp);
+      assert(pContainer);
+      //FIXME: THIS IS IMPORTANT
+      //pContainer->Replace(root, eOp);
 
       MathMLTokenElement::Normalize();
     }
@@ -243,11 +244,11 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
 
   if (content.GetSize() == 1 && largeOp && env->GetDisplayStyle())
     {
-      assert(content.GetFirst() != 0);
+      assert(content.GetFirst());
       if (is_a<MathMLCharNode>(content.GetFirst()))
 	{
 	  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
-	  assert(sNode != 0);
+	  assert(sNode);
 	  if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
 	}
     }
@@ -305,11 +306,11 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   adjustedSize = scaledMax(0, adjustedSize);
 
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst());
   if (is_a<MathMLCharNode>(content.GetFirst()))
     {
       Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
-      assert(cNode != 0);
+      assert(cNode);
       if (!cNode->IsStretchyChar())
 	{
 	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
@@ -318,7 +319,7 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
     }
 
   Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
-  assert(sNode != 0);
+  assert(sNode);
 
   scaled adjustedHeight = 0;
   scaled adjustedDepth = 0;
@@ -372,11 +373,11 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
   adjustedSize = scaledMax(0, adjustedSize);
 
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst());
   if (is_a<MathMLCharNode>(content.GetFirst()))
     {
       Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
-      assert(cNode != 0);
+      assert(cNode);
       if (!cNode->IsStretchyChar())
 	{
 	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
@@ -385,7 +386,7 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
     }
 
   Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
-  assert(sNode != 0);
+  assert(sNode);
 
   // now we do the stretchy layout. fontAttributes will be used to find the
   // proper font
@@ -458,7 +459,7 @@ MathMLOperatorElement::GetOperatorAttributeValue(AttributeId id,
   //printf("`%s': searching for attribute `%s'\n", NameOfTagId(IsA()), NameOfAttributeId(id));
 
   // 1st attempt, the attribute may be set for the current operator
-  const Value* value = GetAttributeValue(id, NULL, false);
+  const Value* value = GetAttributeValue(id, env, false);
 
   //if (value != NULL) printf("found directly\n");
 
@@ -477,8 +478,8 @@ MathMLOperatorElement::GetOperatorAttributeValue(AttributeId id,
   }
 
   // if the attribute hasn't still a value, then take its default
-  // from the environment or the default for the mo element
-  if (value == NULL) value = GetAttributeValue(id, env);
+  // for the mo element
+  if (value == NULL) value = GetAttributeValue(id, NULL);
   assert(value != NULL);
 
   return value;
@@ -487,17 +488,17 @@ MathMLOperatorElement::GetOperatorAttributeValue(AttributeId id,
 OperatorFormId
 MathMLOperatorElement::InferOperatorForm() const
 {
-  assert(eOp != NULL);
+  assert(eOp);
 
   Ptr<MathMLElement> elem = eOp->GetParent();
-  assert(elem != 0);
+  assert(elem);
 
   OperatorFormId res = OP_FORM_INFIX;
 
   if (elem->IsA() == TAG_MROW)
     {
       Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-      assert(row != 0);
+      assert(row);
       res = row->GetOperatorForm(eOp);
     }
 
@@ -510,11 +511,11 @@ MathMLOperatorElement::GetStretch() const
   if (!IsStretchy()) return STRETCH_NO;
 
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != 0);
+  assert(content.GetFirst());
 
   if (!is_a<MathMLCharNode>(content.GetFirst())) return STRETCH_NO;
   Ptr<MathMLCharNode> sChar = smart_cast<MathMLCharNode>(content.GetFirst());
-  assert(sChar != 0);
+  assert(sChar);
 
   if (!sChar->IsStretchyChar()) return STRETCH_NO;
 

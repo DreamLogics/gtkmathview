@@ -61,7 +61,7 @@ MathMLElement::MathMLElement(const GMetaDOM::Element& n)
   if (node != 0)
     {
       Ptr<MathMLElement> elem = ::getRenderingInterface(node);
-      if (elem == 0) ::setRenderingInterface(node, this);
+      if (!elem) ::setRenderingInterface(node, this);
     }
 
   Init();
@@ -98,7 +98,7 @@ MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
   assert(el != 0);
 
   Ptr<MathMLElement> elem = ::getRenderingInterface(el);
-  if (elem != 0) return elem;
+  if (elem) return elem;
 
   char* s_tag = NULL;
   if (el.get_namespaceURI() == 0)
@@ -401,9 +401,9 @@ void
 MathMLElement::SetDirty(const Rectangle* rect)
 {
   dirtyBackground =
-    (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 #if 0
-  if (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected()))
+  if (GetParent() && (GetParent()->IsSelected() != IsSelected()))
     dirtyBackground = 1;
 #endif
 
@@ -444,7 +444,7 @@ MathMLElement::GetDepth() const
   unsigned depth = 0;
   Ptr<const MathMLElement> p = this;
   
-  while (p != 0)
+  while (p)
     {
       depth++;
       p = p->GetParent();
@@ -522,7 +522,7 @@ MathMLElement::SetDirtyStructure()
   dirtyStructure = 1;
   
   Ptr<MathMLElement> parent = GetParent();
-  while (parent != 0)
+  while (parent)
     {
       parent->childWithDirtyStructure = 1;
       parent = parent->GetParent();
@@ -535,7 +535,7 @@ MathMLElement::SetDirtyAttribute()
   dirtyAttribute = 1;
 
   Ptr<MathMLElement> parent = GetParent();
-  while (parent != 0)
+  while (parent)
     {
       parent->childWithDirtyAttribute = 1;
       parent = parent->GetParent();

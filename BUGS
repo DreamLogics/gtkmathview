@@ -8,8 +8,7 @@ Bugs in gtkmathview:
 Presentation/TokenElements/mo/moAaccent10.xml	# no stretch
 Presentation/TokenElements/mo/moAaccent9.xml	# no stretch
 Presentation/TokenElements/mo/moAlargeop12.xml	# assertion fails
-Presentation/TokenElements/mo/moAlrspace13.xml	# assertion fails
-Presentation/TokenElements/mo/moAmovable15.xml	# assertion fails
+Presentation/TokenElements/mo/moAlrspace13.xml	# assertion fails for % in rspace
 Presentation/TokenElements/mtext/mtextAtoken3.xml	# courier font instead of helvetica
 Presentation/TokenElements/mtext/mtextStoken6.xml	# courier font instead of helvetica
 Presentation/TokenElements/mspace/mspace2.xml	# no background
@@ -26,11 +25,9 @@ Presentation/GeneralLayout/mfrac/mfracAkeyword9.xml	# line thickness
 Presentation/GeneralLayout/mfrac/mfracAmultiplier10.xml	# line thickness
 Presentation/GeneralLayout/msqrt-mroot/mrootB1.xml	# does not find big root
 Presentation/GeneralLayout/msqrt-mroot/msqrt5.xml	# does not infer mrow in msqrt
-Presentation/GeneralLayout/msqrt-mroot/msqrtB7.xml	# does not find big root
+Presentation/GeneralLayout/msqrt-mroot/msqrtB7.xml# does not find big root
 Presentation/GeneralLayout/msqrt-mroot/msqrtBimplied8.xml	# assertion fails
-Presentation/GeneralLayout/mstyle/mstyleA2.xml	# no space around +
 Presentation/GeneralLayout/mstyle/mstyleAminscript1.xml	# ?
-Presentation/GeneralLayout/merror/merrorB3.xml	# unrecognized space entities, do they exist?
 Presentation/GeneralLayout/mpadded/mpadded10.xml	# does not find entity
 Presentation/GeneralLayout/mpadded/mpadded13.xml	# how to paint the background when width < 0???
 Presentation/GeneralLayout/mpadded/mpadded14.xml	# how to paint the background when width < 0???
@@ -54,7 +51,6 @@ Presentation/ScriptsAndLimits/mmultiscripts/mmultiscripts2.xml	# assertion fails
 Presentation/TablesAndMatrices/mtable/deprecated-test3.xml	# assertion fails (but test deprecated)
 Presentation/TablesAndMatrices/mtable/maligngroup1.xml	# does not align (there is commented code)
 Presentation/TablesAndMatrices/mtable/mtable1.xml	# assertion failed
-Presentation/TablesAndMatrices/mtable/mtableAspacing4.xml	# rows are equal, they should not be
 Presentation/TablesAndMatrices/mlabeledtr/mlabeledtr1.xml	# seg faults!!!
 Presentation/TablesAndMatrices/mlabeledtr/mlabeledtrAside1.xml	# seg faults!!!
 Presentation/TablesAndMatrices/mlabeledtr/mlabeledtrAside2.xml	# assertion fails

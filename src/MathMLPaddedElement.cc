@@ -165,7 +165,7 @@ MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(child != NULL);
+  assert(child);
 
   child->DoLayout(ctxt);
   const BoundingBox& elemBox = child->GetBoundingBox();
@@ -182,7 +182,7 @@ void
 MathMLPaddedElement::SetPosition(scaled x, scaled y)
 {
   MathMLNormalizingContainerElement::SetPosition(x, y);
-  assert(child != NULL);
+  assert(child);
   child->SetPosition(x + lSpaceE, y);
 }
 
@@ -219,6 +219,6 @@ MathMLPaddedElement::EvalLengthDimension(scaled orig,
 void
 MathMLPaddedElement::SetDirty(const Rectangle* rect)
 {
-  assert(child != NULL);
+  assert(child);
   child->SetDirty(rect);
 }

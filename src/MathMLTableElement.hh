@@ -74,8 +74,8 @@ struct TableCell {
   Ptr<MathMLAlignGroupElement> group; // last group found
 
   // some facilities
-  bool ColumnSpanning(void) { return mtd != 0 && !spanned && colSpan > 1; }
-  bool RowSpanning(void) { return mtd != 0 && !spanned && rowSpan > 1; }
+  bool ColumnSpanning(void) { return mtd && !spanned && colSpan > 1; }
+  bool RowSpanning(void) { return mtd && !spanned && rowSpan > 1; }
 };
 
 typedef TableCell* TableCellPtr;

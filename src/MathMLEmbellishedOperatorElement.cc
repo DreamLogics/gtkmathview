@@ -35,7 +35,7 @@ MathMLEmbellishedOperatorElement::
 MathMLEmbellishedOperatorElement(const Ptr<MathMLOperatorElement>& op)
   : coreOp(op)
 {
-  assert(coreOp != 0);
+  assert(coreOp);
   script = false;
 }
 
@@ -48,14 +48,15 @@ MathMLEmbellishedOperatorElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      assert(child != 0);
+      assert(child);
 
       Ptr<MathMLElement> p = GetParent();
-      assert(p != 0);
+      assert(p);
 
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
-      assert(pContainer != 0);
-      pContainer->Replace(this, child);
+      assert(pContainer);
+      //FIXME: THIS IS IMPORTANT
+      //pContainer->Replace(this, child);
 
       child->Normalize();
 
@@ -76,8 +77,8 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(child != 0);
-  assert(coreOp != 0);
+  assert(child);
+  assert(coreOp);
 
   scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
@@ -88,7 +89,7 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 
   // WARNING: maybe in this case we should ask for the LAST char node...
   Ptr<const MathMLCharNode> node = coreOp->GetCharNode();
-  if (node != NULL && isIntegral(node->GetChar())) {
+  if (node && isIntegral(node->GetChar())) {
     // WARNING
     // the following patch is needed in order to have integral sign working
     box.width = scaledMax(box.width, box.rBearing);
@@ -108,8 +109,8 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLEmbellishedOperatorElement::SetPosition(scaled x, scaled y)
 {
-  assert(coreOp != 0);
-  assert(child != 0);
+  assert(coreOp);
+  assert(child);
 
   position.x = x;
   position.y = y;
@@ -130,6 +131,6 @@ MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
 Ptr<MathMLCharNode>
 MathMLEmbellishedOperatorElement::GetCharNode() const
 {
-  if (coreOp == 0 || child != Ptr<MathMLElement>(coreOp)) return 0;
+  if (!coreOp || child != Ptr<MathMLElement>(coreOp)) return 0;
   return coreOp->GetCharNode();
 }

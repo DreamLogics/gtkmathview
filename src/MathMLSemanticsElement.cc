@@ -51,13 +51,13 @@ MathMLSemanticsElement::Normalize()
   if (content.GetSize() == 0)
     {
       Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
+      assert(mdummy);
       mdummy->SetParent(this);
       content.Append(mdummy);
     }
 
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != 0);
+  assert(content.GetFirst());
   content.GetFirst()->Normalize();
 }
 
@@ -65,7 +65,7 @@ bool
 MathMLSemanticsElement::IsExpanding() const
 {
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != 0);
+  assert(content.GetFirst());
   return content.GetFirst()->IsExpanding();
 }
 
@@ -73,6 +73,6 @@ Ptr<class MathMLOperatorElement>
 MathMLSemanticsElement::GetCoreOperator()
 {
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != 0);
+  assert(content.GetFirst());
   return content.GetFirst()->GetCoreOperator();
 }

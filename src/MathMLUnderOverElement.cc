@@ -85,7 +85,7 @@ MathMLUnderOverElement::Normalize()
   while (content.GetSize() < n)
     {
       Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
+      assert(mdummy);
       Append(mdummy);
     }
 
@@ -94,7 +94,7 @@ MathMLUnderOverElement::Normalize()
   MathMLLinearContainerElement::Normalize();
 
   base = content.GetFirst();
-  assert(base != 0);
+  assert(base);
 
   if (IsA() == TAG_MUNDER) underScript = content.GetLast();
   else if (IsA() == TAG_MOVER) overScript = content.GetLast();
@@ -109,7 +109,7 @@ void
 MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-  assert(base != NULL);
+  assert(base);
 
   bool displayStyle = env->GetDisplayStyle();
 
@@ -121,7 +121,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   base->Setup(env);
   Ptr<MathMLOperatorElement> op = base->GetCoreOperator();
 
-  if (op != 0)
+  if (op)
     scriptize = !displayStyle && op->HasMovableLimits();
   else
     scriptize = false;
@@ -131,7 +131,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 
   accentUnder = false;
   underSpacing = 0;
-  if (underScript != 0)
+  if (underScript)
     {
       if (!scriptize)
 	{
@@ -140,7 +140,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 	  else
 	    {
 	      Ptr<MathMLOperatorElement> op = underScript->GetCoreOperator();
-	      if (op != 0)
+	      if (op)
 		{
 		  underScript->Setup(env);
 		  accentUnder = op->IsAccent();
@@ -163,7 +163,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 
   accent = false;
   overSpacing = 0;
-  if (overScript != 0)
+  if (overScript)
     {
       if (!scriptize)
 	{
@@ -172,7 +172,7 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 	  else
 	    {
 	      Ptr<MathMLOperatorElement> op = overScript->GetCoreOperator();
-	      if (op != 0)
+	      if (op)
 		{
 		  overScript->Setup(env);
 		  accent = op->IsAccent();
@@ -200,7 +200,7 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(base != NULL);
+  assert(base);
 
   scaled overClearance = 0;
   scaled underClearance = 0;
@@ -208,17 +208,17 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
   if (scriptize)
     {
       base->DoLayout(ctxt);
-      if (overScript != NULL) overScript->DoLayout(ctxt);
-      if (underScript != NULL) underScript->DoLayout(ctxt);
+      if (overScript) overScript->DoLayout(ctxt);
+      if (underScript) underScript->DoLayout(ctxt);
 
       const BoundingBox& baseBox = base->GetBoundingBox();
       BoundingBox underBox;
       BoundingBox overBox;
     
-      if (underScript != NULL) underBox = underScript->GetBoundingBox();
+      if (underScript) underBox = underScript->GetBoundingBox();
       else underBox.Null();
 
-      if (overScript != NULL) overBox = overScript->GetBoundingBox();
+      if (overScript) overBox = overScript->GetBoundingBox();
       else overBox.Null();
 
       DoScriptLayout(baseBox, underBox, overBox, underShiftX, underShiftY, overShiftX, overShiftY);
@@ -231,8 +231,8 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
       if (ctxt.GetLayoutType() != LAYOUT_AUTO)
 	{
 	  base->DoLayout(ctxt);
-	  if (underScript != 0) underScript->DoLayout(ctxt);
-	  if (overScript != 0) overScript->DoLayout(ctxt);
+	  if (underScript) underScript->DoLayout(ctxt);
+	  if (overScript) overScript->DoLayout(ctxt);
 	} 
       else
 	{
@@ -248,11 +248,11 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 
 	  Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
 
-	  if (baseOp == 0) base->DoLayout(ctxt);
-	  if (underScript != 0 && underOp == 0) underScript->DoLayout(ctxt);
-	  if (overScript != 0 && overOp == 0) overScript->DoLayout(ctxt);
+	  if (!baseOp) base->DoLayout(ctxt);
+	  if (underScript && !underOp) underScript->DoLayout(ctxt);
+	  if (overScript && !overOp) overScript->DoLayout(ctxt);
 
-	  if (baseOp == 0)
+	  if (!baseOp)
 	    {
 	      wOther = base->GetBoundingBox().width;
 	      nOther++;
@@ -263,9 +263,9 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 	      nOp++;
 	    }
 
-	  if (underScript != 0)
+	  if (underScript)
 	    {
-	      if (underOp == 0)
+	      if (!underOp)
 		{
 		  wOther = scaledMax(wOther, underScript->GetBoundingBox().width);
 		  nOther++;
@@ -277,9 +277,9 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 		}
 	    }
 
-	  if (overScript != 0)
+	  if (overScript)
 	    {
-	      if (overOp == 0)
+	      if (!overOp)
 		{
 		  wOther = scaledMax(wOther, overScript->GetBoundingBox().width);
 		  nOther++;
@@ -294,25 +294,25 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 	  if (nOp > 0) {
 	    scaled w = (nOther == 0) ? wOp : wOther;
 
-	    if (baseOp != 0) baseOp->HorizontalStretchTo(w);
-	    if (underOp != 0) underOp->HorizontalStretchTo(w);
-	    if (overOp != 0) overOp->HorizontalStretchTo(w);
+	    if (baseOp) baseOp->HorizontalStretchTo(w);
+	    if (underOp) underOp->HorizontalStretchTo(w);
+	    if (overOp) overOp->HorizontalStretchTo(w);
 	  }
 
-	  if (baseOp != 0) base->DoLayout(ctxt);
-	  if (underScript != 0 && underOp != 0) underScript->DoLayout(ctxt);
-	  if (overScript != 0 && overOp != 0) overScript->DoLayout(ctxt);
+	  if (baseOp) base->DoLayout(ctxt);
+	  if (underScript && underOp) underScript->DoLayout(ctxt);
+	  if (overScript && overOp) overScript->DoLayout(ctxt);
 	}
 
       const BoundingBox& baseBox = base->GetBoundingBox();
       Ptr<const MathMLCharNode> bChar = base->GetCharNode();
 
-      if (underScript != 0)
+      if (underScript)
 	{
 	  Ptr<MathMLCharNode> cChar = underScript->GetCharNode();
 
 	  if (accentUnder &&
-	      bChar != 0 && cChar != 0 &&
+	      bChar && cChar &&
 	      isCombiningBelow(cChar->GetChar()) &&
 	      bChar->CombineWith(cChar, underShiftX, underShiftY))
 	    {
@@ -326,9 +326,9 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 		{
 		  Ptr<MathMLEmbellishedOperatorElement> eOp =
 		    smart_cast<MathMLEmbellishedOperatorElement>(underScript);
-		  assert(eOp != 0);
+		  assert(eOp);
 		  Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-		  assert(coreOp != 0);
+		  assert(coreOp);
 		  underShiftY += coreOp->GetTopPadding();
 		}
 #endif
@@ -343,12 +343,12 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 	    }
 	}
 
-      if (overScript != 0)
+      if (overScript)
 	{
 	  Ptr<MathMLCharNode> cChar = overScript->GetCharNode();
 
 	  if (accent &&
-	      bChar != 0 && cChar != 0 &&
+	      bChar && cChar &&
 	      isCombiningAbove(cChar->GetChar()) &&
 	      bChar->CombineWith(cChar, overShiftX, overShiftY))
 	    {
@@ -360,9 +360,9 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 		{
 		  Ptr<MathMLEmbellishedOperatorElement> eOp =
 		    smart_cast<MathMLEmbellishedOperatorElement>(overScript);
-		  assert(eOp != 0);
+		  assert(eOp);
 		  Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-		  assert(coreOp != 0);
+		  assert(coreOp);
 		  Globals::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
 		  overShiftY += coreOp->GetBottomPadding();
 		}
@@ -388,7 +388,7 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
   box.width += baseShiftX;
   box.lBearing += baseShiftX;
 
-  if (underScript != 0)
+  if (underScript)
     {
       const BoundingBox& scriptBox = underScript->GetBoundingBox();
 
@@ -402,7 +402,7 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
       box.descent += underClearance;
     }
 
-  if (overScript != 0)
+  if (overScript)
     {
       const BoundingBox& scriptBox = overScript->GetBoundingBox();
 
@@ -422,30 +422,30 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLUnderOverElement::SetPosition(scaled x, scaled y)
 {
-  assert(base != 0);
+  assert(base);
 
   position.x = x;
   position.y = y;
 
   base->SetPosition(x + baseShiftX, y);
 
-  if (underScript != 0)
+  if (underScript)
     underScript->SetPosition(x + underShiftX, y + underShiftY);
 
-  if (overScript != 0)
+  if (overScript)
     overScript->SetPosition(x + overShiftX, y - overShiftY);
 }
 
 bool
 MathMLUnderOverElement::IsExpanding() const
 {
-  assert(base != 0);
+  assert(base);
   return base->IsExpanding();
 }
 
 Ptr<class MathMLOperatorElement>
 MathMLUnderOverElement::GetCoreOperator()
 {
-  assert(base != 0);
+  assert(base);
   return base->GetCoreOperator();
 }

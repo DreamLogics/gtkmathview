@@ -46,7 +46,7 @@ MathMLFencedElement::MathMLFencedElement(const GMetaDOM::Element& node)
   : MathMLBinContainerElement(node)
 {
   normalized = false;
-  openFence = closeFence = separators = NULL;
+  openFence = closeFence = separators = 0;
 }
 #endif
 
@@ -129,7 +129,7 @@ MathMLFencedElement::DelayedNormalize()
 	  GMetaDOM::Node node = children.item(i);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-	  assert(elem != 0);
+	  assert(elem);
 	  // we detach the element from its parent, which can be an
 	  // element created by mfenced when it expanded
 	  elem->SetParent(0);
@@ -137,15 +137,15 @@ MathMLFencedElement::DelayedNormalize()
 #endif // HAVE_GMETADOM
 
       Ptr<MathMLRowElement> mainRow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
-      assert(mainRow != 0);
+      assert(mainRow);
 
       Ptr<MathMLRowElement> mrow = 0;
       Ptr<MathMLOperatorElement> fence = 0;
 
-      if (openFence != 0 && openFence->GetLength() > 0)
+      if (openFence && openFence->GetLength() > 0)
 	{
 	  fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
-	  assert(fence != 0);
+	  assert(fence);
 	  fence->Append(openFence);
 	  fence->SetFence();
 	  mainRow->Append(fence);
@@ -156,14 +156,14 @@ MathMLFencedElement::DelayedNormalize()
 
       if (moreArguments) mrow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
       else mrow = mainRow;
-      assert(mrow != 0);
+      assert(mrow);
 
       for (unsigned i = 0; i < nChildren; i++)
 	{
 	  GMetaDOM::Node node = children.item(i);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> arg = MathMLElement::getRenderingInterface(node);
-	  assert(arg != 0);
+	  assert(arg);
 
 	  mrow->Append(arg);
 
@@ -174,7 +174,7 @@ MathMLFencedElement::DelayedNormalize()
 	      assert(sep != NULL);
 
 	      Ptr<MathMLOperatorElement> separator = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
-	      assert(separator != 0);
+	      assert(separator);
 
 	      separator->SetSeparator();
 	      separator->Append(sep);
@@ -188,7 +188,7 @@ MathMLFencedElement::DelayedNormalize()
       if (closeFence != NULL && closeFence->GetLength() > 0)
 	{
 	  fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
-	  assert(fence != 0);
+	  assert(fence);
 	  fence->Append(closeFence);
 	  fence->SetFence();
 	  mainRow->Append(fence);

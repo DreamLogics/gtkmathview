@@ -73,7 +73,7 @@ MathMLFractionElement::Normalize()
   while (content.GetSize() < 2)
     {
       Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
+      assert(mdummy);
 
       mdummy->SetParent(this);
       content.Append(mdummy);
@@ -190,7 +190,7 @@ MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
 
   Ptr<MathMLElement> num   = content.GetFirst();
   Ptr<MathMLElement> denom = content.GetLast();
-  assert(num != 0 && denom != 0);
+  assert(num && denom);
 
   if (bevelled) {
     // the fraction is bevelled
@@ -266,7 +266,7 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
 
   Ptr<MathMLElement> num   = content.GetFirst();
   Ptr<MathMLElement> denom = content.GetLast();
-  assert(num != 0 && denom != 0);
+  assert(num && denom);
 
   const BoundingBox& box      = GetBoundingBox();
   const BoundingBox& numBox   = num->GetBoundingBox();
@@ -328,7 +328,7 @@ MathMLFractionElement::Render(const DrawingArea& area)
     if (bevelled) {
       Ptr<MathMLElement> num   = content.GetFirst();
       Ptr<MathMLElement> denom = content.GetLast();
-      assert(num != 0 && denom != 0);
+      assert(num && denom);
 
       const BoundingBox& numBox   = num->GetBoundingBox();
       const BoundingBox& denomBox = denom->GetBoundingBox();
@@ -355,7 +355,7 @@ MathMLFractionElement::IsExpanding() const
 {
   Ptr<MathMLElement> num   = content.GetFirst();
   Ptr<MathMLElement> denom = content.GetLast();
-  assert(num != 0 && denom != 0);
+  assert(num && denom);
 
   if (num->IsExpanding()) return true;
   if (denom->IsExpanding()) return true;
@@ -367,6 +367,6 @@ Ptr<class MathMLOperatorElement>
 MathMLFractionElement::GetCoreOperator()
 {
   Ptr<MathMLElement> num = content.GetFirst();
-  assert(num != 0);
+  assert(num);
   return num->GetCoreOperator();
 }

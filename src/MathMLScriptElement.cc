@@ -83,7 +83,7 @@ MathMLScriptElement::Normalize()
   while (content.GetSize() < n)
     {
       Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
+      assert(mdummy);
       mdummy->SetParent(this);
       content.Append(mdummy);
     }
@@ -93,7 +93,7 @@ MathMLScriptElement::Normalize()
   MathMLLinearContainerElement::Normalize();
 
   base = content.GetFirst();
-  assert(base != 0);
+  assert(base);
 
   if (IsA() == TAG_MSUB) subScript = content.GetLast();
   else if (IsA() == TAG_MSUP) superScript = content.GetLast();
@@ -111,7 +111,7 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 
   ScriptSetup(env);
 
-  assert(base != 0);
+  assert(base);
   base->Setup(env);
 
   env->Push();
@@ -120,7 +120,7 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 
   const Value* value = NULL;
 
-  if (subScript != 0)
+  if (subScript)
     {
       subScript->Setup(env);
 
@@ -138,7 +138,7 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 	}
     }
 
-  if (superScript != 0)
+  if (superScript)
     {
       superScript->Setup(env);
 
@@ -164,14 +164,14 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(base != 0);
+  assert(base);
 
   base->DoLayout(ctxt);
-  if (subScript != 0) subScript->DoLayout(ctxt);
-  if (superScript != 0) superScript->DoLayout(ctxt);
+  if (subScript) subScript->DoLayout(ctxt);
+  if (superScript) superScript->DoLayout(ctxt);
 
   Ptr<MathMLElement> rel = findRightmostChild(base);
-  assert(rel != 0);
+  assert(rel);
 
   const BoundingBox& baseBox = base->GetBoundingBox();
   BoundingBox relBox = rel->GetBoundingBox();
@@ -182,10 +182,10 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
   BoundingBox superScriptBox;
 
   subScriptBox.Null();
-  if (subScript != 0) subScriptBox = subScript->GetBoundingBox();
+  if (subScript) subScriptBox = subScript->GetBoundingBox();
 
   superScriptBox.Null();
-  if (superScript != 0) superScriptBox = superScript->GetBoundingBox();
+  if (superScript) superScriptBox = superScript->GetBoundingBox();
 
   DoScriptLayout(relBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
 
@@ -198,7 +198,7 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 			   scaledMax(superShiftX + superScriptBox.rBearing,
 				     subShiftX + subScriptBox.rBearing));
 
-  if (subScript != 0)
+  if (subScript)
     {
       box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
       box.tAscent  = scaledMax(box.tAscent, subScriptBox.tAscent - subShiftY);
@@ -206,7 +206,7 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
       box.tDescent = scaledMax(box.tDescent, subScriptBox.tDescent + subShiftY);
     }
 
-  if (superScript != 0)
+  if (superScript)
     {
       box.ascent   = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
       box.tAscent  = scaledMax(box.tAscent, superScriptBox.tAscent + superShiftY);
@@ -220,23 +220,23 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLScriptElement::SetPosition(scaled x, scaled y)
 {
-  assert(base != 0);
+  assert(base);
 
   position.x = x;
   position.y = y;
 
   base->SetPosition(x, y);
 
-  if (subScript != 0)
+  if (subScript)
     subScript->SetPosition(x + subShiftX, y + subShiftY);
 
-  if (superScript != 0)
+  if (superScript)
     superScript->SetPosition(x + superShiftX, y - superShiftY);
 }
 
 Ptr<class MathMLOperatorElement>
 MathMLScriptElement::GetCoreOperator()
 {
-  assert(base != 0);
+  assert(base);
   return base->GetCoreOperator();
 }

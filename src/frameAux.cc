@@ -40,13 +40,13 @@ getFrameBoundingBox(const Ptr<MathMLFrame>& frame)
 Ptr<MathMLFrame>
 getFrameLeftSibling(const Ptr<MathMLFrame>& frame)
 {
-  assert(frame != 0);
-  assert(frame->GetParent() != 0);
+  assert(frame);
+  assert(frame->GetParent());
 
   if (is_a<MathMLTokenElement>(frame->GetParent()))
     {
       Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(frame->GetParent());
-      assert(token != 0);
+      assert(token);
 
       Ptr<MathMLFrame> left = 0;
       for (Iterator< Ptr<MathMLTextNode> > p(token->GetContent()); p.More(); p.Next())
@@ -76,13 +76,13 @@ getFrameLeftSibling(const Ptr<MathMLFrame>& frame)
 Ptr<MathMLFrame>
 getFrameRightSibling(const Ptr<MathMLFrame>& frame)
 {
-  assert(frame != 0);
-  assert(frame->GetParent() != 0);
+  assert(frame);
+  assert(frame->GetParent());
 
   if (is_a<MathMLTokenElement>(frame->GetParent()))
     {
       Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(frame->GetParent());
-      assert(token != 0);
+      assert(token);
 
       for (Iterator< Ptr<MathMLTextNode> > p(token->GetContent()); p.More(); p.Next())
 	if (Ptr<MathMLFrame>(p()) == frame)

@@ -79,7 +79,7 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
   assert(s != NULL);
   if (s->GetLength() == 1) lQuote = MathMLCharNode::create(s->GetChar(0));
   else if (s->GetLength() > 1) lQuote = MathMLStringNode::create(s->Clone());
-  assert(lQuote != NULL);
+  assert(lQuote);
   lQuote->SetParent(this);
   content.AddFirst(lQuote);
 
@@ -87,7 +87,7 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
   assert(s != NULL);
   if (s->GetLength() == 1) rQuote = MathMLCharNode::create(s->GetChar(0));
   else if (s->GetLength() > 0) rQuote = MathMLStringNode::create(s->Clone());
-  assert(rQuote != NULL);
+  assert(rQuote);
   rQuote->SetParent(this);
   content.AddLast(rQuote);
 

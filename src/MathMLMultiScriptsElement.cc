@@ -63,7 +63,7 @@ MathMLMultiScriptsElement::Normalize()
 	      (node.get_nodeName() == "none" || node.get_nodeName() == "mprescripts"))
 	    {
 	      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-	      assert(mdummy != 0);
+	      assert(mdummy);
 	      SetChild(0, mdummy);
 	    }
 	  else
@@ -72,7 +72,7 @@ MathMLMultiScriptsElement::Normalize()
 	      // it might be that we get a NULL. In that case it would probably make
 	      // sense to create a dummy element, because we filtered MathML
 	      // elements only
-	      assert(elem != 0);
+	      assert(elem);
 	      SetChild(i, elem);
 	    }
 	}
@@ -84,20 +84,20 @@ MathMLMultiScriptsElement::Normalize()
     }
 
   if (content.GetSize() == 0 ||
-      (content.GetFirst() != 0 && content.GetFirst()->IsA() == TAG_NONE) ||
-      (content.GetFirst() != 0 && content.GetFirst()->IsA() == TAG_MPRESCRIPTS))
+      (content.GetFirst() && content.GetFirst()->IsA() == TAG_NONE) ||
+      (content.GetFirst() && content.GetFirst()->IsA() == TAG_MPRESCRIPTS))
     {
     }
 
   base = content.GetFirst();
-  assert(base != 0);
+  assert(base);
 
   unsigned i = 0;
   bool     preScripts = false;
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next(), i++)
     {
-      assert(elem() != 0);
+      assert(elem());
       if (elem()->IsA() == TAG_MPRESCRIPTS) 
 	{
 	  preScripts = true;
@@ -121,7 +121,7 @@ void
 MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 {
   assert(content.GetSize() > 0);
-  assert(content.GetFirst() != 0);
+  assert(content.GetFirst());
 
   content.GetFirst()->Setup(env);
   
@@ -133,7 +133,7 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
   elem.Next();
   while (elem.More())
     {
-      if (elem() != 0) elem()->Setup(env);
+      if (elem()) elem()->Setup(env);
       elem.Next();
     }
 
@@ -147,7 +147,7 @@ MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(base != 0);
+  assert(base);
 
   unsigned n = 1 + nPre / 2 + nPost / 2;
   assert(n > 0);
@@ -169,7 +169,7 @@ MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 
   while (elem.More())
     {
-      assert(elem() != 0);
+      assert(elem());
 
       elem()->DoLayout(ctxt);
 
@@ -236,7 +236,7 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
     {
       while (elem.More())
 	{
-	  assert(elem() != 0);
+	  assert(elem());
 
 	  if (preScript)
 	    {
@@ -280,7 +280,7 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
     
       while (elem.More() && !preScript)
 	{
-	  assert(elem() != 0);
+	  assert(elem());
 
 	  if (elem()->IsA() == TAG_MPRESCRIPTS) preScript = true;
 	  else
@@ -309,6 +309,6 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
 Ptr<class MathMLOperatorElement>
 MathMLMultiScriptsElement::GetCoreOperator()
 {
-  assert(base != 0);
+  assert(base);
   return base->GetCoreOperator();
 }

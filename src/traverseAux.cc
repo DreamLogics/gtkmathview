@@ -44,22 +44,22 @@
 Ptr<MathMLElement>
 findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 {
-  assert(root != 0);
+  assert(root);
 
-  if (root->GetParent() == 0) return root;
+  if (!root->GetParent()) return root;
 
   Ptr<MathMLContainerElement> rootParent = smart_cast<MathMLContainerElement>(root->GetParent());
-  assert(rootParent != 0);
+  assert(rootParent);
 
   if (is_a<MathMLRowElement>(rootParent))
     {
       Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(rootParent);
-      assert(row != 0);
+      assert(row);
 
       for (Iterator< Ptr<MathMLElement> > i(row->GetContent()); i.More(); i.Next())
 	{
 	  Ptr<MathMLElement> elem = i();
-	  assert(elem != 0);
+	  assert(elem);
 	  if (!elem->IsSpaceLike() && root != elem) return root;
 	}
 
@@ -72,7 +72,7 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 	   is_a<MathMLSemanticsElement>(rootParent))
     {
       Ptr<MathMLLinearContainerElement> cont = smart_cast<MathMLLinearContainerElement>(rootParent);
-      assert(cont != 0);
+      assert(cont);
 
       if (cont->GetContent().GetSize() > 0 &&
 	  cont->GetContent().GetFirst() != root) return root;
@@ -89,19 +89,19 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 Ptr<MathMLOperatorElement>
 findStretchyOperator(const Ptr<MathMLElement>& elem)
 {
-  if (elem == 0) return 0;
+  if (!elem) return Ptr<MathMLOperatorElement>(0);
 
   if (is_a<MathMLEmbellishedOperatorElement>(elem)) {
     Ptr<MathMLEmbellishedOperatorElement> eop = smart_cast<MathMLEmbellishedOperatorElement>(elem);
-    assert(eop != 0);
+    assert(eop);
     Ptr<MathMLOperatorElement> op = eop->GetCoreOperator();
-    assert(op != 0);
+    assert(op);
 
     if (op->IsStretchy()) return op;
     else return NULL;
   } else if (is_a<MathMLOperatorElement>(elem)) {
     Ptr<MathMLOperatorElement> op = smart_cast<MathMLOperatorElement>(elem);
-    assert(op != 0);
+    assert(op);
     if (op->IsStretchy()) return op;
     else return 0;
   } else
@@ -112,16 +112,16 @@ Ptr<MathMLOperatorElement>
 findStretchyOperator(const Ptr<MathMLElement>& elem, StretchId id)
 {
   Ptr<MathMLOperatorElement> op = findStretchyOperator(elem);
-  if (op == 0) return 0;
-  if (op->GetStretch() != id) return 0;
+  if (!op) return 0;
+  if (op->GetStretch() != id) return Ptr<MathMLOperatorElement>(0);
   return op;
 }
 
 Ptr<MathMLElement>
 findCommonAncestor(const Ptr<MathMLElement>& first, const Ptr<MathMLElement>& last)
 {
-  assert(first != 0);
-  assert(last != 0);
+  assert(first);
+  assert(last);
 
   Ptr<MathMLElement> firstP(first);
   Ptr<MathMLElement> lastP(last);
@@ -131,13 +131,13 @@ findCommonAncestor(const Ptr<MathMLElement>& first, const Ptr<MathMLElement>& la
       unsigned firstDepth = first->GetDepth();
       unsigned lastDepth  = last->GetDepth();
 
-      while (firstP != 0 && firstDepth > lastDepth)
+      while (firstP && firstDepth > lastDepth)
 	{
 	  firstP = firstP->GetParent();
 	  firstDepth--;
 	}
 
-      while (lastP != 0 && lastDepth > firstDepth)
+      while (lastP && lastDepth > firstDepth)
 	{
 	  lastP = lastP->GetParent();
 	  lastDepth--;
@@ -145,7 +145,7 @@ findCommonAncestor(const Ptr<MathMLElement>& first, const Ptr<MathMLElement>& la
 
       assert(firstDepth == lastDepth);
 
-      while (firstP != 0 && lastP != 0 && firstP != lastP)
+      while (firstP && lastP && firstP != lastP)
 	{
 	  firstP = firstP->GetParent();
 	  lastP = lastP->GetParent();
@@ -160,10 +160,10 @@ findActionElement(const Ptr<MathMLElement>& elem)
 {
   Ptr<MathMLElement> elemP(elem);
 
-  while (elemP != 0 && elemP->IsA() != TAG_MACTION)
+  while (elemP && elemP->IsA() != TAG_MACTION)
     elemP = elemP->GetParent();
 
-  return (elemP != 0) ? smart_cast<MathMLActionElement>(elemP) : 0;
+  return (elemP) ? smart_cast<MathMLActionElement>(elemP) : Ptr<MathMLActionElement>(0);
 }
 
 #if defined(HAVE_GMETADOM)
@@ -173,10 +173,10 @@ findDOMNode(const Ptr<MathMLElement>& elem)
 {
   Ptr<MathMLElement> elemP(elem);
 
-  while (elemP != 0 && elemP->GetDOMElement() == 0)
+  while (elemP && elemP->GetDOMElement() == 0)
     elemP = elemP->GetParent();
 
-  return (elemP != 0) ? elemP->GetDOMElement() : 0;
+  return (elemP) ? elemP->GetDOMElement() : 0;
 }
 
 Ptr<MathMLElement>
@@ -186,7 +186,7 @@ getRenderingInterface(const GMetaDOM::Element& node)
   // of the assumption that the user will NEVER modify the user data field
   // in the DOM tree elements!!!
   Ptr<MathMLElement> elem((MathMLElement*) node.get_userData());
-  assert(elem == 0 || elem->GetDOMElement() == node);
+  assert(elem || elem->GetDOMElement() == node);
   return elem;
 }
 
@@ -206,13 +206,13 @@ Ptr<MathMLElement>
 findMathMLElement(const GMetaDOM::Element& node)
 {
   Ptr<MathMLElement> elem = ::getRenderingInterface(node);
-  assert(elem != NULL);
+  assert(elem);
 
   while (elem->IsA() == TAG_MROW &&
 	 smart_cast<MathMLRowElement>(elem)->GetContent().GetSize() == 1)
     {
       Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-      assert(row != 0);
+      assert(row);
       elem = row->GetContent().GetFirst();
     }
 
@@ -224,10 +224,10 @@ findMathMLElement(const GMetaDOM::Element& node)
 Ptr<MathMLElement>
 findRightmostChild(const Ptr<MathMLElement>& elem)
 {
-  if (elem == 0 || elem->IsA() != TAG_MROW) return elem;
+  if (!elem || elem->IsA() != TAG_MROW) return elem;
 
   Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-  assert(row != 0);
+  assert(row);
   if (row->GetContent().GetSize() == 0) return elem;
 
   return findRightmostChild(row->GetContent().GetLast());
@@ -236,10 +236,10 @@ findRightmostChild(const Ptr<MathMLElement>& elem)
 Ptr<MathMLElement>
 findLeftmostChild(const Ptr<MathMLElement>& elem)
 {
-  if (elem == 0 || elem->IsA() != TAG_MROW) return elem;
+  if (!elem || elem->IsA() != TAG_MROW) return elem;
 
   Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-  assert(row != 0);
+  assert(row);
   if (row->GetContent().GetSize() == 0) return elem;
 
   return findLeftmostChild(row->GetContent().GetFirst());
@@ -298,7 +298,7 @@ findLeftSibling(const Ptr<MathMLElement>& elem)
   if (p == 0) return 0;
 
   for (p = p.get_previousSibling();
-       p != 0 && p.get_userData() == NULL;
+       p != 0&& p.get_userData() == NULL;
        p = p.get_previousSibling()) ;
 
   if (p != 0) return findRightmostChild(findMathMLElement(p));

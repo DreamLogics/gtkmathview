@@ -361,7 +361,7 @@ gtk_math_view_destroy(GtkObject* object)
   g_return_if_fail(math_view->interface != NULL);
 
   Ptr<MathMLElement> root = math_view->interface->GetRoot();
-  if (root != 0) root->ReleaseGCs();
+  if (root) root->ReleaseGCs();
 
   Globals::logger(LOG_DEBUG, "destroying the widget");
 
@@ -772,7 +772,7 @@ gtk_math_view_is_selected(GtkMathView* math_view, GdomeElement* elem)
   g_return_val_if_fail(elem != NULL, FALSE);
 
   Ptr<MathMLElement> el = findMathMLElement(elem);
-  if (el == 0) return FALSE;
+  if (!el) return FALSE;
 
   return el->IsSelected() ? TRUE : FALSE;
 }
@@ -876,7 +876,7 @@ gtk_math_view_get_element_coords(GtkMathView* math_view, GdomeElement* elem, gin
   g_return_val_if_fail(elem != NULL, FALSE);
 
   Ptr<MathMLElement> el = findMathMLElement(elem);
-  if (el == 0) return FALSE;
+  if (!el) return FALSE;
 
   if (x != NULL) *x = sp2px(el->GetX());
   if (y != NULL) *y = sp2px(el->GetY());
@@ -892,7 +892,7 @@ gtk_math_view_get_element_rectangle(GtkMathView* math_view, GdomeElement* elem, 
   g_return_val_if_fail(rect != NULL, FALSE);
 
   Ptr<MathMLElement> el = findMathMLElement(elem);
-  if (el == 0) return FALSE;
+  if (!el) return FALSE;
 
   const BoundingBox& box = el->GetBoundingBox();
   rect->x = sp2ipx(el->GetX());
@@ -955,7 +955,7 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
   if (id == math_view->font_manager_id) return;
 
   Ptr<MathMLElement> root = math_view->interface->GetRoot();
-  if (root != 0) root->ReleaseGCs();
+  if (root) root->ReleaseGCs();
 
   delete math_view->font_manager;
   delete math_view->drawing_area;
@@ -1039,7 +1039,7 @@ gtk_math_view_export_to_postscript(GtkMathView* math_view,
   if (disable_colors) area.DisableColors();
 
   Ptr<MathMLElement> root = math_view->interface->GetRoot();
-  if (root == NULL) return;
+  if (!root) return;
 
   // the following invocations are needed just to mark the chars actually used :(
   fm->ResetUsedChars();
@@ -1069,7 +1069,7 @@ gtk_math_view_action_get_selected(GtkMathView* math_view, GdomeElement* elem)
 
   Ptr<MathMLActionElement> action_element =
     smart_cast<MathMLActionElement>(findMathMLElement(elem));
-  if (action_element == NULL) return 0;
+  if (!action_element) return 0;
 
   return action_element->GetSelectedIndex();
 }
@@ -1083,7 +1083,7 @@ gtk_math_view_action_set_selected(GtkMathView* math_view, GdomeElement* elem, gu
 
   Ptr<MathMLActionElement> action_element =
     smart_cast<MathMLActionElement>(findMathMLElement(elem));
-  if (action_element == NULL) return;
+  if (!action_element) return;
 
   action_element->SetSelectedIndex(idx);
   math_view->interface->MinMaxLayout();
@@ -1101,7 +1101,7 @@ gtk_math_view_action_toggle(GtkMathView* math_view, GdomeElement* elem)
 
   Ptr<MathMLActionElement> action_element =
     smart_cast<MathMLActionElement>(findMathMLElement(elem));
-  if (action_element == NULL) return;
+  if (!action_element) return;
 
   guint idx = action_element->GetSelectedIndex();
   if (idx < action_element->GetContent().GetSize())

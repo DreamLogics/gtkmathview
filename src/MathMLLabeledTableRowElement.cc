@@ -58,11 +58,11 @@ MathMLLabeledTableRowElement::Normalize()
 
       if (content.GetSize() == 0 ||
 	  (content.GetSize() > 0 &&
-	   content.GetFirst() != 0 &&
+	   content.GetFirst() &&
 	   is_a<MathMLTableCellElement>(content.GetFirst())))
 	{
 	  Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-	  assert(mdummy != 0);
+	  assert(mdummy);
 	  mdummy->SetParent(this);
 	  content.AddFirst(mdummy);
 	  Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
@@ -76,7 +76,7 @@ Ptr<MathMLElement>
 MathMLLabeledTableRowElement::GetLabel(void) const
 {
   assert(content.GetSize() > 0);
-  assert(content.GetFirst() != 0);
+  assert(content.GetFirst());
   assert(!is_a<MathMLTableCellElement>(content.GetFirst()));
 
   return content.GetFirst();

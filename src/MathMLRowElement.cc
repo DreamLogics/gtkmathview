@@ -65,11 +65,11 @@ MathMLRowElement::Setup(RenderingEnvironment* env)
 
   Iterator< Ptr<MathMLElement> > i(content);
   i.ResetLast();
-  while (i.More() && i() != 0 &&
+  while (i.More() && i() &&
 	 (i()->IsSpaceLike() || is_a<MathMLEmbellishedOperatorElement>(i())))
     i.Prev();
 	      
-  if (i.More() && i() != NULL) lastElement = i();
+  if (i.More() && i()) lastElement = i();
 }
 
 void
@@ -81,7 +81,7 @@ MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
   for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
       Ptr<MathMLElement> elem = i();
-      assert(elem != 0);
+      assert(elem);
       elem->DoLayout(ctxt);
       box.Append(elem->GetBoundingBox());
     }
@@ -106,11 +106,11 @@ MathMLRowElement::DoStretchyLayout()
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       BoundingBox elemBox;
 
       Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
-      if (op != 0)
+      if (op)
 	{
 	  opBox.Append(op->GetMinBoundingBox());
 	  nStretchy++;      
@@ -134,10 +134,10 @@ MathMLRowElement::DoStretchyLayout()
 
       for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
 	{
-	  assert(elem() != 0);
+	  assert(elem());
 	  Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
 
-	  if (op != 0)
+	  if (op)
 	    {
 	      op->VerticalStretchTo(toAscent, toDescent);
 	      elem()->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
@@ -152,7 +152,7 @@ MathMLRowElement::SetPosition(scaled x, scaled y)
   MathMLLinearContainerElement::SetPosition(x, y);
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->SetPosition(x, y);
       x += elem()->GetBoundingBox().width;
     }
@@ -163,7 +163,7 @@ MathMLRowElement::IsSpaceLike() const
 {
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       if (!elem()->IsSpaceLike()) return false;
     }
 
@@ -175,7 +175,7 @@ MathMLRowElement::IsExpanding() const
 {
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       if (elem()->IsExpanding()) return true;
     }
 
@@ -185,7 +185,7 @@ MathMLRowElement::IsExpanding() const
 OperatorFormId
 MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
 {
-  assert(eOp != 0);
+  assert(eOp);
 
   OperatorFormId res = OP_FORM_INFIX;
 
@@ -194,7 +194,7 @@ MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
   for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
       Ptr<const MathMLElement> p = i();
-      assert(p != 0);
+      assert(p);
 
       if (!p->IsSpaceLike())
 	{
@@ -220,14 +220,14 @@ MathMLRowElement::GetCoreOperator()
   for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
       Ptr<MathMLElement> elem = i();
-      assert(elem != 0);
+      assert(elem);
 
       if (!elem->IsSpaceLike())
 	{
-	  if (core == 0) core = elem;
+	  if (!core) core = elem;
 	  else return 0;
 	}
     }
 
-  return (core != 0) ? core->GetCoreOperator() : 0;
+  return core ? core->GetCoreOperator() : Ptr<class MathMLOperatorElement>(0);
 }

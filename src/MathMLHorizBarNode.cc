@@ -71,7 +71,7 @@ MathMLHorizBarNode::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  assert(GetParent() != 0);
+  assert(GetParent());
   const GraphicsContext* gc = GetParent()->GetForegroundGC();
 
   area.Clear(gc, GetX(), GetY() - box.descent, box.width, box.GetHeight());

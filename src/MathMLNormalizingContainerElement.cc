@@ -61,25 +61,25 @@ MathMLNormalizingContainerElement::Normalize()
 	  GMetaDOM::Node node = children.item(0);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-	  assert(elem != 0);
+	  assert(elem);
 	  SetChild(elem);
 	}
-      else if (child == 0 || child->GetDOMElement() != GetDOMElement())
+      else if (!child || child->GetDOMElement() != GetDOMElement())
 	{
 	  Ptr<MathMLElement> row = MathMLRowElement::create(GetDOMElement());
-	  assert(row != 0);
+	  assert(row);
 	  SetChild(row);
 	}
 #else
-      if (child == NULL)
+      if (!child)
 	{
 	  Ptr<MathMLElement> row = MathMLRowElement::create();
-	  assert(row != 0);
+	  assert(row);
 	  SetChild(row);
 	}
 #endif
 
-      assert(child != 0);
+      assert(child);
       child->Normalize();
 
       ResetDirtyStructure();
@@ -91,7 +91,7 @@ MathMLNormalizingContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(child != 0);
+  assert(child);
 
   child->DoLayout(ctxt);
   box = child->GetBoundingBox();
@@ -106,7 +106,7 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
 
   RenderBackground(area);
 
-  assert(child != 0);
+  assert(child);
   child->Render(area);
 
   ResetDirty();
@@ -115,14 +115,14 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
 bool
 MathMLNormalizingContainerElement::IsExpanding() const
 {
-  assert(child != 0);
+  assert(child);
   return child->IsExpanding();
 }
 
 Ptr<class MathMLOperatorElement>
 MathMLNormalizingContainerElement::GetCoreOperator()
 {
-  assert(child != 0);
+  assert(child);
 
   switch (IsA())
     {

@@ -42,6 +42,8 @@ public:
 
   friend bool operator==(const Ptr& p, const Ptr& q) { return p.ptr == q.ptr; }
   friend bool operator!=(const Ptr& p, const Ptr& q) { return p.ptr != q.ptr; }
+              operator bool() const { return ptr != 0; }
+
   template <class Q> friend Ptr<Q> smart_cast(const Ptr& p) { return Ptr<Q>(dynamic_cast<Q*>(p.ptr)); }  
   template <class Q> friend bool is_a(const Ptr& p) { return dynamic_cast<Q*>(p.ptr) != 0; }
 

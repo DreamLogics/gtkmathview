@@ -59,7 +59,7 @@ MathMLInvisibleTimesNode::DoLayout()
   // left to right, at setup time for this node the information is not
   // available
 
-  assert(GetParent() != 0);
+  assert(GetParent());
 
   box.Set(0, 0, 0);
 
@@ -67,13 +67,13 @@ MathMLInvisibleTimesNode::DoLayout()
 
   Ptr<MathMLElement> prev = findLeftSibling(GetParent());
   Ptr<MathMLElement> next = findRightSibling(GetParent());
-  if (prev == 0 || next == 0) return;
+  if (!prev || !next) return;
 
   if (is_a<MathMLIdentifierElement>(prev) && is_a<MathMLIdentifierElement>(next))
     {
       Ptr<MathMLTokenElement> prevToken = smart_cast<MathMLTokenElement>(prev);
       Ptr<MathMLTokenElement> nextToken = smart_cast<MathMLTokenElement>(next);
-      assert(prevToken != 0 && nextToken != 0);
+      assert(prevToken && nextToken);
     
       if (prevToken->GetLogicalContentLength() <= 1 &&
 	  nextToken->GetLogicalContentLength() <= 1) return;

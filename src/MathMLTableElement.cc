@@ -71,8 +71,8 @@ MathMLTableElement::GetAttributeSignature(AttributeId id) const
     { ATTR_COLUMNLINES,     lineTypeListParser,       new StringC("none"),        NULL },
     { ATTR_FRAME,           lineTypeParser,           new StringC("none"),        NULL },
     { ATTR_FRAMESPACING,    tableFrameSpacingParser,  new StringC("0.4em 0.5ex"), NULL },
-    { ATTR_EQUALROWS,       booleanParser,            new StringC("true"),        NULL },
-    { ATTR_EQUALCOLUMNS,    booleanParser,            new StringC("true"),        NULL },
+    { ATTR_EQUALROWS,       booleanParser,            new StringC("false"),        NULL },
+    { ATTR_EQUALCOLUMNS,    booleanParser,            new StringC("false"),        NULL },
     { ATTR_DISPLAYSTYLE,    booleanParser,            new StringC("false"),       NULL },
     { ATTR_SIDE,            tableSideParser,          new StringC("right"),       NULL },
     { ATTR_MINLABELSPACING, numberUnitParser,         new StringC("0.8em"),       NULL },
@@ -112,9 +112,9 @@ MathMLTableElement::Normalize()
       for (unsigned i = 0; i < content.GetSize(); i++)
 	{
 	  Ptr<MathMLElement> elem = content.RemoveFirst();
-	  assert(elem != 0);
+	  assert(elem);
 
-	  if (smart_cast<MathMLTableRowElement>(elem) == 0)
+	  if (!is_a<MathMLTableRowElement>(elem))
 	    {
 	      Ptr<MathMLTableRowElement> inferredTableRow = 
 		smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
@@ -145,20 +145,20 @@ MathMLTableElement::SetPosition(scaled x, scaled y)
     scaled xOffset = frameHorizontalSpacing;
 
     if (HasLabels()) {
-      if (rowLabel[i].labelElement != 0 &&
+      if (rowLabel[i].labelElement &&
 	  (side == TABLE_SIDE_LEFT || side == TABLE_SIDE_LEFTOVERLAP))
 	  SetLabelPosition(i, x, y + yOffset + row[i].ascent);
       
       xOffset += leftPadding;
     }
 
-    if (row[i].mtr != 0)
+    if (row[i].mtr)
       row[i].mtr->SetPosition(x + xOffset, y + yOffset + row[i].ascent);
 
     for (unsigned j = 0; j < nColumns; j++) {
       TableCell* cell = GetCell(i, j);
 
-      if (cell->mtd != 0 && !cell->spanned) {
+      if (cell->mtd && !cell->spanned) {
 	const BoundingBox& cellBox = cell->mtd->GetBoundingBox();
 	cell->mtd->SetPosition(x + xOffset, y + yOffset + cellBox.ascent);
       }
@@ -170,7 +170,7 @@ MathMLTableElement::SetPosition(scaled x, scaled y)
     if (HasLabels()) {
       xOffset += frameHorizontalSpacing;
 
-      if (rowLabel[i].labelElement != 0 &&
+      if (rowLabel[i].labelElement &&
 	  (side == TABLE_SIDE_RIGHT || side == TABLE_SIDE_RIGHTOVERLAP))
 	SetLabelPosition(i, x + xOffset, y + yOffset + row[i].ascent);
     }
@@ -187,8 +187,8 @@ void
 MathMLTableElement::SetLabelPosition(unsigned i, scaled x, scaled y)
 {
   assert(i < nRows);
-  assert(rowLabel != 0);
-  assert(rowLabel[i].labelElement != 0);
+  assert(rowLabel);
+  assert(rowLabel[i].labelElement);
 
   const BoundingBox& labelBox = rowLabel[i].labelElement->GetBoundingBox();
 
@@ -246,7 +246,7 @@ MathMLTableElement::RenderTableBackground(const DrawingArea& area)
 
 #if 0   
   for (unsigned i = 0; i < nRows; i++) {
-    assert(row[i].mtr != 0);
+    assert(row[i].mtr);
     if (row[i].mtr->IsSelected()) {
       row[i].mtr->RenderBackground(area);
       return;
@@ -364,9 +364,9 @@ MathMLTableElement::Inside(scaled x, scaled y)
   
   for (unsigned i = 0; i < nRows; i++)
     for (unsigned j = 0; j < nColumns; j++)
-      if (cell[i][j].mtd != NULL && !cell[i][j].spanned) {
+      if (cell[i][j].mtd && !cell[i][j].spanned) {
 	Ptr<MathMLElement> inside = cell[i][j].mtd->Inside(x, y);
-	if (inside != 0) return inside;
+	if (inside) return inside;
       }
 
   return MathMLLinearContainerElement::Inside(x, y);
@@ -394,7 +394,7 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
     hasLines = column[j].lineType != TABLE_LINE_NONE;
 
   dirtyBackground =
-    (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty()) return;
   if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
@@ -406,7 +406,7 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->SetDirty(rect);
     }  
 }

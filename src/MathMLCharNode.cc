@@ -349,7 +349,7 @@ MathMLCharNode::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  assert(GetParent() != NULL);
+  assert(GetParent());
   const GraphicsContext* gc = GetParent()->GetForegroundGC();
 
   if (IsStretchyFontified() && (layout->simple != NULLCHAR || layout->n > 0)) {
@@ -553,7 +553,7 @@ MathMLCharNode::GetStretch() const
 bool
 MathMLCharNode::CombineWith(const Ptr<MathMLCharNode>& cChar, scaled& shiftX, scaled& shiftY) const
 {
-  assert(cChar != 0);
+  assert(cChar);
   if (!IsFontified() || is_a<MathMLCombinedCharNode>(cChar) || !cChar->IsFontified()) return false;
   if (!isCombining(cChar->GetChar())) return false;
 

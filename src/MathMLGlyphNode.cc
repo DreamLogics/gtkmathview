@@ -80,10 +80,10 @@ MathMLGlyphNode::Render(const DrawingArea& area)
 
   if (font != NULL)
     {
-      assert(GetParent() != 0);
+      assert(GetParent());
       assert(is_a<MathMLTokenElement>(GetParent()));
       Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(GetParent());
-      assert(token != 0);
+      assert(token);
 
       const GraphicsContext* gc = token->GetForegroundGC();
 

@@ -99,7 +99,8 @@ inline void Iterator<Type>::Prev()
 template <class Type>
 inline Type Iterator<Type>::operator()() const
 {
-  return (p != 0) ? p->obj : 0;
+  assert(p != 0);
+  return p->obj;
 }
 
 #endif

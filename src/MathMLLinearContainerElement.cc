@@ -67,7 +67,7 @@ MathMLLinearContainerElement::Normalize()
 	      // it might be that we get a NULL. In that case it would probably make
 	      // sense to create a dummy element, because we filtered MathML
 	      // elements only
-	      assert(elem != 0);
+	      assert(elem);
 	      SetChild(i, elem);
 	    }
 
@@ -83,7 +83,7 @@ MathMLLinearContainerElement::Normalize()
 
       for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
 	{
-	  assert(elem() != 0);
+	  assert(elem());
 	  elem()->Normalize();
 	}
 
@@ -99,7 +99,7 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
   background = env->GetBackgroundColor();
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
-    assert(elem() != 0);
+    assert(elem());
     elem()->Setup(env);
   }
 }
@@ -113,7 +113,7 @@ MathMLLinearContainerElement::DoLayout(const class FormattingContext& ctxt)
   // children boxed, however the minimum box is to be called
   // by the overriding method!
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
-    assert(elem() != 0);
+    assert(elem());
     elem()->DoLayout(ctxt);
   }
 
@@ -125,7 +125,7 @@ MathMLLinearContainerElement::DoStretchyLayout()
 {
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->DoStretchyLayout();
     }
 }
@@ -139,7 +139,7 @@ MathMLLinearContainerElement::Render(const DrawingArea& area)
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->Render(area);
     }
 
@@ -153,10 +153,9 @@ MathMLLinearContainerElement::Inside(scaled x, scaled y)
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
-
+      assert(elem());
       Ptr<MathMLElement> inside = elem()->Inside(x, y);
-      if (inside != 0) return inside;
+      if (inside) return inside;
     }
 
   return this;
@@ -169,7 +168,7 @@ MathMLLinearContainerElement::SetDirtyLayout(bool children)
   if (children) {
     for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
       {
-	assert(elem() != 0);
+	assert(elem());
 	elem()->SetDirtyLayout(children);
       }
   }
@@ -179,7 +178,7 @@ void
 MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
 {
   dirtyBackground =
-    (GetParent() != 0 && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty() || HasDirtyChildren()) return;
   // if there is tweaking some tokens might still be visible but the whole box not
@@ -190,7 +189,7 @@ MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->SetDirty(rect);
     }
 }
@@ -204,7 +203,7 @@ MathMLLinearContainerElement::SetSelected()
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->SetSelected();
     }
 
@@ -220,7 +219,7 @@ MathMLLinearContainerElement::ResetSelected()
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->ResetSelected();
     }  
 
@@ -233,7 +232,7 @@ MathMLLinearContainerElement::IsExpanding() const
   for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
       Ptr<MathMLElement> elem = i();
-      assert(elem != 0);
+      assert(elem);
       if (elem->IsExpanding()) return true;
     }  
   
@@ -247,7 +246,7 @@ MathMLLinearContainerElement::GetLeftEdge() const
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       if (elem.IsFirst()) edge = elem()->GetLeftEdge();
       else edge = scaledMin(edge, elem()->GetLeftEdge());
     }
@@ -262,7 +261,7 @@ MathMLLinearContainerElement::GetRightEdge() const
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       if (elem.IsFirst()) edge = elem()->GetRightEdge();
       else edge = scaledMax(edge, elem()->GetRightEdge());
     }
@@ -277,7 +276,7 @@ MathMLLinearContainerElement::ReleaseGCs()
 
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->ReleaseGCs();
     }
 }
@@ -305,7 +304,7 @@ MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& ele
   else
     {
       Ptr<MathMLElement> oldElem = content.Get(i);
-      assert(oldElem != 0);
+      assert(oldElem);
       if (oldElem != elem)
 	{
 	  elem->SetParent(this);

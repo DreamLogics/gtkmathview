@@ -79,7 +79,7 @@ MathMLTableRowElement::Normalize()
       for (unsigned i = 0; i < content.GetSize(); i++)
 	{
 	  Ptr<MathMLElement> elem = content.RemoveFirst();
-	  assert(elem != 0);
+	  assert(elem);
 	  
 	  // if this is a labeled row, then the first child is always the label
 	  // because of normalization (see above)
@@ -88,7 +88,7 @@ MathMLTableRowElement::Normalize()
 	    {
 	      Ptr<MathMLTableCellElement> inferredTableCell =
 		smart_cast<MathMLTableCellElement>(MathMLTableCellElement::create());
-	      assert(inferredTableCell != 0);
+	      assert(inferredTableCell);
 	      inferredTableCell->SetParent(this);
 	      inferredTableCell->SetChild(elem);
 	      elem = inferredTableCell;
@@ -113,14 +113,14 @@ MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 {
   for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
     {
-      assert(p() != 0);
+      assert(p());
 
       if (IsA() == TAG_MTR || p() != content.GetFirst())
 	{
 	  assert(p()->IsA() == TAG_MTD);
 
 	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(p());
-	  assert(mtd != 0);
+	  assert(mtd);
 
 	  mtd->SetupCellSpanning(env);
 	}
@@ -130,9 +130,9 @@ MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 void
 MathMLTableRowElement::Setup(RenderingEnvironment* env)
 {
-  assert(GetParent() != 0);
+  assert(GetParent());
   Ptr<MathMLTableElement> mtable = smart_cast<MathMLTableElement>(GetParent());
-  assert(mtable != 0);
+  assert(mtable);
 
   const Value* value;
 
@@ -156,7 +156,7 @@ MathMLTableRowElement::SetDirty(const Rectangle* rect)
   // its children
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       elem()->SetDirty(rect);
     }
 }
@@ -167,7 +167,7 @@ MathMLTableRowElement::IsInside(scaled x, scaled y) const
   // same arguments as for the SetDirty method above
   for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
     {
-      assert(elem() != 0);
+      assert(elem());
       if (elem()->IsInside(x, y)) return true;
     }
 

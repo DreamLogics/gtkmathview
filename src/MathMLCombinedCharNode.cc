@@ -66,7 +66,7 @@ void
 MathMLCombinedCharNode::DoLayout(const FormattingContext& ctxt)
 {
   MathMLCharNode::DoLayout(ctxt);
-  assert(cChar != NULL);
+  assert(cChar);
   cChar->DoLayout(ctxt);
 
   if (IsFontified() && cChar->IsFontified()) {
@@ -89,7 +89,7 @@ void
 MathMLCombinedCharNode::SetPosition(scaled x, scaled y)
 {
   MathMLCharNode::SetPosition(x, y);
-  assert(cChar != NULL);
+  assert(cChar);
   cChar->SetPosition(x + shiftX, y - shiftY);
 }
 
@@ -97,7 +97,7 @@ void
 MathMLCombinedCharNode::SetDirty(const Rectangle* rect)
 {
   MathMLCharNode::SetDirty(rect);
-  assert(cChar != NULL);
+  assert(cChar);
   cChar->SetDirty(rect);
 }
 
@@ -105,7 +105,7 @@ void
 MathMLCombinedCharNode::Render(const DrawingArea& area)
 {
   MathMLCharNode::Render(area);
-  assert(cChar != NULL);
+  assert(cChar);
   if (cChar->IsFontified()) cChar->Render(area);
 }
 
@@ -118,7 +118,7 @@ MathMLCombinedCharNode::IsCombinedChar() const
 String*
 MathMLCombinedCharNode::GetRawContent() const
 {
-  assert(cChar != NULL);
+  assert(cChar);
 
   Char c[2];
 

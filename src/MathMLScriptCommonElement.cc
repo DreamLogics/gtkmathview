@@ -54,25 +54,25 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
 					  scaled& subShiftX, scaled& subShiftY,
 					  scaled& superShiftX, scaled& superShiftY)
 {
-  assert(base != 0);
+  assert(base);
 
   scaled u;
   scaled v;
 
   Ptr<MathMLElement> rel = findRightmostChild(base);
-  assert(rel != 0);
+  assert(rel);
 
   Ptr<MathMLOperatorElement> coreOp = 0;
   if (is_a<MathMLOperatorElement>(rel)) coreOp = smart_cast<MathMLOperatorElement>(rel);
   else if (is_a<MathMLEmbellishedOperatorElement>(rel))
     {
       Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(rel);
-      assert(eOp != 0);
+      assert(eOp);
       coreOp = eOp->GetCoreOperator();
     }
 
-  if ((is_a<MathMLTokenElement>(rel) && coreOp == 0) ||
-      (coreOp != 0 && !coreOp->IsStretchy() && coreOp->IsFence()))
+  if ((is_a<MathMLTokenElement>(rel) && !coreOp) ||
+      (coreOp && !coreOp->IsStretchy() && coreOp->IsFence()))
     {
       u = v = 0;
     } 
@@ -123,6 +123,6 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
 bool
 MathMLScriptCommonElement::IsExpanding() const
 {
-  assert(base != 0);
+  assert(base);
   return base->IsExpanding();
 }

@@ -171,7 +171,7 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
   FontAttributes myfa(fa);
 
   do {
-#if 0
+#if 1
     Globals::logger(LOG_DEBUG, "char: %x stretchy: %d trying attributes:", ch, stretchy);
     myfa.Dump();
 #endif
@@ -193,14 +193,14 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
       // the other are not considered any more. Finally, the availability of the
       // font is a call to a virtual function.
       if (i()->fontMap != NULL) {
-#if 0
+#if 1
 	Globals::logger(LOG_DEBUG, "asking for a charmap for U+%04x stretchy %d", ch, stretchy);
 #endif
 	const CharMap* charMap = i()->fontMap->GetCharMap(ch, stretchy);
 	if (charMap != NULL) {
 	  unsigned eval = i()->attributes.Compare(myfa);
 
-#if 0
+#if 1
 	  Globals::logger(LOG_DEBUG, "char: U+%04x comparing with: ", ch);
 	  i()->attributes.Dump();
 	  Globals::logger(LOG_DEBUG, "comparison = %d", eval);
@@ -211,7 +211,7 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
 	    bestCharMap = charMap;
 	    bestDesc = i();
 	  } else if (eval < bestEval) {
-#if 0
+#if 1
 	    Globals::logger(LOG_DEBUG, "found a better font, but it's not available");
 	    i()->extraAttributes.Dump();
 #endif
@@ -227,7 +227,7 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
     }
   } while (bestFont == NULL && myfa.DownGrade());
 
-#if 0
+#if 1
   Globals::logger(LOG_DEBUG, "resulting attributes:");
   myfa.Dump();
   Globals::logger(LOG_DEBUG, "\n");

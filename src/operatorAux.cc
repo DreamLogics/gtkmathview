@@ -31,11 +31,11 @@
 bool
 isStretchyOperator(const Ptr<MathMLElement>& elem)
 {
-  return findStretchyOperator(elem) != 0;
+  return findStretchyOperator(elem);
 }
 
 bool
 isStretchyOperator(const Ptr<MathMLElement>& elem, StretchId id)
 {
-  return findStretchyOperator(elem, id) != 0;
+  return findStretchyOperator(elem, id);
 }

@@ -65,12 +65,12 @@ MathMLBinContainerElement::Normalize()
 	  // it might be that we get a NULL. In that case it would probably make
 	  // sense to create a dummy element, because we filtered MathML
 	  // elements only
-	  assert(elem != 0);
+	  assert(elem);
 	  SetChild(elem);
 	}
 #endif // HAVE_GMETADOM
 
-      if (child != 0) child->Normalize();
+      if (child) child->Normalize();
       ResetDirtyStructure();
     }
 }
@@ -81,7 +81,7 @@ MathMLBinContainerElement::Setup(RenderingEnvironment* env)
   assert(env != NULL);
 
   background = env->GetBackgroundColor();
-  if (child != 0) child->Setup(env);
+  if (child) child->Setup(env);
   ResetDirtyAttribute();
 }
 
@@ -91,7 +91,7 @@ MathMLBinContainerElement::DoLayout(const class FormattingContext& ctxt)
   if (HasDirtyLayout())
     {
       box.Null();
-      if (child != 0)
+      if (child)
 	{
 	  child->DoLayout(ctxt);
 	  box = child->GetBoundingBox();
@@ -103,14 +103,14 @@ MathMLBinContainerElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLBinContainerElement::DoStretchyLayout()
 {
-  if (child != 0) child->DoStretchyLayout();
+  if (child) child->DoStretchyLayout();
 }
 
 void
 MathMLBinContainerElement::SetPosition(scaled x, scaled y)
 {
   MathMLContainerElement::SetPosition(x, y);
-  assert(child != 0);
+  assert(child);
   child->SetPosition(x, y);
 }
 
@@ -120,7 +120,7 @@ MathMLBinContainerElement::Render(const DrawingArea& area)
   if (!HasDirtyChildren()) return;
 
   RenderBackground(area);
-  if (child != 0) child->Render(area);
+  if (child) child->Render(area);
   ResetDirty();
 }
 
@@ -129,10 +129,10 @@ MathMLBinContainerElement::Inside(scaled x, scaled y)
 {
   if (!IsInside(x, y)) return NULL;
 
-  if (child != 0)
+  if (child)
     {
       Ptr<MathMLElement> inside = child->Inside(x, y);
-      if (inside != 0) return inside;
+      if (inside) return inside;
     }
   
   return this;
@@ -142,14 +142,14 @@ void
 MathMLBinContainerElement::SetDirtyLayout(bool children)
 {
   MathMLElement::SetDirtyLayout(children);
-  if (children && child != 0) child->SetDirtyLayout(children);
+  if (children && child) child->SetDirtyLayout(children);
 }
 
 void
 MathMLBinContainerElement::SetDirty(const Rectangle* rect)
 {
   dirtyBackground =
-    (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty() || HasDirtyChildren()) return;
   //if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
@@ -157,7 +157,7 @@ MathMLBinContainerElement::SetDirty(const Rectangle* rect)
   //dirty = 1;
   //SetDirtyChildren();
 
-  if (child != 0) child->SetDirty(rect);
+  if (child) child->SetDirty(rect);
 }
 
 void
@@ -166,7 +166,7 @@ MathMLBinContainerElement::SetSelected()
   if (IsSelected()) return;
 
   selected = 1;
-  if (child != 0) child->SetSelected();
+  if (child) child->SetSelected();
 
   SetDirty();
 }
@@ -178,28 +178,28 @@ MathMLBinContainerElement::ResetSelected()
 
   SetDirty();
 
-  if (child != 0) child->ResetSelected();
+  if (child) child->ResetSelected();
   selected = 0;
 }
 
 bool
 MathMLBinContainerElement::IsExpanding() const
 {
-  if (child != 0) return child->IsExpanding();
+  if (child) return child->IsExpanding();
   return false;
 }
 
 scaled
 MathMLBinContainerElement::GetLeftEdge() const
 {
-  if (child != 0) return child->GetLeftEdge();
+  if (child) return child->GetLeftEdge();
   else return 0;
 }
 
 scaled
 MathMLBinContainerElement::GetRightEdge() const
 {
-  if (child != 0) return child->GetRightEdge();
+  if (child) return child->GetRightEdge();
   else return 0;
 }
 
@@ -207,41 +207,25 @@ void
 MathMLBinContainerElement::ReleaseGCs()
 {
   MathMLElement::ReleaseGCs();
-  if (child != 0) child->ReleaseGCs();
+  if (child) child->ReleaseGCs();
 }
 
 void
-MathMLBinContainerElement::Remove(const Ptr<MathMLElement>& elem)
+MathMLBinContainerElement::Remove(const Ptr<MathMLElement>&)
 {
-  assert(elem != 0);
-  assert(elem == child);
-
-  elem->SetParent(0);
-  child = 0;
-
-  SetDirtyStructure();
+  assert(0);
 }
 
 void
-MathMLBinContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
-				   const Ptr<MathMLElement>& newElem)
+MathMLBinContainerElement::Replace(const Ptr<MathMLElement>&,
+				   const Ptr<MathMLElement>&)
 {
-  assert(oldElem != 0);
-  assert(newElem != 0);
-  assert(oldElem == child);
-
-  if (oldElem != newElem)
-    {
-      Remove(oldElem);
-      newElem->SetParent(this);
-      child = newElem;
-      SetDirtyStructure();
-    }  
+  assert(0);
 }
 
 void
 MathMLBinContainerElement::SetChild(const Ptr<MathMLElement>& elem)
 {
-  if (elem != 0) elem->SetParent(this);
+  if (elem) elem->SetParent(this);
   child = elem;
 }

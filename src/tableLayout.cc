@@ -62,11 +62,11 @@ MathMLTableElement::DoLayout(const FormattingContext& ctxt)
 #endif
 
   for (unsigned i = 0; i < nRows; i++) {
-    if (row[i].mtr != NULL)
+    if (row[i].mtr)
       row[i].mtr->box.Set(GetColumnWidth(0, nColumns), row[i].ascent, row[i].descent);
 
     for (unsigned j = 0; j < nColumns; j++) {
-      if (cell[i][j].mtd != NULL && !cell[i][j].spanned) {
+      if (cell[i][j].mtd && !cell[i][j].spanned) {
 	scaled width = GetColumnWidth(j, cell[i][j].colSpan);
 	scaled height = GetRowHeight(i, cell[i][j].rowSpan);
 
@@ -240,7 +240,7 @@ MathMLTableElement::DoHorizontalMinimumLayout()
   for (i = 0; i < nRows; i++) {
     for (j = 0; j < nColumns; j++) {
       unsigned n = cell[i][j].colSpan;
-      if (cell[i][j].mtd != NULL && !cell[i][j].spanned && n > 1) {
+      if (cell[i][j].mtd && !cell[i][j].spanned && n > 1) {
 	scaled minWidth = GetMinimumWidth(j, cell[i][j].colSpan);
 	cell[i][j].mtd->DoLayout(FormattingContext(LAYOUT_MIN, 0));
 	scaled cellWidth = cell[i][j].mtd->GetBoundingBox().width;
@@ -493,7 +493,7 @@ MathMLTableElement::ColumnLayout(unsigned j, const FormattingContext& ctxt)
 
   for (unsigned i = 0; i < nRows; i++) {
     TableCell& tableCell = cell[i][j];
-    if (tableCell.mtd != NULL &&
+    if (tableCell.mtd &&
 	!tableCell.spanned && tableCell.colSpan == 1) {
 
       if (ctxt.GetLayoutType() != LAYOUT_AUTO || !tableCell.mtd->IsStretchyOperator())
@@ -517,7 +517,7 @@ MathMLTableElement::ColumnLayout(unsigned j, const FormattingContext& ctxt)
 	  // 0 width for the subsequent layout
 	  for (unsigned k = 0; k < tableCell.nAlignGroup; k++)
 	    {
-	      assert(tableCell.aGroup[k].group != NULL);
+	      assert(tableCell.aGroup[k].group);
 	      tableCell.aGroup[k].group->SetWidth(0);
 	    }
 
@@ -563,7 +563,7 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, const FormattingContext& ctxt
   for (i = 0; i < nRows; i++)
     {
       TableCell& tableCell = cell[i][j];
-      if (tableCell.mtd != NULL &&
+      if (tableCell.mtd &&
 	  !tableCell.spanned &&
 	  tableCell.colSpan == 1 &&
 	  !tableCell.mtd->IsStretchyOperator()) 
@@ -584,14 +584,14 @@ MathMLTableElement::ColumnGroupsLayout(unsigned j, const FormattingContext& ctxt
     {
       for (i = 0; i < nRows; i++) {
 	TableCell& tableCell = cell[i][j];
-	if (tableCell.mtd != NULL &&
+	if (tableCell.mtd &&
 	    !tableCell.spanned &&
 	    tableCell.colSpan == 1 &&
 	    !tableCell.mtd->IsStretchyOperator())
 	  {
 	    for (k = 0; k < tableCell.nAlignGroup; k++)
 	      {
-		assert(tableCell.aGroup[k].group != NULL);
+		assert(tableCell.aGroup[k].group);
 
 		scaled rightPrev = 0;
 		if (k > 0) rightPrev = gExtent[k - 1].right - tableCell.aGroup[k - 1].extent.right;
@@ -634,7 +634,7 @@ MathMLTableElement::SpannedCellsLayout(const FormattingContext& ctxt)
 {
   for (unsigned i = 0; i < nRows; i++) {
     for (unsigned j = 0; j < nColumns; j++) {
-      if (cell[i][j].mtd != NULL &&
+      if (cell[i][j].mtd &&
 	  !cell[i][j].spanned && cell[i][j].colSpan > 1) {
 	if (ctxt.GetLayoutType() == LAYOUT_MIN) {
 	  cell[i][j].mtd->DoLayout(FormattingContext(LAYOUT_MIN, 0));
@@ -658,13 +658,13 @@ MathMLTableElement::StretchyCellsLayout()
     {
       for (unsigned j = 0; j < nColumns; j++)
 	{
-	  if (cell[i][j].mtd != NULL && !cell[i][j].spanned)
+	  if (cell[i][j].mtd && !cell[i][j].spanned)
 	    {
 	      Ptr<MathMLElement> cellElem = cell[i][j].mtd->GetChild();
-	      assert(cellElem != 0);
+	      assert(cellElem);
 	      Ptr<MathMLOperatorElement> op = findStretchyOperator(cellElem);
 
-	      if (op != 0)
+	      if (op)
 		{
 		  scaled width = GetColumnWidth(j, cell[i][j].colSpan);
 
@@ -700,7 +700,7 @@ MathMLTableElement::DoVerticalLayout(LayoutId id)
     scaled descent = 0;
 
     for (j = 0; j < nColumns; j++) 
-      if (cell[i][j].mtd != NULL &&
+      if (cell[i][j].mtd &&
 	  !cell[i][j].spanned &&
 	  cell[i][j].rowAlign == ROW_ALIGN_BASELINE) {
 	const BoundingBox& box = cell[i][j].mtd->GetBoundingBox();
@@ -709,7 +709,7 @@ MathMLTableElement::DoVerticalLayout(LayoutId id)
       }
 
     if (HasLabels()) {
-      if (rowLabel[i].labelElement != NULL &&
+      if (rowLabel[i].labelElement &&
 	  rowLabel[i].rowAlign == ROW_ALIGN_BASELINE) {
 	const BoundingBox& labelBox = rowLabel[i].labelElement->GetBoundingBox();
 	ascent = scaledMax(ascent, labelBox.tAscent);
@@ -718,7 +718,7 @@ MathMLTableElement::DoVerticalLayout(LayoutId id)
     }
 
     for (j = 0; j < nColumns; j++)
-      if (cell[i][j].mtd != NULL &&
+      if (cell[i][j].mtd &&
 	  !cell[i][j].spanned && cell[i][j].rowSpan == 1 &&
 	  cell[i][j].rowAlign != ROW_ALIGN_BASELINE) {
 	const BoundingBox& box = cell[i][j].mtd->GetBoundingBox();
@@ -726,7 +726,7 @@ MathMLTableElement::DoVerticalLayout(LayoutId id)
       }
 
     if (HasLabels()) {
-      if (rowLabel[i].labelElement != NULL &&
+      if (rowLabel[i].labelElement &&
 	  rowLabel[i].rowAlign != ROW_ALIGN_BASELINE) {
 	const BoundingBox& labelBox = rowLabel[i].labelElement->GetBoundingBox();
 	if (labelBox.GetHeight() > ascent + descent) descent = labelBox.GetTotalHeight() - ascent;
@@ -835,7 +835,7 @@ MathMLTableElement::SpanRowHeight(LayoutId id)
   for (unsigned j = 0; j < nColumns; j++) {
     unsigned i = 0;
     while (i < nRows) {
-      if (cell[i][j].mtd != NULL &&
+      if (cell[i][j].mtd &&
 	  !cell[i][j].spanned && cell[i][j].rowSpan > 1) {
 	unsigned n = cell[i][j].rowSpan;
 	scaled height  = GetRowHeight(i, n);
@@ -1058,11 +1058,11 @@ MathMLTableElement::PrepareLabelsLayout(const FormattingContext& ctxt)
 scaled
 MathMLTableElement::GetMaxLabelWidth() const
 {  
-  assert(rowLabel != NULL);
+  assert(rowLabel);
 
   scaled width = 0;
   for (unsigned i = 0; i < nRows; i++) {
-    if (rowLabel[i].labelElement != NULL)
+    if (rowLabel[i].labelElement)
       width = scaledMax(width, rowLabel[i].labelElement->GetBoundingBox().width);
   }
 
@@ -1072,12 +1072,12 @@ MathMLTableElement::GetMaxLabelWidth() const
 void
 MathMLTableElement::DoLabelsLayout(const FormattingContext& ctxt)
 {
-  assert(rowLabel != NULL);
+  assert(rowLabel);
 
   scaled availForLabels = scaledMax(0, ctxt.GetAvailableWidth() - GetTableWidth() - minLabelFixedSpacing);
 
   for (unsigned i = 0; i < nRows; i++) {
-    if (rowLabel[i].labelElement != NULL)
+    if (rowLabel[i].labelElement)
       rowLabel[i].labelElement->DoLayout(FormattingContext(ctxt.GetLayoutType(), availForLabels));
   }
 }
@@ -1085,14 +1085,14 @@ MathMLTableElement::DoLabelsLayout(const FormattingContext& ctxt)
 void
 MathMLTableElement::AdjustTableLayoutWithLabels(const FormattingContext& ctxt)
 {
-  assert(rowLabel != NULL);
+  assert(rowLabel);
 
   tableWidth = box.width;
   labelsWidth = 0;
   leftPadding = 0;
 
   for (unsigned i = 0; i < nRows; i++) {
-    if (rowLabel[i].labelElement != NULL) {
+    if (rowLabel[i].labelElement) {
       const BoundingBox& labelBox = rowLabel[i].labelElement->GetBoundingBox();
       labelsWidth = scaledMax(labelsWidth, labelBox.width);
     }

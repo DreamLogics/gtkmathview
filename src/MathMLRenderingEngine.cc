@@ -55,8 +55,8 @@ MathMLRenderingEngine::MathMLRenderingEngine()
 MathMLRenderingEngine::~MathMLRenderingEngine()
 {
   Unload();
-  assert(document == 0);
-  assert(root == 0);
+  assert(!document);
+  assert(!root);
 
   delete charMapper;
   charMapper = NULL;
@@ -126,7 +126,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
   Unload();
 
   Ptr<MathMLDocument> document = MathMLDocument::create(doc);
-  assert(document != 0);
+  assert(document);
 
   Clock perf;
   perf.Start();
@@ -135,7 +135,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
   Globals::logger(LOG_INFO, "normalization time: %dms", perf());
     
   root = document->GetRoot();
-  assert(root != 0);
+  assert(root);
 
   Setup();
 
@@ -150,7 +150,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
   Unload();
 
   Ptr<MathMLDocument> document = MathMLDocument::create(elem);
-  assert(document != 0);
+  assert(document);
 
   Clock perf;
   perf.Start();
@@ -159,7 +159,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
   Globals::logger(LOG_INFO, "normalization time: %dms", perf());
     
   root = document->GetRoot();
-  assert(root != 0);
+  assert(root);
 
   Setup();
 
@@ -177,7 +177,7 @@ MathMLRenderingEngine::Unload()
 void
 MathMLRenderingEngine::Setup()
 {
-  if (root == 0) return;
+  if (!root) return;
 
   Clock perf;
 
@@ -199,7 +199,7 @@ MathMLRenderingEngine::Setup()
 void
 MathMLRenderingEngine::MinMaxLayout()
 {
-  if (root == 0) return;
+  if (!root) return;
 
   Clock perf;
 
@@ -219,7 +219,7 @@ MathMLRenderingEngine::Layout()
 {
   assert(area != NULL);
 
-  if (root == 0) return;
+  if (!root) return;
 
   Clock perf;
   perf.Start();
@@ -232,14 +232,14 @@ MathMLRenderingEngine::Layout()
 void
 MathMLRenderingEngine::SetDirty(const Rectangle* rect)
 {
-  if (root == 0) return;
+  if (!root) return;
   root->SetDirty(rect);
 }
 
 void
 MathMLRenderingEngine::Render(const Rectangle* rect)
 {
-  if (root != 0) root->SetDirty(rect);
+  if (root) root->SetDirty(rect);
   Update(rect);
 }
 
@@ -248,7 +248,7 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 {
   assert(area != NULL);
 
-  if (root != 0)
+  if (root)
     {
       Clock perf;
       perf.Start();
@@ -264,7 +264,7 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 void
 MathMLRenderingEngine::GetDocumentBoundingBox(BoundingBox& box) const
 {
-  if (root == 0)
+  if (!root)
     {
       box.Null();
       return;
@@ -276,7 +276,7 @@ MathMLRenderingEngine::GetDocumentBoundingBox(BoundingBox& box) const
 void
 MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 {
-  if (root != NULL) {
+  if (root) {
     BoundingBox box;
     GetDocumentBoundingBox(box);
     rect = box.GetRectangle(root->GetX(), root->GetY());
@@ -287,8 +287,8 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 void
 MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 {
-  if (elem != 0) elem->SetSelected();
-  else if (root != 0) root->SetSelected();
+  if (elem) elem->SetSelected();
+  else if (root) root->SetSelected();
     
   Update();
 }
@@ -296,8 +296,8 @@ MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 void
 MathMLRenderingEngine::ResetSelected(const Ptr<MathMLElement>& elem)
 {
-  if (elem != 0) elem->ResetSelected();
-  else if (root != 0) root->ResetSelected();
+  if (elem) elem->ResetSelected();
+  else if (root) root->ResetSelected();
 
   Update();
 }
@@ -305,7 +305,7 @@ MathMLRenderingEngine::ResetSelected(const Ptr<MathMLElement>& elem)
 Ptr<MathMLElement>
 MathMLRenderingEngine::GetElementAt(scaled x, scaled y) const
 {
-  if (root == 0) return root;
+  if (!root) return root;
   // WARNING: x and y must be absolute coordinates w.r.t. the drawing area, because
   // at this level we do not known whether the drawing area is scrollable (as in
   // the case of Gtk_DrawingArea) or not (PS_DrawingArea). The caller must

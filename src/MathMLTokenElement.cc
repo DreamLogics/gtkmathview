@@ -108,11 +108,11 @@ MathMLTokenElement::Append(const String* s)
 
   Ptr<MathMLTextNode> last = 0;
   if (content.GetSize() > 0 &&
-      content.GetLast() != 0 &&
+      content.GetLast() &&
       content.GetLast()->IsText())
     {
       last = smart_cast<MathMLTextNode>(content.GetLast());
-      assert(last != 0);
+      assert(last);
     }
 
   unsigned i = 0;
@@ -155,7 +155,7 @@ MathMLTokenElement::Append(const String* s)
 	  i++;
 	}
     
-      if (node != 0)
+      if (node)
 	{
 	  Append(node);
 	  last = node;
@@ -166,7 +166,7 @@ MathMLTokenElement::Append(const String* s)
 void
 MathMLTokenElement::Append(const Ptr<MathMLTextNode>& node)
 {
-  assert(node != 0);
+  assert(node);
   node->SetParent(this);
   content.Append(node);
 }
@@ -218,12 +218,12 @@ MathMLTokenElement::Normalize()
 		    if (p.get_nodeName() == "mglyph")
 		      {
 			Ptr<MathMLTextNode> text = SubstituteMGlyphElement(p);
-			if (text != 0) Append(text);
+			if (text) Append(text);
 		      }
 		    else if (p.get_nodeName() == "malignmark")
 		      {
 			Ptr<MathMLTextNode> text = SubstituteAlignMarkElement(p);
-			if (text != 0) Append(text);
+			if (text) Append(text);
 		      }
 		    else
 		      {
@@ -316,11 +316,11 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
     } else if (is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this))) {
       if (GetLogicalContentLength() == 1) {
 	Ptr<MathMLTextNode> node = content.GetFirst();
-	assert(node != 0);
+	assert(node);
 
 	if (is_a<MathMLCharNode>(node)) {
 	  Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(node);
-	  assert(cNode != 0);
+	  assert(cNode);
 
 	  if (!isUpperCaseGreek(cNode->GetChar())) env->SetFontStyle(FONT_STYLE_ITALIC);
 	  else env->SetFontStyle(FONT_STYLE_NORMAL);
@@ -360,7 +360,7 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 
   for (Iterator< Ptr<MathMLTextNode> > p(content); p.More(); p.Next())
     {
-      assert(p() != 0);
+      assert(p());
       p()->Setup(env);
     }
 
@@ -375,7 +375,7 @@ MathMLTokenElement::DoLayout(const class FormattingContext& ctxt)
   box.Null();
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() != 0);
+      assert(text());
 
       // as the minimum layout, that we have previously done,
       // so we save some work.
@@ -400,7 +400,7 @@ MathMLTokenElement::SetPosition(scaled x, scaled y)
   MathMLElement::SetPosition(x, y);
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() != 0);
+      assert(text());
       text()->SetPosition(x, y);
       x += text()->GetBoundingBox().width;
       x += (sppm * text()->GetSpacing()) / 18;
@@ -425,7 +425,7 @@ MathMLTokenElement::Render(const DrawingArea& area)
 
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() != 0);
+      assert(text());
       text()->Render(area);
     }
 
@@ -438,7 +438,7 @@ void
 MathMLTokenElement::SetDirty(const Rectangle* rect)
 {
   dirtyBackground =
-    (GetParent() != 0 && 
+    (GetParent() && 
      ((GetParent()->IsSelected() != IsSelected()) ||
       (GetParent()->GetBackgroundColor() != GetBackgroundColor()))) ? 1 : 0;
 
@@ -450,7 +450,7 @@ MathMLTokenElement::SetDirty(const Rectangle* rect)
 
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() != 0);
+      assert(text());
       text()->SetDirty(rect);
     }
 }
@@ -462,7 +462,7 @@ MathMLTokenElement::GetLeftEdge() const
 
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() !=  0);
+      assert(text());
       if (text.IsFirst()) edge = text()->GetLeftEdge();
       else edge = scaledMin(edge, text()->GetLeftEdge());
     }
@@ -477,7 +477,7 @@ MathMLTokenElement::GetRightEdge() const
 
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() !=  0);
+      assert(text());
       if (text.IsFirst()) edge = text()->GetRightEdge();
       else edge = scaledMax(edge, text()->GetRightEdge());
     }
@@ -490,7 +490,7 @@ MathMLTokenElement::GetDecimalPointEdge() const
 {
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() != 0);
+      assert(text());
       if (text()->HasDecimalPoint()) return text()->GetDecimalPointEdge();
     }
 
@@ -502,7 +502,7 @@ MathMLTokenElement::IsNonMarking() const
 {
   for (Iterator< Ptr<MathMLTextNode> > text(content); text.More(); text.Next())
     {
-      assert(text() != 0);
+      assert(text());
       if (!is_a<MathMLSpaceNode>(text())) return false;
     }
 
@@ -515,7 +515,7 @@ MathMLTokenElement::GetCharNode() const
   if (content.GetSize() != 1) return 0;
 
   Ptr<MathMLTextNode> node = content.GetFirst();
-  assert(node != 0);
+  assert(node);
   if (!is_a<MathMLCharNode>(node) || is_a<MathMLCombinedCharNode>(node)) return 0;
 
   return smart_cast<MathMLCharNode>(node);
@@ -531,15 +531,15 @@ MathMLTokenElement::AddItalicCorrection()
   if (content.GetSize() == 0) return;
 
   Ptr<MathMLTextNode> lastNode = content.GetLast();
-  assert(lastNode != 0);
+  assert(lastNode);
 
   Ptr<MathMLElement> next = findRightSibling(this);
-  if (next == 0 ||
+  if (!next ||
       !is_a<MathMLOperatorElement>(next) ||
       !is_a<MathMLEmbellishedOperatorElement>(next)) return;
 
   Ptr<MathMLOperatorElement> op = next->GetCoreOperator();
-  if (op == 0) return;
+  if (!op) return;
   bool isFence = op->IsFence();
   if (!isFence) return;
 
@@ -614,7 +614,7 @@ MathMLTokenElement::GetRawContent() const
 
   for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
     {
-      assert(i() != 0);
+      assert(i());
       String* s = i()->GetRawContent();
       if (s != NULL)
 	{
@@ -633,7 +633,7 @@ MathMLTokenElement::GetLogicalContentLength() const
 
   for (Iterator< Ptr<MathMLTextNode> > i(content); i.More(); i.Next())
     {
-      assert(i() != 0);
+      assert(i());
       len += i()->GetLogicalContentLength();
     }
 

@@ -45,7 +45,7 @@ MathMLPhantomElement::~MathMLPhantomElement()
 bool
 MathMLPhantomElement::IsSpaceLike() const
 {
-  assert(child != 0);
+  assert(child);
   return child->IsSpaceLike();
 }
 

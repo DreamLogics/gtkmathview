@@ -59,14 +59,14 @@ MathMLApplyFunctionNode::DoLayout()
   // left to right, at setup time for this node the information is not
   // available
 
-  assert(GetParent() != 0);
+  assert(GetParent());
 
   box.Set(0, 0, 0);
 
   if (!is_a<MathMLOperatorElement>(GetParent())) return;
 
   Ptr<MathMLElement> next = findRightSibling(GetParent());
-  if (next == 0) return;
+  if (!next) return;
 
   if (is_a<MathMLFencedElement>(next)) return;
   
@@ -74,7 +74,7 @@ MathMLApplyFunctionNode::DoLayout()
       is_a<MathMLOperatorElement>(next))
     {
       Ptr<MathMLOperatorElement> coreOp = next->GetCoreOperator();
-      assert(coreOp != 0);
+      assert(coreOp);
       if (coreOp->IsFence()) return;
     }
 

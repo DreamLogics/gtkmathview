@@ -66,8 +66,8 @@ private:
 
     scaled GetWidth(LayoutId) const;
     void   GetBoundingBox(struct BoundingBox&, LayoutId) const;
-    bool   IsFrame(void) const { return frame != 0; }
-    bool   IsSpace(void) const { return frame == 0; }
+    bool   IsFrame(void) const { return frame; }
+    bool   IsSpace(void) const { return !frame; }
     bool   IsDiscardable(void) const { return IsSpace() && penalty < MAX_PENALTY; }
     void   SetPosition(scaled, scaled);
   };

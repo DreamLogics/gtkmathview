@@ -63,10 +63,10 @@ MathMLEncloseElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLEncloseElement::NormalizeRadicalElement()
 {
-  assert(child != 0);
+  assert(child);
 
   Ptr<MathMLLinearContainerElement> sqrt = smart_cast<MathMLLinearContainerElement>(MathMLRadicalElement::create());
-  assert(sqrt != 0);
+  assert(sqrt);
   sqrt->Append(child);
   child->SetParent(sqrt);
   sqrt->SetParent(this);
@@ -105,7 +105,7 @@ MathMLEncloseElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (!HasDirtyLayout()) return;
 
-  assert(child != NULL);
+  assert(child);
 
   MathMLNormalizingContainerElement::DoLayout(ctxt);
   box = child->GetBoundingBox();
@@ -122,7 +122,7 @@ MathMLEncloseElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLEncloseElement::SetPosition(scaled x, scaled y)
 {
-  assert(child != NULL);
+  assert(child);
 
   position.x = x;
   position.y = y;
@@ -142,7 +142,7 @@ MathMLEncloseElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  assert(child != NULL);
+  assert(child);
 
   MathMLNormalizingContainerElement::Render(area);
 

@@ -90,12 +90,12 @@ MathMLDocument::Normalize()
       if (node != 0)
 	{
 	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
-	  assert(elem != 0);
+	  assert(elem);
 	  SetChild(elem);
 	}	  
 #endif // HAVE_GMETADOM
 
-      if (child != 0) child->Normalize();
+      if (child) child->Normalize();
       ResetDirtyStructure();
     }
 }
