@@ -52,7 +52,7 @@ MathMLBinContainerElement::~MathMLBinContainerElement()
 void
 MathMLBinContainerElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
@@ -78,8 +78,8 @@ MathMLBinContainerElement::Normalize()
 void
 MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 {
-  assert(env != NULL);
-  if (HasChildWithDirtyAttribute())
+  assert(env != 0);
+  if (DirtyAttributeP())
     {
       background = env->GetBackgroundColor();
       if (child) child->Setup(env);
@@ -90,7 +90,7 @@ MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 void
 MathMLBinContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       if (child)
 	{
@@ -121,27 +121,28 @@ MathMLBinContainerElement::SetPosition(scaled x, scaled y)
 void
 MathMLBinContainerElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
-  RenderBackground(area);
-  if (child) child->Render(area);
-  ResetDirty();
+  if (Dirty())
+    {
+      RenderBackground(area);
+      if (child) child->Render(area);
+      ResetDirty();
+    }
 }
 
 Ptr<MathMLElement>
 MathMLBinContainerElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return NULL;
-
-  if (child)
+  if (IsInside(x, y))
     {
-      Ptr<MathMLElement> inside = child->Inside(x, y);
-      if (inside) return inside;
+      if (child)
+	if (Ptr<MathMLElement> inside = child->Inside(x, y)) return inside;
+      return this;
     }
-  
-  return this;
+  else
+    return 0;
 }
 
+#if 0
 void
 MathMLBinContainerElement::SetDirtyLayout(bool children)
 {
@@ -187,6 +188,7 @@ MathMLBinContainerElement::ResetSelected()
   if (child) child->ResetSelected();
   selected = 0;
 }
+#endif
 
 scaled
 MathMLBinContainerElement::GetLeftEdge() const
@@ -233,4 +235,18 @@ MathMLBinContainerElement::SetChild(const Ptr<MathMLElement>& elem)
       child = elem;
       SetDirtyLayout();
     }
+}
+
+void
+MathMLBinContainerElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlag(f);
+  if (child) child->SetFlagDown(f);
+}
+
+void
+MathMLBinContainerElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlag(f);
+  if (child) child->ResetFlagDown(f);
 }

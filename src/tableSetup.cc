@@ -36,37 +36,42 @@
 void
 MathMLTableElement::Setup(RenderingEnvironment* env)
 {
-  ReleaseAuxStructures();
   assert(env != NULL);
+  
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      color = env->GetColor();
+      lineThickness = env->GetRuleThickness();
 
-  SetupCellSpanning(env);
-  CalcTableSize();
-  SetupCells();
+      ReleaseAuxStructures();
 
-  SetupAlignmentScopes(env);
-  SetupColumns(env);
-  SetupColumnAlign(env);
+      SetupCellSpanning(env);
+      CalcTableSize();
+      SetupCells();
 
-  SetupRows(env);
-  SetupRowAlign(env);
+      SetupAlignmentScopes(env);
+      SetupColumns(env);
+      SetupColumnAlign(env);
 
-  SetupGroups();
-  SetupGroupAlign(env);
+      SetupRows(env);
+      SetupRowAlign(env);
 
-  SetupTableAttributes(env);
-  SetupLabels();
-  MathMLLinearContainerElement::Setup(env);
-  SetupAlignMarks();
+      SetupGroups();
+      SetupGroupAlign(env);
+
+      SetupTableAttributes(env);
+      SetupLabels();
+      MathMLLinearContainerElement::Setup(env);
+      SetupAlignMarks();
 
 #if 0
-  for (unsigned i = 0; i < nRows; i++)
-    for (unsigned j = 0; j < nColumns; j++) {
-      printf("(%d,%d) rowAlign: %d columnAlign: %d\n", i, j, cell[i][j].rowAlign, cell[i][j].columnAlign);
-    }
+      for (unsigned i = 0; i < nRows; i++)
+	for (unsigned j = 0; j < nColumns; j++) {
+	  printf("(%d,%d) rowAlign: %d columnAlign: %d\n", i, j, cell[i][j].rowAlign, cell[i][j].columnAlign);
+	}
 #endif
-
-  color = env->GetColor();
-  lineThickness = env->GetRuleThickness();
+      ResetDirtyAttribute();
+    }
 }
 
 void

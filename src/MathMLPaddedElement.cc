@@ -163,7 +163,7 @@ MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
 void
 MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       assert(child);
       child->DoLayout(ctxt);
@@ -216,9 +216,11 @@ MathMLPaddedElement::EvalLengthDimension(scaled orig,
   else return float2sp(res);
 }
 
+#if 0
 void
 MathMLPaddedElement::SetDirty(const Rectangle* rect)
 {
   assert(child);
   child->SetDirty(rect);
 }
+#endif

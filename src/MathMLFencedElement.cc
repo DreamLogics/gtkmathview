@@ -76,7 +76,7 @@ MathMLFencedElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLFencedElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
       // normalization is delayed after setup, because it depends on
       // the value of some attributes

@@ -53,10 +53,14 @@ public:
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
 
+#if 0
   virtual void SetDirtyLayout(bool = false);
   virtual void SetDirty(const Rectangle* = NULL);  
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
+#endif
+  virtual void SetFlagDown(Flags);
+  virtual void ResetFlagDown(Flags);
 
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;

@@ -58,7 +58,7 @@ MathMLRowElement::~MathMLRowElement()
 void
 MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       box.Null();
       for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();

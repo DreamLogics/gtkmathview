@@ -50,8 +50,8 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
-
-  virtual void SetDirty(const Rectangle*);
+  
+  //virtual void SetDirty(const Rectangle*);
   virtual bool IsInside(scaled, scaled) const;
 
   virtual Ptr<MathMLElement> GetLabel(void) const;

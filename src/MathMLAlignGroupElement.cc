@@ -55,7 +55,7 @@ MathMLAlignGroupElement::~MathMLAlignGroupElement()
 void
 MathMLAlignGroupElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       box.Set(width, 0, 0);
       ResetDirtyLayout(ctxt);
@@ -89,8 +89,7 @@ MathMLAlignGroupElement::SetAlignmentMark(const Ptr<class MathMLAlignMarkElement
 void
 MathMLAlignGroupElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
-    ResetDirtyStructure();
+  if (DirtyStructure()) ResetDirtyStructure();
 }
 
 bool

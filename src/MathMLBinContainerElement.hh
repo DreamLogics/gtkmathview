@@ -49,10 +49,12 @@ public:
   virtual void ReleaseGCs(void);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
+#if 0
   virtual void SetDirtyLayout(bool = false);
   virtual void SetDirty(const Rectangle* = NULL);
   virtual void SetSelected(void);
   virtual void ResetSelected(void);
+#endif
 
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
@@ -62,6 +64,9 @@ public:
 
   Ptr<MathMLElement> GetChild(void) const { return child; }
   void         SetChild(const Ptr<MathMLElement>&);
+
+  virtual void SetFlagDown(Flags);
+  virtual void ResetFlagDown(Flags);
 
 protected:
   Ptr<MathMLElement> child;

@@ -62,8 +62,7 @@ MathMLAlignMarkElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLAlignMarkElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
-    ResetDirtyStructure();
+  if (DirtyStructure()) ResetDirtyStructure();
 }
 
 void
@@ -82,7 +81,7 @@ MathMLAlignMarkElement::Setup(RenderingEnvironment* env)
 void
 MathMLAlignMarkElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
+  if (DirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 bool

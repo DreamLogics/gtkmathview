@@ -92,14 +92,6 @@ MathMLCombinedCharNode::SetPosition(scaled x, scaled y)
 }
 
 void
-MathMLCombinedCharNode::SetDirty(const Rectangle* rect)
-{
-  MathMLCharNode::SetDirty(rect);
-  assert(cChar);
-  cChar->SetDirty(rect);
-}
-
-void
 MathMLCombinedCharNode::Render(const DrawingArea& area)
 {
   MathMLCharNode::Render(area);

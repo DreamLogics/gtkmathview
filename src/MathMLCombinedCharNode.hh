@@ -42,7 +42,6 @@ public:
 
   virtual String* GetRawContent(void) const;
 
-  virtual void    SetDirty(const Rectangle* = NULL);
   virtual bool    IsCombinedChar(void) const;
 
 private:

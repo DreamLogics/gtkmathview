@@ -70,16 +70,11 @@ MathMLStringNode::Render(const DrawingArea& area)
   assert(is_a<MathMLTokenElement>(GetParent()));
   assert(fContent != NULL);
 
-  if (!HasDirtyChildren()) return;
-
   Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(GetParent());
   assert(token);
 
   const GraphicsContext* gc = token->GetForegroundGC();
-
   fContent->Draw(GetX(), GetY(), area, gc);
-
-  ResetDirty();
 }
 
 bool

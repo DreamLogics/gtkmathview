@@ -71,8 +71,10 @@ MathMLElement::MathMLElement(const GMetaDOM::Element& n)
 void
 MathMLElement::Init()
 {
-  dirtyStructure = childWithDirtyStructure = 1;
-  dirtyAttribute = childWithDirtyAttribute = 1;
+  SetDirtyStructure();
+  SetDirtyAttribute();
+  SetDirtyLayout();
+  SetDirty();
 
   fGC[0] = fGC[1] = NULL;
   bGC[0] = bGC[1] = NULL;
@@ -351,7 +353,7 @@ MathMLElement::IsSet(AttributeId id) const
 void
 MathMLElement::Setup(RenderingEnvironment* env)
 {
-  if (HasDirtyAttribute() || HasChildWithDirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       background = env->GetBackgroundColor();
       ResetDirtyAttribute();
@@ -361,7 +363,7 @@ MathMLElement::Setup(RenderingEnvironment* env)
 void
 MathMLElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
+  if (DirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 void
@@ -372,40 +374,24 @@ MathMLElement::DoStretchyLayout()
 void
 MathMLElement::RenderBackground(const DrawingArea& area)
 {
-  if (bGC[IsSelected()] == NULL)
+  if (bGC[Selected()] == NULL)
     {
       GraphicsContextValues values;
-      values.background = values.foreground = IsSelected() ? area.GetSelectionBackground() : background;
-      bGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
+      values.background = values.foreground = Selected() ? area.GetSelectionBackground() : background;
+      bGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
     }
 
-  if (HasDirtyBackground())
-    area.Clear(bGC[IsSelected()], GetX(), GetY(), GetBoundingBox());
+  if (DirtyBackground()) area.Clear(bGC[Selected()], GetX(), GetY(), GetBoundingBox());
 }
 
 void
 MathMLElement::Render(const DrawingArea& area)
 {
-  if (!IsDirty()) return;
-  RenderBackground(area);
-  ResetDirty();
-}
-
-void
-MathMLElement::SetDirty(const Rectangle* rect)
-{
-  dirtyBackground =
-    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
-#if 0
-  if (GetParent() && (GetParent()->IsSelected() != IsSelected()))
-    dirtyBackground = 1;
-#endif
-
-  if (IsDirty()) return;
-  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
-
-  dirty = 1;
-  SetDirtyChildren();
+  if (Dirty())
+    {
+      RenderBackground(area);
+      ResetDirty();
+    }
 }
 
 bool
@@ -501,6 +487,7 @@ MathMLElement::IsA() const
   return res;
 }
 
+#if 0
 void
 MathMLElement::SetDirtyStructure()
 {
@@ -524,5 +511,152 @@ MathMLElement::SetDirtyAttribute()
     {
       parent->childWithDirtyAttribute = 1;
       parent = parent->GetParent();
+    }
+}
+
+void
+MathMLElement::SetDirtyChildren()
+{
+  if (HasDirtyChildren()) return;
+  dirtyChildren = 1;
+  for (Ptr<MathMLElement> elem = GetParent(); 
+       elem && !elem->HasDirtyChildren(); 
+       elem = elem->GetParent())
+    elem->dirtyChildren = 1;
+}
+
+void
+MathMLElement::SetDirtyLayout(bool)
+{
+  if (HasDirtyLayout()) return;
+  dirtyLayout = 1;
+  for (Ptr<MathMLElement> elem = GetParent(); 
+       elem && !elem->dirtyLayout; 
+       elem = elem->GetParent())
+    elem->dirtyLayout = 1;
+}
+
+void
+MathMLElement::SetSelected()
+{
+  if (IsSelected()) return;
+  selected = 1;
+  SetDirty();
+}
+
+void
+MathMLElement::ResetSelected()
+{
+  if (!IsSelected()) return;
+  SetDirty();
+  selected = 0;
+}
+#endif
+
+void
+MathMLElement::SetDirtyStructure()
+{
+  if (!DirtyStructure())
+    {
+      SetFlag(FDirtyStructure);
+      SetFlagUp(FDirtyStructure);
+    }
+}
+
+void
+MathMLElement::SetDirtyAttribute()
+{
+  if (!DirtyAttribute())
+    {
+      SetFlag(FDirtyAttribute);
+      SetFlagUp(FDirtyAttributeP);
+    }
+}
+
+void
+MathMLElement::SetDirtyLayout()
+{
+  if (!DirtyLayout())
+    {
+      SetFlagDown(FDirtyLayout);
+      SetFlagUp(FDirtyLayout);
+    }
+}
+
+void
+MathMLElement::SetDirty()
+{
+  if (!Dirty())
+    {
+      SetFlagDown(FDirty);
+      SetFlagUp(FDirty);
+    }
+}
+
+void
+MathMLElement::SetDirty(const Rectangle& rect)
+{
+  if (!Dirty() && GetRectangle().Overlaps(rect)) SetDirty();
+}
+
+void
+MathMLElement::SetSelected()
+{
+  if (!Selected())
+    {
+      SetFlagDown(FSelected);
+      SetDirty();
+    }
+}
+
+void
+MathMLElement::ResetSelected()
+{
+  if (Selected())
+    {
+      ResetFlagDown(FSelected);
+      SetDirty();
+    }
+}
+
+void
+MathMLElement::SetFlagUp(Flags f)
+{
+  for (Ptr<MathMLElement> p = GetParent(); p && !p->GetFlag(f); p = p->GetParent())
+    p->SetFlag(f);
+}
+
+void
+MathMLElement::ResetFlagUp(Flags f)
+{
+  for (Ptr<MathMLElement> p = GetParent(); p && !p->GetFlag(f); p = p->GetParent())
+    p->ResetFlag(f);
+}
+
+void
+MathMLElement::SetFlagDown(Flags f)
+{
+  SetFlag(f);
+}
+
+void
+MathMLElement::ResetFlagDown(Flags f)
+{
+  ResetFlag(f);
+}
+
+void
+MathMLElement::SetParent(const Ptr<MathMLElement>& p)
+{
+  MathMLNode::SetParent(p);
+  if (p)
+    {
+      if (DirtyStructure()) p->SetFlagUp(FDirtyStructure);
+      if (DirtyAttribute()) p->SetFlagUp(FDirtyAttributeP);
+      if (DirtyLayout()) p->SetFlagUp(FDirtyLayout);
+      if (Dirty()) p->SetFlagUp(FDirty);
+      if (p->DirtyLayout()) SetFlagDown(FDirtyLayout);
+      if (p->Dirty()) SetFlagDown(FDirty);
+      if (p->Selected()) SetFlagDown(FSelected);
     }
 }

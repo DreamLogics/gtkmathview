@@ -65,17 +65,6 @@ MathMLTextNode::AddSpacing(int ds)
   spacing += ds;
 }
 
-void
-MathMLTextNode::SetDirty(const Rectangle* rect)
-{
-  if (IsDirty()) return;
-
-  if (rect != NULL && !rect->Overlaps(GetX(), GetY() - box.ascent, box.width, box.GetHeight()))
-    return;
-
-  MathMLFrame::SetDirty(rect);
-}
-
 bool
 MathMLTextNode::IsInside(scaled x, scaled y) const
 {

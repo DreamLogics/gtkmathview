@@ -50,7 +50,9 @@ public:
   virtual Ptr<MathMLElement> GetLabel(void) const;
 
   virtual void Normalize(void);
-  virtual void SetDirty(const Rectangle*);
+  //virtual void SetDirty(const Rectangle*);
+  virtual void SetFlagDown(Flags);
+  virtual void ResetFlagDown(Flags);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
   friend class MathMLTableElement;

@@ -292,28 +292,29 @@ MathMLStyleElement::Setup(RenderingEnvironment* env)
 void
 MathMLStyleElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
+  if (Dirty())
+    {
 #if 0 
-  if (IsDirty()) {
-    if (differentBackground && !IsSelected()) {
-      if (bGC[0] == NULL) {
-	GraphicsContextValues values;
-	values.foreground = values.background = background;
-	bGC[0] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
-      }
+      if (IsDirty()) {
+	if (differentBackground && !IsSelected()) {
+	  if (bGC[0] == NULL) {
+	    GraphicsContextValues values;
+	    values.foreground = values.background = background;
+	    bGC[0] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
+	  }
 
-      area.Clear(bGC[0], GetRectangle());
-    }
-  }
+	  area.Clear(bGC[0], GetRectangle());
+	}
+      }
 #endif
 
-  RenderBackground(area);
+      RenderBackground(area);
 
-  assert(child);
-  child->Render(area);
+      assert(child);
+      child->Render(area);
 
-  ResetDirty();
+      ResetDirty();
+    }
 }
 
 bool

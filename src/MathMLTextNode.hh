@@ -44,7 +44,6 @@ public:
   virtual bool 	   IsText(void) const;  
   virtual bool 	   IsInside(scaled, scaled) const;
   virtual bool     HasDecimalPoint(void) const;
-  virtual void 	   SetDirty(const Rectangle* = NULL);
   void             SetSpacing(int);
   void             AddSpacing(int);
   int              GetSpacing(void) const { return spacing; }

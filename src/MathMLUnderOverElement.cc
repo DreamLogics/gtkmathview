@@ -124,7 +124,7 @@ MathMLUnderOverElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<Mat
 void
 MathMLUnderOverElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -182,96 +182,102 @@ void
 MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-  assert(base);
 
-  bool displayStyle = env->GetDisplayStyle();
-
-  ScriptSetup(env);
-
-  scaled smallSpacing = ruleThickness;
-  scaled bigSpacing   = 3 * ruleThickness;
-
-  base->Setup(env);
-  Ptr<MathMLOperatorElement> op = base->GetCoreOperator();
-
-  if (op)
-    scriptize = !displayStyle && op->HasMovableLimits();
-  else
-    scriptize = false;
-
-  env->Push();
-  env->SetDisplayStyle(false);
-
-  accentUnder = false;
-  underSpacing = 0;
-  if (underScript)
+  if (DirtyAttribute())
     {
-      if (!scriptize)
+      assert(base);
+
+      bool displayStyle = env->GetDisplayStyle();
+
+      ScriptSetup(env);
+
+      scaled smallSpacing = ruleThickness;
+      scaled bigSpacing   = 3 * ruleThickness;
+
+      base->Setup(env);
+      Ptr<MathMLOperatorElement> op = base->GetCoreOperator();
+
+      if (op)
+	scriptize = !displayStyle && op->HasMovableLimits();
+      else
+	scriptize = false;
+
+      env->Push();
+      env->SetDisplayStyle(false);
+
+      accentUnder = false;
+      underSpacing = 0;
+      if (underScript)
 	{
-	  const Value* value = GetAttributeValue(ATTR_ACCENTUNDER, env, false);
-	  if (value != NULL) accentUnder = value->ToBoolean();
-	  else
+	  if (!scriptize)
 	    {
-	      Ptr<MathMLOperatorElement> op = underScript->GetCoreOperator();
-	      if (op)
+	      const Value* value = GetAttributeValue(ATTR_ACCENTUNDER, env, false);
+	      if (value != NULL) accentUnder = value->ToBoolean();
+	      else
 		{
-		  underScript->Setup(env);
-		  accentUnder = op->IsAccent();
+		  Ptr<MathMLOperatorElement> op = underScript->GetCoreOperator();
+		  if (op)
+		    {
+		      underScript->Setup(env);
+		      accentUnder = op->IsAccent();
+		    }
 		}
 	    }
-	}
 
-      if (accentUnder) underSpacing = smallSpacing;
-      else
-	{
-	  env->AddScriptLevel(1);
-	  underSpacing = displayStyle ? bigSpacing : smallSpacing;
-	}
-      underScript->Setup(env);
-    }
-
-  env->Drop();
-  env->Push();
-  env->SetDisplayStyle(false);
-
-  accent = false;
-  overSpacing = 0;
-  if (overScript)
-    {
-      if (!scriptize)
-	{
-	  const Value* value = GetAttributeValue(ATTR_ACCENT, env, false);
-	  if (value != NULL) accent = value->ToBoolean();
+	  if (accentUnder) underSpacing = smallSpacing;
 	  else
 	    {
-	      Ptr<MathMLOperatorElement> op = overScript->GetCoreOperator();
-	      if (op)
-		{
-		  overScript->Setup(env);
-		  accent = op->IsAccent();
-		}
+	      env->AddScriptLevel(1);
+	      underSpacing = displayStyle ? bigSpacing : smallSpacing;
 	    }
+	  underScript->Setup(env);
 	}
 
-      if (accent)
+      env->Drop();
+      env->Push();
+      env->SetDisplayStyle(false);
+
+      accent = false;
+      overSpacing = 0;
+      if (overScript)
 	{
-	  overSpacing = smallSpacing;
-	} 
-      else
-	{
-	  env->AddScriptLevel(1);
-	  overSpacing = displayStyle ? bigSpacing : smallSpacing;
+	  if (!scriptize)
+	    {
+	      const Value* value = GetAttributeValue(ATTR_ACCENT, env, false);
+	      if (value != NULL) accent = value->ToBoolean();
+	      else
+		{
+		  Ptr<MathMLOperatorElement> op = overScript->GetCoreOperator();
+		  if (op)
+		    {
+		      overScript->Setup(env);
+		      accent = op->IsAccent();
+		    }
+		}
+	    }
+
+	  if (accent)
+	    {
+	      overSpacing = smallSpacing;
+	    } 
+	  else
+	    {
+	      env->AddScriptLevel(1);
+	      overSpacing = displayStyle ? bigSpacing : smallSpacing;
+	    }
+	  overScript->Setup(env);
 	}
-      overScript->Setup(env);
-    }
   
-  env->Drop();
+      env->Drop();
+
+      ResetDirtyAttribute();
+    }
 }
 
 void
 MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
 
       assert(base);
@@ -510,7 +516,7 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
 void
 MathMLUnderOverElement::Render(const DrawingArea& area)
 {
-  if (HasDirtyChildren())
+  if (Dirty())
     {
       RenderBackground(area);
       assert(base);
@@ -570,6 +576,7 @@ MathMLUnderOverElement::GetCoreOperator()
   return base->GetCoreOperator();
 }
 
+#if 0
 void
 MathMLUnderOverElement::SetDirty(const Rectangle* rect)
 {
@@ -592,4 +599,23 @@ MathMLUnderOverElement::SetDirtyLayout(bool children)
       if (underScript) underScript->SetDirtyLayout(children);
       if (overScript) overScript->SetDirtyLayout(children);
     }
+}
+#endif
+
+void
+MathMLUnderOverElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlagDown(f);
+  if (base) base->SetFlagDown(f);
+  if (underScript) underScript->SetFlagDown(f);
+  if (overScript) overScript->SetFlagDown(f);
+}
+
+void
+MathMLUnderOverElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlagDown(f);
+  if (base) base->ResetFlagDown(f);
+  if (underScript) underScript->ResetFlagDown(f);
+  if (overScript) overScript->ResetFlagDown(f);
 }

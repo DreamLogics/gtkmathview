@@ -101,7 +101,7 @@ MathMLFractionElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<Math
 void
 MathMLFractionElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -122,9 +122,10 @@ MathMLFractionElement::Normalize()
 	}
 #endif
 
-      assert(numerator && denominator);
-      numerator->Normalize();
-      denominator->Normalize();
+      if (numerator) numerator->Normalize();
+      if (denominator) denominator->Normalize();
+
+      ResetDirtyStructure();
     }
 }
 
@@ -133,110 +134,117 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  const Value* value = NULL;
+  if (DirtyAttribute())
+    {
+      const Value* value = NULL;
 
 #ifdef TEXISH_MATHML
-  defaultRuleThickness = env->GetRuleThickness();
+      defaultRuleThickness = env->GetRuleThickness();
 #else
-  scaled defaultRuleThickness = env->GetRuleThickness();
+      scaled defaultRuleThickness = env->GetRuleThickness();
 #endif // TEXISH_MATHML
 
-  value = GetAttributeValue(ATTR_LINETHICKNESS, env, true);
-  if (value != NULL) {
-    if (value->IsKeyword()) {
-      switch (value->ToKeyword()) {
-      case KW_THIN:
-	lineThickness = defaultRuleThickness / 2;
-	break;
-      case KW_MEDIUM:
-	lineThickness = defaultRuleThickness;
-	break;
-      case KW_THICK:
-	lineThickness = defaultRuleThickness * 2;
-	break;
-      default:
-	assert(IMPOSSIBLE);
-	break;
-      }
-    } else {
-      assert(value->IsSequence());
-      const Value* number = value->Get(0);
-      const Value* unit   = value->Get(1);
-
-      assert(number != NULL);
-      assert(unit != NULL);
-
-      if (unit->IsEmpty()) lineThickness = defaultRuleThickness * roundFloat(number->ToNumber());
-      else {
-	assert(unit->IsKeyword());
-	UnitId unitId = ToUnitId(unit);
-	if (unitId == UNIT_PERCENTAGE) {
-	  Globals::logger(LOG_WARNING, "line thickness given as percentage in `mfrac' element (taking default)");
-	  lineThickness = defaultRuleThickness;
+      value = GetAttributeValue(ATTR_LINETHICKNESS, env, true);
+      if (value != NULL) {
+	if (value->IsKeyword()) {
+	  switch (value->ToKeyword()) {
+	  case KW_THIN:
+	    lineThickness = defaultRuleThickness / 2;
+	    break;
+	  case KW_MEDIUM:
+	    lineThickness = defaultRuleThickness;
+	    break;
+	  case KW_THICK:
+	    lineThickness = defaultRuleThickness * 2;
+	    break;
+	  default:
+	    assert(IMPOSSIBLE);
+	    break;
+	  }
 	} else {
-	  UnitValue unitValue;
-	  unitValue.Set(number->ToNumber(), unitId);
-	  lineThickness = env->ToScaledPoints(unitValue);
+	  assert(value->IsSequence());
+	  const Value* number = value->Get(0);
+	  const Value* unit   = value->Get(1);
+
+	  assert(number != NULL);
+	  assert(unit != NULL);
+
+	  if (unit->IsEmpty()) lineThickness = defaultRuleThickness * roundFloat(number->ToNumber());
+	  else {
+	    assert(unit->IsKeyword());
+	    UnitId unitId = ToUnitId(unit);
+	    if (unitId == UNIT_PERCENTAGE) {
+	      Globals::logger(LOG_WARNING, "line thickness given as percentage in `mfrac' element (taking default)");
+	      lineThickness = defaultRuleThickness;
+	    } else {
+	      UnitValue unitValue;
+	      unitValue.Set(number->ToNumber(), unitId);
+	      lineThickness = env->ToScaledPoints(unitValue);
+	    }
+	  }
 	}
+
+	lineThickness = scaledMax(0, lineThickness);
       }
+
+      delete value;
+
+      value = GetAttributeValue(ATTR_NUMALIGN, env, true);
+      if (value != NULL) {
+	numAlign = ToFractionAlignId(value);
+	delete value;
+      }
+
+      value = GetAttributeValue(ATTR_DENOMALIGN, env, true);
+      if (value != NULL) {
+	denomAlign = ToFractionAlignId(value);
+	delete value;
+      }
+
+      value = GetAttributeValue(ATTR_BEVELLED, env, true);
+      if (value != NULL) {
+	bevelled = value->ToBoolean();
+	delete value;
+      }
+
+      color = env->GetColor();
+
+      axis = env->GetAxis();
+
+      displayStyle = env->GetDisplayStyle();
+
+#ifdef TEXISH_MATHML
+      if (displayStyle) {
+	numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.676508);
+	denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.685951);
+      } else {
+	numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * (lineThickness > 0 ? 0.393732 : 0.443731));
+	denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.344841);
+      }
+#else
+      minShift = env->GetScaledPointsPerEx();
+#endif // TEXISH_MATHML
     }
 
-    lineThickness = scaledMax(0, lineThickness);
-  }
+  if (DirtyAttributeP())
+    {
+      env->Push();
+      if (!displayStyle) env->AddScriptLevel(1);
+      else env->SetDisplayStyle(false);
 
-  delete value;
+      if (numerator) numerator->Setup(env);
+      if (denominator) denominator->Setup(env);
 
-  value = GetAttributeValue(ATTR_NUMALIGN, env, true);
-  if (value != NULL) {
-    numAlign = ToFractionAlignId(value);
-    delete value;
-  }
+      env->Drop();
+    }
 
-  value = GetAttributeValue(ATTR_DENOMALIGN, env, true);
-  if (value != NULL) {
-    denomAlign = ToFractionAlignId(value);
-    delete value;
-  }
-
-  value = GetAttributeValue(ATTR_BEVELLED, env, true);
-  if (value != NULL) {
-    bevelled = value->ToBoolean();
-    delete value;
-  }
-
-  color = env->GetColor();
-
-  axis = env->GetAxis();
-
-  displayStyle = env->GetDisplayStyle();
-
-#ifdef TEXISH_MATHML
-  if (displayStyle) {
-    numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.676508);
-    denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.685951);
-  } else {
-    numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * (lineThickness > 0 ? 0.393732 : 0.443731));
-    denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.344841);
-  }
-#else
-  minShift = env->GetScaledPointsPerEx();
-#endif // TEXISH_MATHML
-
-  env->Push();
-  if (!displayStyle) env->AddScriptLevel(1);
-  else env->SetDisplayStyle(false);
-
-  assert(numerator && denominator);
-  numerator->Setup(env);
-  denominator->Setup(env);
-
-  env->Drop();
+  ResetDirtyAttribute();
 }
 
 void
 MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       assert(numerator && denominator);
       numerator->DoLayout(ctxt);
@@ -350,48 +358,50 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
 void
 MathMLFractionElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
-  if (fGC[IsSelected()] == NULL)
+  if (Dirty())
     {
-      GraphicsContextValues values;
-      values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-      values.lineWidth = lineThickness;
-      fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_WIDTH);
-    }
-
-  RenderBackground(area);
-
-  assert(numerator && denominator);
-  numerator->Render(area);
-  denominator->Render(area);
-
-  if (lineThickness > SP_EPSILON)
-    {
-      if (bevelled)
+      if (fGC[Selected()] == NULL)
 	{
-	  const BoundingBox& numBox   = numerator->GetBoundingBox();
-	  const BoundingBox& denomBox = denominator->GetBoundingBox();
-
-	  scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
-	  scaled barHoriz = barVert / 2;
-
-	  area.DrawLine(fGC[IsSelected()],
-			GetX() + numBox.width + lineThickness,
-			GetY() + scaledMax(numBox.descent, denomBox.descent),
-			GetX() + numBox.width + lineThickness + barHoriz,
-			GetY() - scaledMax(numBox.ascent, denomBox.ascent));
+	  GraphicsContextValues values;
+	  values.foreground = Selected() ? area.GetSelectionForeground() : color;
+	  values.lineWidth = lineThickness;
+	  fGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_WIDTH);
 	}
-      else
+
+      RenderBackground(area);
+
+      assert(numerator && denominator);
+      numerator->Render(area);
+      denominator->Render(area);
+
+      if (lineThickness > SP_EPSILON)
 	{
-	  area.DrawLine(fGC[IsSelected()], GetX(), GetY() - axis,
-			GetX() + box.width, GetY() - axis);
-	}
-    }
+	  if (bevelled)
+	    {
+	      const BoundingBox& numBox   = numerator->GetBoundingBox();
+	      const BoundingBox& denomBox = denominator->GetBoundingBox();
 
-  ResetDirty();
+	      scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
+	      scaled barHoriz = barVert / 2;
+
+	      area.DrawLine(fGC[Selected()],
+			    GetX() + numBox.width + lineThickness,
+			    GetY() + scaledMax(numBox.descent, denomBox.descent),
+			    GetX() + numBox.width + lineThickness + barHoriz,
+			    GetY() - scaledMax(numBox.ascent, denomBox.ascent));
+	    }
+	  else
+	    {
+	      area.DrawLine(fGC[Selected()], GetX(), GetY() - axis,
+			    GetX() + box.width, GetY() - axis);
+	    }
+	}
+
+      ResetDirty();
+    }
 }
 
+#if 0
 void
 MathMLFractionElement::SetDirty(const Rectangle* rect)
 {
@@ -428,6 +438,23 @@ MathMLFractionElement::ResetSelected()
   MathMLContainerElement::ResetSelected();
   if (numerator) numerator->ResetSelected();
   if (denominator) denominator->ResetSelected();
+}
+#endif
+
+void
+MathMLFractionElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlagDown(f);
+  if (numerator) numerator->SetFlagDown(f);
+  if (denominator) denominator->SetFlagDown(f);
+}
+
+void
+MathMLFractionElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlagDown(f);
+  if (numerator) numerator->ResetFlagDown(f);
+  if (denominator) denominator->ResetFlagDown(f);
 }
 
 scaled

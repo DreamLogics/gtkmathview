@@ -46,45 +46,48 @@ MathMLDummyElement::~MathMLDummyElement()
 void
 MathMLDummyElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
-    ResetDirtyStructure();
+  if (DirtyStructure()) ResetDirtyStructure();
 }
 
 void
 MathMLDummyElement::Setup(RenderingEnvironment* env)
 {
-  assert(env != NULL);
-
-  FontifiedChar fChar;
-
-  env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), 'a');
-  assert(fChar.font != NULL);
-  
-  fChar.font->GetBoundingBox(box);
-  // memory leak n fChar fields???
+  assert(env);
+  if (DirtyAttribute())
+    {
+      FontifiedChar fChar;
+      
+      env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), 'a');
+      assert(fChar.font);
+      
+      fChar.font->GetBoundingBox(box);
+      // memory leak n fChar fields???
+      ResetDirtyAttribute();
+    }
 }
 
 void
 MathMLDummyElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
+  if (DirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 void
 MathMLDummyElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
+  if (Dirty())
+    {
+      RenderBackground(area);
+      if (fGC[Selected()] == NULL)
+	{
+	  GraphicsContextValues values;
+	  values.foreground = Selected() ? area.GetSelectionForeground() : RED_COLOR;
+	  values.lineStyle = LINE_STYLE_SOLID;
+	  fGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
+	}
 
-  RenderBackground(area);
+      area.DrawRectangle(fGC[Selected()], GetX(), GetY(), GetBoundingBox());
 
-  if (fGC[IsSelected()] == NULL) {
-    GraphicsContextValues values;
-    values.foreground = IsSelected() ? area.GetSelectionForeground() : RED_COLOR;
-    values.lineStyle = LINE_STYLE_SOLID;
-    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
-  }
-
-  area.DrawRectangle(fGC[IsSelected()], GetX(), GetY(), GetBoundingBox());
-
-  ResetDirty();
+      ResetDirty();
+    }
 }

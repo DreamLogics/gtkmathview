@@ -225,7 +225,7 @@ MathMLMultiScriptsElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<
 void
 MathMLMultiScriptsElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
@@ -318,6 +318,8 @@ MathMLMultiScriptsElement::Normalize()
       for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), NormalizeAdaptor());
       for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), NormalizeAdaptor());
       for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), NormalizeAdaptor());
+
+      ResetDirtyStructure();
     }
 }
 
@@ -346,7 +348,7 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 void
 MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       assert(base);
       base->DoLayout(ctxt);
@@ -488,7 +490,7 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
 void
 MathMLMultiScriptsElement::Render(const DrawingArea& area)
 {
-  if (HasDirtyChildren())
+  if (Dirty())
     {
       RenderBackground(area);
       assert(base);
@@ -516,44 +518,47 @@ MathMLMultiScriptsElement::ReleaseGCs()
 Ptr<MathMLElement>
 MathMLMultiScriptsElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return 0;
+  if (IsInside(x, y))
+    {
+      assert(base);
+      if (Ptr<MathMLElement> inside = base->Inside(x, y)) return inside;
 
-  assert(base);
-  if (Ptr<MathMLElement> inside = base->Inside(x, y)) return inside;
+      for (vector< Ptr<MathMLElement> >::iterator elem = preSubScript.begin();
+	   elem != preSubScript.end(); elem++)
+	if (*elem)
+	  {
+	    Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	    if (inside) return inside;
+	  }
 
-  for (vector< Ptr<MathMLElement> >::iterator elem = preSubScript.begin();
-       elem != preSubScript.end(); elem++)
-    if (*elem)
-      {
-	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-	if (inside) return inside;
-      }
+      for (vector< Ptr<MathMLElement> >::iterator elem = preSuperScript.begin();
+	   elem != preSuperScript.end(); elem++)
+	if (*elem)
+	  {
+	    Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	    if (inside) return inside;
+	  }
 
-  for (vector< Ptr<MathMLElement> >::iterator elem = preSuperScript.begin();
-       elem != preSuperScript.end(); elem++)
-    if (*elem)
-      {
-	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-	if (inside) return inside;
-      }
+      for (vector< Ptr<MathMLElement> >::iterator elem = subScript.begin();
+	   elem != subScript.end(); elem++)
+	if (*elem)
+	  {
+	    Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	    if (inside) return inside;
+	  }
 
-  for (vector< Ptr<MathMLElement> >::iterator elem = subScript.begin();
-       elem != subScript.end(); elem++)
-    if (*elem)
-      {
-	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-	if (inside) return inside;
-      }
+      for (vector< Ptr<MathMLElement> >::iterator elem = superScript.begin();
+	   elem != superScript.end(); elem++)
+	if (*elem)
+	  {
+	    Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	    if (inside) return inside;
+	  }
 
-  for (vector< Ptr<MathMLElement> >::iterator elem = superScript.begin();
-       elem != superScript.end(); elem++)
-    if (*elem)
-      {
-	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-	if (inside) return inside;
-      }
-
-  return this;
+      return this;
+    }
+  else
+    return 0;
 }
 
 scaled
@@ -611,6 +616,7 @@ MathMLMultiScriptsElement::GetCoreOperator()
   return base->GetCoreOperator();
 }
 
+#if 0
 void
 MathMLMultiScriptsElement::SetDirty(const Rectangle* rect)
 {
@@ -638,3 +644,27 @@ MathMLMultiScriptsElement::SetDirtyLayout(bool children)
       for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
     }
 }
+#endif
+
+void
+MathMLMultiScriptsElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlagDown(f);
+  if (base) base->SetFlagDown(f);
+  for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(SetFlagDownAdaptor(), f));
+  for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(SetFlagDownAdaptor(), f));
+  for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(SetFlagDownAdaptor(), f));
+  for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetFlagDownAdaptor(), f));
+}
+
+void
+MathMLMultiScriptsElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlagDown(f);
+  if (base) base->ResetFlagDown(f);
+  for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(ResetFlagDownAdaptor(), f));
+  for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(ResetFlagDownAdaptor(), f));
+  for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(ResetFlagDownAdaptor(), f));
+  for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(ResetFlagDownAdaptor(), f));
+}
+

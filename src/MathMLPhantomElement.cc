@@ -52,6 +52,5 @@ MathMLPhantomElement::IsSpaceLike() const
 void
 MathMLPhantomElement::Render(const DrawingArea&)
 {
-  if (!HasDirtyChildren()) return;
-  ResetDirty();
+  if (Dirty()) ResetDirty();
 }

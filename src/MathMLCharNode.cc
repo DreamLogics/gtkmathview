@@ -343,8 +343,6 @@ MathMLCharNode::DoHorizontalStretchyLayoutAux(scaled desiredSize, bool)
 void
 MathMLCharNode::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
   assert(GetParent());
   const GraphicsContext* gc = GetParent()->GetForegroundGC();
 
@@ -365,8 +363,6 @@ MathMLCharNode::Render(const DrawingArea& area)
   }
 
   // area.DrawBoundingBox(gc, GetX(), GetY(), box);
-
-  ResetDirty();
 }
 
 void

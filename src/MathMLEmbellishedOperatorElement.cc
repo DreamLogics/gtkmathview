@@ -46,7 +46,7 @@ MathMLEmbellishedOperatorElement::~MathMLEmbellishedOperatorElement()
 void
 MathMLEmbellishedOperatorElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
       assert(child);
 
@@ -67,14 +67,14 @@ void
 MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-  script = env->GetScriptLevel() > 0;
+  if (DirtyAttribute()) script = env->GetScriptLevel() > 0;
   MathMLBinContainerElement::Setup(env);
 }
 
 void
 MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       assert(child);
       assert(coreOp);
@@ -129,6 +129,8 @@ MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
 Ptr<MathMLCharNode>
 MathMLEmbellishedOperatorElement::GetCharNode() const
 {
-  if (!coreOp || child != coreOp) return 0;
-  return coreOp->GetCharNode();
+  if (!coreOp || child != coreOp)
+    return 0;
+  else
+    return coreOp->GetCharNode();
 }

@@ -35,7 +35,7 @@
 void
 MathMLTableElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       scaled aAvailWidth = PrepareLabelsLayout(ctxt);
 

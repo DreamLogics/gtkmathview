@@ -82,7 +82,7 @@ MathMLDocument::~MathMLDocument()
 void
 MathMLDocument::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       GMetaDOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
@@ -95,6 +95,7 @@ MathMLDocument::Normalize()
 #endif // HAVE_GMETADOM
 
       if (child) child->Normalize();
+
       ResetDirtyStructure();
     }
 }

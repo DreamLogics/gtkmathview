@@ -224,7 +224,7 @@ MathMLTokenElement::InsertChild(unsigned i, const Ptr<MathMLTextNode>& node)
 void
 MathMLTokenElement::Normalize()
 {
-  if ((HasDirtyStructure() || HasChildWithDirtyStructure()) && GetDOMElement())
+  if (DirtyStructure() && GetDOMElement())
     {
       String* sContent = NULL;
       for (GMetaDOM::Node p = GetDOMElement().get_firstChild(); 
@@ -302,127 +302,132 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  env->Push();
-
-  if (!is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this)) &&
-      !is_a<MathMLOperatorElement>(Ptr<MathMLElement>(this)))
-    env->SetFontMode(FONT_MODE_TEXT);
-
-  const Value* value = NULL;
-
-  value = GetAttributeValue(ATTR_MATHSIZE, NULL, false);
-  if (value != NULL) {
-    if (IsSet(ATTR_FONTSIZE))
-      Globals::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
-    
-    if (value->IsKeyword(KW_SMALL)) env->AddScriptLevel(1);
-    else if (value->IsKeyword(KW_BIG)) env->AddScriptLevel(-1);
-    else if (value->IsKeyword(KW_NORMAL)) ; // noop
-    else env->SetFontSize(value->ToNumberUnit());
-  } else {
-    value = GetAttributeValue(ATTR_FONTSIZE, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
-      env->SetFontSize(value->ToNumberUnit());
-    }
-  }
-  delete value;
-  
-  value = GetAttributeValue(ATTR_MATHVARIANT, NULL, false);
-  if (value != NULL) {
-    assert(value->IsKeyword());
-
-    const MathVariantAttributes& attr = attributesOfVariant(value->ToKeyword());
-    assert(attr.kw != KW_NOTVALID);
-    env->SetFontFamily(attr.family);
-    env->SetFontWeight(attr.weight);
-    env->SetFontStyle(attr.style);
-
-    if (IsSet(ATTR_FONTFAMILY) || IsSet(ATTR_FONTWEIGHT) || IsSet(ATTR_FONTSTYLE))
-      Globals::logger(LOG_WARNING, "attribute `mathvariant' overrides deprecated font-related attributes");
-
-    delete value;
-  } else {
-    value = GetAttributeValue(ATTR_FONTFAMILY, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontfamily' is deprecated in MathML 2");
-      env->SetFontFamily(value->ToString());
-    }
-    delete value;
-
-    value = GetAttributeValue(ATTR_FONTWEIGHT, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontweight' is deprecated in MathML 2");
-      env->SetFontWeight(ToFontWeightId(value));
-    }
-    delete value;
-
-    value = GetAttributeValue(ATTR_FONTSTYLE, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
-      env->SetFontStyle(ToFontStyleId(value));
-    } else if (is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this))) {
-      if (GetLogicalContentLength() == 1) {
-	Ptr<MathMLTextNode> node = GetChild(0);
-	assert(node);
-
-	if (is_a<MathMLCharNode>(node)) {
-	  Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(node);
-	  assert(cNode);
-
-	  if (!isUpperCaseGreek(cNode->GetChar())) env->SetFontStyle(FONT_STYLE_ITALIC);
-	  else env->SetFontStyle(FONT_STYLE_NORMAL);
-	} else
-	  env->SetFontStyle(FONT_STYLE_NORMAL);
-      } else {
-	env->SetFontStyle(FONT_STYLE_NORMAL);
-	env->SetFontMode(FONT_MODE_TEXT);
-      }
-    }
-    delete value;
-  }
-
-  value = GetAttributeValue(ATTR_MATHCOLOR, NULL, false);
-  if (value != NULL) {
-    if (IsSet(ATTR_COLOR))
-      Globals::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
-    env->SetColor(ToRGB(value));
-  } else {
-    value = GetAttributeValue(ATTR_COLOR, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
-      env->SetColor(ToRGB(value));
-    } else
-      if (HasLink()) env->SetColor(Globals::configuration.GetLinkForeground());
-  }
-  delete value;
-
-  value = GetAttributeValue(ATTR_MATHBACKGROUND, NULL, false);
-  if (value != NULL) env->SetBackgroundColor(ToRGB(value));
-  else if (HasLink()) env->SetBackgroundColor(Globals::configuration.GetLinkBackground());
-  delete value;
-
-  Globals::logger(LOG_DEBUG, "doing token setup");
-
-  color      = env->GetColor();
-  background = env->GetBackgroundColor();
-  sppm       = env->GetScaledPointsPerEm();
-
-  for (std::vector< Ptr<MathMLTextNode> >::const_iterator p = GetContent().begin();
-       p != GetContent().end();
-       p++)
+  if (DirtyAttribute())
     {
-      assert(*p);
-      (*p)->Setup(env);
-    }
+      env->Push();
 
-  env->Drop();
+      if (!is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this)) &&
+	  !is_a<MathMLOperatorElement>(Ptr<MathMLElement>(this)))
+	env->SetFontMode(FONT_MODE_TEXT);
+
+      const Value* value = NULL;
+
+      value = GetAttributeValue(ATTR_MATHSIZE, NULL, false);
+      if (value != NULL) {
+	if (IsSet(ATTR_FONTSIZE))
+	  Globals::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
+    
+	if (value->IsKeyword(KW_SMALL)) env->AddScriptLevel(1);
+	else if (value->IsKeyword(KW_BIG)) env->AddScriptLevel(-1);
+	else if (value->IsKeyword(KW_NORMAL)) ; // noop
+	else env->SetFontSize(value->ToNumberUnit());
+      } else {
+	value = GetAttributeValue(ATTR_FONTSIZE, NULL, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
+	  env->SetFontSize(value->ToNumberUnit());
+	}
+      }
+      delete value;
+  
+      value = GetAttributeValue(ATTR_MATHVARIANT, NULL, false);
+      if (value != NULL) {
+	assert(value->IsKeyword());
+
+	const MathVariantAttributes& attr = attributesOfVariant(value->ToKeyword());
+	assert(attr.kw != KW_NOTVALID);
+	env->SetFontFamily(attr.family);
+	env->SetFontWeight(attr.weight);
+	env->SetFontStyle(attr.style);
+
+	if (IsSet(ATTR_FONTFAMILY) || IsSet(ATTR_FONTWEIGHT) || IsSet(ATTR_FONTSTYLE))
+	  Globals::logger(LOG_WARNING, "attribute `mathvariant' overrides deprecated font-related attributes");
+
+	delete value;
+      } else {
+	value = GetAttributeValue(ATTR_FONTFAMILY, NULL, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontfamily' is deprecated in MathML 2");
+	  env->SetFontFamily(value->ToString());
+	}
+	delete value;
+
+	value = GetAttributeValue(ATTR_FONTWEIGHT, NULL, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontweight' is deprecated in MathML 2");
+	  env->SetFontWeight(ToFontWeightId(value));
+	}
+	delete value;
+
+	value = GetAttributeValue(ATTR_FONTSTYLE, NULL, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
+	  env->SetFontStyle(ToFontStyleId(value));
+	} else if (is_a<MathMLIdentifierElement>(Ptr<MathMLElement>(this))) {
+	  if (GetLogicalContentLength() == 1) {
+	    Ptr<MathMLTextNode> node = GetChild(0);
+	    assert(node);
+
+	    if (is_a<MathMLCharNode>(node)) {
+	      Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(node);
+	      assert(cNode);
+
+	      if (!isUpperCaseGreek(cNode->GetChar())) env->SetFontStyle(FONT_STYLE_ITALIC);
+	      else env->SetFontStyle(FONT_STYLE_NORMAL);
+	    } else
+	      env->SetFontStyle(FONT_STYLE_NORMAL);
+	  } else {
+	    env->SetFontStyle(FONT_STYLE_NORMAL);
+	    env->SetFontMode(FONT_MODE_TEXT);
+	  }
+	}
+	delete value;
+      }
+
+      value = GetAttributeValue(ATTR_MATHCOLOR, NULL, false);
+      if (value != NULL) {
+	if (IsSet(ATTR_COLOR))
+	  Globals::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
+	env->SetColor(ToRGB(value));
+      } else {
+	value = GetAttributeValue(ATTR_COLOR, NULL, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
+	  env->SetColor(ToRGB(value));
+	} else
+	  if (HasLink()) env->SetColor(Globals::configuration.GetLinkForeground());
+      }
+      delete value;
+
+      value = GetAttributeValue(ATTR_MATHBACKGROUND, NULL, false);
+      if (value != NULL) env->SetBackgroundColor(ToRGB(value));
+      else if (HasLink()) env->SetBackgroundColor(Globals::configuration.GetLinkBackground());
+      delete value;
+
+      Globals::logger(LOG_DEBUG, "doing token setup");
+
+      color      = env->GetColor();
+      background = env->GetBackgroundColor();
+      sppm       = env->GetScaledPointsPerEm();
+
+      for (std::vector< Ptr<MathMLTextNode> >::const_iterator p = GetContent().begin();
+	   p != GetContent().end();
+	   p++)
+	{
+	  assert(*p);
+	  (*p)->Setup(env);
+	}
+
+      env->Drop();
+
+      ResetDirtyAttribute();
+    }
 }
 
 void
 MathMLTokenElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       box.Null();
       for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
@@ -467,52 +472,30 @@ MathMLTokenElement::SetPosition(scaled x, scaled y)
 void
 MathMLTokenElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
-  RenderBackground(area);
-
-  if (fGC[IsSelected()] == NULL)
+  if (Dirty())
     {
-      GraphicsContextValues values;
+      RenderBackground(area);
 
-      values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-      values.background = IsSelected() ? area.GetSelectionBackground() : background;
-      fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
-    }
+      if (fGC[Selected()] == NULL)
+	{
+	  GraphicsContextValues values;
 
-  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
-       text != GetContent().end();
-       text++)
-    {
-      assert(*text);
-      (*text)->Render(area);
-    }
+	  values.foreground = Selected() ? area.GetSelectionForeground() : color;
+	  values.background = Selected() ? area.GetSelectionBackground() : background;
+	  fGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
+	}
 
-  //area.DrawRectangle(fGC[0], *shape);
+      for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+	   text != GetContent().end();
+	   text++)
+	{
+	  assert(*text);
+	  (*text)->Render(area);
+	}
 
-  ResetDirty();
-}
+      //area.DrawRectangle(fGC[0], *shape);
 
-void
-MathMLTokenElement::SetDirty(const Rectangle* rect)
-{
-  dirtyBackground =
-    (GetParent() && 
-     ((GetParent()->IsSelected() != IsSelected()) ||
-      (GetParent()->GetBackgroundColor() != GetBackgroundColor()))) ? 1 : 0;
-
-  if (IsDirty()) return;
-  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
-
-  dirty = 1;
-  SetDirtyChildren();
-
-  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
-       text != GetContent().end();
-       text++)
-    {
-      assert(*text);
-      (*text)->SetDirty(rect);
+      ResetDirty();
     }
 }
 

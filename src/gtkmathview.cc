@@ -774,7 +774,7 @@ gtk_math_view_is_selected(GtkMathView* math_view, GdomeElement* elem)
   Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
-  return el->IsSelected() ? TRUE : FALSE;
+  return el->Selected() ? TRUE : FALSE;
 }
 
 extern "C" gint

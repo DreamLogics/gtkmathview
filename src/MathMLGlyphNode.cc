@@ -76,8 +76,6 @@ MathMLGlyphNode::DoLayout(const FormattingContext&)
 void
 MathMLGlyphNode::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
   if (font != NULL)
     {
       assert(GetParent());
@@ -89,8 +87,6 @@ MathMLGlyphNode::Render(const DrawingArea& area)
 
       area.DrawChar(gc, font, GetX(), GetY(), nch);
     }
-
-  ResetDirty();
 }
 
 unsigned

@@ -135,7 +135,7 @@ MathMLScriptElement::Inside(scaled x, scaled y)
 void
 MathMLScriptElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -180,8 +180,7 @@ MathMLScriptElement::Normalize()
 	}
 #endif
 
-      assert(base);
-      base->Normalize();
+      if (base) base->Normalize();
       if (subScript) subScript->Normalize();
       if (superScript) superScript->Normalize();
 
@@ -194,65 +193,71 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  MathMLElement::Setup(env);
-
-  ScriptSetup(env);
-
-  assert(base);
-  base->Setup(env);
-
-  env->Push();
-  env->AddScriptLevel(1);
-  env->SetDisplayStyle(false);
-
-  const Value* value = NULL;
-
-  if (subScript)
+  if (DirtyAttribute())
     {
-      subScript->Setup(env);
+      MathMLElement::Setup(env);
 
-      value = GetAttributeValue(ATTR_SUBSCRIPTSHIFT, env, false);
-      if (value != NULL)
-	{
-	  assert(value->IsNumberUnit());
-
-	  UnitValue unitValue = value->ToNumberUnit();
-	  assert(!unitValue.IsPercentage());
-
-	  subMinShift = env->ToScaledPoints(unitValue);
-
-	  delete value;
-	}
+      ScriptSetup(env);
     }
 
-  if (superScript)
+  if (DirtyAttributeP())
     {
-      superScript->Setup(env);
+      if (base) base->Setup(env);
 
-      value = GetAttributeValue(ATTR_SUPERSCRIPTSHIFT, env, false);
-      if (value != NULL)
+      env->Push();
+      env->AddScriptLevel(1);
+      env->SetDisplayStyle(false);
+
+      const Value* value = NULL;
+
+      if (subScript)
 	{
-	  assert(value->IsNumberUnit());
+	  subScript->Setup(env);
+
+	  value = GetAttributeValue(ATTR_SUBSCRIPTSHIFT, env, false);
+	  if (value != NULL)
+	    {
+	      assert(value->IsNumberUnit());
+
+	      UnitValue unitValue = value->ToNumberUnit();
+	      assert(!unitValue.IsPercentage());
+
+	      subMinShift = env->ToScaledPoints(unitValue);
+
+	      delete value;
+	    }
+	}
+
+      if (superScript)
+	{
+	  superScript->Setup(env);
+
+	  value = GetAttributeValue(ATTR_SUPERSCRIPTSHIFT, env, false);
+	  if (value != NULL)
+	    {
+	      assert(value->IsNumberUnit());
       
-	  UnitValue unitValue = value->ToNumberUnit();
-	  assert(!unitValue.IsPercentage());
+	      UnitValue unitValue = value->ToNumberUnit();
+	      assert(!unitValue.IsPercentage());
 
-	  superMinShift = env->ToScaledPoints(unitValue);
+	      superMinShift = env->ToScaledPoints(unitValue);
 
-	  delete value;
+	      delete value;
+	    }
 	}
+
+      env->Drop();
     }
 
-  env->Drop();
+  ResetDirtyAttribute();
 }
 
 void
 MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
-      assert(base);
-      base->DoLayout(ctxt);
+      if (base) base->DoLayout(ctxt);
       if (subScript) subScript->DoLayout(ctxt);
       if (superScript) superScript->DoLayout(ctxt);
 
@@ -320,7 +325,7 @@ MathMLScriptElement::SetPosition(scaled x, scaled y)
 void
 MathMLScriptElement::Render(const DrawingArea& area)
 {
-  if (HasDirtyChildren())
+  if (Dirty())
     {
       RenderBackground(area);
       assert(base);
@@ -368,6 +373,7 @@ MathMLScriptElement::GetCoreOperator()
   return base->GetCoreOperator();
 }
 
+#if 0
 void
 MathMLScriptElement::SetDirty(const Rectangle* rect)
 {
@@ -390,4 +396,23 @@ MathMLScriptElement::SetDirtyLayout(bool children)
       if (subScript) subScript->SetDirtyLayout(children);
       if (superScript) superScript->SetDirtyLayout(children);
     }
+}
+#endif
+
+void
+MathMLScriptElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlagDown(f);
+  if (base) base->SetFlagDown(f);
+  if (subScript) subScript->SetFlagDown(f);
+  if (superScript) superScript->SetFlagDown(f);
+}
+
+void
+MathMLScriptElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlagDown(f);
+  if (base) base->ResetFlagDown(f);
+  if (subScript) subScript->ResetFlagDown(f);
+  if (superScript) superScript->ResetFlagDown(f);
 }

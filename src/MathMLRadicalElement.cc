@@ -94,7 +94,7 @@ MathMLRadicalElement::SetIndex(const Ptr<MathMLElement>& elem)
 void
 MathMLRadicalElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -153,31 +153,35 @@ MathMLRadicalElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  spacing       = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_MEDIUM));
-  color         = env->GetColor();
-  background    = env->GetBackgroundColor();
-  lineThickness = env->GetRuleThickness();
-
-  assert(radical);
-  radical->Setup(env);
-
-  assert(radicand);
-  radicand->Setup(env);
-
-  if (index)
+  if (DirtyAttribute())
     {
-      env->Push();
-      env->SetDisplayStyle(false);
-      env->AddScriptLevel(2);
-      index->Setup(env);
-      env->Drop();
+      spacing       = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_MEDIUM));
+      color         = env->GetColor();
+      background    = env->GetBackgroundColor();
+      lineThickness = env->GetRuleThickness();
     }
+
+  if (DirtyAttributeP())
+    {
+      if (radical) radical->Setup(env);
+      if (radicand) radicand->Setup(env);
+      if (index)
+	{
+	  env->Push();
+	  env->SetDisplayStyle(false);
+	  env->AddScriptLevel(2);
+	  index->Setup(env);
+	  env->Drop();
+	}
+    }
+
+  ResetDirtyAttribute();
 }
 
 void
 MathMLRadicalElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       assert(radicand);
       radicand->DoLayout(ctxt);
@@ -233,13 +237,13 @@ MathMLRadicalElement::SetPosition(scaled x, scaled y)
     }
 }
 
+#if 0
 void
 MathMLRadicalElement::SetDirty(const Rectangle* rect)
 {
   if (!IsDirty() && !HasDirtyChildren())
     {
       MathMLElement::SetDirty(rect);
-      if (radical) radical->SetDirty(rect);
       if (radicand) radicand->SetDirty(rect);
       if (index) index->SetDirty(rect);  
     }
@@ -251,7 +255,6 @@ MathMLRadicalElement::SetDirtyLayout(bool children)
   MathMLElement::SetDirtyLayout(children);
   if (children)
     {
-      if (radical) radical->SetDirtyLayout(children);
       if (radicand) radicand->SetDirtyLayout(children);
       if (index) index->SetDirtyLayout(children);
     }
@@ -264,7 +267,6 @@ MathMLRadicalElement::SetSelected()
 
   selected = 1;
 
-  if (radical) radical->SetSelected();
   if (radicand) radicand->SetSelected();
   if (index) index->SetSelected();
 
@@ -278,40 +280,56 @@ MathMLRadicalElement::ResetSelected()
   
   SetDirty();
 
-  if (radical) radical->ResetSelected();
   if (radicand) radicand->ResetSelected();
   if (index) index->ResetSelected();
 
   selected = 0;
 }
+#endif
+
+void
+MathMLRadicalElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlagDown(f);
+  if (radicand) radicand->SetFlagDown(f);
+  if (index) index->SetFlagDown(f);
+}
+
+void
+MathMLRadicalElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlagDown(f);
+  if (radicand) radicand->ResetFlagDown(f);
+  if (index) index->ResetFlagDown(f);
+}
 
 void
 MathMLRadicalElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
+  if (Dirty())
+    {
+      if (fGC[Selected()] == NULL) {
+	GraphicsContextValues values;
+	values.foreground = Selected() ? area.GetSelectionForeground() : color;
+	values.background = Selected() ? area.GetSelectionBackground() : background;
+	values.lineWidth = lineThickness;
+	fGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND | GC_MASK_LINE_WIDTH);
+      }
 
-  if (fGC[IsSelected()] == NULL) {
-    GraphicsContextValues values;
-    values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-    values.background = IsSelected() ? area.GetSelectionBackground() : background;
-    values.lineWidth = lineThickness;
-    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND | GC_MASK_LINE_WIDTH);
-  }
+      RenderBackground(area);
 
-  RenderBackground(area);
+      assert(radicand);
+      radicand->Render(area);
+      if (index) index->Render(area);
 
-  assert(radicand);
-  radicand->Render(area);
-  if (index) index->Render(area);
+      assert(radical);
+      radical->Render(area);
+      const BoundingBox& radBox = radical->GetBoundingBox();
+      area.MoveTo(radical->GetX() + radBox.width, radical->GetY() - radBox.ascent + lineThickness / 2);
+      area.DrawLineToDelta(fGC[Selected()], radicand->GetBoundingBox().width, 0);
 
-  assert(radical);
-  radical->SetDirty();
-  radical->Render(area);
-  const BoundingBox& radBox = radical->GetBoundingBox();
-  area.MoveTo(radical->GetX() + radBox.width, radical->GetY() - radBox.ascent + lineThickness / 2);
-  area.DrawLineToDelta(fGC[IsSelected()], radicand->GetBoundingBox().width, 0);
-
-  ResetDirty();
+      ResetDirty();
+    }
 }
 
 scaled

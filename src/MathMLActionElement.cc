@@ -87,16 +87,15 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
 void
 MathMLActionElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
-      Ptr<MathMLElement> elem = GetSelectedElement();
-      
-      if (elem)
+      if (Ptr<MathMLElement> elem = GetSelectedElement())
 	{
 	  elem->DoLayout(ctxt);
 	  box = elem->GetBoundingBox();
-	} else
-	  box.Null();
+	}
+      else
+	box.Null();
 
       ResetDirtyLayout(ctxt);
     }
@@ -122,27 +121,28 @@ MathMLActionElement::SetPosition(scaled x, scaled y)
 void
 MathMLActionElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem) elem->Render(area);
-
-  ResetDirty();
+  if (Dirty())
+    {
+      if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->Render(area);
+      ResetDirty();
+    }
 }
 
+#if 0
 void
 MathMLActionElement::SetDirty(const Rectangle* rect)
 {
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem) {
-    elem->SetDirty(rect);
-    // dirty-children has to be called explicitly because if the child is already
-    // dirty, then it does not invoke SetDirtyChildren by itself
-    // (see MathMLFrame.hh)
-    SetDirtyChildren();
-    //dirty = elem->IsDirty();
-  }
+  if (Ptr<MathMLElement> elem = GetSelectedElement())
+    {
+      elem->SetDirty(rect);
+      // dirty-children has to be called explicitly because if the child is already
+      // dirty, then it does not invoke SetDirtyChildren by itself
+      // (see MathMLFrame.hh)
+      SetDirtyChildren();
+      //dirty = elem->IsDirty();
+    }
 }
+#endif
 
 Ptr<MathMLElement>
 MathMLActionElement::GetSelectedElement() const
@@ -154,11 +154,11 @@ void
 MathMLActionElement::SetSelectedIndex(unsigned i)
 {
   assert(i > 0 && i <= content.size());
-  if (selection == i - 1) return;
-  selection = i - 1;
-
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem) elem->SetDirtyLayout(true);
+  if (selection != i - 1)
+    {
+      selection = i - 1;
+      if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->SetDirtyLayout();
+    }
 }
 
 unsigned
@@ -170,26 +170,36 @@ MathMLActionElement::GetSelectedIndex() const
 scaled
 MathMLActionElement::GetLeftEdge() const
 {
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return elem ? elem->GetLeftEdge() : GetX();
+  if (Ptr<MathMLElement> elem = GetSelectedElement())
+    return elem->GetLeftEdge();
+  else
+    return GetX();
 }
 
 scaled
 MathMLActionElement::GetRightEdge() const
 {
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return elem ? elem->GetRightEdge() : GetX();
+  if (Ptr<MathMLElement> elem = GetSelectedElement())
+    return elem->GetRightEdge();
+  else
+    return GetX();
 }
 
 Ptr<MathMLElement>
 MathMLActionElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return 0;
-
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  return elem ? elem->Inside(x, y) : Ptr<MathMLElement>(this);
+  if (IsInside(x, y))
+    {
+      if (Ptr<MathMLElement> elem = GetSelectedElement())
+	return elem->Inside(x, y);
+      else
+	return this;
+    }
+  else
+    return 0;
 }
 
+#if 0
 void
 MathMLActionElement::SetSelected()
 {
@@ -224,4 +234,19 @@ MathMLActionElement::SetDirtyLayout(bool children)
     Ptr<MathMLElement> elem = GetSelectedElement();
     if (elem) elem->SetDirtyLayout(children);
   }
+}
+#endif
+
+void
+MathMLActionElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlag(f);
+  if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->SetFlagDown(f);
+}
+
+void
+MathMLActionElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlag(f);
+  if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->ResetFlagDown(f);
 }

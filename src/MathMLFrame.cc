@@ -28,67 +28,10 @@
 
 MathMLFrame::MathMLFrame()
 {
-  selected = 0;
-  dirty = dirtyChildren = dirtyBackground = dirtyLayout = 0;
 }
 
 MathMLFrame::~MathMLFrame()
 {
-}
-
-bool
-MathMLFrame::IsFrame() const
-{
-  return true;
-}
-
-void
-MathMLFrame::SetDirty(const Rectangle*)
-{
-  dirtyBackground =
-    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
-  
-  if (IsDirty()) return;
-  dirty = 1;
-  SetDirtyChildren();
-}
-
-void
-MathMLFrame::SetDirtyChildren()
-{
-  if (HasDirtyChildren()) return;
-  dirtyChildren = 1;
-  for (Ptr<MathMLElement> elem = GetParent(); 
-       elem && !elem->HasDirtyChildren(); 
-       elem = elem->GetParent())
-    elem->dirtyChildren = 1;
-}
-
-void
-MathMLFrame::SetDirtyLayout(bool)
-{
-  if (HasDirtyLayout()) return;
-  dirtyLayout = 1;
-  for (Ptr<MathMLElement> elem = GetParent(); 
-       elem && !elem->dirtyLayout; 
-       elem = elem->GetParent())
-    elem->dirtyLayout = 1;
-}
-
-void
-MathMLFrame::SetSelected()
-{
-  if (IsSelected()) return;
-  selected = 1;
-  SetDirty();
-}
-
-void
-MathMLFrame::ResetSelected()
-{
-  if (!IsSelected()) return;
-  SetDirty();
-  selected = 0;
 }
 
 void

@@ -163,7 +163,7 @@ public:
   void 	       SetupRowAlignAux(const Value*, unsigned, bool = false);
   void 	       SetupGroupAlignAux(const Value*, unsigned, unsigned);
 
-  virtual void SetDirty(const Rectangle* rect);
+  //virtual void SetDirty(const Rectangle* rect);
   bool         HasLabels(void) const { return rowLabel != NULL; }
 
 protected:

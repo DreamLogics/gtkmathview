@@ -191,7 +191,7 @@ MathMLRenderingEngine::Setup()
   root->Setup(&env);
   perf.Stop();
   Globals::logger(LOG_INFO, "setup time: %dms", perf());
-  root->SetDirtyLayout(true);
+  // ?????? root->SetDirtyLayout(true);
 
   MinMaxLayout();
 }
@@ -234,21 +234,24 @@ MathMLRenderingEngine::Layout()
 void
 MathMLRenderingEngine::SetDirty(const Rectangle* rect)
 {
-  if (!root) return;
-  root->SetDirty(rect);
+  if (root)
+    {
+      if (rect) root->SetDirty(*rect);
+      else root->SetDirty();
+    }
 }
 
 void
 MathMLRenderingEngine::Render(const Rectangle* rect)
 {
-  if (root) root->SetDirty(rect);
+  SetDirty(rect);
   Update(rect);
 }
 
 void
 MathMLRenderingEngine::Update(const Rectangle* rect)
 {
-  assert(area != NULL);
+  assert(area);
 
   if (root)
     {
@@ -259,7 +262,7 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
       Globals::logger(LOG_INFO, "rendering time: %dms", perf());
     }
 
-  if (rect != NULL) area->Update(*rect);
+  if (rect) area->Update(*rect);
   else area->Update();
 }
 

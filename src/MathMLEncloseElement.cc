@@ -103,7 +103,7 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
 void
 MathMLEncloseElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
       assert(child);
 
@@ -142,27 +142,26 @@ MathMLEncloseElement::SetPosition(scaled x, scaled y)
 void
 MathMLEncloseElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
+  if (Dirty())
+    {
+      MathMLNormalizingContainerElement::Render(area);
 
-  assert(child);
+      if (fGC[Selected()] == NULL) {
+	GraphicsContextValues values;
+	values.foreground = Selected() ? area.GetSelectionForeground() : color;
+	fGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND);
+      }
 
-  MathMLNormalizingContainerElement::Render(area);
+      if (notation == NOTATION_LONGDIV) {
+	area.MoveTo(GetX() + lineThickness / 2, GetY() + box.descent);
+	area.DrawLineTo(fGC[Selected()], GetX() + lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
+	area.DrawLineTo(fGC[Selected()], GetX() + box.width, GetY() - box.ascent + lineThickness / 2);
+      } else if (notation == NOTATION_ACTUARIAL) {
+	area.MoveTo(GetX(), GetY() - box.ascent + lineThickness / 2);
+	area.DrawLineTo(fGC[Selected()], GetX() + box.width - lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
+	area.DrawLineTo(fGC[Selected()], GetX() + box.width - lineThickness / 2, GetY() + box.descent);
+      }
 
-  if (fGC[IsSelected()] == NULL) {
-    GraphicsContextValues values;
-    values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND);
-  }
-
-  if (notation == NOTATION_LONGDIV) {
-    area.MoveTo(GetX() + lineThickness / 2, GetY() + box.descent);
-    area.DrawLineTo(fGC[IsSelected()], GetX() + lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
-    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() - box.ascent + lineThickness / 2);
-  } else if (notation == NOTATION_ACTUARIAL) {
-    area.MoveTo(GetX(), GetY() - box.ascent + lineThickness / 2);
-    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width - lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
-    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width - lineThickness / 2, GetY() + box.descent);
-  }
-
-  ResetDirty();
+      ResetDirty();
+    }
 }

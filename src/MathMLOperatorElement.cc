@@ -99,7 +99,7 @@ MathMLOperatorElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLOperatorElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
       Ptr<MathMLElement> root = findEmbellishedOperatorRoot(this);
       assert(root);
@@ -132,126 +132,135 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  const Value* value = NULL;
-  const Value* resValue = NULL;
-
-  axis = env->GetAxis();
-
-  value = GetAttributeValue(ATTR_FORM, env, false);
-  if (value != NULL) form = ToFormId(value);
-  else form = InferOperatorForm();
-  delete value;
-
-  const MathMLAttributeList* prefix  = NULL;
-  const MathMLAttributeList* infix   = NULL;
-  const MathMLAttributeList* postfix = NULL;
-
-  String* operatorName = GetRawContent();
-  if (operatorName != NULL)
+  if (DirtyAttribute())
     {
-      Globals::dictionary.Search(operatorName, &prefix, &infix, &postfix);
-      delete operatorName;
-    }
+      const Value* value = NULL;
+      const Value* resValue = NULL;
 
-  if      (form == OP_FORM_PREFIX && prefix != NULL) defaults = prefix;
-  else if (form == OP_FORM_INFIX && infix != NULL) defaults = infix;
-  else if (form == OP_FORM_POSTFIX && postfix != NULL) defaults = postfix;
-  else if (infix != NULL) defaults = infix;
-  else if (postfix != NULL) defaults = postfix;
-  else if (prefix != NULL) defaults = prefix;
-  else defaults = NULL;
+      axis = env->GetAxis();
 
-  value = GetOperatorAttributeValue(ATTR_FENCE, env);
-  assert(value != NULL && value->IsBoolean());
-  if (!ForcedFence()) fence = value->ToBoolean() ? 1 : 0;
-  delete value;
+      value = GetAttributeValue(ATTR_FORM, env, false);
+      if (value != NULL) form = ToFormId(value);
+      else form = InferOperatorForm();
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_SEPARATOR, env);
-  assert(value != NULL && value->IsBoolean());
-  if (!ForcedSeparator()) separator = value->ToBoolean() ? 1 : 0;
-  delete value;
+      const MathMLAttributeList* prefix  = NULL;
+      const MathMLAttributeList* infix   = NULL;
+      const MathMLAttributeList* postfix = NULL;
 
-  value = GetOperatorAttributeValue(ATTR_LSPACE, env);
-  assert(value != NULL);
-  resValue = Resolve(value, env);
-  assert(resValue != NULL && resValue->IsNumberUnit());
-  lSpace = env->ToScaledPoints(resValue->ToNumberUnit());
-  delete resValue;
-  delete value;
+      String* operatorName = GetRawContent();
+      if (operatorName != NULL)
+	{
+	  Globals::dictionary.Search(operatorName, &prefix, &infix, &postfix);
+	  delete operatorName;
+	}
 
-  value = GetOperatorAttributeValue(ATTR_RSPACE, env);
-  assert(value != NULL);
-  resValue = Resolve(value, env);
-  assert(resValue != NULL && resValue->IsNumberUnit());
-  rSpace = env->ToScaledPoints(resValue->ToNumberUnit());
-  delete resValue;
-  delete value;
+      if      (form == OP_FORM_PREFIX && prefix != NULL) defaults = prefix;
+      else if (form == OP_FORM_INFIX && infix != NULL) defaults = infix;
+      else if (form == OP_FORM_POSTFIX && postfix != NULL) defaults = postfix;
+      else if (infix != NULL) defaults = infix;
+      else if (postfix != NULL) defaults = postfix;
+      else if (prefix != NULL) defaults = prefix;
+      else defaults = NULL;
+
+      value = GetOperatorAttributeValue(ATTR_FENCE, env);
+      assert(value != NULL && value->IsBoolean());
+      if (!ForcedFence()) fence = value->ToBoolean() ? 1 : 0;
+      delete value;
+
+      value = GetOperatorAttributeValue(ATTR_SEPARATOR, env);
+      assert(value != NULL && value->IsBoolean());
+      if (!ForcedSeparator()) separator = value->ToBoolean() ? 1 : 0;
+      delete value;
+
+      value = GetOperatorAttributeValue(ATTR_LSPACE, env);
+      assert(value != NULL);
+      resValue = Resolve(value, env);
+      assert(resValue != NULL && resValue->IsNumberUnit());
+      lSpace = env->ToScaledPoints(resValue->ToNumberUnit());
+      delete resValue;
+      delete value;
+
+      value = GetOperatorAttributeValue(ATTR_RSPACE, env);
+      assert(value != NULL);
+      resValue = Resolve(value, env);
+      assert(resValue != NULL && resValue->IsNumberUnit());
+      rSpace = env->ToScaledPoints(resValue->ToNumberUnit());
+      delete resValue;
+      delete value;
 
 #ifdef ENABLE_EXTENSIONS
-  value = GetOperatorAttributeValue(ATTR_TSPACE, env);
-  assert(value != NULL && value->IsNumberUnit());
-  tSpace = env->ToScaledPoints(value->ToNumberUnit());
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_TSPACE, env);
+      assert(value != NULL && value->IsNumberUnit());
+      tSpace = env->ToScaledPoints(value->ToNumberUnit());
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_BSPACE, env);
-  assert(value != NULL && value->IsNumberUnit());
-  bSpace = env->ToScaledPoints(value->ToNumberUnit());
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_BSPACE, env);
+      assert(value != NULL && value->IsNumberUnit());
+      bSpace = env->ToScaledPoints(value->ToNumberUnit());
+      delete value;
 #endif // ENABLE_EXTENSIONS
 
-  value = GetOperatorAttributeValue(ATTR_STRETCHY, env);
-  assert(value != NULL && value->IsBoolean());
-  stretchy = value->ToBoolean() ? 1 : 0;
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_STRETCHY, env);
+      assert(value != NULL && value->IsBoolean());
+      stretchy = value->ToBoolean() ? 1 : 0;
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_SYMMETRIC, env);
-  assert(value != NULL && value->IsBoolean());
-  if (!ForcedSymmetric()) symmetric = value->ToBoolean() ? 1 : 0;
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_SYMMETRIC, env);
+      assert(value != NULL && value->IsBoolean());
+      if (!ForcedSymmetric()) symmetric = value->ToBoolean() ? 1 : 0;
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_MAXSIZE, env);
-  assert(value != NULL);
-  if (value->IsKeyword(KW_INFINITY)) infiniteMaxSize = 1;
-  else {
-    infiniteMaxSize = 0;
-    ParseLimitValue(value, env, maxMultiplier, maxSize);
-  }
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_MAXSIZE, env);
+      assert(value != NULL);
+      if (value->IsKeyword(KW_INFINITY)) infiniteMaxSize = 1;
+      else {
+	infiniteMaxSize = 0;
+	ParseLimitValue(value, env, maxMultiplier, maxSize);
+      }
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_MINSIZE, env);
-  assert(value != NULL);
-  ParseLimitValue(value, env, minMultiplier, minSize);
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_MINSIZE, env);
+      assert(value != NULL);
+      ParseLimitValue(value, env, minMultiplier, minSize);
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_MOVABLELIMITS, env);
-  assert(value != NULL && value->IsBoolean());
-  movableLimits = value->ToBoolean() ? 1 : 0;
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_MOVABLELIMITS, env);
+      assert(value != NULL && value->IsBoolean());
+      movableLimits = value->ToBoolean() ? 1 : 0;
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_ACCENT, env);
-  assert(value != NULL && value->IsBoolean());
-  accent = value->ToBoolean() ? 1 : 0;
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_ACCENT, env);
+      assert(value != NULL && value->IsBoolean());
+      accent = value->ToBoolean() ? 1 : 0;
+      delete value;
 
-  value = GetOperatorAttributeValue(ATTR_LARGEOP, env);
-  assert(value != NULL && value->IsBoolean());
-  bool largeOp = value->ToBoolean();
-  delete value;
+      value = GetOperatorAttributeValue(ATTR_LARGEOP, env);
+      assert(value != NULL && value->IsBoolean());
+      bool largeOp = value->ToBoolean();
+      delete value;
 
-  MathMLTokenElement::Setup(env);
+      MathMLTokenElement::Setup(env);
 
-  if (GetSize() == 1 && largeOp && env->GetDisplayStyle())
-    {
-      if (Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0)))
-	if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
+      if (GetSize() == 1 && largeOp && env->GetDisplayStyle())
+	{
+	  if (Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0)))
+	    if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
+	}
+
+      ResetDirtyAttribute();
     }
 }
 
 void
 MathMLOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
-  MathMLTokenElement::DoLayout(ctxt);
-  if (ctxt.GetLayoutType() == LAYOUT_MIN) minBox = box;
+  if (DirtyLayout())
+    {
+      MathMLTokenElement::DoLayout(ctxt);
+      if (ctxt.GetLayoutType() == LAYOUT_MIN) minBox = box;
+      ResetDirtyLayout();
+    }
 }
 
 void

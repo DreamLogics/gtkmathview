@@ -50,7 +50,7 @@ MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 void
 MathMLNormalizingContainerElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
@@ -77,9 +77,7 @@ MathMLNormalizingContainerElement::Normalize()
 	}
 #endif
 
-      assert(child);
-      child->Normalize();
-
+      if (child) child->Normalize();
       ResetDirtyStructure();
     }
 }
@@ -87,11 +85,15 @@ MathMLNormalizingContainerElement::Normalize()
 void
 MathMLNormalizingContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
-      assert(child);
-      child->DoLayout(ctxt);
-      box = child->GetBoundingBox();
+      if (child)
+	{
+	  child->DoLayout(ctxt);
+	  box = child->GetBoundingBox();
+	}
+      else
+	box.Null();
       ResetDirtyLayout(ctxt);
     }
 }
@@ -99,14 +101,12 @@ MathMLNormalizingContainerElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLNormalizingContainerElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
-  RenderBackground(area);
-
-  assert(child);
-  child->Render(area);
-
-  ResetDirty();
+  if (Dirty())
+    {
+      RenderBackground(area);
+      if (child) child->Render(area);
+      ResetDirty();
+    }
 }
 
 Ptr<class MathMLOperatorElement>

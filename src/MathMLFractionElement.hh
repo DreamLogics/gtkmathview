@@ -51,10 +51,15 @@ public:
   virtual void   Setup(RenderingEnvironment*);
   virtual void   DoLayout(const class FormattingContext&);
   virtual void   SetPosition(scaled, scaled);
+#if 0
   virtual void   SetDirtyLayout(bool = false);
   virtual void   SetDirty(const Rectangle* = 0);
   virtual void   SetSelected(void);
   virtual void   ResetSelected(void);
+#endif
+  virtual void   SetFlagDown(Flags);
+  virtual void   ResetFlagDown(Flags);
+
   virtual void   Render(const DrawingArea&);
 
   virtual void   Replace(const Ptr<class MathMLElement>&, const Ptr<class MathMLElement>&);

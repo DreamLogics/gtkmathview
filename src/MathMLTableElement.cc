@@ -99,7 +99,7 @@ MathMLTableElement::~MathMLTableElement()
 void
 MathMLTableElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -237,20 +237,19 @@ MathMLTableElement::SetLabelPosition(unsigned i, scaled x, scaled y)
 void
 MathMLTableElement::RenderTableBackground(const DrawingArea& area)
 {
-  if (bGC[IsSelected()] == NULL) {
+  if (bGC[Selected()] == NULL) {
     GraphicsContextValues values;
-    values.foreground = values.background = IsSelected() ? area.GetSelectionBackground() : background;
-    bGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
+    values.foreground = values.background = Selected() ? area.GetSelectionBackground() : background;
+    bGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND);
   }
 
-  if (HasDirtyBackground()) {
-    area.Clear(bGC[IsSelected()], GetX(), GetY(), box);
-  }
+  if (DirtyBackground())
+    area.Clear(bGC[Selected()], GetX(), GetY(), box);
 
 #if 0   
   for (unsigned i = 0; i < nRows; i++) {
     assert(row[i].mtr);
-    if (row[i].mtr->IsSelected()) {
+    if (row[i].mtr->Selected()) {
       row[i].mtr->RenderBackground(area);
       return;
     }
@@ -261,103 +260,104 @@ MathMLTableElement::RenderTableBackground(const DrawingArea& area)
 void
 MathMLTableElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
+  if (Dirty())
+    {
+      MathMLLinearContainerElement::Render(area);
 
-  MathMLLinearContainerElement::Render(area);
+      if (fGC[Selected()] == NULL) {
+	GraphicsContextValues values;
+	values.foreground = Selected() ? area.GetSelectionForeground() : color;
+	values.lineStyle = LINE_STYLE_SOLID;
+	values.lineWidth = lineThickness;
+	fGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
 
-  if (fGC[IsSelected()] == NULL) {
-    GraphicsContextValues values;
-    values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-    values.lineStyle = LINE_STYLE_SOLID;
-    values.lineWidth = lineThickness;
-    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
-
-    values.lineStyle = LINE_STYLE_DASHED;
-    dGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
-  }
-
-  //area.DrawRectangle(gc, GetX(), GetY(), box);
-
-  if (frame != TABLE_LINE_NONE) {
-    Rectangle rect;
-
-    if (HasLabels()) {
-      rect.x = GetX() + leftPadding;
-      rect.y = GetY() - box.ascent;    
-      rect.width = tableWidth;
-      rect.height = box.GetHeight();
-    } else
-      rect = box.GetRectangle(GetX(), GetY());
-
-    area.DrawRectangle((frame == TABLE_LINE_DASHED) ? dGC[IsSelected()] : fGC[IsSelected()], rect);
-  }
-
-  scaled yOffset = frameVerticalSpacing - box.ascent;
-  for (unsigned i = 0; i < nRows; i++) {
-    scaled xOffset = frameHorizontalSpacing;
-    if (HasLabels()) xOffset += leftPadding;
-
-    for (unsigned j = 0; j < nColumns; j++) {
-      TableCell* cell = GetCell(i, j);
-
-      if (i != nRows - 1 && row[i].lineType != TABLE_LINE_NONE) {
-	// horizontal lines
-	if (cell->rowSpan <= 1) {
-	  scaled lineX = position.x + xOffset;
-	  scaled lineY = position.y + yOffset + row[i].GetHeight() + row[i].spacing / 2;
-	  scaled len = column[j].width;
-
-	  if (j == 0) {
-	    lineX -= frameHorizontalSpacing;
-	    len   += frameHorizontalSpacing;
-	  } else {
-	    lineX -= column[j - 1].spacing / 2;
-	    len   += column[j - 1].spacing / 2;
-	  }
-
-	  if (j == nColumns - 1) {
-	    len   += frameHorizontalSpacing;
-	  } else {
-	    len   += column[j].spacing / 2;
-	  }
-
-	  area.DrawLine((row[i].lineType == TABLE_LINE_DASHED) ? dGC[IsSelected()] : fGC[IsSelected()],
-			lineX, lineY, lineX + len, lineY);
-	}
+	values.lineStyle = LINE_STYLE_DASHED;
+	dGC[Selected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_STYLE);
       }
 
-      if (j != nColumns - 1 && column[j].lineType != TABLE_LINE_NONE) {
-	// vertical lines
-	if (cell->colSpan <= 1) {
-	  scaled lineX = position.x + xOffset + column[j].width + column[j].spacing / 2;
-	  scaled lineY = position.y + yOffset;
-	  scaled len = row[i].GetHeight();
+      //area.DrawRectangle(gc, GetX(), GetY(), box);
 
-	  if (i == 0) {
-	    lineY -= frameVerticalSpacing;
-	    len   += frameVerticalSpacing;
-	  } else {
-	    lineY -= row[i - 1].spacing / 2;
-	    len   += row[i - 1].spacing / 2;
-	  }
-	  if (i == nRows - 1) {
-	    len   += frameVerticalSpacing;
-	  } else {
-	    len   += row[i].spacing / 2;
-	  }
+      if (frame != TABLE_LINE_NONE) {
+	Rectangle rect;
 
-	  area.DrawLine((column[j].lineType == TABLE_LINE_DASHED) ? dGC[IsSelected()] : fGC[IsSelected()],
-			lineX, lineY, lineX, lineY + len);
-	}
+	if (HasLabels()) {
+	  rect.x = GetX() + leftPadding;
+	  rect.y = GetY() - box.ascent;    
+	  rect.width = tableWidth;
+	  rect.height = box.GetHeight();
+	} else
+	  rect = box.GetRectangle(GetX(), GetY());
+
+	area.DrawRectangle((frame == TABLE_LINE_DASHED) ? dGC[Selected()] : fGC[Selected()], rect);
       }
 
-      xOffset += column[j].width + column[j].spacing;
+      scaled yOffset = frameVerticalSpacing - box.ascent;
+      for (unsigned i = 0; i < nRows; i++) {
+	scaled xOffset = frameHorizontalSpacing;
+	if (HasLabels()) xOffset += leftPadding;
+
+	for (unsigned j = 0; j < nColumns; j++) {
+	  TableCell* cell = GetCell(i, j);
+
+	  if (i != nRows - 1 && row[i].lineType != TABLE_LINE_NONE) {
+	    // horizontal lines
+	    if (cell->rowSpan <= 1) {
+	      scaled lineX = position.x + xOffset;
+	      scaled lineY = position.y + yOffset + row[i].GetHeight() + row[i].spacing / 2;
+	      scaled len = column[j].width;
+
+	      if (j == 0) {
+		lineX -= frameHorizontalSpacing;
+		len   += frameHorizontalSpacing;
+	      } else {
+		lineX -= column[j - 1].spacing / 2;
+		len   += column[j - 1].spacing / 2;
+	      }
+
+	      if (j == nColumns - 1) {
+		len   += frameHorizontalSpacing;
+	      } else {
+		len   += column[j].spacing / 2;
+	      }
+
+	      area.DrawLine((row[i].lineType == TABLE_LINE_DASHED) ? dGC[Selected()] : fGC[Selected()],
+			    lineX, lineY, lineX + len, lineY);
+	    }
+	  }
+
+	  if (j != nColumns - 1 && column[j].lineType != TABLE_LINE_NONE) {
+	    // vertical lines
+	    if (cell->colSpan <= 1) {
+	      scaled lineX = position.x + xOffset + column[j].width + column[j].spacing / 2;
+	      scaled lineY = position.y + yOffset;
+	      scaled len = row[i].GetHeight();
+
+	      if (i == 0) {
+		lineY -= frameVerticalSpacing;
+		len   += frameVerticalSpacing;
+	      } else {
+		lineY -= row[i - 1].spacing / 2;
+		len   += row[i - 1].spacing / 2;
+	      }
+	      if (i == nRows - 1) {
+		len   += frameVerticalSpacing;
+	      } else {
+		len   += row[i].spacing / 2;
+	      }
+
+	      area.DrawLine((column[j].lineType == TABLE_LINE_DASHED) ? dGC[Selected()] : fGC[Selected()],
+			    lineX, lineY, lineX, lineY + len);
+	    }
+	  }
+
+	  xOffset += column[j].width + column[j].spacing;
+	}
+
+	yOffset += row[i].GetHeight() + row[i].spacing;
+      }
+
+      ResetDirty();
     }
-
-    yOffset += row[i].GetHeight() + row[i].spacing;
-  }
-
-  ResetDirty();
 }
 
 Ptr<MathMLElement>
@@ -375,6 +375,7 @@ MathMLTableElement::Inside(scaled x, scaled y)
   return MathMLLinearContainerElement::Inside(x, y);
 }
 
+#if 0
 // SetDirty: Tables redefine this method for optimization. In fact,
 // if the table has no lines it behaves just as a container, and
 // only the cells covered by "rect" are effectively rendered again,
@@ -391,7 +392,7 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
     hasLines = column[j].lineType != TABLE_LINE_NONE;
 
   dirtyBackground =
-    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() && (GetParent()->Selected() != Selected())) ? 1 : 0;
 
   if (IsDirty()) return;
   if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
@@ -404,6 +405,7 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
   std::for_each(content.begin(), content.end(),
 		std::bind2nd(SetDirtyAdaptor(), rect));
 }
+#endif
 
 void
 MathMLTableElement::ReleaseGCs()

@@ -69,7 +69,6 @@ public:
   virtual void 	 Render(const class DrawingArea&);
 
   bool           IsNonMarking(void) const;
-  virtual void 	 SetDirty(const Rectangle* = NULL);
 
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;

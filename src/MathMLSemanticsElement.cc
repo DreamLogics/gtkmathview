@@ -46,7 +46,7 @@ MathMLSemanticsElement::~MathMLSemanticsElement()
 void
 MathMLSemanticsElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())

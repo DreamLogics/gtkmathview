@@ -52,7 +52,7 @@ MathMLLabeledTableRowElement::~MathMLLabeledTableRowElement()
 void
 MathMLLabeledTableRowElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
       MathMLTableRowElement::Normalize();
 
@@ -87,11 +87,27 @@ MathMLLabeledTableRowElement::Inside(scaled x, scaled y)
   return 0;
 }
 
+#if 0
 void
 MathMLLabeledTableRowElement::SetDirty(const Rectangle* rect)
 {
   MathMLTableRowElement::SetDirty(rect);
   if (label) label->SetDirty(rect);
+}
+#endif
+
+void
+MathMLLabeledTableRowElement::SetFlagDown(Flags f)
+{
+  MathMLLinearContainerElement::SetFlagDown(f);
+  if (label) label->SetFlagDown(f);
+}
+
+void
+MathMLLabeledTableRowElement::ResetFlagDown(Flags f)
+{
+  MathMLLinearContainerElement::ResetFlagDown(f);
+  if (label) label->ResetFlagDown(f);  
 }
 
 Ptr<MathMLElement>

@@ -76,7 +76,7 @@ MathMLTableRowElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLTableRowElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -124,24 +124,30 @@ MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 void
 MathMLTableRowElement::Setup(RenderingEnvironment* env)
 {
-  assert(GetParent());
-  Ptr<MathMLTableElement> mtable = smart_cast<MathMLTableElement>(GetParent());
-  assert(mtable);
+  if (DirtyAttribute())
+    {
+      assert(GetParent());
+      Ptr<MathMLTableElement> mtable = smart_cast<MathMLTableElement>(GetParent());
+      assert(mtable);
 
-  const Value* value;
+      const Value* value;
 
-  value = GetAttributeValue(ATTR_COLUMNALIGN, NULL, false);
-  if (value != NULL) mtable->SetupColumnAlignAux(value, rowIndex, 1, IsA() == TAG_MLABELEDTR);
+      value = GetAttributeValue(ATTR_COLUMNALIGN, NULL, false);
+      if (value != NULL) mtable->SetupColumnAlignAux(value, rowIndex, 1, IsA() == TAG_MLABELEDTR);
 
-  value = GetAttributeValue(ATTR_ROWALIGN, NULL, false);
-  if (value != NULL) mtable->SetupRowAlignAux(value, rowIndex, IsA() == TAG_MLABELEDTR);
+      value = GetAttributeValue(ATTR_ROWALIGN, NULL, false);
+      if (value != NULL) mtable->SetupRowAlignAux(value, rowIndex, IsA() == TAG_MLABELEDTR);
 
-  value = GetAttributeValue(ATTR_GROUPALIGN, NULL, false);
-  if (value != NULL) mtable->SetupGroupAlignAux(value, rowIndex, 1);
+      value = GetAttributeValue(ATTR_GROUPALIGN, NULL, false);
+      if (value != NULL) mtable->SetupGroupAlignAux(value, rowIndex, 1);
+    }
 
   MathMLLinearContainerElement::Setup(env);
+
+  ResetDirtyAttribute();
 }
 
+#if 0
 void
 MathMLTableRowElement::SetDirty(const Rectangle* rect)
 {
@@ -150,6 +156,7 @@ MathMLTableRowElement::SetDirty(const Rectangle* rect)
   // its children
   std::for_each(content.begin(), content.end(), std::bind2nd(SetDirtyAdaptor(), rect));
 }
+#endif
 
 bool
 MathMLTableRowElement::IsInside(scaled x, scaled y) const

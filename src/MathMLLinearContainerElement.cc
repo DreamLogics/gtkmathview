@@ -53,7 +53,7 @@ MathMLLinearContainerElement::~MathMLLinearContainerElement()
 void
 MathMLLinearContainerElement::Normalize()
 {
-  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+  if (DirtyStructure())
     {
       // editing is supported with GMetaDOM only
 #if defined(HAVE_GMETADOM)
@@ -85,7 +85,6 @@ MathMLLinearContainerElement::Normalize()
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
       std::for_each(content.begin(), content.end(), NormalizeAdaptor());
-
       ResetDirtyStructure();
     }
 }
@@ -94,13 +93,10 @@ void
 MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-  if (HasChildWithDirtyAttribute())
+  if (DirtyAttributeP())
     {
       background = env->GetBackgroundColor();
-      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-	   elem != content.end();
-	   elem++)
-	(*elem)->Setup(env);
+      std::for_each(content.begin(), content.end(), std::bind2nd(SetupAdaptor(), env));
       ResetDirtyAttribute();
     }
 }
@@ -108,13 +104,9 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 void
 MathMLLinearContainerElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout(ctxt))
+  if (DirtyLayout(ctxt))
     {
-      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-	   elem != content.end();
-	   elem++)
-	(*elem)->DoLayout(ctxt);
-
+      std::for_each(content.begin(), content.end(), std::bind2nd(DoLayoutAdaptor(), &ctxt));
       ResetDirtyLayout(ctxt);
     }
 }
@@ -128,32 +120,33 @@ MathMLLinearContainerElement::DoStretchyLayout()
 void
 MathMLLinearContainerElement::Render(const DrawingArea& area)
 {
-  if (!HasDirtyChildren()) return;
-
-  RenderBackground(area);
-  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end();
-       elem++)
-    (*elem)->Render(area);
-
-  ResetDirty();
+  if (Dirty())
+    {
+      RenderBackground(area);
+      std::for_each(content.begin(), content.end(), std::bind2nd(RenderAdaptor(), &area));
+      ResetDirty();
+    }
 }
 
 Ptr<MathMLElement>
 MathMLLinearContainerElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return 0;
-
-  for (vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end(); elem++)
+  if (IsInside(x, y)) 
     {
-      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-      if (inside) return inside;
+      for (vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+	   elem != content.end(); elem++)
+	{
+	  Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	  if (inside) return inside;
+	}
+      
+      return this;
     }
-
-  return this;
+  else
+    return 0;
 }
 
+#if 0
 void
 MathMLLinearContainerElement::SetDirtyLayout(bool children)
 {
@@ -199,6 +192,7 @@ MathMLLinearContainerElement::ResetSelected()
   std::for_each(content.begin(), content.end(), ResetSelectedAdaptor());
   selected = 0;
 }
+#endif
 
 void
 MathMLLinearContainerElement::ReleaseGCs()
@@ -295,3 +289,16 @@ MathMLLinearContainerElement::GetRightEdge() const
   return edge;
 }
 
+void
+MathMLLinearContainerElement::SetFlagDown(Flags f)
+{
+  MathMLElement::SetFlagDown(f);
+  std::for_each(content.begin(), content.end(), std::bind2nd(SetFlagDownAdaptor(), f));
+}
+
+void
+MathMLLinearContainerElement::ResetFlagDown(Flags f)
+{
+  MathMLElement::ResetFlagDown(f);
+  std::for_each(content.begin(), content.end(), std::bind2nd(ResetFlagDownAdaptor(), f));
+}

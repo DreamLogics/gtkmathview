@@ -22,6 +22,8 @@
 
 #include <config.h>
 
+#include <assert.h>
+
 #include "MathMLNode.hh"
 #include "MathMLElement.hh"
 #include "MathMLCharNode.hh"
@@ -34,26 +36,20 @@ MathMLNode::~MathMLNode()
 {
 }
 
-bool
-MathMLNode::IsNode() const
-{
-  return true;
-}
-
 Ptr<MathMLCharNode>
 MathMLNode::GetCharNode() const
 {
   return 0;
 }
 
-void
-MathMLNode::SetParent(const Ptr<MathMLElement>& p)
-{
-  parent = p;
-}
-
 Ptr<MathMLElement>
 MathMLNode::GetParent() const
 {
   return parent;
+}
+
+void
+MathMLNode::SetParent(const Ptr<MathMLElement>& p)
+{
+  parent = p;
 }
