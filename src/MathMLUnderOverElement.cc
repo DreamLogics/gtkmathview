@@ -331,6 +331,7 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
 
     if (overScript != NULL) {
       const BoundingBox& scriptBox = overScript->GetBoundingBox();
+      printf("box: %d base: %d script: %d\n", sp2ipx(box.width), sp2ipx(baseBox.width), sp2ipx(scriptBox.width));
       overScript->SetPosition(x + (box.width - scriptBox.width) / 2,
 			      y - baseBox.ascent - overSpacing - scriptBox.descent);
     }      

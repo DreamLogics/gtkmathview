@@ -326,6 +326,8 @@ MathMLCharNode::Render(const DrawingArea& area)
       area.DrawBoundingBox(gc, GetX(), GetY(), box);
   }
 
+  // area.DrawBoundingBox(gc, GetX(), GetY(), box);
+
   ResetDirty();
 }
 

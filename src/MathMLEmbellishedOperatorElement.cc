@@ -62,6 +62,10 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
 
   content.GetFirst()->DoBoxedLayout(id, BREAK_NO, scaledMax(0, availWidth - totalPadding));
   box = content.GetFirst()->GetBoundingBox();
+  // WARNING
+  // the following patch is needed in order to have integral sign working
+  // fine, but it could affect badly other slanted symbols like /
+  box.width = scaledMax(box.width, box.rBearing);
   box.width += totalPadding;
 
   ConfirmLayout(id);

@@ -95,6 +95,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	x-foundry="wri" x-family="math5" x-weight="bold" x-encoding="fontspecific"
 	/>
 
+  <!--
   <font type="ps" map="plain8"
 	family="sans-serif" weight="normal" style="normal"
 	ps-file="Swiss721BT-Roman.pfa"
@@ -114,7 +115,8 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	family="sans-serif" weight="bold" style="italic"
 	ps-file="Swiss721BT-BoldItalic.pfa"
 	/>
-  
+  -->
+
   <font type="ps" mode="math" map="wolfram-math1"
 	family="math1" style="normal" weight="normal"
 	ps-file="Math1.pfa"
@@ -663,8 +665,8 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	     -1   -1   -1   -1   -1 0x21   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	   "/>
-    <single code="0x22ee" index="0xbb"/>
-    <single code="0x22ef" index="0xba"/>
+    <single code="0x22ee" index="181"/>
+    <single code="0x22ef" index="180"/>
     <single code="0x22f0" index="0xb7"/>
     <single code="0x22f1" index="0xb8"/>
     <multi first="0xeb00" last="0xebff" index="
