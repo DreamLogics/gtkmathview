@@ -293,7 +293,6 @@ AC_CONFIG_FILES([
  auto/config.dirs
  doc/Makefile
  viewer/Makefile
- randomath/Makefile
  mathml2ps/Makefile
  gtkmathview.pc
 ])
