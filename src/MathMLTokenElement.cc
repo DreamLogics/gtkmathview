@@ -424,7 +424,8 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
 
       value = GetAttributeValue(ATTR_MATHBACKGROUND, env, false);
       if (value != NULL) env.SetBackgroundColor(ToRGB(value));
-      else if (HasLink()) env.SetBackgroundColor(Globals::configuration.GetLinkBackground());
+      else if (HasLink() && !Globals::configuration.HasTransparentLinkBackground())
+	env.SetBackgroundColor(Globals::configuration.GetLinkBackground());
       delete value;
 
       color      = env.GetColor();
