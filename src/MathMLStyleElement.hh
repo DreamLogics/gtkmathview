@@ -29,7 +29,7 @@
 
 #include "MathMLNormalizingContainerElement.hh"
 
-class MathMLStyleElement: public MathMLNormalizingContainerElement
+class MathMLStyleElement : public MathMLNormalizingContainerElement
 {
 public:
   MathMLStyleElement(void);
@@ -51,6 +51,7 @@ public:
   virtual void Render(const DrawingArea&);
 
   virtual bool IsSpaceLike(void) const;
+  virtual void SetDirtyAttribute(void);
 
   bool HasDifferentBackground(void) const { return differentBackground; }
   

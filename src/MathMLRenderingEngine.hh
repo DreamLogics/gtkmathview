@@ -73,8 +73,6 @@ public:
   // GTK drawing area)
   void SetAntiAliasing(bool);
   bool GetAntiAliasing(void) const;
-  void SetKerning(bool);
-  bool GetKerning(void) const;
   void SetTransparency(bool);
   bool GetTransparency(void) const;
 

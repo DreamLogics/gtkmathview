@@ -63,6 +63,8 @@ public:
   //void RegisterElement(const Ptr<MathMLElement>&);
   //void UnregisterElement(const Ptr<MathMLElement>&);
 
+  Ptr<MathMLElement> findFormattingNode(const GMetaDOM::Element&) const;
+  Ptr<MathMLElement> getFormattingNodeNoCreate(const GMetaDOM::Element&) const;
   Ptr<MathMLElement> getFormattingNode(const GMetaDOM::Element&) const;
 
 #if defined(HAVE_GMETADOM)
@@ -76,17 +78,27 @@ protected:
   class DOMSubtreeModifiedListener : public GMetaDOM::EventListener
   {
   public:
+    DOMSubtreeModifiedListener(const Ptr<MathMLDocument> d) : doc(d) { };
+    virtual ~DOMSubtreeModifiedListener() { };
     virtual void handleEvent(const GMetaDOM::Event&);
+
+  private:
+    Ptr<MathMLDocument> doc;
   };
 
   class DOMAttrModifiedListener : public GMetaDOM::EventListener
   {
   public:
+    DOMAttrModifiedListener(const Ptr<MathMLDocument> d) : doc(d) { };
+    virtual ~DOMAttrModifiedListener() { };
     virtual void handleEvent(const GMetaDOM::Event&);
+
+  private:
+    Ptr<MathMLDocument> doc;
   };
 
-  DOMSubtreeModifiedListener subtreeModifiedListener;
-  DOMAttrModifiedListener attrModifiedListener;
+  DOMSubtreeModifiedListener* subtreeModifiedListener;
+  DOMAttrModifiedListener* attrModifiedListener;
 
   GMetaDOM::Document DOMdoc;  // can be 0
   GMetaDOM::Element  DOMroot; // can be 0

@@ -36,7 +36,6 @@ static GtkWidget* window;
 static GtkWidget* main_area;
 static GtkWidget* scrolled_area;
 static GtkWidget* status_bar;
-static GtkMenuItem* kerning_item;
 static GtkMenuItem* anti_aliasing_item;
 static GtkMenuItem* transparency_item;
 static GtkMenuItem* font_size_item;
@@ -65,7 +64,6 @@ static void file_close(GtkWidget*, gpointer);
 static void options_selection_mode(GtkWidget*, guint);
 static void options_font_size(GtkWidget*, guint);
 static void options_verbosity(GtkWidget*, guint);
-static void options_kerning(GtkWidget*, gpointer);
 static void options_anti_aliasing(GtkWidget*, gpointer);
 static void options_transparency(GtkWidget*, gpointer);
 static void edit_delete_selection(GtkWidget*, gpointer);
@@ -101,7 +99,6 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/Verbosity/_Info",        NULL, options_verbosity,     2,  "/Options/Verbosity/Errors" },
   { "/Options/Verbosity/_Debug",       NULL, options_verbosity,     3,  "/Options/Verbosity/Errors" },
   { "/Options/sep1",                   NULL, NULL,                  0,  "<Separator>" },
-  { "/Options/_Kerning",               NULL, options_kerning,       0,  "<ToggleItem>" },
   { "/Options/_Anti Aliasing",         NULL, options_anti_aliasing, 0,  "<ToggleItem>" },
   { "/Options/_Transparency",          NULL, options_transparency,  0,  "<ToggleItem>" },
 
@@ -328,13 +325,6 @@ options_anti_aliasing(GtkWidget* widget, gpointer data)
 {
   gboolean aa = gtk_math_view_get_anti_aliasing(GTK_MATH_VIEW(main_area));
   gtk_math_view_set_anti_aliasing(GTK_MATH_VIEW(main_area), !aa);
-}
-
-static void
-options_kerning(GtkWidget* widget, gpointer data)
-{
-  gboolean k = gtk_math_view_get_kerning(GTK_MATH_VIEW(main_area));
-  gtk_math_view_set_kerning(GTK_MATH_VIEW(main_area), !k);
 }
 
 static void
@@ -658,9 +648,6 @@ create_widget_set()
   if (gtk_math_view_get_anti_aliasing(GTK_MATH_VIEW(main_area)))
     gtk_menu_item_activate(anti_aliasing_item);
 
-  if (gtk_math_view_get_kerning(GTK_MATH_VIEW(main_area)))
-    gtk_menu_item_activate(kerning_item);
-
   gtk_menu_item_activate(font_size_item);
 }
 
@@ -680,9 +667,6 @@ get_main_menu()
   gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
   gtk_window_add_accel_group(GTK_WINDOW(window), accel_group);
-
-  menu_item = gtk_item_factory_get_widget(item_factory, "/Options/Kerning");
-  kerning_item = GTK_MENU_ITEM(menu_item);
 
   menu_item = gtk_item_factory_get_widget(item_factory, "/Options/Anti Aliasing");
   anti_aliasing_item = GTK_MENU_ITEM(menu_item);

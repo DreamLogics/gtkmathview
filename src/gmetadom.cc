@@ -68,6 +68,14 @@ elementValue(const Element& elem)
   return res;
 }
 
+GdomeString
+nodeLocalName(const Node& node)
+{
+  assert(node);
+  if (!node.get_namespaceURI().null()) return node.get_localName();
+  else return node.get_nodeName();
+}
+
 }
 
 #endif // HAVE_GMETADOM

@@ -110,7 +110,7 @@ MathMLStyleElement::Setup(RenderingEnvironment& env)
       for (unsigned i = 0; i < nnm.get_length(); i++) {
 	GMetaDOM::Node attribute = nnm.item(i);
 
-	std::string s_name = attribute.get_nodeName();
+	std::string s_name = nodeLocalName(attribute);
 	AttributeId id = AttributeIdOfName(s_name.c_str());
 
 	if (id != ATTR_NOTVALID) {
@@ -322,4 +322,9 @@ MathMLStyleElement::IsSpaceLike() const
   return child->IsSpaceLike();
 }
 
+void
+MathMLStyleElement::SetDirtyAttribute() const
+{
+  SetDirtyAttributeDeep();
+}
 

@@ -817,28 +817,6 @@ gtk_math_view_get_anti_aliasing(GtkMathView* math_view)
 }
 
 extern "C" void
-gtk_math_view_set_kerning(GtkMathView* math_view, gboolean kerning)
-{
-  g_return_if_fail(math_view != NULL);
-  g_return_if_fail(math_view->interface != NULL);
-
-  math_view->interface->SetKerning(kerning != FALSE);
-  math_view->interface->Setup();
-  math_view->interface->Layout();
-  setup_adjustments(math_view);
-  paint_widget(math_view);
-}
-
-extern "C" gboolean
-gtk_math_view_get_kerning(GtkMathView* math_view)
-{
-  g_return_val_if_fail(math_view != NULL, FALSE);
-  g_return_val_if_fail(math_view->interface != NULL, FALSE);
-
-  return math_view->interface->GetKerning() ? TRUE : FALSE;
-}
-
-extern "C" void
 gtk_math_view_set_transparency(GtkMathView* math_view, gboolean transparency)
 {
   g_return_if_fail(math_view != NULL);

@@ -425,7 +425,7 @@ MathMLElement::IsA() const
 {
   if (!node) return TAG_NOTVALID;
 
-  std::string s_tag = node.get_nodeName();
+  std::string s_tag = nodeLocalName(node);
   TagId res = TagIdOfName(s_tag.c_str());
 
   return res;
@@ -513,6 +513,16 @@ MathMLElement::SetDirtyAttribute()
   if (!DirtyAttribute())
     {
       SetFlag(FDirtyAttribute);
+      SetFlagUp(FDirtyAttributeP);
+    }
+}
+
+void
+MathMLElement::SetDirtyAttributeDeep()
+{
+  if (!DirtyAttribute())
+    {
+      SetFlagDown(FDirtyAttribute);
       SetFlagUp(FDirtyAttributeP);
     }
 }

@@ -61,7 +61,7 @@ MathMLLabeledTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
       if (GetDOMElement())
 	{
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
-	  if (children.item(0) && children.item(0).get_nodeName() != "mtr")
+	  if (children.item(0) && nodeLocalName(children.item(0)) != "mtr")
 	    {
 	      Ptr<MathMLElement> elem = doc->getFormattingNode(children.item(0));
 	      assert(elem);

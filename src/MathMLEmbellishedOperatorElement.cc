@@ -80,7 +80,7 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 
       scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
-      Globals::logger(LOG_DEBUG, "layout of embellishment %p script %d padding %d", this, script, sp2ipx(totalPadding));
+      //Globals::logger(LOG_DEBUG, "layout of embellishment %p script %d padding %d", this, script, sp2ipx(totalPadding));
 
       child->DoLayout(ctxt);
       box = child->GetBoundingBox();

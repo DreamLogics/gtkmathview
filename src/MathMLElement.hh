@@ -131,6 +131,7 @@ public:
   void ResetDirtyStructure(void) { ResetFlag(FDirtyStructure); }
   bool DirtyStructure(void) const { return GetFlag(FDirtyStructure); }
   virtual void SetDirtyAttribute(void);
+  virtual void SetDirtyAttributeDeep(void);
   void ResetDirtyAttribute(void) { ResetFlag(FDirtyAttribute); }
   bool DirtyAttribute(void) const { return GetFlag(FDirtyAttribute); }
   bool DirtyAttributeP(void) const { return GetFlag(FDirtyAttributeP); }

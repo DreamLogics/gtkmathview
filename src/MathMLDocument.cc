@@ -34,6 +34,7 @@ MathMLDocument::MathMLDocument()
   : DOMdoc(0), DOMroot(0)
 #endif
 {
+  Init();
 }
 
 #if defined(HAVE_GMETADOM)
@@ -61,8 +62,11 @@ MathMLDocument::Init()
       GMetaDOM::EventTarget et(DOMroot);
       assert(et);
 
-      et.addEventListener("DOMNodeRemoved", subtreeModifiedListener, false);
-      et.addEventListener("DOMAttrModified", attrModifiedListener, false);
+      subtreeModifiedListener = new DOMSubtreeModifiedListener(this);
+      attrModifiedListener = new DOMAttrModifiedListener(this);
+
+      et.addEventListener("DOMNodeRemoved", *subtreeModifiedListener, false);
+      et.addEventListener("DOMAttrModified", *attrModifiedListener, false);
     }
 }
 #endif
@@ -75,8 +79,13 @@ MathMLDocument::~MathMLDocument()
       GMetaDOM::EventTarget et(DOMroot);
       assert(et);
 
-      et.removeEventListener("DOMSubtreeModified", subtreeModifiedListener, false);
-      et.removeEventListener("DOMAttrModified", attrModifiedListener, false);
+      et.removeEventListener("DOMSubtreeModified", *subtreeModifiedListener, false);
+      et.removeEventListener("DOMAttrModified", *attrModifiedListener, false);
+
+      delete subtreeModifiedListener;
+      delete attrModifiedListener;
+      subtreeModifiedListener = 0;
+      attrModifiedListener = 0;
     }
 #endif
 }
@@ -88,9 +97,9 @@ MathMLDocument::Normalize()
     {
 #if defined(HAVE_GMETADOM)
       GMetaDOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
-      if (nodeList.get_length() > 0)
+      if (GMetaDOM::Node mathRoot = nodeList.item(0))
 	{
-	  Ptr<MathMLElement> elem = getFormattingNode(nodeList.item(0));
+	  Ptr<MathMLElement> elem = getFormattingNode(mathRoot);
 	  assert(elem);
 	  SetChild(elem);
 	}	  
@@ -132,7 +141,12 @@ MathMLDocument::DOMSubtreeModifiedListener::handleEvent(const GMetaDOM::Event& e
 {
   const GMetaDOM::MutationEvent& me(ev);
   assert(me);
-  printf("subtree modified\n");
+  assert(doc);
+  if (Ptr<MathMLElement> elem = doc->findFormattingNode(me.get_relatedNode()))
+    {
+      printf("notifying event\n");
+      elem->SetDirtyStructure();
+    }
 }
 
 void
@@ -166,6 +180,26 @@ MathMLDocument::UnregisterElement(const Ptr<MathMLElement>& elem)
 #endif
 
 Ptr<MathMLElement>
+MathMLDocument::getFormattingNodeNoCreate(const GMetaDOM::Element& el) const
+{
+  assert(el);
+
+  DOMNodeMap::iterator p = nodeMap.find(el);
+  if (p != nodeMap.end()) return (*p).second;
+  else return 0;
+}
+
+Ptr<MathMLElement>
+MathMLDocument::findFormattingNode(const GMetaDOM::Element& el) const
+{
+  for (GMetaDOM::Element p = el; p; p = p.get_parentNode())
+    if (Ptr<MathMLElement> fNode = getFormattingNodeNoCreate(p))
+      return fNode;
+  
+  return 0;
+}
+
+Ptr<MathMLElement>
 MathMLDocument::getFormattingNode(const GMetaDOM::Element& el) const
 {
   assert(el);
@@ -173,11 +207,7 @@ MathMLDocument::getFormattingNode(const GMetaDOM::Element& el) const
   DOMNodeMap::iterator p = nodeMap.find(el);
   if (p != nodeMap.end()) return (*p).second;
 
-  std::string s_tag;
-  if (!el.get_namespaceURI().null())
-    s_tag = el.get_nodeName();
-  else
-    s_tag = el.get_localName();
+  std::string s_tag = nodeLocalName(el);
 
   TagId tag = TagIdOfName(s_tag.c_str());
 

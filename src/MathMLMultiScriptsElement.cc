@@ -242,7 +242,7 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  if (i == 0)
 	    {
 	      Ptr<MathMLElement> elem;
-	      if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
+	      if (nodeLocalName(node) != "none" && nodeLocalName(node) != "mprescripts")
 		{
 		  elem = doc->getFormattingNode(node);
 		  i++;
@@ -250,7 +250,7 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 	      if (elem) SetBase(elem);
 	      else if (!is_a<MathMLDummyElement>(base)) SetBase(MathMLDummyElement::create());
 	    }
-	  else if (node.get_nodeName() == "mprescripts")
+	  else if (nodeLocalName(node) == "mprescripts")
 	    {
 	      if (preScripts)
 		Globals::logger(LOG_WARNING, "multiple <mprescripts> elements in mmultiscript");
@@ -263,16 +263,16 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 	      Ptr<MathMLElement> sub;
 	      Ptr<MathMLElement> sup;
 
-	      if (node.get_nodeName() != "none")
+	      if (nodeLocalName(node) != "none")
 		sub = doc->getFormattingNode(node);
 	      i++;
 	      
 	      if (i < n)
 		{
 		  node = children.item(i);
-		  if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
+		  if (nodeLocalName(node) != "none" && nodeLocalName(node) != "mprescripts")
 		    sup = doc->getFormattingNode(node);
-		  if (node.get_nodeName() != "mprescripts") i++;
+		  if (nodeLocalName(node) != "mprescripts") i++;
 		}
 
 	      if (sub || sup)
@@ -287,16 +287,16 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 	      Ptr<MathMLElement> sub;
 	      Ptr<MathMLElement> sup;
 
-	      if (node.get_nodeName() != "none")
+	      if (nodeLocalName(node) != "none")
 		sub = doc->getFormattingNode(node);
 	      i++;
 	      
 	      if (i < n)
 		{
 		  node = children.item(i);
-		  if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
+		  if (nodeLocalName(node) != "none" && nodeLocalName(node) != "mprescripts")
 		    sup = doc->getFormattingNode(node);
-		  if (node.get_nodeName() != "mprescripts") i++;
+		  if (nodeLocalName(node) != "mprescripts") i++;
 		}
 
 	      if (sub || sup)

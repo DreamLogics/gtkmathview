@@ -316,6 +316,12 @@ MathMLRenderingEngine::SetDefaultFontSize(unsigned size)
 {
   assert(size > 0);
   defaultFontSize = size;
+  if (document)
+    {
+      document->SetDirtyAttributeDeep();
+      document->SetDirtyLayout();
+      document->SetDirty();
+    }
 }
 
 void
@@ -342,33 +348,6 @@ MathMLRenderingEngine::GetAntiAliasing() const
   if (t1_area != NULL) return t1_area->GetAntiAliasing();
 #endif
   Globals::logger(LOG_WARNING, "anti-aliasing is available with the T1 font manager only");
-  return false;
-}
-
-void
-MathMLRenderingEngine::SetKerning(bool b)
-{
-  assert(area != NULL);
-
-#ifdef HAVE_LIBT1
-  T1_Gtk_DrawingArea* t1_area = TO_T1_GTK_DRAWING_AREA(area);
-  if (t1_area != NULL)
-    t1_area->SetKerning(b);
-  else
-#endif
-    Globals::logger(LOG_WARNING, "kerning is available with the T1 font manager only");
-}
-
-bool
-MathMLRenderingEngine::GetKerning() const
-{
-  assert(area != NULL);
-
-#ifdef HAVE_LIBT1
-  T1_Gtk_DrawingArea* t1_area = TO_T1_GTK_DRAWING_AREA(area);
-  if (t1_area != NULL) return t1_area->GetKerning();
-#endif
-  Globals::logger(LOG_WARNING, "kerning is available with the T1 font manager only");
   return false;
 }
 

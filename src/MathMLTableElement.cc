@@ -111,8 +111,9 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  content.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
-	      GMetaDOM::Node node = children.item(i);
-	      if (node.get_nodeName() == "mtr" || node.get_nodeName() == "mlabeledtr")
+	      GMetaDOM::Element node = children.item(i);
+	      assert(node);
+	      if (nodeLocalName(node) == "mtr" || nodeLocalName(node) == "mlabeledtr")
 		{
 		  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 		  assert(elem);

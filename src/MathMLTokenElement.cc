@@ -264,19 +264,19 @@ MathMLTokenElement::Normalize(const Ptr<class MathMLDocument>&)
 	      {	    
 		if (p.get_namespaceURI() == MATHML_NS_URI)
 		  {
-		    if (p.get_nodeName() == "mglyph")
+		    if (nodeLocalName(p) == "mglyph")
 		      {
 			Ptr<MathMLTextNode> text = SubstituteMGlyphElement(p);
 			if (text) AppendChild(text);
 		      }
-		    else if (p.get_nodeName() == "malignmark")
+		    else if (nodeLocalName(p) == "malignmark")
 		      {
 			Ptr<MathMLTextNode> text = SubstituteAlignMarkElement(p);
 			if (text) AppendChild(text);
 		      }
 		    else
 		      {
-			std::string s_name = p.get_nodeName();
+			std::string s_name = nodeLocalName(p);
 			Globals::logger(LOG_WARNING, "element `%s' inside token (ignored)\n", s_name.c_str());
 		      }
 		  } else
@@ -400,8 +400,6 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
       if (value != NULL) env.SetBackgroundColor(ToRGB(value));
       else if (HasLink()) env.SetBackgroundColor(Globals::configuration.GetLinkBackground());
       delete value;
-
-      Globals::logger(LOG_DEBUG, "doing token setup");
 
       color      = env.GetColor();
       background = env.GetBackgroundColor();
