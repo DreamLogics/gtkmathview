@@ -77,8 +77,8 @@ T1_FontManager::IsAvailable(const FontAttributes& fa,
 int
 T1_FontManager::SearchT1FontId(const char* fileName) const
 {
-  //int n = T1_GetNoFonts(); // version 5.0 of t1lib
-  int n = T1_Get_no_fonts();
+  //int n = T1_Get_no_fonts(); // version 1.x of t1lib
+  int n = T1_GetNoFonts(); // version 5.0 of t1lib
   int i;
   for (i = 0; i < n && strcmp(fileName, T1_GetFontFileName(i)); i++) ;
 
