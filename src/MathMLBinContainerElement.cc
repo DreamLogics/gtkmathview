@@ -79,7 +79,7 @@ void
 MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-  if (true || HasDirtyAttribute() || HasChildWithDirtyAttribute())
+  if (HasChildWithDirtyAttribute())
     {
       background = env->GetBackgroundColor();
       if (child) child->Setup(env);

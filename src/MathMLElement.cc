@@ -66,6 +66,7 @@ MathMLElement::MathMLElement(const GMetaDOM::Element& n)
 
   Init();
 }
+#endif
 
 void
 MathMLElement::Init()
@@ -76,7 +77,6 @@ MathMLElement::Init()
   fGC[0] = fGC[1] = NULL;
   bGC[0] = bGC[1] = NULL;
 }
-#endif
 
 MathMLElement::~MathMLElement()
 {

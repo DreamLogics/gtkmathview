@@ -94,13 +94,15 @@ void
 MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-
-  background = env->GetBackgroundColor();
-
-  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end();
-       elem++)
-    (*elem)->Setup(env);
+  if (HasChildWithDirtyAttribute())
+    {
+      background = env->GetBackgroundColor();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+	   elem != content.end();
+	   elem++)
+	(*elem)->Setup(env);
+      ResetDirtyAttribute();
+    }
 }
 
 void

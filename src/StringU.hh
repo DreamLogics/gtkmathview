@@ -33,7 +33,6 @@ public:
   StringU(void);
   StringU(unsigned);
   StringU(const char*);
-  StringU(const char*, unsigned);
   StringU(const Char8*, unsigned);
   StringU(const Char16*, unsigned);
   StringU(const Char32*, unsigned);
@@ -50,7 +49,6 @@ public:
   virtual void Append(const String&);
 
   virtual void Set(const char*);
-  virtual void Set(const char*, unsigned);
   virtual void Set(const Char8*, unsigned);
   virtual void Set(const Char16*, unsigned);
   virtual void Set(const Char32*, unsigned);

@@ -49,7 +49,6 @@ public:
 
   virtual void Set(const String&) = 0;
   virtual void Set(const char*) = 0;
-  virtual void Set(const char*, unsigned) = 0;
   virtual void Set(const Char8*, unsigned) = 0;
   virtual void Set(const Char16*, unsigned) = 0;
   virtual void Set(const Char32*, unsigned) = 0;
