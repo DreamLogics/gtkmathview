@@ -30,6 +30,10 @@
 #include "Iterator.hh"
 #include "StringUnicode.hh"
 
+#ifdef HAVE_LIBT1
+#include <t1lib.h>
+#endif
+
 #include "config.dirs"
 
 namespace Globals {

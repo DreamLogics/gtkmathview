@@ -423,7 +423,8 @@ main(int argc, char *argv[])
 
     area.SetOutputFile(outFile);
 
-    engine.SetVerbosity(logLevel);
+    Globals::logger.SetLogLevel(0);
+
     engine.SetDefaultFontSize(fontSize);
     Globals::DrawMissingCharacter(showMissing);
 #if 0

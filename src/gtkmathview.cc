@@ -1051,7 +1051,7 @@ gtk_math_view_export_to_postscript(GtkMathView* math_view,
   area.SetSize(px2sp(w), px2sp(h));
   if (disable_colors) area.DisableColors();
 
-  MathMLElement* root = math_view->interface->GetRoot();
+  Ptr<MathMLElement> root = math_view->interface->GetRoot();
   if (root == NULL) return;
 
   // the following invocations are needed just to mark the chars actually used :(
