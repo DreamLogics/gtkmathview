@@ -25,6 +25,9 @@
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif // HAVE_GETOPT_H
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif // HAVE_UNISTD_H
 #include <stdlib.h>
 
 #include "defs.h"

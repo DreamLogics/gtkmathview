@@ -68,7 +68,8 @@ MathMLCombinedCharNode::DoLayout()
     cChar.GetBoundingBox(cBox);
 
     if (isCombiningOverlay(cch)) {
-      shiftX = shiftY = 0;
+      shiftX = box.lBearing - cBox.lBearing + (box.rBearing - box.lBearing - cBox.rBearing + cBox.lBearing) / 2;
+      shiftY = 0;
     } else if (isCombiningBelow(cch)) {
       shiftX = 0;
       shiftY = -box.descent - cBox.ascent;
