@@ -34,6 +34,7 @@ class MathMLOperatorElement* findStretchyOperator(class MathMLElement*, StretchI
 class MathMLElement*         findCommonAncestor(class MathMLElement*, class MathMLElement*);
 class MathMLActionElement*   findActionElement(class MathMLElement*);
 mDOMNodeRef                  findDOMNode(class MathMLElement*);
+class MathMLElement*         getMathMLElement(mDOMNodeRef);
 class MathMLElement*         findMathMLElement(mDOMNodeRef);
 class MathMLElement*         findRightmostChild(class MathMLElement*);
 class MathMLElement*         findLeftmostChild(class MathMLElement*);

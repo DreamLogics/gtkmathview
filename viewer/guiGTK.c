@@ -439,7 +439,7 @@ element_changed(GtkMathView* math_view, mDOMNodeRef node)
 {
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
-  /* printf("node changed: %p %s\n", node, (node != NULL) ? mdom_node_get_name(node) : "-"); */
+  printf("node changed: %p %s\n", node, (node != NULL) ? mdom_node_get_name(node) : "-");
 
   while (node != NULL && !mdom_node_has_attribute_ns(node, DOM_CONST_STRING("href"), XLINK_NS_URI))
     node = mdom_node_get_parent(node);
@@ -455,7 +455,7 @@ action_changed(GtkMathView* math_view, mDOMNodeRef node)
 {
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
-  /* printf("action changed: %p\n", node); */
+  printf("action changed: %p\n", node);
 }
 
 static void
@@ -469,10 +469,17 @@ selection_changed(GtkMathView* math_view, mDOMNodeRef node)
 static void
 clicked(GtkMathView* math_view, gpointer user_data)
 {
+  mDOMNodeRef p1, p2, p3;
+
   mDOMNodeRef p = gtk_math_view_get_element(math_view);
   while (p != NULL && !mdom_node_has_attribute_ns(p, DOM_CONST_STRING("href"), XLINK_NS_URI))
     p = mdom_node_get_parent(p);
 
+  p1 = gtk_math_view_get_action(math_view);
+  p2 = mdom_node_get_first_child(p1);
+  p3 = mdom_node_get_next_sibling(p2);
+  printf("search starts %p %p %p\n", p1, p2, p3);
+  
   if (p != NULL) {
     mDOMStringRef href = mdom_node_get_attribute_ns(p, DOM_CONST_STRING("href"), XLINK_NS_URI);
     g_assert(href != NULL);

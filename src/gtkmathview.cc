@@ -973,7 +973,7 @@ gtk_math_view_set_selection(GtkMathView* math_view, mDOMNodeRef node)
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(math_view->interface != NULL);
 
-  MathMLElement* elem = (node != NULL) ? findMathMLElement(node) : NULL;
+  MathMLElement* elem = (node != NULL) ? getMathMLElement(node) : NULL;
   math_view->interface->SetSelected(elem);
 }
 

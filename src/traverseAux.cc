@@ -215,7 +215,7 @@ findDOMNode(MathMLElement* elem)
 }
 
 MathMLElement*
-findMathMLElement(mDOMNodeRef node)
+getMathMLElement(mDOMNodeRef node)
 {
   assert(node != NULL);
   // WARNING: the following is a very dangerous operation. It relies
@@ -224,6 +224,14 @@ findMathMLElement(mDOMNodeRef node)
   MathMLElement* elem = (MathMLElement*) mdom_node_get_user_data(node);
   assert(elem != NULL);
   assert(elem->GetDOMNode() == node);
+  return elem;
+}
+
+MathMLElement*
+findMathMLElement(mDOMNodeRef node)
+{
+  MathMLElement* elem = getMathMLElement(node);
+  assert(elem != NULL);
 
   while (elem->IsA() == TAG_MROW && TO_CONTAINER(elem)->content.GetSize() == 1) {
     elem = TO_CONTAINER(elem)->content.GetFirst();
