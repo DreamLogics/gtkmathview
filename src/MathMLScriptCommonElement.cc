@@ -26,43 +26,13 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLScriptCommonElement.hh"
 
-MathMLScriptCommonElement::MathMLScriptCommonElement(mDOMNodeRef node, TagId id) :
-  MathMLContainerElement(node, id)
+MathMLScriptCommonElement::MathMLScriptCommonElement()
 {
-  assert(id == TAG_MSUP || id == TAG_MSUB || id == TAG_MSUBSUP || id == TAG_MMULTISCRIPTS);
   base = NULL;
 }
 
-MathMLScriptCommonElement::~MathMLScriptCommonElement()
-{
-}
-
-const AttributeSignature*
-MathMLScriptCommonElement::GetAttributeSignature(AttributeId id) const
-{
-  static AttributeSignature subSig[] = {
-    { ATTR_SUBSCRIPTSHIFT, numberUnitParser, NULL, NULL },
-    { ATTR_NOTVALID,       NULL,             NULL, NULL }
-  };
-
-  static AttributeSignature supSig[] = {
-    { ATTR_SUPERSCRIPTSHIFT, numberUnitParser, NULL, NULL },
-    { ATTR_NOTVALID,         NULL,             NULL, NULL }
-  };
-
-  const AttributeSignature* signature = NULL;
-  if (IsA() == TAG_MSUB || IsA() == TAG_MSUBSUP || IsA() == TAG_MMULTISCRIPTS)
-    signature = GetAttributeSignatureAux(id, subSig);
-  if ((IsA() == TAG_MSUP || IsA() == TAG_MSUBSUP || IsA() == TAG_MMULTISCRIPTS) && signature == NULL)
-    signature = GetAttributeSignatureAux(id, supSig);
-
-  if (signature == NULL) signature = MathMLContainerElement::GetAttributeSignature(id);
-
-  return signature;
-}
-
 void
-MathMLScriptCommonElement::Setup(RenderingEnvironment* env)
+MathMLScriptCommonElement::ScriptSetup(RenderingEnvironment* env)
 {
   ruleThickness = env->GetRuleThickness();
 #ifdef TEXISH_MATHML
@@ -75,13 +45,12 @@ MathMLScriptCommonElement::Setup(RenderingEnvironment* env)
   scriptSpacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_VERYVERYTHIN));
 #endif // TEXISH_MATHML
   scriptAxis    = env->GetAxis();
-  background    = env->GetBackgroundColor();
 }
 
 void
-MathMLScriptCommonElement::DoLayoutAux(const BoundingBox& baseBox,
-				       const BoundingBox& subScriptBox,
-				       const BoundingBox& superScriptBox)
+MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
+					  const BoundingBox& subScriptBox,
+					  const BoundingBox& superScriptBox)
 {
   assert(base != NULL);
 

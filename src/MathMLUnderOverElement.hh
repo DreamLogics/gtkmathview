@@ -24,8 +24,9 @@
 #define MathMLUnderOverElement_hh
 
 #include "MathMLContainerElement.hh"
+#include "MathMLScriptCommonElement.hh"
 
-class MathMLUnderOverElement : public MathMLContainerElement {
+class MathMLUnderOverElement : public MathMLContainerElement, public MathMLScriptCommonElement {
 public:
   MathMLUnderOverElement(mDOMNodeRef, TagId);
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -43,20 +44,9 @@ protected:
   bool   accentUnder;
   bool   accent;
 
-  union {
-    scaled underSpacing; // if scriptize == false
-    scaled underShift;   // if scriptize == true
-  };
+  scaled underSpacing; // if scriptize == false
+  scaled overSpacing; // if scriptize == false
 
-  union {
-    scaled overSpacing; // if scriptize == false
-    scaled overShift;   // if scriptize == true
-  };
-
-  scaled ruleThickness;
-  scaled scriptSpacing; // script spacing from base (if scriptize == true)
-
-  MathMLElement* base;
   MathMLElement* underScript;
   MathMLElement* overScript;
 };

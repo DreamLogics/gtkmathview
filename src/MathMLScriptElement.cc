@@ -29,13 +29,37 @@
 #include "RenderingEnvironment.hh"
 
 MathMLScriptElement::MathMLScriptElement(mDOMNodeRef node, TagId id) :
-  MathMLScriptCommonElement(node, id)
+  MathMLContainerElement(node, id)
 {
   subScript = superScript = NULL;
 }
 
 MathMLScriptElement::~MathMLScriptElement()
 {
+}
+
+const AttributeSignature*
+MathMLScriptElement::GetAttributeSignature(AttributeId id) const
+{
+  static AttributeSignature subSig[] = {
+    { ATTR_SUBSCRIPTSHIFT, numberUnitParser, NULL, NULL },
+    { ATTR_NOTVALID,       NULL,             NULL, NULL }
+  };
+
+  static AttributeSignature supSig[] = {
+    { ATTR_SUPERSCRIPTSHIFT, numberUnitParser, NULL, NULL },
+    { ATTR_NOTVALID,         NULL,             NULL, NULL }
+  };
+
+  const AttributeSignature* signature = NULL;
+  if (IsA() == TAG_MSUB || IsA() == TAG_MSUBSUP || IsA() == TAG_MMULTISCRIPTS)
+    signature = GetAttributeSignatureAux(id, subSig);
+  if ((IsA() == TAG_MSUP || IsA() == TAG_MSUBSUP || IsA() == TAG_MMULTISCRIPTS) && signature == NULL)
+    signature = GetAttributeSignatureAux(id, supSig);
+
+  if (signature == NULL) signature = MathMLContainerElement::GetAttributeSignature(id);
+
+  return signature;
 }
 
 void
@@ -74,8 +98,9 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  MathMLScriptCommonElement::Setup(env);
+  ScriptSetup(env);
 
+  assert(base != NULL);
   base->Setup(env);
 
   env->Push();
@@ -140,7 +165,7 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
   superScriptBox.Null();
   if (superScript != NULL) superScriptBox = superScript->GetBoundingBox();
 
-  DoLayoutAux(baseBox, subScriptBox, superScriptBox);
+  DoScriptLayout(baseBox, subScriptBox, superScriptBox);
 
   box = baseBox;
   box.rBearing = scaledMax(box.width + scriptSpacing + subScriptBox.rBearing,

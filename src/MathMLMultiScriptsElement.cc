@@ -30,7 +30,7 @@
 #include "MathMLMultiScriptsElement.hh"
 
 MathMLMultiScriptsElement::MathMLMultiScriptsElement(mDOMNodeRef node) :
-  MathMLScriptCommonElement(node, TAG_MMULTISCRIPTS)
+  MathMLContainerElement(node, TAG_MMULTISCRIPTS)
 {
 }
 
@@ -92,7 +92,7 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
     elem.Next();
   }
 
-  MathMLScriptCommonElement::Setup(env);
+  ScriptSetup(env);
 
   env->Drop();
 }
@@ -147,7 +147,7 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
     elem.Next();
   }
 
-  DoLayoutAux(base->GetBoundingBox(), subScriptBox, superScriptBox);
+  DoScriptLayout(base->GetBoundingBox(), subScriptBox, superScriptBox);
 
   box = base->GetBoundingBox();
   box.width += totalWidth + ((nPre > 0) ? scriptSpacing : 0) + ((nPost > 0) ? scriptSpacing : 0);

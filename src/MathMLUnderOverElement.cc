@@ -36,8 +36,7 @@ MathMLUnderOverElement::MathMLUnderOverElement(mDOMNodeRef node, TagId id) :
   MathMLContainerElement(node, id)
 {
   assert(id == TAG_MUNDER || id == TAG_MOVER || id == TAG_MUNDEROVER);
-
-  base = underScript = overScript = NULL;
+  underScript = overScript = NULL;
 }
 
 MathMLUnderOverElement::~MathMLUnderOverElement()
@@ -104,13 +103,10 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   assert(env != NULL);
   assert(base != NULL);
 
-  ruleThickness       = env->GetRuleThickness();
+  ScriptSetup(env);
+
   scaled smallSpacing = ruleThickness;
   scaled bigSpacing   = 3 * ruleThickness;
-  // the following should be kept consistent with the similar parameter
-  // in MathMLScriptCommonElement.cc
-  scriptSpacing       = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_THIN));
-  background          = env->GetBackgroundColor();
 
   base->Setup(env);
 
@@ -187,37 +183,40 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
   assert(base != NULL);
 
   if (scriptize) {
-    base->DoBoxedLayout(id, BREAK_NO);
-    box = base->GetBoundingBox();
+    base->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
+    if (overScript != NULL) overScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
+    if (underScript != NULL) underScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
 
+    const BoundingBox& baseBox = base->GetBoundingBox();
     BoundingBox underBox;
     BoundingBox overBox;
+    
+    if (underScript != NULL) underBox = underScript->GetBoundingBox();
+    else underBox.Null();
 
-    underBox.Null();
+    if (overScript != NULL) overBox = overScript->GetBoundingBox();
+    else overBox.Null();
+
+    DoScriptLayout(baseBox, underBox, overBox);
+
+    box = baseBox;
+    box.rBearing = scaledMax(box.width + scriptSpacing + underBox.rBearing,
+			     box.rBearing + scriptSpacing + overBox.rBearing);
+    box.width += scaledMax(scriptSpacing + underBox.width,
+			   scriptSpacing + scaledMax(0, baseBox.rBearing - baseBox.width) + overBox.width);
+
     if (underScript != NULL) {
-      underScript->DoBoxedLayout(id, BREAK_NO);
-      underBox = underScript->GetBoundingBox();
+      box.ascent   = scaledMax(box.ascent, underBox.ascent - subShift);
+      box.tAscent  = scaledMax(box.tAscent, underBox.tAscent - subShift);
+      box.descent  = scaledMax(box.descent, underBox.descent + subShift);
+      box.tDescent = scaledMax(box.tDescent, underBox.tDescent + subShift);
     }
 
-    overBox.Null();
     if (overScript != NULL) {
-      overScript->DoBoxedLayout(id, BREAK_NO);
-      overBox = overScript->GetBoundingBox();
-    }
-
-    scaled baseHeight = box.GetHeight();
-
-    box.width += scriptSpacing + scaledMax(underBox.width, overBox.width);
-
-    underShift = box.descent - underBox.descent;
-    overShift  = box.ascent - overBox.ascent;    
-  
-    if (underBox.GetHeight() + overBox.GetHeight() > baseHeight) {
-      scaled more = (underBox.GetHeight() + overBox.GetHeight() - baseHeight) / 2;
-      box.ascent += more;
-      box.descent += more;
-      underShift += more;
-      overShift += more;
+      box.ascent   = scaledMax(box.ascent, overBox.ascent + superShift);
+      box.tAscent  = scaledMax(box.tAscent, overBox.tAscent + superShift);
+      box.descent  = scaledMax(box.descent, overBox.descent - superShift);
+      box.tDescent = scaledMax(box.tDescent, overBox.tDescent - superShift);
     }
   } else {    
     if (id != LAYOUT_AUTO) {
@@ -318,11 +317,10 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
   if (scriptize) {
     base->SetPosition(x, y);
 
-    if (underScript != NULL)
-      underScript->SetPosition(x + baseBox.width + scriptSpacing, y + underShift);
-
+    if (underScript != NULL) underScript->SetPosition(x + baseBox.width + scriptSpacing, y + subShift);
+    
     if (overScript != NULL)
-      overScript->SetPosition(x + baseBox.width + scriptSpacing, y - overShift);
+      overScript->SetPosition(x + scaledMax(baseBox.width, baseBox.rBearing) + scriptSpacing, y - superShift);
   } else {
     base->SetPosition(x + (box.width - baseBox.width) / 2, y);
 
@@ -334,8 +332,8 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
 
     if (overScript != NULL) {
       const BoundingBox& scriptBox = overScript->GetBoundingBox();
-      printf("box: %d base: %d script: %d\n", sp2ipx(box.width), sp2ipx(baseBox.width), sp2ipx(scriptBox.width));
-      overScript->SetPosition(x + (box.width - scriptBox.width) / 2,
+      // WARNING: there is a heuristic here which works, but the bounding box is wrong!
+      overScript->SetPosition(x + (box.width - scriptBox.width) / 2 + scaledMax(0, baseBox.rBearing - baseBox.width),
 			      y - baseBox.ascent - overSpacing - scriptBox.descent);
     }      
   }

@@ -23,19 +23,17 @@
 #ifndef MathMLScriptCommonElement_hh
 #define MathMLScriptCommonElement_hh
 
-#include "MathMLContainerElement.hh"
+#include "MathMLElement.hh"
 
-class MathMLScriptCommonElement: public MathMLContainerElement {
+class MathMLScriptCommonElement {
 public:
-  MathMLScriptCommonElement(mDOMNodeRef, TagId);
-  virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
-  virtual ~MathMLScriptCommonElement();
+  MathMLScriptCommonElement(void);
+  void ScriptSetup(class RenderingEnvironment*);
 
   virtual bool IsExpanding(void) const;
 
 protected:
-  void DoLayoutAux(const BoundingBox&, const BoundingBox&, const BoundingBox&);
+  void DoScriptLayout(const BoundingBox&, const BoundingBox&, const BoundingBox&);
 
   MathMLElement* base;
 

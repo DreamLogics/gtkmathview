@@ -23,11 +23,10 @@
 #ifndef MathMLMultiScriptsElement_hh
 #define MathMLMultiScriptsElement_hh
 
-#include <config.h>
-
+#include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLMultiScriptsElement : public MathMLScriptCommonElement {
+class MathMLMultiScriptsElement : public MathMLContainerElement, public MathMLScriptCommonElement {
 public:
   MathMLMultiScriptsElement(mDOMNodeRef);
   virtual void Normalize(void);
