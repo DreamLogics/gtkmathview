@@ -65,14 +65,17 @@ MathMLInvisibleTimesNode::DoLayout()
   MathMLElement* prev = findLeftSibling(GetParent());
   MathMLElement* next = findRightSibling(GetParent());
   if (prev == NULL || next == NULL) return;
-  if (prev->IsA() != TAG_MI || next->IsA() != TAG_MI) return;
 
-  MathMLTokenElement* prevToken = TO_TOKEN(prev);
-  MathMLTokenElement* nextToken = TO_TOKEN(next);
-  assert(prev != NULL && next != NULL);
-
-  if (prevToken->GetRawContentLength() <= 1 || nextToken->GetRawContentLength() <= 1) return;
-
-  // FIXME: the following constants should be defined somewhere
-  box.Set((sppm * 5) / 18, 0, 0);
+  if (prev->IsA() == TAG_MI && next->IsA() == TAG_MI) {
+    MathMLTokenElement* prevToken = TO_TOKEN(prev);
+    MathMLTokenElement* nextToken = TO_TOKEN(next);
+    assert(prevToken != NULL && nextToken != NULL);
+    
+    if (prevToken->GetRawContentLength() <= 1 && nextToken->GetRawContentLength() <= 1) return;
+    
+    // FIXME: the following constants should be defined somewhere
+    box.Set((sppm * 5) / 18, 0, 0);
+  } else if (prev->IsA() == TAG_MFRAC || next->IsA() == TAG_MFRAC) {
+    box.Set((sppm * 2) / 18, 0, 0);
+  }
 }
