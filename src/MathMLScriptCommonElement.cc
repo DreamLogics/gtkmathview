@@ -61,7 +61,7 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
   const MathMLElement* rel = findRightmostChild(base);
   assert(rel != NULL);
 
-  if (rel->IsToken()) {
+  if (rel->IsToken() && rel->IsA() != TAG_MO) {
     u = v = 0;
   } else {
     u = baseBox.ascent - scriptAxis;

@@ -404,10 +404,11 @@ main(int argc, char *argv[])
       exit(1);
     }
 
-    PS_T1_FontManager fm;
     PS_DrawingArea area(values, x0, y0, outFile);
     area.SetSize(w, h);
     if (!colors) area.DisableColors();
+
+    PS_T1_FontManager fm;
 
     engine.Init(&area, &fm);
     engine.SetVerbosity(logLevel);
