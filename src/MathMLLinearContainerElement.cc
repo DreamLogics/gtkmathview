@@ -57,7 +57,7 @@ MathMLLinearContainerElement::Normalize()
     {
       // editing is supported with GMetaDOM only
 #if defined(HAVE_GMETADOM)
-      GMetaDOM::NodeList children = GetDOMNode().getElementsByTagNameNS(MATHML_NS_URI, "*");
+      GMetaDOM::NodeList children = GetDOMElement().getElementsByTagNameNS(MATHML_NS_URI, "*");
       for (unsigned i = 0; i < children.get_length(); i++)
 	{
 	  GMetaDOM::Node node = children.item(i);

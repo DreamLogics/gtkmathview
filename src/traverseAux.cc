@@ -158,8 +158,14 @@ findActionElement(MathMLElement* elem)
 GMetaDOM::Element
 findDOMNode(MathMLElement* elem)
 {
-  while (elem != NULL && elem->GetDOMNode() == 0) elem = elem->GetParent();
-  return (elem != NULL) ? elem->GetDOMNode() : 0;
+  while (elem != NULL && elem->GetDOMElement() == 0)
+    {
+      MathMLElement* parent = elem->GetParent();
+      elem->Release();
+      elem = parent;
+    }
+
+  return (elem != NULL) ? elem->GetDOMElement() : 0;
 }
 
 MathMLElement*
@@ -170,7 +176,8 @@ getRenderingInterface(const GMetaDOM::Element& node)
   // in the DOM tree elements!!!
   MathMLElement* elem = (MathMLElement*) node.get_userData();
   if (elem == 0) return 0;
-  assert(elem->GetDOMNode() == node);
+  elem->AddRef();
+  assert(elem->GetDOMElement() == node);
   return elem;
 }
 

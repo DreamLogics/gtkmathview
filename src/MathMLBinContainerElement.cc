@@ -58,6 +58,23 @@ MathMLBinContainerElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
+#if defined(HAVE_GMETADOM)
+      GMetaDOM::NodeList children = GetDOMElement().getElementsByTagNameNS(MATHML_NS_URI, "*");
+      if (children.get_length() > 0)
+	{
+	  GMetaDOM::Node node = children.item(0);
+	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+
+	  MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+	  // it might be that we get a NULL. In that case it would probably make
+	  // sense to create a dummy element, because we filtered MathML
+	  // elements only
+	  assert(elem != 0);
+	  SetChild(elem);
+	  elem->Release();
+	}
+#endif // HAVE_GMETADOM
+
       if (child != 0) child->Normalize();
       ResetDirtyStructure();
     }
@@ -304,7 +321,13 @@ MathMLBinContainerElement::GetChild() const
 void
 MathMLBinContainerElement::SetChild(MathMLElement* elem)
 {
-  if (elem != NULL) elem->AddRef();
+  if (elem != NULL)
+    {
+      elem->AddRef();
+      elem->SetParent(this);
+    }
+
   if (child != NULL) elem->Release();
+
   child = elem;
 }

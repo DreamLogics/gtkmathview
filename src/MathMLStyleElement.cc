@@ -92,7 +92,7 @@ MathMLStyleElement::Setup(RenderingEnvironment* env)
   MathMLAttributeList attributes;
 
 #if defined(HAVE_MINIDOM)
-  for (mDOMAttrRef attribute = mdom_node_get_first_attribute(GetDOMNode());
+  for (mDOMAttrRef attribute = mdom_node_get_first_attribute(GetDOMElement());
        attribute != NULL;
        attribute = mdom_attr_get_next_sibling(attribute)) {
     AttributeId id = AttributeIdOfName(C_CONST_STRING(mdom_attr_get_name(attribute)));
@@ -104,7 +104,7 @@ MathMLStyleElement::Setup(RenderingEnvironment* env)
     }
   }
 #elif defined(HAVE_GMETADOM)
-  GMetaDOM::NamedNodeMap nnm = GetDOMNode().get_attributes();
+  GMetaDOM::NamedNodeMap nnm = GetDOMElement().get_attributes();
 
   for (unsigned i = 0; i < nnm.get_length(); i++) {
     GMetaDOM::Node attribute = nnm.item(i);

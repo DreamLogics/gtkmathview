@@ -34,7 +34,7 @@ MathMLDocument::MathMLDocument()
 
 #if defined(HAVE_GMETADOM)
 MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
-  : MathMLBinContainerElement(0)
+  : MathMLBinContainerElement()
   , DOMdoc(doc)
 {
   assert(doc != 0);
@@ -44,6 +44,27 @@ MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
 MathMLDocument::~MathMLDocument()
 {
   DOMdoc = 0;
+}
+
+void
+MathMLDocument::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+#if defined(HAVE_GMETADOM)
+      GMetaDOM::Element node = GetDOMDocument().get_documentElement();
+      assert(node != 0);
+      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+
+      MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+      assert(elem != 0);
+      SetChild(elem);
+      elem->Release();
+#endif // HAVE_GMETADOM
+
+      if (child != 0) child->Normalize();
+      ResetDirtyStructure();
+    }
 }
 
 bool

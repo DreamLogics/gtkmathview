@@ -57,7 +57,12 @@ MathMLElement::MathMLElement()
 MathMLElement::MathMLElement(const GMetaDOM::Element& n)
   : node(n)
 {
-  ::setRenderingInterface(n, this);
+  if (node != 0)
+    {
+      MathMLElement* elem = ::getRenderingInterface(node);
+      if (elem == NULL) ::setRenderingInterface(node, this);
+    }
+
   Init();
 }
 
@@ -81,11 +86,13 @@ MathMLElement::Init()
 
 MathMLElement::~MathMLElement()
 {
-  //Globals::logger(LOG_DEBUG, "destroying `%s' (DOM %p)", NameOfTagId(IsA()), node);
-#if defined(HAVE_MINIDOM)
-  if (node != NULL) mdom_node_set_user_data(node, NULL);
-#elif defined(HAVE_GMETADOM)
-  if (node != 0) node.set_userData(0);
+#if defined(HAVE_GMETADOM)
+  if (node != 0)
+    {
+      MathMLElement* elem = ::getRenderingInterface(node);
+      if (elem == this) ::setRenderingInterface(node, NULL);
+      elem->Release();
+    }
 #endif
 
   delete layout;
@@ -634,14 +641,14 @@ bool
 MathMLElement::HasLink() const
 {
 #if defined(HAVE_MINIDOM)
-  mDOMNodeRef p = GetDOMNode();
+  mDOMNodeRef p = GetDOMElement();
 
   while (p != NULL && !mdom_node_has_attribute(p, DOM_CONST_STRING("href")))
     p = mdom_node_get_parent(p);
 
   return p != NULL;
 #elif defined(HAVE_GMETADOM)
-  GMetaDOM::Element p = GetDOMNode();
+  GMetaDOM::Element p = GetDOMElement();
 
   while (p != 0 && !p.hasAttribute("href")) {
     GMetaDOM::Node parent = p.get_parentNode();

@@ -96,8 +96,9 @@ public:
   // some queries
   TagId        	 IsA(void) const;
 #if defined(HAVE_GMETADOM)
-  const GMetaDOM::Element& GetDOMNode(void) const { return node; }
+  const GMetaDOM::Element& GetDOMElement(void) const { return node; }
 #endif
+
   virtual bool 	 IsSpaceLike(void) const;
   virtual bool 	 IsExpanding(void) const;
   virtual bool 	 IsInside(scaled, scaled) const;

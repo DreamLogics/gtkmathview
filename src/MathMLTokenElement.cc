@@ -190,10 +190,10 @@ MathMLTokenElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      assert(GetDOMNode() != 0);
+      assert(GetDOMElement() != 0);
 
       String* sContent = NULL;
-      for (GMetaDOM::Node p = GetDOMNode().get_firstChild(); 
+      for (GMetaDOM::Node p = GetDOMElement().get_firstChild(); 
 	   p != 0;
 	   p = p.get_nextSibling()) 
 	{

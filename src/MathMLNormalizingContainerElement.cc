@@ -47,13 +47,41 @@ MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 void
 MathMLNormalizingContainerElement::Normalize()
 {
-  if (child == NULL) {
-    MathMLElement* mdummy = MathMLDummyElement::create();
-    assert(mdummy != NULL);
-    SetChild(mdummy);
-  }
-  
-  MathMLBinContainerElement::Normalize();
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+#if defined(HAVE_GMETADOM)
+      GMetaDOM::NodeList children = GetDOMElement().getElementsByTagNameNS(MATHML_NS_URI, "*");
+      if (children.get_length() == 1)
+	{
+	  GMetaDOM::Node node = children.item(0);
+	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+	  assert(elem != 0);
+	  SetChild(elem);
+	  elem->Release();
+	}
+      else if (child == NULL || child->GetDOMElement() != GetDOMElement())
+	{
+	  MathMLElement* row = MathMLRowElement::create(GetDOMElement());
+	  assert(row != NULL);
+	  SetChild(row);
+	  row->Release();
+	}
+#else
+      if (child == NULL)
+	{
+	  MathMLElement* row = MathMLRowElement::create();
+	  assert(row != NULL);
+	  SetChild(row);
+	  row->Release();
+	}
+#endif
+
+      assert(child != NULL);
+      child->Normalize();
+
+      ResetDirtyStructure();
+    }
 }
 
 void

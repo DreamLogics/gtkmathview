@@ -27,7 +27,6 @@
 #include "Iterator.hh"
 #include "Globals.hh"
 #include "CharMapper.hh"
-#include "MathMLizer.hh"
 #include "StringUnicode.hh"
 #include "MathMLDocument.hh"
 #include "MathMLParseFile.hh"
@@ -144,10 +143,10 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 void
 MathMLRenderingEngine::Unload()
 {
-  document->Release();
-  document = 0;
-  root = 0;
-  selected = 0;
+  if (document != NULL) document->Release();
+  document = NULL;
+  root = NULL;
+  selected = NULL;
 }
 
 void
@@ -273,7 +272,7 @@ MathMLRenderingEngine::SetSelectionLast(MathMLElement* selectionLast)
   if (selectionLast == NULL) return;
 
   selectionRoot = SelectMinimumTree(selectionFirst, selectionLast);
-  while (selectionRoot != NULL && selectionRoot->GetDOMNode() == NULL)
+  while (selectionRoot != NULL && selectionRoot->GetDOMElement() == NULL)
     selectionRoot = selectionRoot->GetParent();
 }
 

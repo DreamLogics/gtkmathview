@@ -44,6 +44,7 @@ public:
   static MathMLDocument* create(const GMetaDOM::Document& doc) { return new MathMLDocument(doc); }
 #endif
 
+  virtual void Normalize(void);
   virtual bool IsDocument(void) const;
 
   MathMLElement* GetRoot(void) const { return GetChild(); }
