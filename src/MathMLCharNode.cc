@@ -23,6 +23,8 @@
 #include <config.h>
 #include <assert.h>
 
+#include <math.h>
+
 #include "MathEngine.hh"
 #include "CharMapper.hh"
 #include "MathMLElement.hh"
@@ -35,6 +37,11 @@ MathMLCharNode::MathMLCharNode(Char c)
   // The basic idea is that a stretchable char behaves exactly as an unstretchable
   // one as long as the layout is not allocated.
   layout = NULL;
+
+  // the following initialization is really important for
+  // subclasses of MathMLCharNode overriding the Setup method
+  fChar.font = NULL;
+  fChar.charMap = NULL;
 }
 
 MathMLCharNode::~MathMLCharNode()
@@ -319,6 +326,9 @@ MathMLCharNode::Render(const DrawingArea& area)
   const GraphicsContext* gc = GetParent()->GetForegroundGC();
 
   if (IsStretchyFontified() && (layout->simple != NULLCHAR || layout->n > 0)) {
+#ifdef DEBUG
+    MathEngine::logger(LOG_DEBUG, "rendering stretchy char U+%04X with simple %02x and n %d\n", ch, layout->simple, layout->n);
+#endif // DEBUG
     if (layout->sChar.charMap->GetStretch() == STRETCH_VERTICAL)
       RenderVerticalStretchyChar(area, gc, GetX(), GetY() + box.descent);
     else
@@ -502,4 +512,45 @@ MathMLCharNode::GetStretch() const
 {
   if (!IsStretchyFontified()) return STRETCH_NO;
   else return layout->sChar.charMap->GetStretch();
+}
+
+bool
+MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled& shiftY) const
+{
+  assert(cChar != NULL);
+  if (!IsFontified() || cChar->IsCombinedChar() || !cChar->IsFontified()) return false;
+  if (!isCombining(cChar->GetChar())) return false;
+
+  Char cch = cChar->GetChar();
+  const AFont* cFont = cChar->GetFont();
+  assert(cFont != NULL);
+
+  const BoundingBox& cBox = cChar->GetBoundingBox();
+
+  if (isCombiningOverlay(cch)) {
+    shiftX = box.lBearing - cBox.lBearing + (box.rBearing - box.lBearing - cBox.rBearing + cBox.lBearing) / 2;
+    shiftY = 0;
+  } else if (isCombiningBelow(cch)) {
+    shiftX = 0;
+    shiftY = - box.descent - cBox.ascent;
+  } else {
+    /*
+    printf("italic angle of the base char is %f %f\n",
+	   fChar.font->GetItalicAngle(),
+	   cFont->GetItalicAngle()
+	   );
+    */
+
+    //shiftY = box.ascent + cBox.descent + cChar.font->GetLineThickness();
+    // the following computation assumes that the accent is taken from a TeX font
+    // and that that font has a valid glyph for x as position 'x'
+    shiftY = box.ascent - cFont->GetEx();
+
+    float ia = (M_PI * (90 + fChar.font->GetItalicAngle() - cFont->GetItalicAngle())) / 180;
+    scaled correction = float2sp(sp2float(2 * shiftY) * cos(ia));
+
+    shiftX = correction + (box.width - cBox.width) / 2;
+  }
+
+  return true;
 }

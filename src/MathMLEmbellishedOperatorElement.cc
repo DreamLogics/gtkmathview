@@ -105,3 +105,12 @@ MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
 {
   return true;
 }
+
+const MathMLCharNode*
+MathMLEmbellishedOperatorElement::GetCharNode() const
+{
+  if (content.GetSize() != 1 || coreOp == NULL || content.GetFirst() != coreOp)
+    return NULL;
+
+  return coreOp->GetCharNode();
+}

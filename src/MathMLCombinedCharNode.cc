@@ -23,8 +23,6 @@
 #include <config.h>
 #include <assert.h>
 
-#include <math.h>
-
 #include "CharMapper.hh"
 #include "MathEngine.hh"
 #include "MathMLElement.hh"
@@ -34,11 +32,13 @@
 MathMLCombinedCharNode::MathMLCombinedCharNode(Char c, Char cc) :
   MathMLCharNode(c)
 {
-  cch = cc;
+  cChar = new MathMLCharNode(cc);
 }
 
 MathMLCombinedCharNode::~MathMLCombinedCharNode()
 {
+  delete cChar;
+  cChar = NULL;
 }
 
 void
@@ -52,17 +52,13 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
   env->SetFontMode(FONT_MODE_ANY);
   env->SetFontStyle(FONT_STYLE_NORMAL);
 
-  if (!env->charMapper.FontifyChar(cChar, env->GetFontAttributes(), cch)) {
-    cChar.font = NULL;
-    cChar.charMap = NULL;
-  }
+  assert(cChar != NULL);
+  // this is really ugly, but in some sense is also true...
+  cChar->SetParent(GetParent());
+  cChar->Setup(env);
 
-  if (cChar.font == NULL)
-    MathEngine::logger(LOG_WARNING, "not able to render combining char `U+%04x'", cch);
-  else if (cChar.font != fChar.font)
-    MathEngine::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cch);
-
-  sppex = env->GetScaledPointsPerEx();
+  if (cChar->GetFont() != fChar.font)
+    MathEngine::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cChar->GetChar());
 
   env->Drop();
 }
@@ -71,69 +67,51 @@ void
 MathMLCombinedCharNode::DoLayout()
 {
   MathMLCharNode::DoLayout();
+  assert(cChar != NULL);
+  cChar->DoLayout();
 
-  if (cChar.font != NULL && cChar.charMap != NULL) {
-    BoundingBox cBox;
-    cChar.GetBoundingBox(cBox);
+  if (cChar->IsFontified()) {
+    const BoundingBox& cBox = cChar->GetBoundingBox();
 
-    if (isCombiningOverlay(cch)) {
-      shiftX = box.lBearing - cBox.lBearing + (box.rBearing - box.lBearing - cBox.rBearing + cBox.lBearing) / 2;
-      shiftY = 0;
-    } else if (isCombiningBelow(cch)) {
-      shiftX = 0;
-      shiftY = - box.descent - cBox.ascent;
-    } else {
-#if 0
-      if (cChar.font == fChar.font)
-	shiftX = cChar.font->GetKerning(cChar.nch, fChar.nch);
-      else
-	shiftX = 0;
-#endif
-      printf("italic angle of the base char is %f %f\n",
-	     fChar.font->GetItalicAngle(),
-	     cChar.font->GetItalicAngle()
-	     );
+    bool res = CombineWith(cChar, shiftX, shiftY);
+    assert(res);
 
-#if 0
-      if (scaledEq(shiftX, 0))
-	shiftX = fChar.font->GetKerning(fChar.nch, 127);
-#endif
-
-      //shiftY = box.ascent + cBox.descent + cChar.font->GetLineThickness();
-      shiftY = box.ascent - sppex;
-
-      float ia = 90 + fChar.font->GetItalicAngle() - cChar.font->GetItalicAngle();
-      printf("combined italic angle degree: %f\n", ia);
-
-      ia = (M_PI * ia) / 180;
-      printf("combined italic angle radiant %f the cosine: %f the ray: %f\n", ia, cos(ia), sp2float(shiftY));
-
-      scaled correction = float2sp(sp2float(2 * shiftY) * cos(ia));
-      printf("the correction turns out to be of %d\n", sp2ipx(correction));
-
-      shiftX = correction + (box.width - cBox.width) / 2;
-    }
-
-    charBox.ascent = scaledMax(box.ascent, cBox.ascent + shiftY);
-    charBox.descent = scaledMax(box.descent, cBox.descent - shiftY);
-    charBox.tAscent = scaledMax(box.tAscent, cBox.tAscent + shiftY);
-    charBox.tDescent = scaledMax(box.tDescent, cBox.tDescent - shiftY);
-    charBox.width = scaledMax(box.width, cBox.width + scaledAbs(shiftX));
-    charBox.lBearing = scaledMin(box.lBearing, cBox.lBearing + shiftX);
-    charBox.rBearing = scaledMax(box.rBearing, cBox.rBearing + shiftX);
-    box = charBox;
+    box.ascent = scaledMax(charBox.ascent, cBox.ascent + shiftY);
+    box.descent = scaledMax(charBox.descent, cBox.descent - shiftY);
+    box.tAscent = scaledMax(charBox.tAscent, cBox.tAscent + shiftY);
+    box.tDescent = scaledMax(charBox.tDescent, cBox.tDescent - shiftY);
+    box.width = scaledMax(charBox.width, cBox.width + scaledAbs(shiftX));
+    box.lBearing = scaledMin(charBox.lBearing, cBox.lBearing + shiftX);
+    box.rBearing = scaledMax(charBox.rBearing, cBox.rBearing + shiftX);
   }
+}
+
+void
+MathMLCombinedCharNode::SetPosition(scaled x, scaled y)
+{
+  MathMLCharNode::SetPosition(x, y);
+  assert(cChar != NULL);
+  cChar->SetPosition(x + shiftX, y - shiftY);
+}
+
+void
+MathMLCombinedCharNode::SetDirty(const Rectangle* rect)
+{
+  MathMLCharNode::SetDirty(rect);
+  assert(cChar != NULL);
+  cChar->SetDirty(rect);
 }
 
 void
 MathMLCombinedCharNode::Render(const DrawingArea& area)
 {
   MathMLCharNode::Render(area);
+  assert(cChar != NULL);
+  if (cChar->IsFontified()) cChar->Render(area);
+}
 
-  if (cChar.font != NULL) {
-    assert(GetParent() != NULL);
-    const GraphicsContext* gc = GetParent()->GetForegroundGC();
-
-    area.DrawChar(gc, cChar.font, GetX() + shiftX, GetY() - shiftY, cChar.nch);
-  }
+bool
+MathMLCombinedCharNode::IsCombinedChar() const
+{
+  return true;
 }

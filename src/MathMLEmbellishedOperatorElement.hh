@@ -36,6 +36,8 @@ public:
   virtual bool IsEmbellishedOperator(void) const;
   class MathMLOperatorElement* GetCoreOperator(void) const { return coreOp; }
 
+  virtual const class MathMLCharNode* GetCharNode(void) const;
+
 private:
   class MathMLOperatorElement* coreOp;
   bool  script;

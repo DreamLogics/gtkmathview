@@ -39,13 +39,20 @@ public:
   virtual bool IsExpanding(void) const;
 
 protected:
-  bool   scriptize; // true if under and over are to be considered in script position
+  bool   scriptize;
 
   bool   accentUnder;
   bool   accent;
 
-  scaled underSpacing; // if scriptize == false
-  scaled overSpacing; // if scriptize == false
+  scaled baseShiftX;
+
+  scaled underSpacing;
+  scaled underShiftX;
+  scaled underShiftY;
+
+  scaled overSpacing;
+  scaled overShiftX;
+  scaled overShiftY;
 
   MathMLElement* underScript;
   MathMLElement* overScript;

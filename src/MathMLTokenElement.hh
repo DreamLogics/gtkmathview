@@ -55,6 +55,7 @@ public:
   scaled         GetDecimalPointEdge(void) const;
 
   RGBValue       GetColor(void) const { return color; }
+  virtual const class MathMLCharNode* GetCharNode(void) const;
 
   const Container<class MathMLTextNode*>& GetContent(void) const { return content; }
   unsigned       GetRawContentLength(void) const { return rawContentLength; }

@@ -494,3 +494,15 @@ MathMLTokenElement::IsLast() const
   } else
     return false;
 }
+
+const MathMLCharNode*
+MathMLTokenElement::GetCharNode() const
+{
+  if (content.GetSize() != 1) return NULL;
+
+  MathMLTextNode* node = content.GetFirst();
+  assert(node != NULL);
+  if (!node->IsChar() || node->IsCombinedChar()) return NULL;
+
+  return TO_CHAR(node);
+}

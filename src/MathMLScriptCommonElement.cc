@@ -39,10 +39,8 @@ MathMLScriptCommonElement::ScriptSetup(RenderingEnvironment* env)
   sppex = env->GetScaledPointsPerEx();
   subMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.247217);
   superMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.362892);
-  scriptSpacing = pt2sp(0); //pt2sp(1); // taken from the TeXbook
 #else
   sppex = subMinShift = superMinShift = env->GetAxis();
-  scriptSpacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_VERYVERYTHIN));
 #endif // TEXISH_MATHML
   scriptAxis    = env->GetAxis();
 }
@@ -50,7 +48,9 @@ MathMLScriptCommonElement::ScriptSetup(RenderingEnvironment* env)
 void
 MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
 					  const BoundingBox& subScriptBox,
-					  const BoundingBox& superScriptBox)
+					  const BoundingBox& superScriptBox,
+					  scaled& subShiftX, scaled& subShiftY,
+					  scaled& superShiftX, scaled& superShiftY)
 {
   assert(base != NULL);
 
@@ -87,8 +87,11 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
     }
   }
 
-  superShift = u;
-  subShift = v;
+  superShiftY = u;
+  superShiftX = scaledMax(baseBox.width, baseBox.rBearing + sppex / 5);
+
+  subShiftY = v;
+  subShiftX = baseBox.width;
 }
 
 bool

@@ -67,7 +67,7 @@ FontAttributes::DownGrade()
 bool
 FontAttributes::Equals(const FontAttributes& fa) const
 {
-  if (mode != fa.mode) return false;
+  //if (mode != fa.mode) return false;
   if (style != fa.style) return false;
   if (weight != fa.weight) return false;
   if ((family == NULL && fa.family != NULL) ||
@@ -84,8 +84,8 @@ FontAttributes::Compare(const FontAttributes& fa) const
 {
   unsigned eval = 0;
 
-  if (mode != FONT_MODE_ANY && fa.mode != FONT_MODE_ANY && mode != fa.mode)
-    return UINT_MAX;
+  //if (mode != FONT_MODE_ANY && fa.mode != FONT_MODE_ANY && mode != fa.mode)
+  //  return UINT_MAX;
 
   if (HasStyle()) {
     if (fa.HasStyle()) {

@@ -38,6 +38,12 @@ public:
 private:
   unsigned nPre;
   unsigned nPost;
+
+  scaled subShiftX;
+  scaled subShiftY;
+
+  scaled superShiftX;
+  scaled superShiftY;
 };
 
 #endif // MathMLMultiScriptsElement_hh

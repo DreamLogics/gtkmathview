@@ -159,7 +159,6 @@ noinst_HEADERS = \
   FontifiedString.hh \
   FontAttributes.hh \
   FontManager.hh \
-  FontMapper.hh \
   GraphicsContext.hh \
   Iterator.hh \
   Layout.hh \

@@ -47,6 +47,9 @@ public:
   virtual void   DoHorizontalStretchyLayout(scaled, bool);
   virtual StretchId GetStretch(void) const;
   Char           GetChar(void) const { return ch; }
+  const AFont*   GetFont(void) const { return fChar.font; }
+
+  bool           CombineWith(const MathMLCharNode*, scaled&, scaled&) const;
 
 protected:
   void DoVerticalStretchyLayoutAux(scaled, bool);

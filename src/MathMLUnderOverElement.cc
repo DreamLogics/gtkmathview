@@ -26,6 +26,7 @@
 #include "MathEngine.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
+#include "MathMLCharNode.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLUnderOverElement.hh"
@@ -111,15 +112,9 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   scaled bigSpacing   = 3 * ruleThickness;
 
   base->Setup(env);
-
   const MathMLOperatorElement* op = findCoreOperator(base);
 
-  if (op != NULL) {
-    scriptize = !env->GetDisplayStyle() && op->HasMovableLimits();
-    MathEngine::logger(LOG_DEBUG, "display style: %d  movable limits: %d  scriptize: %d\n",
-		    	env->GetDisplayStyle(), op->HasMovableLimits(), scriptize);
-  } else
-    scriptize = false;
+  scriptize = op != NULL && !displayStyle && op->HasMovableLimits();
 
   env->Push();
   env->SetDisplayStyle(false);
@@ -166,8 +161,9 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
       }
     }
 
-    if (accent) overSpacing = smallSpacing;
-    else {
+    if (accent) {
+      overSpacing = smallSpacing;
+    } else {
       env->AddScriptLevel(1);
       overSpacing = displayStyle ? bigSpacing : smallSpacing;
     }
@@ -184,6 +180,9 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 
   assert(base != NULL);
 
+  scaled overClearance = 0;
+  scaled underClearance = 0;
+
   if (scriptize) {
     base->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
     if (overScript != NULL) overScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
@@ -199,27 +198,10 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
     if (overScript != NULL) overBox = overScript->GetBoundingBox();
     else overBox.Null();
 
-    DoScriptLayout(baseBox, underBox, overBox);
+    DoScriptLayout(baseBox, underBox, overBox, underShiftX, underShiftY, overShiftX, overShiftY);
+    underClearance = overClearance = 0;
 
-    box = baseBox;
-    box.rBearing = scaledMax(box.width + scriptSpacing + underBox.rBearing,
-			     box.rBearing + scriptSpacing + overBox.rBearing);
-    box.width += scaledMax(scriptSpacing + underBox.width,
-			   scriptSpacing + scaledMax(0, baseBox.rBearing - baseBox.width) + overBox.width);
-
-    if (underScript != NULL) {
-      box.ascent   = scaledMax(box.ascent, underBox.ascent - subShift);
-      box.tAscent  = scaledMax(box.tAscent, underBox.tAscent - subShift);
-      box.descent  = scaledMax(box.descent, underBox.descent + subShift);
-      box.tDescent = scaledMax(box.tDescent, underBox.tDescent + subShift);
-    }
-
-    if (overScript != NULL) {
-      box.ascent   = scaledMax(box.ascent, overBox.ascent + superShift);
-      box.tAscent  = scaledMax(box.tAscent, overBox.tAscent + superShift);
-      box.descent  = scaledMax(box.descent, overBox.descent - superShift);
-      box.tDescent = scaledMax(box.tDescent, overBox.tDescent - superShift);
-    }
+    baseShiftX = 0;
   } else {    
     if (id != LAYOUT_AUTO) {
       base->DoBoxedLayout(id, BREAK_NO);
@@ -235,6 +217,8 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
       MathMLOperatorElement* baseOp  = findStretchyOperator(base, STRETCH_HORIZONTAL);
       MathMLOperatorElement* underOp = findStretchyOperator(underScript, STRETCH_HORIZONTAL);
       MathMLOperatorElement* overOp  = findStretchyOperator(overScript, STRETCH_HORIZONTAL);
+
+      MathEngine::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
 
       if (baseOp == NULL) base->DoBoxedLayout(id, BREAK_NO, maxWidth);
       if (underScript != NULL && underOp == NULL) underScript->DoBoxedLayout(id, BREAK_NO, maxWidth);
@@ -281,25 +265,83 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
       if (overScript != NULL && overOp != NULL) overScript->DoBoxedLayout(id, BREAK_NO);
     }
 
-    box = base->GetBoundingBox();
+    const BoundingBox& baseBox = base->GetBoundingBox();
+    const MathMLCharNode* bChar = base->GetCharNode();
 
     if (underScript != NULL) {
-      const BoundingBox& scriptBox = underScript->GetBoundingBox();
+      const MathMLCharNode* cChar = underScript->GetCharNode();
 
-      box.width = scaledMax(box.width, scriptBox.width);
-      box.tDescent = box.descent + underSpacing + scriptBox.ascent + scriptBox.tDescent + ruleThickness;
-      box.descent  = box.descent + underSpacing + scriptBox.GetHeight() + ruleThickness;
+      if (accentUnder &&
+	  bChar != NULL && cChar != NULL &&
+	  isCombiningBelow(cChar->GetChar()) &&
+	  bChar->CombineWith(cChar, underShiftX, underShiftY)) {
+	// nothing to do
+	MathEngine::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent under U+%04X",
+			   cChar->GetChar(), bChar->GetChar());
+      } else {
+	const BoundingBox& scriptBox = underScript->GetBoundingBox();
+
+	underShiftX = (baseBox.width - scriptBox.width) / 2;
+	underShiftY = baseBox.descent + underSpacing + scriptBox.ascent;
+	underClearance = ruleThickness;
+      }
     }
 
     if (overScript != NULL) {
-      const BoundingBox& scriptBox = overScript->GetBoundingBox();
+      const MathMLCharNode* cChar = overScript->GetCharNode();
 
-      box.width = scaledMax(box.width, scriptBox.width);
-      box.tAscent = box.ascent + overSpacing + scriptBox.descent + scriptBox.tAscent + ruleThickness;
-      box.ascent  = box.ascent + overSpacing + scriptBox.GetHeight() + ruleThickness;
+      if (accent &&
+	  bChar != NULL && cChar != NULL &&
+	  isCombiningAbove(cChar->GetChar()) &&
+	  bChar->CombineWith(cChar, overShiftX, overShiftY)) {
+	// nothing to do
+	MathEngine::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
+			   cChar->GetChar(), bChar->GetChar());
+      } else {
+	const BoundingBox& scriptBox = overScript->GetBoundingBox();
+
+	overShiftX = (baseBox.width - scriptBox.width) / 2;
+	overShiftY = baseBox.ascent + overSpacing + scriptBox.descent;
+	overClearance = ruleThickness;
+      }
     }
+
+    baseShiftX = scaledMax(0, - scaledMin(overShiftX, underShiftX));
   }
 
+  overShiftX += baseShiftX;
+  underShiftX += baseShiftX;
+
+  box = base->GetBoundingBox();
+  box.width += baseShiftX;
+  box.lBearing += baseShiftX;
+
+  if (underScript != NULL) {
+    const BoundingBox& scriptBox = underScript->GetBoundingBox();
+
+    box.width = scaledMax(box.width, underShiftX + scriptBox.width);
+    box.rBearing = scaledMax(box.rBearing, underShiftX + scriptBox.rBearing);
+    box.lBearing = scaledMin(box.lBearing, underShiftX + scriptBox.lBearing);
+    box.ascent   = scaledMax(box.ascent, scriptBox.ascent - underShiftY);
+    box.tAscent  = scaledMax(box.tAscent, scriptBox.tAscent - underShiftY);
+    box.descent  = scaledMax(box.descent, scriptBox.descent + underShiftY);
+    box.tDescent = scaledMax(box.tDescent, scriptBox.tDescent + underShiftY);
+    box.descent += underClearance;
+  }
+
+  if (overScript != NULL) {
+    const BoundingBox& scriptBox = overScript->GetBoundingBox();
+
+    box.width = scaledMax(box.width, overShiftX + scriptBox.width);
+    box.rBearing = scaledMax(box.rBearing, overShiftX + scriptBox.rBearing);
+    box.lBearing = scaledMin(box.lBearing, overShiftX + scriptBox.lBearing);
+    box.ascent   = scaledMax(box.ascent, scriptBox.ascent + overShiftY);
+    box.tAscent  = scaledMax(box.tAscent, scriptBox.tAscent + overShiftY);
+    box.descent  = scaledMax(box.descent, scriptBox.descent - overShiftY);
+    box.tDescent = scaledMax(box.tDescent, scriptBox.tDescent - overShiftY);
+    box.ascent += overClearance;
+  }
+  
   ConfirmLayout(id);
 
   ResetDirtyLayout(id, maxWidth);
@@ -313,32 +355,13 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  const BoundingBox& box     = GetBoundingBox();
-  const BoundingBox& baseBox = base->GetBoundingBox();
+  base->SetPosition(x + baseShiftX, y);
 
-  if (scriptize) {
-    base->SetPosition(x, y);
+  if (underScript != NULL)
+    underScript->SetPosition(x + underShiftX, y + underShiftY);
 
-    if (underScript != NULL) underScript->SetPosition(x + baseBox.width + scriptSpacing, y + subShift);
-    
-    if (overScript != NULL)
-      overScript->SetPosition(x + scaledMax(baseBox.width, baseBox.rBearing) + scriptSpacing, y - superShift);
-  } else {
-    base->SetPosition(x + (box.width - baseBox.width) / 2, y);
-
-    if (underScript != NULL) {
-      const BoundingBox& scriptBox = underScript->GetBoundingBox();
-      underScript->SetPosition(x + (box.width - scriptBox.width) / 2,
-			       y + baseBox.descent + underSpacing + scriptBox.ascent);
-    }
-
-    if (overScript != NULL) {
-      const BoundingBox& scriptBox = overScript->GetBoundingBox();
-      // WARNING: there is a heuristic here which works, but the bounding box is wrong!
-      overScript->SetPosition(x + (box.width - scriptBox.width) / 2 + scaledMax(0, baseBox.rBearing - baseBox.width),
-			      y - baseBox.ascent - overSpacing - scriptBox.descent);
-    }      
-  }
+  if (overScript != NULL)
+    overScript->SetPosition(x + overShiftX, y - overShiftY);
 }
 
 bool

@@ -247,7 +247,7 @@ CharMapper::FontMap::GetCharMap(Char ch, bool stretchy) const
 
   for (Iterator<CharMap*> charMap(single[CHAR_HASH(ch)]); m == NULL && charMap.More(); charMap.Next()) {
     assert(charMap() != NULL);
-    if ((!stretchy && charMap()->MapsSimpleChar(ch)) ||
+    if ((!stretchy && charMap()->MapsChar(ch)) ||
 	(stretchy && charMap()->MapsStretchyChar(ch))) m = charMap();
   }
 

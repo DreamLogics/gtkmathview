@@ -33,21 +33,19 @@ public:
   virtual bool IsExpanding(void) const;
 
 protected:
-  void DoScriptLayout(const BoundingBox&, const BoundingBox&, const BoundingBox&);
+  void DoScriptLayout(const BoundingBox&,
+		      const BoundingBox&, const BoundingBox&,
+		      scaled&, scaled&,
+		      scaled&, scaled&);
 
   MathMLElement* base;
 
   scaled sppex;
   scaled ruleThickness;
 
-  scaled scriptSpacing;
   scaled scriptAxis;
-
   scaled subMinShift;
-  scaled subShift;
-
   scaled superMinShift;
-  scaled superShift;
 };
 
 #endif // MathMLScriptCommonElement_hh

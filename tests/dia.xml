@@ -4,79 +4,79 @@
       <mtr>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0306;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0306;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0307;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0307;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0308;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0308;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0305;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0305;</mo>
 	  </mover>
 	</mtd>
       </mtr>
       <mtr>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0304;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0304;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0303;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0303;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
+	    <mi>&alpha;</mi>
 	    <!--<mo stretchy="false">&#x0302;</mo>-->
-            <mo>^</mo>
+            <mo lspace="0em" rspace="0em">^</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0301;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0301;</mo>
 	  </mover>
 	</mtd>
       </mtr>
       <mtr>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x0300;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0300;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x030a;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x030a;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="alpha"/></mi>
-	    <mo>&#x030c;</mo>
+	    <mi>&alpha;</mi>
+	    <mo lspace="0em" rspace="0em">&#x030c;</mo>
 	  </mover>
 	</mtd>
 	<mtd>
 	  <mover accent="true">
-	    <mi><mchar name="beta"/></mi>
-	    <mo>&#x0307;</mo>
+	    <mi>&beta;</mi>
+	    <mo lspace="0em" rspace="0em">&#x0307;</mo>
 	  </mover>
 	</mtd>
       </mtr>

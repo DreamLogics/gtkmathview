@@ -47,6 +47,7 @@ inline bool isVariant(Char ch) { return ch == 0xfe00; }
 inline bool isCombining(Char ch) { return (ch >= 0x0300 && ch <= 0x0362) || (ch >= 0x20d0 && ch <= 0x20e8); }
 bool        isCombiningOverlay(Char ch);
 bool        isCombiningBelow(Char ch);
+inline bool isCombiningAbove(Char ch) { return isCombining(ch) && !isCombiningOverlay(ch) && !isCombiningBelow(ch); }
 
 unsigned    isNonMarkingChar(Char, int* = NULL, BreakId* = NULL);
 unsigned    isNonMarkingChar(Char, Char, int* = NULL, BreakId* = NULL);

@@ -39,6 +39,12 @@ public:
 private:
   MathMLElement* subScript;
   MathMLElement* superScript;
+
+  scaled subShiftX;
+  scaled subShiftY;
+
+  scaled superShiftX;
+  scaled superShiftY;
 };
 
 #endif // MathMLScriptElement_hh
