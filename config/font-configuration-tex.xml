@@ -591,6 +591,11 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <stretchy code="0x2211" direction="vertical">
       <simple index="0x50 0x58"/>
     </stretchy>
+
+    <stretchy code="0x2225" direction="vertical">
+      <simple index="0x77"/>
+      <compound index="-1 -1 -1 0x77"/>
+    </stretchy>
   </map>
 
   <map id="tex-circle">
