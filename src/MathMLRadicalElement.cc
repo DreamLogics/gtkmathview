@@ -36,7 +36,7 @@
 #include "MathMLOperatorElement.hh"
 
 MathMLRadicalElement::MathMLRadicalElement(mDOMNodeRef node, TagId id) :
-  MathMLContainerElement(node, id)
+  MathMLNormalizingContainerElement(node, id)
 {
   assert(id == TAG_MSQRT || id == TAG_MROOT);
   radical = NULL;
@@ -50,16 +50,22 @@ MathMLRadicalElement::~MathMLRadicalElement()
 void
 MathMLRadicalElement::Normalize()
 {
-  unsigned n = (IsA() == TAG_MSQRT) ? 1 : 2;
+  if (IsA() == TAG_MSQRT)
+    MathMLNormalizingContainerElement::Normalize();
+  else {
+    assert(IsA() == TAG_MROOT);
 
-  while (content.GetSize() < n) {
-    MathMLElement* mdummy = new MathMLDummyElement();
-    Append(mdummy);
-  }
+    while (content.GetSize() < 2) {
+      MathMLElement* mdummy = new MathMLDummyElement();
+      Append(mdummy);
+    }
+    
+    while (content.GetSize() > 2) {
+      MathMLElement* elem = content.RemoveLast();
+      delete elem;
+    }
 
-  while (content.GetSize() > n) {
-    MathMLElement* elem = content.RemoveLast();
-    delete elem;
+    MathMLContainerElement::Normalize();
   }
 
   String* rad = MathEngine::entitiesTable.GetEntityContent(DOM_CONST_STRING("Sqrt"));
@@ -68,8 +74,6 @@ MathMLRadicalElement::Normalize()
   radical = new MathMLCharNode(rad->GetChar(0));
   radical->SetParent(this);
   delete rad;
-
-  MathMLContainerElement::Normalize();
 }
 
 void
