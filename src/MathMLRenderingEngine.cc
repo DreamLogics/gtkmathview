@@ -24,7 +24,6 @@
 #include <assert.h>
 
 #include "Clock.hh"
-#include "Iterator.hh"
 #include "Globals.hh"
 #include "CharMapper.hh"
 #include "StringUnicode.hh"
@@ -77,19 +76,20 @@ MathMLRenderingEngine::Init(class DrawingArea* a, class FontManager* fm)
   if (charMapper != NULL) delete charMapper;
   charMapper = new CharMapper(*fm);
 
-  Iterator<String*> cit(Globals::configuration.GetFonts());
-  if (cit.More()) {
-    while (cit.More()) {
-      assert(cit() != NULL);
-      if (!charMapper->Load(cit()->ToStaticC())) {
-	Globals::logger(LOG_WARNING, "could not load `%s'", cit()->ToStaticC());
+  if (!Globals::configuration.GetFonts().empty())
+    for (std::vector<String*>::const_iterator cit = Globals::configuration.GetFonts().begin();
+	 cit != Globals::configuration.GetFonts().end();
+	 cit++)
+      {
+	assert(*cit);
+	if (!charMapper->Load((*cit)->ToStaticC()))
+	  Globals::logger(LOG_WARNING, "could not load `%s'", (*cit)->ToStaticC());
       }
-      cit.Next();
+  else
+    {
+      bool res = charMapper->Load("config/font-configuration.xml");
+      if (!res) charMapper->Load(PKGDATADIR"/font-configuration.xml");
     }
-  } else {
-    bool res = charMapper->Load("config/font-configuration.xml");
-    if (!res) charMapper->Load(PKGDATADIR"/font-configuration.xml");
-  }
 }
 
 bool
@@ -208,10 +208,12 @@ MathMLRenderingEngine::MinMaxLayout()
   perf.Stop();
   Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
 
+#if 0
   perf.Start();
   root->DoLayout(FormattingContext(LAYOUT_MAX,0));
   perf.Stop();
   Globals::logger(LOG_INFO, "maximum layout time: %dms", perf());
+#endif
 }
 
 void

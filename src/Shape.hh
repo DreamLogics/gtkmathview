@@ -23,10 +23,9 @@
 #ifndef Shape_hh
 #define Shape_hh
 
+#include <vector>
 #include <stddef.h>
-
 #include "Rectangle.hh"
-#include "Container.hh"
 
 class Shape {
 public:
@@ -38,7 +37,7 @@ public:
   bool Overlaps(const Rectangle&) const;
   void Dump(void) const;
 
-  Container<Rectangle*> content;
+  std::vector<Rectangle*> content;
 };
 
 #endif // Shape_hh

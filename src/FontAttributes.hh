@@ -24,9 +24,9 @@
 #define FontAttributes_hh
 
 #include <string>
+#include <vector>
 
 #include "keyword.hh"
-#include "Container.hh"
 #include "UnitValue.hh"
 
 enum FontModeId { FONT_MODE_ANY, FONT_MODE_TEXT, FONT_MODE_MATH };
@@ -66,7 +66,7 @@ private:
     std::string value;
   };
 
-  Container<ExtraFontAttribute*> content;
+  std::vector<ExtraFontAttribute*> content;
 };
 
 #endif // FontAttributes.hh

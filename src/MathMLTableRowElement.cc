@@ -111,7 +111,7 @@ void
 MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 {
   for (std::vector< Ptr<MathMLElement> >::iterator p = content.begin();
-       p < content.end();
+       p != content.end();
        p++)
     {
       assert(is_a<MathMLTableCellElement>(*p));
@@ -156,7 +156,7 @@ MathMLTableRowElement::IsInside(scaled x, scaled y) const
 {
   // same arguments as for the SetDirty method above
   for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
-       elem < content.end();
+       elem != content.end();
        elem++)
     {
       assert(*elem);

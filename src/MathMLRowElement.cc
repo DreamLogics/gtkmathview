@@ -58,20 +58,21 @@ MathMLRowElement::~MathMLRowElement()
 void
 MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  box.Null();
-  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
-       elem != content.end();
-       elem++)
+  if (HasDirtyLayout(ctxt))
     {
-      (*elem)->DoLayout(ctxt);
-      box.Append((*elem)->GetBoundingBox());
+      box.Null();
+      for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
+	   elem != content.end();
+	   elem++)
+	{
+	  (*elem)->DoLayout(ctxt);
+	  box.Append((*elem)->GetBoundingBox());
+	}
+
+      DoStretchyLayout();
+
+      ResetDirtyLayout(ctxt);
     }
-
-  DoStretchyLayout();
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

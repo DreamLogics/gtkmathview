@@ -21,6 +21,10 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
+#include <functional>
+#include <algorithm>
+
 #include <assert.h>
 #include <stdlib.h>
 
@@ -31,6 +35,14 @@
 #include "MathMLParseFile.hh"
 #include "ValueConversion.hh"
 
+// definition of local adaptors
+struct DeleteStringAdaptor
+  : public std::unary_function<String*,void>
+{
+  void operator()(String* s) const
+  { delete s; }
+};
+
 Configuration::Configuration(void)
 {
   colorSet = linkColorSet = selectColorSet = false;
@@ -38,25 +50,10 @@ Configuration::Configuration(void)
 
 Configuration::~Configuration()
 {
-  while (dictionaries.GetSize() > 0) {
-    String* s = dictionaries.RemoveFirst();
-    delete s;
-  }
-
-  while (entities.GetSize() > 0) {
-    String* s = entities.RemoveFirst();
-    delete s;
-  }
-
-  while (fonts.GetSize() > 0) {
-    String* s = fonts.RemoveFirst();
-    delete s;
-  }
-
-  while (t1Configs.GetSize() > 0) {
-    String* s = t1Configs.RemoveFirst();
-    delete s;
-  }
+  std::for_each(dictionaries.begin(), dictionaries.end(), DeleteStringAdaptor());
+  std::for_each(entities.begin(), entities.end(), DeleteStringAdaptor());
+  std::for_each(fonts.begin(), fonts.end(), DeleteStringAdaptor());
+  std::for_each(t1Configs.begin(), t1Configs.end(), DeleteStringAdaptor());
 }
 
 #if defined(HAVE_MINIDOM)
@@ -108,7 +105,7 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
-	dictionaries.Append(s);
+	dictionaries.push_back(s);
       }
     } else if (mdom_string_eq(name, DOM_CONST_STRING("font-configuration-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
@@ -117,7 +114,7 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
-	fonts.Append(s);
+	fonts.push_back(s);
       }
     } else if (mdom_string_eq(name, DOM_CONST_STRING("entities-table-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
@@ -126,16 +123,16 @@ Configuration::ParseConfiguration(mDOMNodeRef node)
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
-	entities.Append(s);
+	entities.push_back(s);
       }
     } else if (mdom_string_eq(name, DOM_CONST_STRING("t1-config-path"))) {
       mDOMStringRef path = mdom_node_get_content(p);
-      if (path != NULL && t1Configs.GetSize() == 0) {
+      if (path != NULL && t1Configs.empty()) {
 	Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", C_STRING(path));
 	String* s = new StringC(C_STRING(path));
 	s->TrimSpacesLeft();
 	s->TrimSpacesRight();
-	t1Configs.Append(s);
+	t1Configs.push_back(s);
       }
     } else if (mdom_string_eq(name, DOM_CONST_STRING("font-size"))) {
       mDOMStringRef attr = mdom_node_get_attribute(p, DOM_CONST_STRING("size"));
@@ -254,7 +251,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
-	  dictionaries.Append(s);
+	  dictionaries.push_back(s);
 	}
       } else if (name == "font-configuration-path") {
 	GMetaDOM::GdomeString path = elementValue(elem);
@@ -264,7 +261,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
-	  fonts.Append(s);
+	  fonts.push_back(s);
 	}
       } else if (name == "entities-table-path") {
 	GMetaDOM::GdomeString path = elementValue(elem);
@@ -274,17 +271,17 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
-	  entities.Append(s);
+	  entities.push_back(s);
 	}
       } else if (name == "t1-config-path") {
 	GMetaDOM::GdomeString path = elementValue(elem);
-	if (!path.empty() && t1Configs.GetSize() == 0) {
+	if (!path.empty() && t1Configs.empty()) {
 	  std::string s_path = path;
 	  Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", s_path.c_str());
 	  String* s = new StringC(s_path.c_str());
 	  s->TrimSpacesLeft();
 	  s->TrimSpacesRight();
-	  t1Configs.Append(s);
+	  t1Configs.push_back(s);
 	}
       } else if (name == "font-size") {
 	GMetaDOM::GdomeString attr = elem.getAttribute("size");

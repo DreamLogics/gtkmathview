@@ -271,221 +271,223 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 void
 MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  assert(base);
-
-  scaled overClearance = 0;
-  scaled underClearance = 0;
-
-  if (scriptize)
+  if (HasDirtyLayout(ctxt))
     {
-      base->DoLayout(ctxt);
-      if (overScript) overScript->DoLayout(ctxt);
-      if (underScript) underScript->DoLayout(ctxt);
 
-      const BoundingBox& baseBox = base->GetBoundingBox();
-      BoundingBox underBox;
-      BoundingBox overBox;
-    
-      if (underScript) underBox = underScript->GetBoundingBox();
-      else underBox.Null();
+      assert(base);
 
-      if (overScript) overBox = overScript->GetBoundingBox();
-      else overBox.Null();
+      scaled overClearance = 0;
+      scaled underClearance = 0;
 
-      DoScriptLayout(baseBox, underBox, overBox, underShiftX, underShiftY, overShiftX, overShiftY);
-      underClearance = overClearance = 0;
-
-      baseShiftX = 0;
-    } 
-  else
-    {    
-      if (ctxt.GetLayoutType() != LAYOUT_AUTO)
+      if (scriptize)
 	{
 	  base->DoLayout(ctxt);
-	  if (underScript) underScript->DoLayout(ctxt);
 	  if (overScript) overScript->DoLayout(ctxt);
+	  if (underScript) underScript->DoLayout(ctxt);
+
+	  const BoundingBox& baseBox = base->GetBoundingBox();
+	  BoundingBox underBox;
+	  BoundingBox overBox;
+    
+	  if (underScript) underBox = underScript->GetBoundingBox();
+	  else underBox.Null();
+
+	  if (overScript) overBox = overScript->GetBoundingBox();
+	  else overBox.Null();
+
+	  DoScriptLayout(baseBox, underBox, overBox, underShiftX, underShiftY, overShiftX, overShiftY);
+	  underClearance = overClearance = 0;
+
+	  baseShiftX = 0;
 	} 
       else
-	{
-	  unsigned nOp    = 0;
-	  unsigned nOther = 0;
-
-	  scaled wOp      = 0;
-	  scaled wOther   = 0;
-
-	  Ptr<MathMLOperatorElement> baseOp  = findStretchyOperator(base, STRETCH_HORIZONTAL);
-	  Ptr<MathMLOperatorElement> underOp = findStretchyOperator(underScript, STRETCH_HORIZONTAL);
-	  Ptr<MathMLOperatorElement> overOp  = findStretchyOperator(overScript, STRETCH_HORIZONTAL);
-
-	  Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
-
-	  if (!baseOp) base->DoLayout(ctxt);
-	  if (underScript && !underOp) underScript->DoLayout(ctxt);
-	  if (overScript && !overOp) overScript->DoLayout(ctxt);
-
-	  if (!baseOp)
+	{    
+	  if (ctxt.GetLayoutType() != LAYOUT_AUTO)
 	    {
-	      wOther = base->GetBoundingBox().width;
-	      nOther++;
+	      base->DoLayout(ctxt);
+	      if (underScript) underScript->DoLayout(ctxt);
+	      if (overScript) overScript->DoLayout(ctxt);
 	    } 
 	  else
 	    {
-	      wOp = baseOp->GetMinBoundingBox().width;
-	      nOp++;
-	    }
+	      unsigned nOp    = 0;
+	      unsigned nOther = 0;
 
-	  if (underScript)
-	    {
-	      if (!underOp)
+	      scaled wOp      = 0;
+	      scaled wOther   = 0;
+
+	      Ptr<MathMLOperatorElement> baseOp  = findStretchyOperator(base, STRETCH_HORIZONTAL);
+	      Ptr<MathMLOperatorElement> underOp = findStretchyOperator(underScript, STRETCH_HORIZONTAL);
+	      Ptr<MathMLOperatorElement> overOp  = findStretchyOperator(overScript, STRETCH_HORIZONTAL);
+
+	      Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
+
+	      if (!baseOp) base->DoLayout(ctxt);
+	      if (underScript && !underOp) underScript->DoLayout(ctxt);
+	      if (overScript && !overOp) overScript->DoLayout(ctxt);
+
+	      if (!baseOp)
 		{
-		  wOther = scaledMax(wOther, underScript->GetBoundingBox().width);
+		  wOther = base->GetBoundingBox().width;
 		  nOther++;
 		} 
 	      else
 		{
-		  wOp = scaledMax(wOp, underOp->GetMinBoundingBox().width);
+		  wOp = baseOp->GetMinBoundingBox().width;
 		  nOp++;
+		}
+
+	      if (underScript)
+		{
+		  if (!underOp)
+		    {
+		      wOther = scaledMax(wOther, underScript->GetBoundingBox().width);
+		      nOther++;
+		    } 
+		  else
+		    {
+		      wOp = scaledMax(wOp, underOp->GetMinBoundingBox().width);
+		      nOp++;
+		    }
+		}
+
+	      if (overScript)
+		{
+		  if (!overOp)
+		    {
+		      wOther = scaledMax(wOther, overScript->GetBoundingBox().width);
+		      nOther++;
+		    } 
+		  else
+		    {
+		      wOp = scaledMax(wOp, overOp->GetMinBoundingBox().width);
+		      nOp++;
+		    }
+		}
+
+	      if (nOp > 0) {
+		scaled w = (nOther == 0) ? wOp : wOther;
+
+		if (baseOp) baseOp->HorizontalStretchTo(w);
+		if (underOp) underOp->HorizontalStretchTo(w);
+		if (overOp) overOp->HorizontalStretchTo(w);
+	      }
+
+	      if (baseOp) base->DoLayout(ctxt);
+	      if (underScript && underOp) underScript->DoLayout(ctxt);
+	      if (overScript && overOp) overScript->DoLayout(ctxt);
+	    }
+
+	  const BoundingBox& baseBox = base->GetBoundingBox();
+	  Ptr<const MathMLCharNode> bChar = base->GetCharNode();
+
+	  if (underScript)
+	    {
+	      Ptr<MathMLCharNode> cChar = underScript->GetCharNode();
+
+	      if (accentUnder &&
+		  bChar && cChar &&
+		  isCombiningBelow(cChar->GetChar()) &&
+		  bChar->CombineWith(cChar, underShiftX, underShiftY))
+		{
+		  Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent under U+%04X",
+				  cChar->GetChar(), bChar->GetChar());
+
+		  underShiftY = -underShiftY;
+
+#if defined(ENABLE_EXTENSIONS)
+		  if (underScript->IsEmbellishedOperator())
+		    {
+		      Ptr<MathMLEmbellishedOperatorElement> eOp =
+			smart_cast<MathMLEmbellishedOperatorElement>(underScript);
+		      assert(eOp);
+		      Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
+		      assert(coreOp);
+		      underShiftY += coreOp->GetTopPadding();
+		    }
+#endif
+		} 
+	      else
+		{
+		  const BoundingBox& scriptBox = underScript->GetBoundingBox();
+
+		  underShiftX = (baseBox.width - scriptBox.width) / 2;
+		  underShiftY = baseBox.descent + underSpacing + scriptBox.ascent;
+		  underClearance = ruleThickness;
 		}
 	    }
 
 	  if (overScript)
 	    {
-	      if (!overOp)
+	      Ptr<MathMLCharNode> cChar = overScript->GetCharNode();
+
+	      if (accent &&
+		  bChar && cChar &&
+		  isCombiningAbove(cChar->GetChar()) &&
+		  bChar->CombineWith(cChar, overShiftX, overShiftY))
 		{
-		  wOther = scaledMax(wOther, overScript->GetBoundingBox().width);
-		  nOther++;
+		  Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
+				  cChar->GetChar(), bChar->GetChar());
+
+#if defined(ENABLE_EXTENSIONS)
+		  if (overScript->IsEmbellishedOperator())
+		    {
+		      Ptr<MathMLEmbellishedOperatorElement> eOp =
+			smart_cast<MathMLEmbellishedOperatorElement>(overScript);
+		      assert(eOp);
+		      Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
+		      assert(coreOp);
+		      Globals::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
+		      overShiftY += coreOp->GetBottomPadding();
+		    }
+#endif
 		} 
 	      else
 		{
-		  wOp = scaledMax(wOp, overOp->GetMinBoundingBox().width);
-		  nOp++;
+		  const BoundingBox& scriptBox = overScript->GetBoundingBox();
+
+		  overShiftX = (baseBox.width - scriptBox.width) / 2 + scaledMax(0, baseBox.rBearing - baseBox.width);
+		  overShiftY = baseBox.ascent + overSpacing + scriptBox.descent;
+		  overClearance = ruleThickness;
 		}
 	    }
 
-	  if (nOp > 0) {
-	    scaled w = (nOther == 0) ? wOp : wOther;
-
-	    if (baseOp) baseOp->HorizontalStretchTo(w);
-	    if (underOp) underOp->HorizontalStretchTo(w);
-	    if (overOp) overOp->HorizontalStretchTo(w);
-	  }
-
-	  if (baseOp) base->DoLayout(ctxt);
-	  if (underScript && underOp) underScript->DoLayout(ctxt);
-	  if (overScript && overOp) overScript->DoLayout(ctxt);
+	  baseShiftX = scaledMax(0, - scaledMin(overShiftX, underShiftX));
 	}
 
-      const BoundingBox& baseBox = base->GetBoundingBox();
-      Ptr<const MathMLCharNode> bChar = base->GetCharNode();
+      overShiftX += baseShiftX;
+      underShiftX += baseShiftX;
+
+      box = base->GetBoundingBox();
+      box.width += baseShiftX;
+      box.lBearing += baseShiftX;
 
       if (underScript)
 	{
-	  Ptr<MathMLCharNode> cChar = underScript->GetCharNode();
+	  const BoundingBox& scriptBox = underScript->GetBoundingBox();
 
-	  if (accentUnder &&
-	      bChar && cChar &&
-	      isCombiningBelow(cChar->GetChar()) &&
-	      bChar->CombineWith(cChar, underShiftX, underShiftY))
-	    {
-	      Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent under U+%04X",
-			      cChar->GetChar(), bChar->GetChar());
-
-	      underShiftY = -underShiftY;
-
-#if defined(ENABLE_EXTENSIONS)
-	      if (underScript->IsEmbellishedOperator())
-		{
-		  Ptr<MathMLEmbellishedOperatorElement> eOp =
-		    smart_cast<MathMLEmbellishedOperatorElement>(underScript);
-		  assert(eOp);
-		  Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-		  assert(coreOp);
-		  underShiftY += coreOp->GetTopPadding();
-		}
-#endif
-	    } 
-	  else
-	    {
-	      const BoundingBox& scriptBox = underScript->GetBoundingBox();
-
-	      underShiftX = (baseBox.width - scriptBox.width) / 2;
-	      underShiftY = baseBox.descent + underSpacing + scriptBox.ascent;
-	      underClearance = ruleThickness;
-	    }
+	  box.width = scaledMax(box.width, underShiftX + scriptBox.width);
+	  box.rBearing = scaledMax(box.rBearing, underShiftX + scriptBox.rBearing);
+	  box.lBearing = scaledMin(box.lBearing, underShiftX + scriptBox.lBearing);
+	  box.ascent   = scaledMax(box.ascent, scriptBox.ascent - underShiftY);
+	  box.descent  = scaledMax(box.descent, scriptBox.descent + underShiftY);
+	  box.descent += underClearance;
 	}
 
       if (overScript)
 	{
-	  Ptr<MathMLCharNode> cChar = overScript->GetCharNode();
+	  const BoundingBox& scriptBox = overScript->GetBoundingBox();
 
-	  if (accent &&
-	      bChar && cChar &&
-	      isCombiningAbove(cChar->GetChar()) &&
-	      bChar->CombineWith(cChar, overShiftX, overShiftY))
-	    {
-	      Globals::logger(LOG_DEBUG, "this is the special handling for U+%04X used as accent over U+%04X",
-			      cChar->GetChar(), bChar->GetChar());
-
-#if defined(ENABLE_EXTENSIONS)
-	      if (overScript->IsEmbellishedOperator())
-		{
-		  Ptr<MathMLEmbellishedOperatorElement> eOp =
-		    smart_cast<MathMLEmbellishedOperatorElement>(overScript);
-		  assert(eOp);
-		  Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-		  assert(coreOp);
-		  Globals::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
-		  overShiftY += coreOp->GetBottomPadding();
-		}
-#endif
-	    } 
-	  else
-	    {
-	      const BoundingBox& scriptBox = overScript->GetBoundingBox();
-
-	      overShiftX = (baseBox.width - scriptBox.width) / 2 + scaledMax(0, baseBox.rBearing - baseBox.width);
-	      overShiftY = baseBox.ascent + overSpacing + scriptBox.descent;
-	      overClearance = ruleThickness;
-	    }
+	  box.width = scaledMax(box.width, overShiftX + scriptBox.width);
+	  box.rBearing = scaledMax(box.rBearing, overShiftX + scriptBox.rBearing);
+	  box.lBearing = scaledMin(box.lBearing, overShiftX + scriptBox.lBearing);
+	  box.ascent   = scaledMax(box.ascent, scriptBox.ascent + overShiftY);
+	  box.descent  = scaledMax(box.descent, scriptBox.descent - overShiftY);
+	  box.ascent += overClearance;
 	}
-
-      baseShiftX = scaledMax(0, - scaledMin(overShiftX, underShiftX));
-    }
-
-  overShiftX += baseShiftX;
-  underShiftX += baseShiftX;
-
-  box = base->GetBoundingBox();
-  box.width += baseShiftX;
-  box.lBearing += baseShiftX;
-
-  if (underScript)
-    {
-      const BoundingBox& scriptBox = underScript->GetBoundingBox();
-
-      box.width = scaledMax(box.width, underShiftX + scriptBox.width);
-      box.rBearing = scaledMax(box.rBearing, underShiftX + scriptBox.rBearing);
-      box.lBearing = scaledMin(box.lBearing, underShiftX + scriptBox.lBearing);
-      box.ascent   = scaledMax(box.ascent, scriptBox.ascent - underShiftY);
-      box.descent  = scaledMax(box.descent, scriptBox.descent + underShiftY);
-      box.descent += underClearance;
-    }
-
-  if (overScript)
-    {
-      const BoundingBox& scriptBox = overScript->GetBoundingBox();
-
-      box.width = scaledMax(box.width, overShiftX + scriptBox.width);
-      box.rBearing = scaledMax(box.rBearing, overShiftX + scriptBox.rBearing);
-      box.lBearing = scaledMin(box.lBearing, overShiftX + scriptBox.lBearing);
-      box.ascent   = scaledMax(box.ascent, scriptBox.ascent + overShiftY);
-      box.descent  = scaledMax(box.descent, scriptBox.descent - overShiftY);
-      box.ascent += overClearance;
-    }
   
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

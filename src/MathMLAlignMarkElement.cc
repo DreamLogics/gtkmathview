@@ -82,8 +82,7 @@ MathMLAlignMarkElement::Setup(RenderingEnvironment* env)
 void
 MathMLAlignMarkElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-  ResetDirtyLayout(ctxt.GetLayoutType());
+  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 bool

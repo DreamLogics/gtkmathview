@@ -110,9 +110,12 @@ MathMLScriptElement::SetSuperScript(const Ptr<MathMLElement>& elem)
 }
 
 void
-MathMLScriptElement::Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&)
+MathMLScriptElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
 {
-  assert(0);
+  assert(oldElem);
+  if (oldElem == base) SetBase(newElem);
+  if (oldElem == subScript) SetSubScript(newElem);
+  if (oldElem == superScript) SetSuperScript(newElem);
 }
 
 Ptr<MathMLElement>
@@ -191,6 +194,8 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
+  MathMLElement::Setup(env);
+
   ScriptSetup(env);
 
   assert(base);
@@ -244,55 +249,55 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 void
 MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  assert(base);
-
-  base->DoLayout(ctxt);
-  if (subScript) subScript->DoLayout(ctxt);
-  if (superScript) superScript->DoLayout(ctxt);
-
-  Ptr<MathMLElement> rel = findRightmostChild(base);
-  assert(rel);
-
-  const BoundingBox& baseBox = base->GetBoundingBox();
-  BoundingBox relBox = rel->GetBoundingBox();
-  relBox.rBearing = baseBox.rBearing;
-  relBox.width = baseBox.width;
-
-  BoundingBox subScriptBox;
-  BoundingBox superScriptBox;
-
-  subScriptBox.Null();
-  if (subScript) subScriptBox = subScript->GetBoundingBox();
-
-  superScriptBox.Null();
-  if (superScript) superScriptBox = superScript->GetBoundingBox();
-
-  DoScriptLayout(relBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
-
-  box = baseBox;
-
-  box.width = scaledMax(box.width,
-			scaledMax(superShiftX + superScriptBox.width,
-				  subShiftX + subScriptBox.width));
-  box.rBearing = scaledMax(box.rBearing,
-			   scaledMax(superShiftX + superScriptBox.rBearing,
-				     subShiftX + subScriptBox.rBearing));
-
-  if (subScript)
+  if (HasDirtyLayout(ctxt))
     {
-      box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
-      box.descent  = scaledMax(box.descent, subScriptBox.descent + subShiftY);
-    }
+      assert(base);
+      base->DoLayout(ctxt);
+      if (subScript) subScript->DoLayout(ctxt);
+      if (superScript) superScript->DoLayout(ctxt);
 
-  if (superScript)
-    {
-      box.ascent   = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
-      box.descent  = scaledMax(box.descent, superScriptBox.descent - superShiftY);
-    }
+      Ptr<MathMLElement> rel = findRightmostChild(base);
+      assert(rel);
 
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      const BoundingBox& baseBox = base->GetBoundingBox();
+      BoundingBox relBox = rel->GetBoundingBox();
+      relBox.rBearing = baseBox.rBearing;
+      relBox.width = baseBox.width;
+
+      BoundingBox subScriptBox;
+      BoundingBox superScriptBox;
+
+      subScriptBox.Null();
+      if (subScript) subScriptBox = subScript->GetBoundingBox();
+
+      superScriptBox.Null();
+      if (superScript) superScriptBox = superScript->GetBoundingBox();
+
+      DoScriptLayout(relBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
+
+      box = baseBox;
+
+      box.width = scaledMax(box.width,
+			    scaledMax(superShiftX + superScriptBox.width,
+				      subShiftX + subScriptBox.width));
+      box.rBearing = scaledMax(box.rBearing,
+			       scaledMax(superShiftX + superScriptBox.rBearing,
+					 subShiftX + subScriptBox.rBearing));
+
+      if (subScript)
+	{
+	  box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
+	  box.descent  = scaledMax(box.descent, subScriptBox.descent + subShiftY);
+	}
+
+      if (superScript)
+	{
+	  box.ascent   = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
+	  box.descent  = scaledMax(box.descent, superScriptBox.descent - superShiftY);
+	}
+
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

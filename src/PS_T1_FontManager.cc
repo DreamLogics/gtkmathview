@@ -31,8 +31,6 @@
 
 #include "t1lib.h"
 
-#include "Iterator.hh"
-#include "Container.hh"
 #include "Globals.hh"
 #include "PS_T1_Font.hh"
 #include "PS_T1_FontManager.hh"
@@ -68,17 +66,21 @@ PS_T1_FontManager::SearchNativeFont(const FontAttributes& fa,
 void
 PS_T1_FontManager::ResetUsedChars() const
 {
-  for (Iterator<Bucket*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    if (i()->used) {
-      const AFont* font = i()->font;
-      assert(font != NULL);
-      const PS_T1_Font* ps_font = TO_PS_T1_FONT(font);
-      assert(ps_font != NULL);
+  for (std::vector<Bucket*>::const_iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i);
+      if ((*i)->used)
+	{
+	  const AFont* font = (*i)->font;
+	  assert(font != NULL);
+	  const PS_T1_Font* ps_font = TO_PS_T1_FONT(font);
+	  assert(ps_font != NULL);
 
-      ps_font->ResetUsedChars();
+	  ps_font->ResetUsedChars();
+	}
     }
-  }
 }
 
 void
@@ -86,47 +88,54 @@ PS_T1_FontManager::DumpFontDictionary(FILE* output, bool subset) const
 {
   assert(output != NULL);
 
-  Container<T1_FontDesc*> fontDesc;
+  std::list<T1_FontDesc*> fontDesc;
 
-  for (Iterator<Bucket*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    if (i()->used) {
-      const AFont* font = i()->font;
-      assert(font != NULL);
-      const PS_T1_Font* ps_font = TO_PS_T1_FONT(font);
-      assert(ps_font != NULL);
+  for (std::vector<Bucket*>::const_iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i);
+      if ((*i)->used)
+	{
+	  const AFont* font = (*i)->font;
+	  assert(font != NULL);
+	  const PS_T1_Font* ps_font = TO_PS_T1_FONT(font);
+	  assert(ps_font != NULL);
 
-      if (subset)
-	SetUsedChars(fontDesc, ps_font->GetNativeFontId(), ps_font->GetUsedChars());
-      else
-	SetUsedChars(fontDesc, ps_font->GetNativeFontId());
+	  if (subset)
+	    SetUsedChars(fontDesc, ps_font->GetNativeFontId(), ps_font->GetUsedChars());
+	  else
+	    SetUsedChars(fontDesc, ps_font->GetNativeFontId());
 
 #if 0      
-      unsigned id = t1_font->GetNativeFontId();
-      if (!fontId.Contains(id)) fontId.Append(id);
+	  unsigned id = t1_font->GetNativeFontId();
+	  if (!fontId.Contains(id)) fontId.Append(id);
 #endif
-    }
-  }
-
-  for (Iterator<T1_FontDesc*> i(fontDesc); i.More(); i.Next()) {
-    assert(i() != NULL);
-
-    if (i.IsFirst()) {
-      fprintf(output, "%%%%DocumentSuppliedResources: font ");
-    } else {
-      fprintf(output, "%%%%+ font ");
+	}
     }
 
-    fprintf(output, "%s\n", T1_GetFontName(i()->id));
+  for (std::list<T1_FontDesc*>::const_iterator i = fontDesc.begin();
+       i != fontDesc.end();
+       i++)
+    {
+      assert(*i);
 
-    if (i.IsLast()) fprintf(output, "\n\n");
-  }
+      if (i == fontDesc.begin())
+	fprintf(output, "%%%%DocumentSuppliedResources: font ");
+      else 
+	fprintf(output, "%%%%+ font ");
+
+      fprintf(output, "%s\n", T1_GetFontName((*i)->id));
+
+      if (i == fontDesc.end()) fprintf(output, "\n\n");
+    }
 
   fprintf(output, "%%%%BeginSetup\n");
 
-  while (!fontDesc.IsEmpty()) {
-    T1_FontDesc* desc = fontDesc.RemoveFirst();
+  while (!fontDesc.empty()) {
+    T1_FontDesc* desc = fontDesc.front();
     assert(desc != NULL);
+    fontDesc.pop_front();
 
     Globals::logger(LOG_DEBUG, "subset font `%d'", desc->id);
 
@@ -194,59 +203,70 @@ PS_T1_FontManager::DumpFontDictionary(FILE* output, bool subset) const
 
   fprintf(output, "%%%%EndSetup\n\n");
 
-  for (Iterator<Bucket*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    if (i()->used) {
-      const AFont* font = i()->font;
-      assert(font != NULL);
-      const T1_Font* t1_font = TO_T1_FONT(font);
-      assert(t1_font != NULL);
+  for (std::vector<Bucket*>::iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i);
+      if ((*i)->used)
+	{
+	  const AFont* font = (*i)->font;
+	  assert(font != NULL);
+	  const T1_Font* t1_font = TO_T1_FONT(font);
+	  assert(t1_font != NULL);
 
-      fprintf(output, "/F%d /%s findfont %f scalefont def\n",
-	      t1_font->GetFontId(),
-	      T1_GetFontName(t1_font->GetNativeFontId()),
-	      t1_font->GetScale());
+	  fprintf(output, "/F%d /%s findfont %f scalefont def\n",
+		  t1_font->GetFontId(),
+		  T1_GetFontName(t1_font->GetNativeFontId()),
+		  t1_font->GetScale());
+	}
     }
-  }
 }
 
 void
-PS_T1_FontManager::SetUsedChars(Container<T1_FontDesc*>& fontDesc, unsigned id,
+PS_T1_FontManager::SetUsedChars(std::list<T1_FontDesc*>& fontDesc, unsigned id,
 				const char used[])
 {
-  for (Iterator<T1_FontDesc*> desc(fontDesc); desc.More(); desc.Next()) {
-    assert(desc() != NULL);
-    if (desc()->id == id) {
-      for (unsigned i = 0; i < 256; i++)
-        desc()->used[i] |= used[i];
-      return;
+  for (std::list<T1_FontDesc*>::iterator desc = fontDesc.begin();
+       desc != fontDesc.end();
+       desc++)
+    {
+      assert(*desc);
+      if ((*desc)->id == id)
+	{
+	  for (unsigned i = 0; i < 256; i++)
+	    (*desc)->used[i] |= used[i];
+	  return;
+	}
     }
-  }
 
   T1_FontDesc* desc = new T1_FontDesc;
   assert(desc != NULL);
   desc->id = id;
   for (unsigned i = 0; i < 256; i++) desc->used[i] = used[i];
-  fontDesc.Append(desc);
+  fontDesc.push_back(desc);
 }
 
 void
-PS_T1_FontManager::SetUsedChars(Container<T1_FontDesc*>& fontDesc, unsigned id)
+PS_T1_FontManager::SetUsedChars(std::list<T1_FontDesc*>& fontDesc, unsigned id)
 {
-  for (Iterator<T1_FontDesc*> desc(fontDesc); desc.More(); desc.Next()) {
-    assert(desc() != NULL);
-    if (desc()->id == id) {
-      for (unsigned i = 0; i < 256; i++)
-        desc()->used[i] = 1;
-      return;
+  for (std::list<T1_FontDesc*>::iterator desc = fontDesc.begin();
+       desc != fontDesc.end();
+       desc++) 
+    {
+      assert(*desc);
+      if ((*desc)->id == id) {
+	for (unsigned i = 0; i < 256; i++)
+	  (*desc)->used[i] = 1;
+	return;
+      }
     }
-  }
 
   T1_FontDesc* desc = new T1_FontDesc;
   assert(desc != NULL);
   desc->id = id;
   for (unsigned i = 0; i < 256; i++) desc->used[i] = 1;
-  fontDesc.Append(desc);
+  fontDesc.push_back(desc);
 }
 
 #if 0

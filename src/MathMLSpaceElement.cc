@@ -130,7 +130,7 @@ MathMLSpaceElement::Setup(RenderingEnvironment* env)
 void
 MathMLSpaceElement::DoLayout(const FormattingContext& ctxt)
 {
-  ResetDirtyLayout(ctxt.GetLayoutType());
+  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 bool

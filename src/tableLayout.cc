@@ -35,47 +35,43 @@
 void
 MathMLTableElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout(ctxt))
+    {
+      scaled aAvailWidth = PrepareLabelsLayout(ctxt);
 
-  scaled aAvailWidth = PrepareLabelsLayout(ctxt);
+      if (ctxt.GetLayoutType() == LAYOUT_MIN) DoHorizontalMinimumLayout();
+      else DoHorizontalLayout(ctxt);
 
-  if (ctxt.GetLayoutType() == LAYOUT_MIN) DoHorizontalMinimumLayout();
-  else DoHorizontalLayout(ctxt);
+      if (HasLabels()) DoLabelsLayout(ctxt);
 
-  if (HasLabels()) DoLabelsLayout(ctxt);
-
-  if (ctxt.GetLayoutType() == LAYOUT_AUTO) {
-    StretchyCellsLayout();
-    AdjustTableWidth(ctxt.GetAvailableWidth());
-  }
-
-  DoVerticalLayout(ctxt.GetLayoutType());
-
-  box.Set(GetTableWidth(), 0, 0);
-  AlignTable(GetTableHeight(), box);
-
-  if (HasLabels()) AdjustTableLayoutWithLabels(ctxt);
-
-#if 0
-  cout << "`mtable' DoBoxedLayout (" << id << ',' << bid << ',' << sp2ipx(availWidth);
-  cout << ") [" << sp2ipx(box.width) << ',' << sp2ipx(box.GetHeight()) << ']' << endl;
-#endif
-
-  for (unsigned i = 0; i < nRows; i++) {
-    if (row[i].mtr)
-      row[i].mtr->box.Set(GetColumnWidth(0, nColumns), row[i].ascent, row[i].descent);
-
-    for (unsigned j = 0; j < nColumns; j++) {
-      if (cell[i][j].mtd && !cell[i][j].spanned) {
-	scaled width = GetColumnWidth(j, cell[i][j].colSpan);
-	scaled height = GetRowHeight(i, cell[i][j].rowSpan);
-
-	cell[i][j].mtd->box.Set(width, row[i].ascent, height - row[i].ascent);
+      if (ctxt.GetLayoutType() == LAYOUT_AUTO) {
+	StretchyCellsLayout();
+	AdjustTableWidth(ctxt.GetAvailableWidth());
       }
-    }
-  }
 
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      DoVerticalLayout(ctxt.GetLayoutType());
+
+      box.Set(GetTableWidth(), 0, 0);
+      AlignTable(GetTableHeight(), box);
+
+      if (HasLabels()) AdjustTableLayoutWithLabels(ctxt);
+
+      for (unsigned i = 0; i < nRows; i++) {
+	if (row[i].mtr)
+	  row[i].mtr->box.Set(GetColumnWidth(0, nColumns), row[i].ascent, row[i].descent);
+
+	for (unsigned j = 0; j < nColumns; j++) {
+	  if (cell[i][j].mtd && !cell[i][j].spanned) {
+	    scaled width = GetColumnWidth(j, cell[i][j].colSpan);
+	    scaled height = GetRowHeight(i, cell[i][j].rowSpan);
+
+	    cell[i][j].mtd->box.Set(width, row[i].ascent, height - row[i].ascent);
+	  }
+	}
+      }
+
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void
@@ -704,7 +700,18 @@ MathMLTableElement::DoVerticalLayout(LayoutId id)
 	  !cell[i][j].spanned &&
 	  cell[i][j].rowAlign == ROW_ALIGN_BASELINE) {
 	const BoundingBox& box = cell[i][j].mtd->GetBoundingBox();
+        ascent = scaledMax(ascent, box.ascent);
+        if (cell[i][j].rowSpan == 1) descent = scaledMax(descent, box.descent);
       }
+
+    if (HasLabels()) {
+      if (rowLabel[i].labelElement != NULL &&
+          rowLabel[i].rowAlign == ROW_ALIGN_BASELINE) {
+        const BoundingBox& labelBox = rowLabel[i].labelElement->GetBoundingBox();
+        ascent = scaledMax(ascent, labelBox.ascent);
+        descent = scaledMax(descent, labelBox.descent);
+      }
+    }
 
     for (j = 0; j < nColumns; j++)
       if (cell[i][j].mtd &&

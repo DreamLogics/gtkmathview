@@ -106,14 +106,14 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 void
 MathMLLinearContainerElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (HasDirtyLayout())
+  if (HasDirtyLayout(ctxt))
     {
       for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
 	   elem != content.end();
 	   elem++)
 	(*elem)->DoLayout(ctxt);
 
-      ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
     }
 }
 

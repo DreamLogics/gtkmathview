@@ -367,7 +367,7 @@ main(int argc, char *argv[])
   }
 
   if (configPath == NULL) configPath = getenv("MATHENGINECONF");
-  
+
   Globals::InitGlobalData(configPath);  
   Globals::logger.SetLogLevel(logLevel);
   Globals::logger(LOG_INFO, "Font size : %f", fontSize);
@@ -422,8 +422,6 @@ main(int argc, char *argv[])
     }
 
     area.SetOutputFile(outFile);
-
-    Globals::logger.SetLogLevel(0);
 
     engine.SetDefaultFontSize(fontSize);
     Globals::DrawMissingCharacter(showMissing);

@@ -28,7 +28,9 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "Globals.hh"
 #include "Adaptors.hh"
+#include "for_each_if.h"
 #include "ChildList.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
@@ -206,7 +208,18 @@ MathMLMultiScriptsElement::SetPreSuperScript(unsigned i, const Ptr<MathMLElement
 void
 MathMLMultiScriptsElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<MathMLElement>& newElem)
 {
-  assert(0);
+  assert(oldElem);
+  if (oldElem == base) SetBase(newElem);
+  std::vector< Ptr<MathMLElement> >::iterator p;
+
+  if ((p = std::find(subScript.begin(), subScript.end(), oldElem)) != subScript.end())
+    SetSubScript(p - subScript.begin(), newElem);
+  else if ((p = std::find(superScript.begin(), superScript.end(), oldElem)) != superScript.end())
+    SetSuperScript(p - superScript.begin(), newElem);
+  else if ((p = std::find(preSubScript.begin(), preSubScript.end(), oldElem)) != preSubScript.end())
+    SetPreSubScript(p - preSubScript.begin(), newElem);
+  else if ((p = std::find(preSuperScript.begin(), preSuperScript.end(), oldElem)) != preSuperScript.end())
+    SetPreSuperScript(p - preSuperScript.begin(), newElem);
 }
 
 void
@@ -239,8 +252,10 @@ MathMLMultiScriptsElement::Normalize()
 	    }
 	  else if (node.get_nodeName() == "mprescripts")
 	    {
-	      // FIXME: issue warning if preScripts is already set
-	      preScripts = true;
+	      if (preScripts)
+		Globals::logger(LOG_WARNING, "multiple <mprescripts> elements in mmultiscript");
+	      else
+		preScripts = true;
 	      i++;
 	    }
 	  else if (!preScripts)
@@ -286,9 +301,9 @@ MathMLMultiScriptsElement::Normalize()
 
 	      if (sub || sup)
 		{
-		  SetPreSubScript(nScripts, sub);
-		  SetPreSuperScript(nScripts, sup);
-		  nScripts++;
+		  SetPreSubScript(nPreScripts, sub);
+		  SetPreSuperScript(nPreScripts, sup);
+		  nPreScripts++;
 		}
 	    }
 	}
@@ -299,16 +314,18 @@ MathMLMultiScriptsElement::Normalize()
 #endif // HAVE_GMETADOM
 
       if (base) base->Normalize();
-      std::for_each(subScript.begin(), subScript.end(), NormalizeAdaptor());
-      std::for_each(superScript.begin(), superScript.end(), NormalizeAdaptor());
-      std::for_each(preSubScript.begin(), preSubScript.end(), NormalizeAdaptor());
-      std::for_each(preSuperScript.begin(), preSuperScript.end(), NormalizeAdaptor());
+      for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), NormalizeAdaptor());
+      for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), NormalizeAdaptor());
+      for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), NormalizeAdaptor());
+      for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), NormalizeAdaptor());
     }
 }
 
 void
 MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 {
+  background = env->GetBackgroundColor();
+
   assert(base);
   base->Setup(env);
 
@@ -316,10 +333,10 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
   env->AddScriptLevel(1);
   env->SetDisplayStyle(false);
 
-  std::for_each(subScript.begin(), subScript.end(), std::bind2nd(SetupAdaptor(), env));
-  std::for_each(superScript.begin(), superScript.end(), std::bind2nd(SetupAdaptor(), env));
-  std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(SetupAdaptor(), env));
-  std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(SetupAdaptor(), env));
+  for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), env));
+  for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), env));
+  for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), env));
+  for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), env));
 
   ScriptSetup(env);
 
@@ -329,7 +346,7 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 void
 MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout())
+  if (HasDirtyLayout(ctxt))
     {
       assert(base);
       base->DoLayout(ctxt);
@@ -408,7 +425,7 @@ MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 	  box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
 	}
 
-      ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
     }
 }
 
@@ -476,10 +493,10 @@ MathMLMultiScriptsElement::Render(const DrawingArea& area)
       RenderBackground(area);
       assert(base);
       base->Render(area);
-      std::for_each(subScript.begin(), subScript.end(), std::bind2nd(RenderAdaptor(), &area));
-      std::for_each(superScript.begin(), superScript.end(), std::bind2nd(RenderAdaptor(), &area));
-      std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(RenderAdaptor(), &area));
-      std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(RenderAdaptor(), &area));
+      for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(RenderAdaptor(), &area));
+      for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(RenderAdaptor(), &area));
+      for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(RenderAdaptor(), &area));
+      for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(RenderAdaptor(), &area));
       ResetDirty();
     }
 }
@@ -490,10 +507,10 @@ MathMLMultiScriptsElement::ReleaseGCs()
   MathMLElement::ReleaseGCs();
   assert(base);
   base->ReleaseGCs();
-  std::for_each(subScript.begin(), subScript.end(), ReleaseGCsAdaptor());
-  std::for_each(superScript.begin(), superScript.end(), ReleaseGCsAdaptor());
-  std::for_each(preSubScript.begin(), preSubScript.end(), ReleaseGCsAdaptor());
-  std::for_each(preSuperScript.begin(), preSuperScript.end(), ReleaseGCsAdaptor());
+  for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), ReleaseGCsAdaptor());
+  for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), ReleaseGCsAdaptor());
+  for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), ReleaseGCsAdaptor());
+  for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), ReleaseGCsAdaptor());
 }
 
 Ptr<MathMLElement>
@@ -506,31 +523,35 @@ MathMLMultiScriptsElement::Inside(scaled x, scaled y)
 
   for (vector< Ptr<MathMLElement> >::iterator elem = preSubScript.begin();
        elem != preSubScript.end(); elem++)
-    {
-      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-      if (inside) return inside;
-    }
+    if (*elem)
+      {
+	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	if (inside) return inside;
+      }
 
   for (vector< Ptr<MathMLElement> >::iterator elem = preSuperScript.begin();
        elem != preSuperScript.end(); elem++)
-    {
-      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-      if (inside) return inside;
-    }
+    if (*elem)
+      {
+	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	if (inside) return inside;
+      }
 
   for (vector< Ptr<MathMLElement> >::iterator elem = subScript.begin();
        elem != subScript.end(); elem++)
-    {
-      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-      if (inside) return inside;
-    }
+    if (*elem)
+      {
+	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	if (inside) return inside;
+      }
 
   for (vector< Ptr<MathMLElement> >::iterator elem = superScript.begin();
        elem != superScript.end(); elem++)
-    {
-      Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
-      if (inside) return inside;
-    }
+    if (*elem)
+      {
+	Ptr<MathMLElement> inside = (*elem)->Inside(x, y);
+	if (inside) return inside;
+      }
 
   return this;
 }
@@ -597,10 +618,10 @@ MathMLMultiScriptsElement::SetDirty(const Rectangle* rect)
     {
       MathMLElement::SetDirty(rect);
       if (base) base->SetDirty(rect);
-      std::for_each(subScript.begin(), subScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
-      std::for_each(superScript.begin(), superScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
-      std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
-      std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(SetDirtyAdaptor(), rect));
+      for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyAdaptor(), rect));
+      for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyAdaptor(), rect));
+      for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyAdaptor(), rect));
+      for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyAdaptor(), rect));
     }
 }
 
@@ -611,9 +632,9 @@ MathMLMultiScriptsElement::SetDirtyLayout(bool children)
   if (children)
     {
       if (base) base->SetDirtyLayout(children);
-      std::for_each(subScript.begin(), subScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
-      std::for_each(superScript.begin(), superScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
-      std::for_each(preSubScript.begin(), preSubScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
-      std::for_each(preSuperScript.begin(), preSuperScript.end(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
+      for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetDirtyLayoutAdaptor(), true));
     }
 }

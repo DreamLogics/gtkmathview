@@ -79,24 +79,28 @@ void
 MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
-
-  background = env->GetBackgroundColor();
-  if (child) child->Setup(env);
-  ResetDirtyAttribute();
+  if (true || HasDirtyAttribute() || HasChildWithDirtyAttribute())
+    {
+      background = env->GetBackgroundColor();
+      if (child) child->Setup(env);
+      ResetDirtyAttribute();
+    }
 }
 
 void
 MathMLBinContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (HasDirtyLayout())
+  if (HasDirtyLayout(ctxt))
     {
-      box.Null();
       if (child)
 	{
 	  child->DoLayout(ctxt);
 	  box = child->GetBoundingBox();
 	}
-      ResetDirtyLayout(ctxt.GetLayoutType());
+      else
+	box.Null();
+
+      ResetDirtyLayout(ctxt);
     }
 }
 
@@ -149,7 +153,9 @@ void
 MathMLBinContainerElement::SetDirty(const Rectangle* rect)
 {
   dirtyBackground =
-    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent()
+     && ((GetParent()->IsSelected() != IsSelected())
+	 || (GetParent()->GetBackgroundColor() != GetBackgroundColor()))) ? 1 : 0;
 
   if (IsDirty() || HasDirtyChildren()) return;
   //if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;

@@ -402,6 +402,8 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
   else if (HasLink()) env->SetBackgroundColor(Globals::configuration.GetLinkBackground());
   delete value;
 
+  Globals::logger(LOG_DEBUG, "doing token setup");
+
   color      = env->GetColor();
   background = env->GetBackgroundColor();
   sppm       = env->GetScaledPointsPerEm();
@@ -420,30 +422,31 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 void
 MathMLTokenElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  box.Null();
-  for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
-       text != GetContent().end();
-       text++)
+  if (HasDirtyLayout(ctxt))
     {
-      assert(*text);
+      box.Null();
+      for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin();
+	   text != GetContent().end();
+	   text++)
+	{
+	  assert(*text);
 
-      // as the minimum layout, that we have previously done,
-      // so we save some work.
-      if (ctxt.GetLayoutType() == LAYOUT_MIN) (*text)->DoLayout(ctxt);
+	  // as the minimum layout, that we have previously done,
+	  // so we save some work.
+	  if (ctxt.GetLayoutType() == LAYOUT_MIN) (*text)->DoLayout(ctxt);
 
-      // if we do not insert MathMLSpaceNodes in the layout, they will not be
-      // positioned correctly, since positioning is done thru the layout.
-      // In such way, If a space node is the first inside a token, it will produce
-      // a zero-origin rectangle which is obviously incorrect
-      box.Append((*text)->GetBoundingBox());
-      box.Append((sppm * (*text)->GetSpacing()) / 18);
+	  // if we do not insert MathMLSpaceNodes in the layout, they will not be
+	  // positioned correctly, since positioning is done thru the layout.
+	  // In such way, If a space node is the first inside a token, it will produce
+	  // a zero-origin rectangle which is obviously incorrect
+	  box.Append((*text)->GetBoundingBox());
+	  box.Append((sppm * (*text)->GetSpacing()) / 18);
+	}
+
+      AddItalicCorrection();
+
+      ResetDirtyLayout(ctxt);
     }
-
-  AddItalicCorrection();
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

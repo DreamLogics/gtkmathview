@@ -55,9 +55,11 @@ MathMLAlignGroupElement::~MathMLAlignGroupElement()
 void
 MathMLAlignGroupElement::DoLayout(const FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-  box.Set(width, 0, 0);
-  ResetDirtyLayout(ctxt.GetLayoutType());
+  if (HasDirtyLayout(ctxt))
+    {
+      box.Set(width, 0, 0);
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

@@ -582,7 +582,7 @@ gtk_math_view_load_doc(GtkMathView* math_view, GdomeDocument* doc)
   g_return_val_if_fail(doc != NULL, FALSE);
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
 
-  bool res = math_view->interface->Load(doc);
+  bool res = math_view->interface->Load(GMetaDOM::Document(doc));
   if (!res) return FALSE;
 
   math_view->interface->Layout();
@@ -601,7 +601,7 @@ gtk_math_view_load_tree(GtkMathView* math_view, GdomeElement* elem)
   g_return_val_if_fail(elem != NULL, FALSE);
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
 
-  bool res = math_view->interface->Load(elem);
+  bool res = math_view->interface->Load(GMetaDOM::Element(elem));
   if (!res) return FALSE;
 
   math_view->interface->Layout();
@@ -749,7 +749,7 @@ gtk_math_view_set_selection(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
 
-  math_view->interface->SetSelected(findMathMLElement(elem));
+  math_view->interface->SetSelected(findMathMLElement(GMetaDOM::Element(elem)));
   paint_widget(math_view);
 }
 
@@ -760,7 +760,7 @@ gtk_math_view_reset_selection(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
 
-  math_view->interface->ResetSelected(findMathMLElement(elem));
+  math_view->interface->ResetSelected(findMathMLElement(GMetaDOM::Element(elem)));
   paint_widget(math_view);
 }
 
@@ -771,7 +771,7 @@ gtk_math_view_is_selected(GtkMathView* math_view, GdomeElement* elem)
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(elem != NULL, FALSE);
 
-  Ptr<MathMLElement> el = findMathMLElement(elem);
+  Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
   return el->IsSelected() ? TRUE : FALSE;
@@ -875,7 +875,7 @@ gtk_math_view_get_element_coords(GtkMathView* math_view, GdomeElement* elem, gin
   g_return_val_if_fail(math_view != NULL, FALSE);
   g_return_val_if_fail(elem != NULL, FALSE);
 
-  Ptr<MathMLElement> el = findMathMLElement(elem);
+  Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
   if (x != NULL) *x = sp2px(el->GetX());
@@ -891,7 +891,7 @@ gtk_math_view_get_element_rectangle(GtkMathView* math_view, GdomeElement* elem, 
   g_return_val_if_fail(elem != NULL, FALSE);
   g_return_val_if_fail(rect != NULL, FALSE);
 
-  Ptr<MathMLElement> el = findMathMLElement(elem);
+  Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
   const BoundingBox& box = el->GetBoundingBox();
@@ -1068,7 +1068,7 @@ gtk_math_view_action_get_selected(GtkMathView* math_view, GdomeElement* elem)
   g_return_val_if_fail(elem != NULL, 0);
 
   Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(elem));
+    smart_cast<MathMLActionElement>(findMathMLElement(GMetaDOM::Element(elem)));
   if (!action_element) return 0;
 
   return action_element->GetSelectedIndex();
@@ -1082,7 +1082,7 @@ gtk_math_view_action_set_selected(GtkMathView* math_view, GdomeElement* elem, gu
   g_return_if_fail(elem != NULL);
 
   Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(elem));
+    smart_cast<MathMLActionElement>(findMathMLElement(GMetaDOM::Element(elem)));
   if (!action_element) return;
 
   action_element->SetSelectedIndex(idx);
@@ -1100,7 +1100,7 @@ gtk_math_view_action_toggle(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(elem != NULL);
 
   Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(elem));
+    smart_cast<MathMLActionElement>(findMathMLElement(GMetaDOM::Element(elem)));
   if (!action_element) return;
 
   guint idx = action_element->GetSelectedIndex();

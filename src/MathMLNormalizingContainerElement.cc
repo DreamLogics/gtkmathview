@@ -47,8 +47,6 @@ MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 {
 }
 
-#include <stdio.h>
-
 void
 MathMLNormalizingContainerElement::Normalize()
 {
@@ -89,14 +87,13 @@ MathMLNormalizingContainerElement::Normalize()
 void
 MathMLNormalizingContainerElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  assert(child);
-
-  child->DoLayout(ctxt);
-  box = child->GetBoundingBox();
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
+  if (HasDirtyLayout(ctxt))
+    {
+      assert(child);
+      child->DoLayout(ctxt);
+      box = child->GetBoundingBox();
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

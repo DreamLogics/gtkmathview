@@ -40,10 +40,13 @@ FontManager::~FontManager()
 FontManager::Bucket*
 FontManager::SearchFont(const FontAttributes& fa, const class ExtraFontAttributes* efa) const
 {
-  for (Iterator<Bucket*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    if (i()->fontAttributes.Equals(fa) && i()->extraFontAttributes == efa) return i();
-  }
+  for (std::vector<Bucket*>::const_iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i);
+      if ((*i)->fontAttributes.Equals(fa) && (*i)->extraFontAttributes == efa) return *i;
+    }
 
   return NULL;
 }
@@ -52,10 +55,13 @@ FontManager::Bucket*
 FontManager::SearchFont(const class AFont* font) const
 {
   assert(font != NULL);
-  for (Iterator<Bucket*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    if (i()->font == font) return i();
-  }
+  for (std::vector<Bucket*>::const_iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i != NULL);
+      if ((*i)->font == font) return *i;
+    }
 
   return NULL;
 }
@@ -79,7 +85,7 @@ FontManager::GetFont(const FontAttributes& fa, const class ExtraFontAttributes* 
   bucket->font = font;
   bucket->used = false;
 
-  content.Append(bucket);
+  content.push_back(bucket);
 
   return bucket->font;
 }
@@ -87,10 +93,13 @@ FontManager::GetFont(const FontAttributes& fa, const class ExtraFontAttributes* 
 void
 FontManager::ResetUsedFonts() const
 {
-  for (Iterator<Bucket*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    i()->used = false;
-  }
+  for (std::vector<Bucket*>::const_iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i);
+      (*i)->used = false;
+    }
 }
 
 void

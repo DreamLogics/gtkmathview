@@ -3,9 +3,9 @@
     columnwidth="auto" columnspacing="0"
     >
       <mtr>
-        <mi>un</mi>
-	<mi>grande</mi>
-	<mi>ciao</mi>
+        <mtd> <mi>un</mi> </mtd>
+	<mtd> <mi>grande</mi> </mtd>
+	<mtd> <mi>ciao</mi> </mtd>
       </mtr>
     </mtable>
 </math>

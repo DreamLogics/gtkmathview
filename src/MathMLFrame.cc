@@ -70,7 +70,7 @@ MathMLFrame::SetDirtyLayout(bool)
   if (HasDirtyLayout()) return;
   dirtyLayout = 1;
   for (Ptr<MathMLElement> elem = GetParent(); 
-       elem && !elem->HasDirtyLayout(); 
+       elem && !elem->dirtyLayout; 
        elem = elem->GetParent())
     elem->dirtyLayout = 1;
 }

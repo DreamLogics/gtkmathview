@@ -177,34 +177,35 @@ MathMLRadicalElement::Setup(RenderingEnvironment* env)
 void
 MathMLRadicalElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
-
-  assert(radicand);
-  radicand->DoLayout(ctxt);
-  box = radicand->GetBoundingBox();
-
-  assert(radical);
-  radical->DoLayout(ctxt);
-  radical->DoVerticalStretchyLayout(box.ascent + lineThickness, box.descent, 0, false);
-  const BoundingBox& radBox = radical->GetBoundingBox();
-
-  box.width += radBox.width;
-  box.rBearing += radBox.width;
-  box.ascent = scaledMax(box.ascent + spacing, radBox.ascent);
-  box.descent = scaledMax(box.descent, radBox.descent);
-
-  if (index)
+  if (HasDirtyLayout(ctxt))
     {
-      index->DoLayout(ctxt);
-      const BoundingBox& indexBox = index->GetBoundingBox();
+      assert(radicand);
+      radicand->DoLayout(ctxt);
+      box = radicand->GetBoundingBox();
 
-      box.width += indexBox.width;
+      assert(radical);
+      radical->DoLayout(ctxt);
+      radical->DoVerticalStretchyLayout(box.ascent + lineThickness, box.descent, 0, false);
+      const BoundingBox& radBox = radical->GetBoundingBox();
 
-      if (box.GetHeight() / 2 < indexBox.GetHeight())
-	box.ascent += indexBox.GetHeight() - box.GetHeight() / 2;
+      box.width += radBox.width;
+      box.rBearing += radBox.width;
+      box.ascent = scaledMax(box.ascent + spacing, radBox.ascent);
+      box.descent = scaledMax(box.descent, radBox.descent);
+
+      if (index)
+	{
+	  index->DoLayout(ctxt);
+	  const BoundingBox& indexBox = index->GetBoundingBox();
+
+	  box.width += indexBox.width;
+
+	  if (box.GetHeight() / 2 < indexBox.GetHeight())
+	    box.ascent += indexBox.GetHeight() - box.GetHeight() / 2;
+	}
+
+      ResetDirtyLayout(ctxt);
     }
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
 }
 
 void

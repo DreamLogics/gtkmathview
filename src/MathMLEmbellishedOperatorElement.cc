@@ -74,33 +74,34 @@ MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
 void
 MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout(ctxt))
+    {
+      assert(child);
+      assert(coreOp);
 
-  assert(child);
-  assert(coreOp);
+      scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
-  scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
+      Globals::logger(LOG_DEBUG, "layout of embellishment %p script %d padding %d", this, script, sp2ipx(totalPadding));
 
-  Globals::logger(LOG_DEBUG, "layout of embellishment %p script %d padding %d", this, script, sp2ipx(totalPadding));
+      child->DoLayout(ctxt);
+      box = child->GetBoundingBox();
 
-  child->DoLayout(ctxt);
-  box = child->GetBoundingBox();
-
-  // WARNING: maybe in this case we should ask for the LAST char node...
-  Ptr<const MathMLCharNode> node = coreOp->GetCharNode();
-  if (node && isIntegral(node->GetChar())) {
-    // WARNING
-    // the following patch is needed in order to have integral sign working
-    box.width = scaledMax(box.width, box.rBearing);
-  }
-  box.width += totalPadding;
+      // WARNING: maybe in this case we should ask for the LAST char node...
+      Ptr<const MathMLCharNode> node = coreOp->GetCharNode();
+      if (node && isIntegral(node->GetChar())) {
+	// WARNING
+	// the following patch is needed in order to have integral sign working
+	box.width = scaledMax(box.width, box.rBearing);
+      }
+      box.width += totalPadding;
 
 #ifdef ENABLE_EXTENSIONS
-  box.ascent += coreOp->GetTopPadding();
-  box.descent += coreOp->GetBottomPadding();
+      box.ascent += coreOp->GetTopPadding();
+      box.descent += coreOp->GetBottomPadding();
 #endif // ENABLE_EXTENSIONS
 
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

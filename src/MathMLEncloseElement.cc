@@ -103,20 +103,22 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
 void
 MathMLEncloseElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout(ctxt))
+    {
+      assert(child);
 
-  assert(child);
+      MathMLNormalizingContainerElement::DoLayout(ctxt);
+      box = child->GetBoundingBox();
 
-  MathMLNormalizingContainerElement::DoLayout(ctxt);
-  box = child->GetBoundingBox();
+      if (notation != NOTATION_RADICAL)
+	{
+	  box = child->GetBoundingBox();
+	  box.ascent += spacing + lineThickness;
+	  box.width += spacing + lineThickness;
+	}
 
-  if (notation != NOTATION_RADICAL) {
-    box = child->GetBoundingBox();
-    box.ascent += spacing + lineThickness;
-    box.width += spacing + lineThickness;
-  }
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

@@ -2,7 +2,7 @@
   <!-- example of forbidden table-->
   <mtable frame="solid" columnlines="solid" rowlines="solid" columnalign="right" rowalign="bottom">
     <mtr>
-      <mi>ciao</mi>
+      <mtd> <mi>ciao</mi> </mtd>
       <mtd rowspan="2">
         <mi>O</mi>
       </mtd>

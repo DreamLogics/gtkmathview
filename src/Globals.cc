@@ -27,7 +27,6 @@
 #include <string.h>
 
 #include "Globals.hh"
-#include "Iterator.hh"
 #include "StringUnicode.hh"
 
 #ifdef HAVE_LIBT1
@@ -71,29 +70,30 @@ namespace Globals {
     entitiesTable.LoadInternalTable();
 #endif
 
-    Iterator<String*> dit(configuration.GetDictionaries());
-    if (dit.More()) {
-      while (dit.More()) {
-	assert(dit() != NULL);
-	logger(LOG_DEBUG, "loading dictionary `%s'", dit()->ToStaticC());
-	if (!dictionary.Load(dit()->ToStaticC())) {
-	  logger(LOG_WARNING, "could not load `%s'", dit()->ToStaticC());
+    if (!configuration.GetDictionaries().empty())
+      for (std::vector<String*>::const_iterator dit = configuration.GetDictionaries().begin();
+	   dit != configuration.GetDictionaries().end();
+	   dit++)
+	{
+	  assert(*dit);
+	  logger(LOG_DEBUG, "loading dictionary `%s'", (*dit)->ToStaticC());
+	  if (!dictionary.Load((*dit)->ToStaticC()))
+	    logger(LOG_WARNING, "could not load `%s'", (*dit)->ToStaticC());
 	}
-	dit.Next();
-      }
-    } else {
+    else {
       bool res = dictionary.Load("config/dictionary.xml");
       if (!res) dictionary.Load(PKGDATADIR"/dictionary.xml");
     }
 
-    if (getenv("T1LIB_CONFIG") == NULL && configuration.GetT1ConfigFiles().GetSize() == 1) {
-      StringC s("T1LIB_CONFIG=");
-      assert(configuration.GetT1ConfigFiles().GetFirst() != NULL);
-      s.Append(*configuration.GetT1ConfigFiles().GetFirst());
+    if (getenv("T1LIB_CONFIG") == NULL && configuration.GetT1ConfigFiles().size() == 1)
+      {
+	StringC s("T1LIB_CONFIG=");
+	assert(configuration.GetT1ConfigFiles()[0]);
+	s.Append(*configuration.GetT1ConfigFiles()[0]);
 
-      char *cs = strdup(s.ToStaticC());
-      putenv(cs);
-    }
+	char *cs = strdup(s.ToStaticC());
+	putenv(cs);
+      }
 
     done = true;
   }

@@ -23,10 +23,11 @@
 #ifndef DrawingArea_hh
 #define DrawingArea_hh
 
+#include <vector>
+
 #include "AFont.hh"
 #include "Shape.hh"
 #include "String.hh"
-#include "Container.hh"
 #include "BoundingBox.hh"
 #include "GraphicsContext.hh"
 
@@ -93,7 +94,7 @@ protected:
   RGBValue selectionForeground;
   RGBValue selectionBackground;
 
-  mutable Container<const GraphicsContext*> poolGC;
+  mutable std::vector<const GraphicsContext*> poolGC;
 };
 
 #endif // DrawingArea_hh

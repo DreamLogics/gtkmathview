@@ -25,7 +25,6 @@
 
 #ifdef HAVE_LIBT1
 
-#include "Container.hh"
 #include "FontManager.hh"
 #include "FontAttributes.hh"
 

@@ -195,7 +195,7 @@ findDOMNode(const Ptr<MathMLElement>& elem)
     elemP = elemP->GetParent();
 
   if (elemP) return elemP->GetDOMElement();
-  else return 0;
+  else return GMetaDOM::Element(0);
 }
 
 Ptr<MathMLElement>

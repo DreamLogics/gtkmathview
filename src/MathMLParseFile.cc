@@ -79,13 +79,13 @@ MathMLParseFile(const char* filename, bool subst)
     if (exc != 0) {
       gdome_di_unref(di, &exc);
       gdome_doc_unref(doc, &exc);
-      return 0;
+      return GMetaDOM::Document(0);
     }
 
     if (doc == 0) {
       // FIXME: this should be signalled as an exception, I think
       gdome_di_unref(di, &exc);
-      return 0;
+      return GMetaDOM::Document(0);
     }
 
     GMetaDOM::Document res(doc);

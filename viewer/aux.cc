@@ -153,7 +153,7 @@ leftSibling(const GMetaDOM::Node& node)
   while (p.get_parentNode() && p.get_parentNode().get_firstChild() == p)
     p = p.get_parentNode();
 
-  if (!p.get_parentNode()) return 0;
+  if (!p.get_parentNode()) return GMetaDOM::Node(0);
 
   GMetaDOM::Node prevSibling = p.get_previousSibling();
   assert(prevSibling);
@@ -174,7 +174,7 @@ rightSibling(const GMetaDOM::Node& node)
   while (p.get_parentNode() && p.get_parentNode().get_lastChild() == p)
     p = p.get_parentNode();
 
-  if (!p.get_parentNode()) return 0;
+  if (!p.get_parentNode()) return GMetaDOM::Node(0);
 
   GMetaDOM::Node nextSibling = p.get_nextSibling();
   assert(nextSibling);
@@ -197,7 +197,7 @@ find_common_siblings(GdomeElement* first, GdomeElement* last,
   GMetaDOM::Element fs(0);
   GMetaDOM::Element ls(0);
 
-  findCommonSiblings(first, last, fs, ls);
+  findCommonSiblings(GMetaDOM::Element(first), GMetaDOM::Element(last), fs, ls);
 
   if (firstS != NULL) *firstS = gdome_cast_el(fs.gdome_object());
   if (lastS != NULL) *lastS = gdome_cast_el(ls.gdome_object());

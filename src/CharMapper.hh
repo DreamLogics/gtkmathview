@@ -23,6 +23,9 @@
 #ifndef CharMapper_hh
 #define CharMapper_hh
 
+#include <vector>
+#include <functional>
+
 #if defined(HAVE_MINIDOM)
 #include "minidom.h"
 #elif defined(HAVE_GMETADOM)
@@ -57,8 +60,8 @@ public:
 private:
   struct FontMap {
     std::string id;
-    Container<CharMap*> multi; // actually, RANGE and MULTI maps
-    Container<CharMap*> single[CHAR_MAP_HASH_TABLE_SIZE]; // actually, SINGLE and STRETCHY
+    std::vector<CharMap*> multi; // actually, RANGE and MULTI maps
+    std::vector<CharMap*> single[CHAR_MAP_HASH_TABLE_SIZE]; // actually, SINGLE and STRETCHY
 
     StretchId GetStretch(Char) const;
     const CharMap* GetCharMap(Char, bool = false) const;
@@ -70,6 +73,21 @@ private:
 
     std::string         fontMapId;
     const FontMap*      fontMap;
+  };
+
+  // definition of local adaptors
+  struct DeleteFontDescriptorAdaptor
+    : public std::unary_function<FontDescriptor*,void>
+  {
+    void operator()(FontDescriptor* desc) const
+    { delete desc; }
+  };
+
+  struct DeleteFontMapAdaptor
+    : public std::unary_function<FontMap*,void>
+  {
+    void operator()(FontMap* map) const
+    { delete map; }
   };
 
   bool FontifyCharAux(FontifiedChar&, const FontAttributes&, Char, bool = false) const;
@@ -99,8 +117,8 @@ private:
   void PatchConfiguration(void);
   const FontMap* SearchMapping(const std::string&) const;
 
-  Container<FontDescriptor*> fonts;
-  Container<FontMap*>        maps;
+  std::vector<FontDescriptor*> fonts;
+  std::vector<FontMap*>        maps;
 
   class FontManager& fontManager;
 

@@ -21,13 +21,29 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+
+#include <functional>
+#include <algorithm>
+
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
-#include "Iterator.hh"
 #include "Globals.hh"
 #include "FontAttributes.hh"
+
+// local definition of adaptors
+struct DumpAttributeAdaptor
+  : public std::unary_function<ExtraFontAttributes::ExtraFontAttribute*,void>
+{
+  void operator()(ExtraFontAttributes::ExtraFontAttribute* attr) const
+  {
+    assert(attr);
+    assert(attr->name != "");
+    assert(attr->value != "");
+    Globals::logger(LOG_DEBUG, "%s = '%s'", attr->name.c_str(), attr->value.c_str());
+  }
+};
 
 FontAttributes::FontAttributes()
 {
@@ -179,12 +195,15 @@ FontAttributes::Dump() const
 std::string
 ExtraFontAttributes::GetProperty(const std::string& name) const
 {
-  for (Iterator<ExtraFontAttribute*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    assert(i()->name != "");
-    assert(i()->value != "");
-    if (i()->name == name) return i()->value;
-  }
+  for (std::vector<ExtraFontAttribute*>::const_iterator i = content.begin();
+       i != content.end();
+       i++)
+    {
+      assert(*i);
+      assert((*i)->name != "");
+      assert((*i)->value != "");
+      if ((*i)->name == name) return (*i)->value;
+    }
 
   return "";
 }
@@ -195,19 +214,12 @@ ExtraFontAttributes::AddProperty(const std::string& name, const std::string& val
   ExtraFontAttribute* attribute = new ExtraFontAttribute;
   attribute->name = name;
   attribute->value = value;
-  content.Append(attribute);
+  content.push_back(attribute);
 }
 
 void
 ExtraFontAttributes::Dump() const
 {
   Globals::logger(LOG_DEBUG, "extra font attributes dump:");
-
-  for (Iterator<ExtraFontAttribute*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    assert(i()->name != "");
-    assert(i()->value != "");
-
-    Globals::logger(LOG_DEBUG, "%s = '%s'", i()->name.c_str(), i()->value.c_str());
-  }
+  std::for_each(content.begin(), content.end(), DumpAttributeAdaptor());
 }

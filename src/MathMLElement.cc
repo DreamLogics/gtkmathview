@@ -349,16 +349,11 @@ MathMLElement::IsSet(AttributeId id) const
 }
 
 void
-MathMLElement::Setup(RenderingEnvironment*)
+MathMLElement::Setup(RenderingEnvironment* env)
 {
   if (HasDirtyAttribute() || HasChildWithDirtyAttribute())
     {
-      // this function is defined to be empty but not pure-virtual
-      // because some "space-like" elements such as <mspace>
-      // <maligngroup>, <malignmark> effectively do nothing.
-      // So we don't have to implement this function as empty
-      // in every such element.
-      // The same holds for Render below.
+      background = env->GetBackgroundColor();
       ResetDirtyAttribute();
     }
 }
@@ -366,7 +361,7 @@ MathMLElement::Setup(RenderingEnvironment*)
 void
 MathMLElement::DoLayout(const FormattingContext& ctxt)
 {
-  ResetDirtyLayout(ctxt.GetLayoutType());
+  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 void

@@ -236,64 +236,65 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 void
 MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout(ctxt))
+    {
+      assert(numerator && denominator);
+      numerator->DoLayout(ctxt);
+      denominator->DoLayout(ctxt);
 
-  assert(numerator && denominator);
-  numerator->DoLayout(ctxt);
-  denominator->DoLayout(ctxt);
+      const BoundingBox& numBox   = numerator->GetBoundingBox();
+      const BoundingBox& denomBox = denominator->GetBoundingBox();
 
-  const BoundingBox& numBox   = numerator->GetBoundingBox();
-  const BoundingBox& denomBox = denominator->GetBoundingBox();
+      if (bevelled) {
+	scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
+	scaled barHoriz = barVert / 2;
 
-  if (bevelled) {
-    scaled barVert = scaledMax(numBox.GetHeight(), denomBox.GetHeight());
-    scaled barHoriz = barVert / 2;
-
-    box.Set(barHoriz + 2 * lineThickness, 0, 0);
-    box.Append(numBox);
-    box.Append(denomBox);
-  } else {
+	box.Set(barHoriz + 2 * lineThickness, 0, 0);
+	box.Append(numBox);
+	box.Append(denomBox);
+      } else {
 #ifdef TEXISH_MATHML
-    scaled u = numMinShift;
-    scaled v = denomMinShift;
+	scaled u = numMinShift;
+	scaled v = denomMinShift;
 #else
-    scaled u = minShift;
-    scaled v = minShift;
+	scaled u = minShift;
+	scaled v = minShift;
 #endif // TEXISH_MATHML
 
-    if (lineThickness < EPSILON) {
+	if (lineThickness < EPSILON) {
 #ifdef TEXISH_MATHML
-      scaled psi = (displayStyle ? 7 : 3) * defaultRuleThickness;
+	  scaled psi = (displayStyle ? 7 : 3) * defaultRuleThickness;
 #else
-      scaled psi = displayStyle ? 3 * lineThickness : lineThickness;
+	  scaled psi = displayStyle ? 3 * lineThickness : lineThickness;
 #endif // TEXISH_MATHML
-      scaled phi = (u - numBox.descent) - (denomBox.ascent - v);
+	  scaled phi = (u - numBox.descent) - (denomBox.ascent - v);
 
-      if (psi < phi) {
-	u += (phi - psi) / 2;
-	v += (phi - psi) / 2;
-      }
-    } else {
-      scaled phi = displayStyle ? 3 * lineThickness : lineThickness;
+	  if (psi < phi) {
+	    u += (phi - psi) / 2;
+	    v += (phi - psi) / 2;
+	  }
+	} else {
+	  scaled phi = displayStyle ? 3 * lineThickness : lineThickness;
 
-      scaled diff = phi - ((u - numBox.descent) - (axis + lineThickness / 2));
-      if (diff > 0) u += diff;
+	  scaled diff = phi - ((u - numBox.descent) - (axis + lineThickness / 2));
+	  if (diff > 0) u += diff;
 
-      diff = phi - ((axis - lineThickness / 2) - (denomBox.ascent - v));
-      if (diff > 0) v += diff;
-    }
+	  diff = phi - ((axis - lineThickness / 2) - (denomBox.ascent - v));
+	  if (diff > 0) v += diff;
+	}
 
-    numShift   = u;
-    denomShift = v;
+	numShift   = u;
+	denomShift = v;
     
-    box.Set(scaledMax(numBox.width, denomBox.width),
-	    numShift + numBox.ascent,
-	    denomShift + denomBox.descent);
-    box.rBearing = scaledMax(numBox.rBearing, denomBox.rBearing);
-    box.width = scaledMax(box.width, box.rBearing);
-  }
+	box.Set(scaledMax(numBox.width, denomBox.width),
+		numShift + numBox.ascent,
+		denomShift + denomBox.descent);
+	box.rBearing = scaledMax(numBox.rBearing, denomBox.rBearing);
+	box.width = scaledMax(box.width, box.rBearing);
+      }
 
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

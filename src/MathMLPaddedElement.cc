@@ -163,19 +163,19 @@ MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
 void
 MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout(ctxt))
+    {
+      assert(child);
+      child->DoLayout(ctxt);
+      const BoundingBox& elemBox = child->GetBoundingBox();
 
-  assert(child);
+      lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
+      box.Set(lSpaceE + EvalLengthDimension(elemBox.width, width, elemBox),
+	      EvalLengthDimension(elemBox.ascent, height, elemBox),
+	      EvalLengthDimension(elemBox.descent, depth, elemBox));
 
-  child->DoLayout(ctxt);
-  const BoundingBox& elemBox = child->GetBoundingBox();
-
-  lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
-  box.Set(lSpaceE + EvalLengthDimension(elemBox.width, width, elemBox),
-	  EvalLengthDimension(elemBox.ascent, height, elemBox),
-	  EvalLengthDimension(elemBox.descent, depth, elemBox));
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

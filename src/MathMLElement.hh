@@ -32,6 +32,7 @@
 #include "BoundingBox.hh"
 #include "DrawingArea.hh"
 #include "AttributeSignature.hh"
+#include "FormattingContext.hh"
 
 // MathMLElement: base class for every MathML Element
 class MathMLElement: public MathMLFrame
@@ -90,10 +91,10 @@ public:
   virtual scaled GetRightEdge(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
-  bool HasDirtyLayout(void) const { return MathMLFrame::HasDirtyLayout(); }
+  bool HasDirtyLayout(const class FormattingContext&) const { return MathMLFrame::HasDirtyLayout(); }
   void ResetDirtyLayout(void) { MathMLFrame::ResetDirtyLayout(); }
-  bool HasDirtyLayout(LayoutId, scaled) const;
-  void ResetDirtyLayout(LayoutId id) { if (id == LAYOUT_AUTO) MathMLFrame::ResetDirtyLayout(); }
+  void ResetDirtyLayout(const FormattingContext& ctxt)
+  { if (ctxt.GetLayoutType() == LAYOUT_AUTO) ResetDirtyLayout(); }
 
 protected:
   const AttributeSignature* GetAttributeSignatureAux(AttributeId,

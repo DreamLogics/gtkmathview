@@ -67,7 +67,7 @@ MathMLDummyElement::Setup(RenderingEnvironment* env)
 void
 MathMLDummyElement::DoLayout(const FormattingContext& ctxt)
 {
-  ResetDirtyLayout(ctxt.GetLayoutType());
+  if (HasDirtyLayout(ctxt)) ResetDirtyLayout(ctxt);
 }
 
 void

@@ -63,6 +63,7 @@ MathMLmathElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
+  background = env->GetBackgroundColor();
   env->Push();
 
   const Value* value = NULL;

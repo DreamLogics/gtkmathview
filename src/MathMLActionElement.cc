@@ -87,17 +87,19 @@ MathMLActionElement::Setup(RenderingEnvironment* env)
 void
 MathMLActionElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (!HasDirtyLayout()) return;
+  if (HasDirtyLayout(ctxt))
+    {
+      Ptr<MathMLElement> elem = GetSelectedElement();
+      
+      if (elem)
+	{
+	  elem->DoLayout(ctxt);
+	  box = elem->GetBoundingBox();
+	} else
+	  box.Null();
 
-  Ptr<MathMLElement> elem = GetSelectedElement();
-
-  if (elem) {
-    elem->DoLayout(ctxt);
-    box = elem->GetBoundingBox();
-  } else
-    box.Null();
-
-  ResetDirtyLayout(ctxt.GetLayoutType());
+      ResetDirtyLayout(ctxt);
+    }
 }
 
 void

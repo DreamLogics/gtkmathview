@@ -32,7 +32,6 @@
 #include "t1lib.h"
 
 #include "T1_Font.hh"
-#include "Iterator.hh"
 #include "Globals.hh"
 #include "T1_FontManager.hh"
 

@@ -293,7 +293,8 @@ void
 MathMLStyleElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
- 
+
+#if 0 
   if (IsDirty()) {
     if (differentBackground && !IsSelected()) {
       if (bGC[0] == NULL) {
@@ -305,6 +306,7 @@ MathMLStyleElement::Render(const DrawingArea& area)
       area.Clear(bGC[0], GetRectangle());
     }
   }
+#endif
 
   RenderBackground(area);
 
