@@ -459,18 +459,6 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <stretchy name="VerticalSeparator" direction="vertical"> 
       <simple index="0xc8 0xc9 0xcb 0xcc"/> 
     </stretchy>
-    <stretchy name="LongLeftArrow" direction="horizontal"> 
-      <simple index="0xd5"/> 
-      <compound index="0xd5   -1   -1 0xd6"/> 
-    </stretchy> 
-    <stretchy name="LongRightArrow" direction="horizontal"> 
-      <simple index="0xd7"/> 
-      <compound index="  -1   -1 0xd7 0xd6"/> 
-    </stretchy> 
-    <stretchy name="LongLeftRightArrow" direction="horizontal"> 
-      <simple index="0xd8"/> 
-      <compound index="0xd5   -1 0xd7 0xd6"/> 
-    </stretchy> 
     <stretchy name="Tilde" direction="horizontal"> 
       <simple index="0xf3 0xf4 0xf5 0xf6"/> 
     </stretchy> 
@@ -704,23 +692,151 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	   "/>
-    
-    <stretchy name="LeftUpVector" direction="vertical"> 
-      <simple index="0x40"/> 
-      <compound index="0x40   -1   -1 0x41"/> 
+
+    <stretchy code="0x002f" direction="both">
+      <simple code="0xd0 0xd1 0xd2 0xd3 0xd4 0xd5"/>
+    </stretchy>
+    <stretchy code="0x0302" direction="horizontal">
+      <simple index="0xb0 0xb1 0xb2 0xb3"/>
+    </stretchy>
+    <stretchy code="0x2190" direction="horizontal"> 
+      <simple index="0x50"/> 
+      <compound index="0x79   -1   -1 0x51"/> 
+    </stretchy>
+    <stretchy code="0x2191" direction="vertical">
+      <simple index="0x60"/>
+      <compound index="0x77 -1 -1 0x41"/>
+    </stretchy>
+    <stretchy code="0x2192" direction="horizontal"> 
+      <simple index="0x54"/> 
+      <compound index="  -1   -1 0x7a 0x51"/> 
     </stretchy> 
-    <stretchy name="LeftDownVector" direction="vertical"> 
-      <simple index="0x42"/> 
-      <compound index="  -1   -1 0x42 0x41"/> 
-    </stretchy> 
-    <stretchy name="RightUpVector" direction="vertical"> 
+    <stretchy code="0x2193" direction="vertical">
+      <simple index="0x63"/>
+      <compound index="-1 -1 0x78 0x41"/>
+    </stretchy>
+    <stretchy code="0x2196" direction="both">
+      <simple index="0x88 0x8c"/>
+    </stretchy>
+    <stretchy code="0x2197" direction="both">
+      <simple index="0x89 0x8d"/>
+    </stretchy>
+    <stretchy code="0x2198" direction="both">
+      <simple index="0x8a 0x8e"/>
+    </stretchy>
+    <stretchy code="0x2199" direction="both">
+      <simple index="0x87 0x8b"/>
+    </stretchy>    
+    <stretchy code="0x21a4" direction="horizontal">
+      <simple index="0x22"/>
+      <compound index="0x50 -1 0x52 0x51"/>
+    </stretchy>
+    <stretchy code="0x21a5" direction="vertical">
+      <simple index="0x26"/>
+      <compound index="0x60 -1 0x61 0x41"/>
+    </stretchy>
+    <stretchy code="0x21a6" direction="horizontal">
+      <simple index="0x23"/>
+      <compound index="0x53 -1 0x54 0x51"/>
+    </stretchy>
+    <stretchy code="0x21a7" direction="vertical">
+      <simple index="0x27"/>
+      <compound index="0x62 -1 0x63 0x41"/>
+    </stretchy>
+    <stretchy code="0x21bc" direction="horizontal">
+      <simple index="0x30"/>
+      <compound index="0x30 -1 -1 0x51"/>
+    </stretchy>
+    <stretchy code="0x21bd" direction="horizontal">
+      <simple index="0x33"/>
+      <compound index="0x33 -1 -1 0x51"/>
+    </stretchy>
+    <stretchy code="0x21be" direction="vertical"> 
       <simple index="0x43"/> 
       <compound index="0x43   -1   -1 0x44"/> 
     </stretchy> 
-    <stretchy name="RightDownVector" direction="vertical"> 
+    <stretchy code="0x21bf" direction="vertical">
+      <simple index="0x40"/>
+      <compound index="0x40 -1 -1 0x41"/>
+    </stretchy>
+    <stretchy code="0x21c0" direction="horizontal">
+      <simple index="0x31"/>
+      <compound index="-1 -1 0x31 0x51"/>
+    </stretchy>
+    <stretchy code="0x21c1" direction="horizontal">
+      <simple index="0x34"/>
+      <compound index="-1 -1 0x34 0x51"/>
+    </stretchy>
+    <stretchy code="0x21c2" direction="vertical"> 
       <simple index="0x45"/> 
       <compound index="  -1   -1 0x45 0x44"/> 
     </stretchy> 
+    <stretchy code="0x21c3" direction="vertical"> 
+      <simple index="0x42"/> 
+      <compound index="  -1   -1 0x42 0x41"/> 
+    </stretchy> 
+    <stretchy code="0x21c4" direction="horizontal">
+      <simple code="0x56"/>
+      <compound index="0x58 -1 0x59 0x6f"/>
+    </stretchy>
+    <stretchy code="0x21c5" direction="vertical">
+      <simple code="0x5c"/>
+      <compound index="0x6d -1 0x6b 0x66"/>
+    </stretchy>
+    <stretchy code="0x21c6" direction="horizontal">
+      <simple code="0x57"/>
+      <compound index="0x5b -1 0x5a 0x6f"/>
+    </stretchy>
+    <stretchy code="0x21cb" direction="horizontal">
+      <simple index="0x47"/>
+      <compound index="0x4a -1 0x4b 0x6f"/>
+    </stretchy>
+    <stretchy code="0x21cc" direction="horizontal">
+      <simple index="0x46"/>
+      <compound index="0x48 -1 0x49 0x6f"/>
+    </stretchy>
+    <stretchy code="0x21e5" direction="horizontal">
+      <simple index="0x21"/>
+      <compound index="-1 -1 0x21 0x51"/>
+    </stretchy>
+    <stretchy code="0x23b4" direction="horizontal">
+      <simple index="0x70 0x71 0x72 0x73"/>
+      <compound index="0x74 -1 -1 0x76 0x75"/>
+    </stretchy>
+    <stretchy code="0x23b5" direction="horizontal">
+      <simple index="0x80 0x81 0x82 0x83"/>
+      <compound index="0x84 -1 -1 0x86 0x85"/>
+    </stretchy>
+    <stretchy code="0xfe35" direction="horizontal">
+      <simple index="0x90 0x91 0x92 0x93"/>
+      <compound index="0x94 -1 -1 0x96 0x95"/>
+    </stretchy>
+    <stretchy code="0xfe36" direction="horizontal">
+      <simple index="0xa0 0xa1 0xa2 0xa3"/>
+      <compound index="0xa4 -1 -1 0xa6 0xa5"/>
+    </stretchy>
+    <stretchy code="0xfe37" direction="horizontal">
+      <simple index="0x97 0x98 0x99 0x9a"/>
+      <compound index="0x9b 0x9d 0x9e 0x9c"/>
+    </stretchy>
+    <stretchy code="0xfe38" direction="horizontal">
+      <simple index="0xa7 0xa8 0xa9 0xaa"/>
+      <compound index="0xab 0xad 0xae 0xac"/>
+    </stretchy>
+    <stretchy name="LongLeftArrow" direction="horizontal"> 
+      <simple index="0x50"/> 
+      <compound index="0x50   -1   -1 0x51"/> 
+    </stretchy>
+    <stretchy name="LongRightArrow" direction="horizontal"> 
+      <simple index="0x54"/> 
+      <compound index="  -1   -1 0x54 0x51"/> 
+    </stretchy> 
+    <!--
+    <stretchy name="LongLeftRightArrow" direction="horizontal"> 
+      <simple index="0xd8"/> 
+      <compound index="0xd5   -1 0xd7 0xd6"/> 
+    </stretchy>
+    -->
   </map>
 
   <map id="wolfram-math5">
