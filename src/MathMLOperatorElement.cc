@@ -250,6 +250,11 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   // If symmetric == true the we have to stretch to cover the maximum among
   // height and depth, otherwise we just stretch to ascent + descent
   desiredSize = symmetric ? (2 * scaledMax(height, depth)) : (height + depth);
+
+  // actually a slightly smaller fence is usually enough when symmetric is true
+  if (symmetric)
+    desiredSize = scaledMax(desiredSize - pt2sp(5), ((desiredSize * 901) / 1000));
+
   desiredSize = scaledMax(SP_EPSILON, desiredSize);
 
   // ...however, there may be some contraints over the size of the stretchable
