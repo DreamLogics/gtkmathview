@@ -34,7 +34,7 @@ class MathMLLabeledTableRowElement: public MathMLTableRowElement
 protected:
   MathMLLabeledTableRowElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLLabeledTableRowElement(const GMetaDOM::Element&);
+  MathMLLabeledTableRowElement(const DOM::Element&);
 #endif
   virtual ~MathMLLabeledTableRowElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLLabeledTableRowElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLLabeledTableRowElement(el)); }
 #endif
 
@@ -50,6 +50,7 @@ public:
   virtual Ptr<MathMLElement> GetLabel(void) const;
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
+  virtual void Setup(class RenderingEnvironment&);
   //virtual void SetDirty(const Rectangle*);
   virtual void SetFlagDown(Flags);
   virtual void ResetFlagDown(Flags);

@@ -34,7 +34,7 @@ class MathMLSpaceElement: public MathMLElement
 protected:
   MathMLSpaceElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLSpaceElement(const GMetaDOM::Element&);
+  MathMLSpaceElement(const DOM::Element&);
 #endif
   virtual ~MathMLSpaceElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLSpaceElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLSpaceElement(el)); }
 #endif
 

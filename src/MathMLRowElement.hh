@@ -27,14 +27,16 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLLinearContainerElement.hh"
 
-class MathMLRowElement : public MathMLLinearContainerElement
+class MathMLRowElement
+  : public MathMLLinearContainerElement, public MathMLEmbellishment
 {
 protected:
   MathMLRowElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLRowElement(const GMetaDOM::Element&);
+  MathMLRowElement(const DOM::Element&);
 #endif
   virtual ~MathMLRowElement();
 
@@ -42,11 +44,11 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLRowElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLRowElement(el)); }
 #endif
 
-  virtual void Normalize(const Ptr<class MathMLDocument>&);
+  //virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
@@ -55,7 +57,7 @@ public:
   virtual bool IsSpaceLike(void) const;
 
   OperatorFormId GetOperatorForm(const Ptr<MathMLElement>&) const;
-  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment() const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator();
 };
 
 #endif // MathMLRowElement_hh

@@ -68,8 +68,8 @@ private:
   void ParseConfiguration(mDOMNodeRef);
   bool ParseColor(mDOMNodeRef, RGBValue&, RGBValue&);
 #elif defined(HAVE_GMETADOM)
-  void ParseConfiguration(const GMetaDOM::Element&);
-  bool ParseColor(const GMetaDOM::Element&, RGBValue&, RGBValue&);
+  void ParseConfiguration(const DOM::Element&);
+  bool ParseColor(const DOM::Element&, RGBValue&, RGBValue&);
 #endif // HAVE_GMETADOM
 
   std::vector<String*> dictionaries;

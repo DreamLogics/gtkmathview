@@ -29,10 +29,10 @@
 #include "gmetadom.hh"
 
 static unsigned
-getDepth(const GMetaDOM::Element& elem)
+getDepth(const DOM::Element& elem)
 {
   unsigned length = 0;
-  GMetaDOM::Element p = elem;
+  DOM::Element p = elem;
 
   while (p)
     {
@@ -43,14 +43,14 @@ getDepth(const GMetaDOM::Element& elem)
   return length;
 }
 
-static GMetaDOM::Element
-findCommonAncestor(const GMetaDOM::Element& first, const GMetaDOM::Element& last)
+static DOM::Element
+findCommonAncestor(const DOM::Element& first, const DOM::Element& last)
 {
   assert(first);
   assert(last);
 
-  GMetaDOM::Element p(first);
-  GMetaDOM::Element q(last);
+  DOM::Element p(first);
+  DOM::Element q(last);
 
   if (p != q)
     {
@@ -82,14 +82,14 @@ findCommonAncestor(const GMetaDOM::Element& first, const GMetaDOM::Element& last
 }
 
 static void
-findCommonSiblings(const GMetaDOM::Element& first, const GMetaDOM::Element& last,
-		   GMetaDOM::Element& firstS, GMetaDOM::Element& lastS)
+findCommonSiblings(const DOM::Element& first, const DOM::Element& last,
+		   DOM::Element& firstS, DOM::Element& lastS)
 {
   assert(first);
   assert(last);
 
-  GMetaDOM::Element p(first);
-  GMetaDOM::Element q(last);
+  DOM::Element p(first);
+  DOM::Element q(last);
 
   if (p != q)
     {
@@ -121,62 +121,62 @@ findCommonSiblings(const GMetaDOM::Element& first, const GMetaDOM::Element& last
   lastS = q;
 }
 
-static GMetaDOM::Node
-leftmostChild(const GMetaDOM::Node& node)
+static DOM::Node
+leftmostChild(const DOM::Node& node)
 {
   if (!node) return node;
 
-  GMetaDOM::Node firstChild = node.get_firstChild();
+  DOM::Node firstChild = node.get_firstChild();
   if (!firstChild) return node;
 
   return leftmostChild(firstChild);
 }
 
-static GMetaDOM::Node
-rightmostChild(const GMetaDOM::Node& node)
+static DOM::Node
+rightmostChild(const DOM::Node& node)
 {
   if (!node) return node;
 
-  GMetaDOM::Node lastChild = node.get_lastChild();
+  DOM::Node lastChild = node.get_lastChild();
   if (!lastChild) return node;
 
   return rightmostChild(lastChild);
 }
 
-static GMetaDOM::Node
-leftSibling(const GMetaDOM::Node& node)
+static DOM::Node
+leftSibling(const DOM::Node& node)
 {
-  GMetaDOM::Node p = node;
+  DOM::Node p = node;
 
   if (!p) return p;
 
   while (p.get_parentNode() && p.get_parentNode().get_firstChild() == p)
     p = p.get_parentNode();
 
-  if (!p.get_parentNode()) return GMetaDOM::Node(0);
+  if (!p.get_parentNode()) return DOM::Node(0);
 
-  GMetaDOM::Node prevSibling = p.get_previousSibling();
+  DOM::Node prevSibling = p.get_previousSibling();
   assert(prevSibling);
 
   return rightmostChild(prevSibling);
 }
 
-static GMetaDOM::Node
-rightSibling(const GMetaDOM::Node& node)
+static DOM::Node
+rightSibling(const DOM::Node& node)
 {
-  GMetaDOM::Node p = node;
+  DOM::Node p = node;
 
   if (!p) return p;
 
-  GMetaDOM::Node firstChild = p.get_firstChild();
+  DOM::Node firstChild = p.get_firstChild();
   if (firstChild) return firstChild;
 
   while (p.get_parentNode() && p.get_parentNode().get_lastChild() == p)
     p = p.get_parentNode();
 
-  if (!p.get_parentNode()) return GMetaDOM::Node(0);
+  if (!p.get_parentNode()) return DOM::Node(0);
 
-  GMetaDOM::Node nextSibling = p.get_nextSibling();
+  DOM::Node nextSibling = p.get_nextSibling();
   assert(nextSibling);
 
   return leftmostChild(nextSibling);
@@ -185,8 +185,8 @@ rightSibling(const GMetaDOM::Node& node)
 extern "C" GdomeElement*
 find_common_ancestor(GdomeElement* first, GdomeElement* last)
 {
-  GMetaDOM::Element p(first);
-  GMetaDOM::Element q(last);
+  DOM::Element p(first);
+  DOM::Element q(last);
   if (GdomeElement* res = gdome_cast_el(findCommonAncestor(p, q).gdome_object()))
     {
       GdomeException exc = 0;
@@ -202,10 +202,10 @@ extern "C" void
 find_common_siblings(GdomeElement* first, GdomeElement* last,
 		     GdomeElement** firstS, GdomeElement** lastS)
 {
-  GMetaDOM::Element fs(0);
-  GMetaDOM::Element ls(0);
+  DOM::Element fs(0);
+  DOM::Element ls(0);
 
-  findCommonSiblings(GMetaDOM::Element(first), GMetaDOM::Element(last), fs, ls);
+  findCommonSiblings(DOM::Element(first), DOM::Element(last), fs, ls);
 
   if (firstS != NULL) *firstS = gdome_cast_el(fs.gdome_object());
   if (lastS != NULL) *lastS = gdome_cast_el(ls.gdome_object());
@@ -214,12 +214,11 @@ find_common_siblings(GdomeElement* first, GdomeElement* last,
 extern "C" void
 delete_element(GdomeElement* elem)
 {
-  GMetaDOM::Element p(elem);
+  DOM::Element p(elem);
 
-  GMetaDOM::Element parent = p.get_parentNode();
+  DOM::Element parent = p.get_parentNode();
   assert(parent);
 
   parent.removeChild(p);
-
 }
 

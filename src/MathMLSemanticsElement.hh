@@ -27,14 +27,16 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLBinContainerElement.hh"
 
-class MathMLSemanticsElement : public MathMLBinContainerElement
+class MathMLSemanticsElement
+  : public MathMLBinContainerElement, public MathMLEmbellishment
 {
 protected:
   MathMLSemanticsElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLSemanticsElement(const GMetaDOM::Element&);
+  MathMLSemanticsElement(const DOM::Element&);
 #endif
   virtual ~MathMLSemanticsElement();
 
@@ -42,11 +44,14 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLSemanticsElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLSemanticsElement(el)); }
 #endif
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
+  virtual void DoLayout(const class FormattingContext&);
+  virtual void SetPosition(scaled, scaled);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 };
 
 #endif // MathMLSemanticsElement_hh

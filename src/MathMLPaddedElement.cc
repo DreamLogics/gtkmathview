@@ -27,8 +27,8 @@
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
 #include "MathMLPaddedElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLPaddedElement::MathMLPaddedElement()
@@ -36,7 +36,7 @@ MathMLPaddedElement::MathMLPaddedElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLPaddedElement::MathMLPaddedElement(const GMetaDOM::Element& node)
+MathMLPaddedElement::MathMLPaddedElement(const DOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
 }
@@ -63,6 +63,24 @@ MathMLPaddedElement::GetAttributeSignature(AttributeId id) const
 
   return signature;
 }
+
+#if 0
+void
+MathMLPaddedElement::Normalize(const Ptr<MathMLDocument>& doc)
+{
+  if (DirtyStructure())
+    {
+      MathMLNormalizingContainerElement::Normalize(doc);
+      if (Ptr<MathMLOperatorElement> coreOp = GetCoreOperator())
+	{
+	  Ptr<MathMLEmbellishedOperatorElement> eOp = coreOp->GetEmbellishment();
+	  assert(eOp && eOp->GetParent() == this);
+	  eOp->Lift(doc);
+	}
+      ResetDirtyStructure();
+    }
+}
+#endif
 
 void
 MathMLPaddedElement::Setup(RenderingEnvironment& env)
@@ -176,6 +194,8 @@ MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 	      EvalLengthDimension(elemBox.ascent, height, elemBox),
 	      EvalLengthDimension(elemBox.descent, depth, elemBox));
 
+      DoEmbellishmentLayout(this, box);
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -183,9 +203,10 @@ MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLPaddedElement::SetPosition(scaled x, scaled y)
 {
-  MathMLNormalizingContainerElement::SetPosition(x, y);
-  assert(child);
-  child->SetPosition(x + lSpaceE, y);
+  position.x = x;
+  position.y = y;
+  SetEmbellishmentPosition(this, x, y);
+  if (GetChild()) GetChild()->SetPosition(x + lSpaceE, y);
 }
 
 scaled
@@ -227,8 +248,9 @@ MathMLPaddedElement::SetDirty(const Rectangle* rect)
 }
 #endif
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLPaddedElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLPaddedElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(GetChild());
+  if (GetChild()) return GetChild()->GetCoreOperator();
+  else return 0;
 }

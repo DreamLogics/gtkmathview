@@ -28,8 +28,8 @@
 #include "traverseAux.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLScriptElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "RenderingEnvironment.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLScriptElement::MathMLScriptElement()
@@ -38,7 +38,7 @@ MathMLScriptElement::MathMLScriptElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLScriptElement::MathMLScriptElement(const GMetaDOM::Element& node)
+MathMLScriptElement::MathMLScriptElement(const DOM::Element& node)
   : MathMLContainerElement(node)
 {
   subScript = superScript = 0;
@@ -169,7 +169,7 @@ MathMLScriptElement::Normalize(const Ptr<MathMLDocument>& doc)
 		SetSubScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetSubScript()))
 		SetSubScript(MathMLDummyElement::create());
-	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(2)))
 		SetSuperScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetSuperScript()))
 		SetSuperScript(MathMLDummyElement::create());
@@ -183,7 +183,6 @@ MathMLScriptElement::Normalize(const Ptr<MathMLDocument>& doc)
       if (base) base->Normalize(doc);
       if (subScript) subScript->Normalize(doc);
       if (superScript) superScript->Normalize(doc);
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -296,6 +295,8 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 	  box.descent  = scaledMax(box.descent, superScriptBox.descent - superShiftY);
 	}
 
+      DoEmbellishmentLayout(this, box);
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -305,6 +306,8 @@ MathMLScriptElement::SetPosition(scaled x, scaled y)
 {
   position.x = x;
   position.y = y;
+
+  SetEmbellishmentPosition(this, x, y);
 
   if (base) base->SetPosition(x, y);
 
@@ -359,10 +362,11 @@ MathMLScriptElement::GetRightEdge() const
   return m;
 }
 
-Ptr<class MathMLEmbellishedOperatorElement>
-MathMLScriptElement::GetEmbellishment() const
+Ptr<class MathMLOperatorElement>
+MathMLScriptElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(base);
+  if (base) return base->GetCoreOperator();
+  else return 0;
 }
 
 #if 0

@@ -55,7 +55,6 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLIdentifierElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLTokenElement::MathMLTokenElement()
@@ -63,7 +62,7 @@ MathMLTokenElement::MathMLTokenElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLTokenElement::MathMLTokenElement(const GMetaDOM::Element& node)
+MathMLTokenElement::MathMLTokenElement(const DOM::Element& node)
   : MathMLElement(node)
 {
 }
@@ -213,7 +212,7 @@ MathMLTokenElement::InsertChild(unsigned i, const Ptr<MathMLTextNode>& node)
   assert(i <= content.size());
   assert(node);
   assert(!node->GetParent());
-  node->SetParent(0);
+  node->SetParent(this);
   content.insert(content.begin() + i, node);
   SetDirtyLayout();
 }
@@ -253,19 +252,19 @@ MathMLTokenElement::Normalize(const Ptr<class MathMLDocument>&)
       content.clear();
 
       String* sContent = NULL;
-      for (GMetaDOM::Node p = GetDOMElement().get_firstChild(); 
+      for (DOM::Node p = GetDOMElement().get_firstChild(); 
 	   p;
 	   p = p.get_nextSibling()) 
 	{
 	  switch (p.get_nodeType())
 	    {
-	    case GMetaDOM::Node::TEXT_NODE:
+	    case DOM::Node::TEXT_NODE:
 	      {
 		// ok, we have a chunk of text
-		GMetaDOM::GdomeString content = p.get_nodeValue();
+		DOM::GdomeString content = p.get_nodeValue();
 		String* s = allocString(content);
 		assert(s != NULL);
-	      
+
 		// white-spaces are always collapsed...
 		s->CollapseSpaces();
 	      
@@ -281,13 +280,13 @@ MathMLTokenElement::Normalize(const Ptr<class MathMLDocument>&)
 
 #if 0
 	    // to be rewritten or deleted
-	    case GMetaDOM::Node::ENTITY_REFERENCE_NODE:
-	      for (GMetaDOM::Node p = node.get_firstChild(); p != 0; p = p.get_nextSibling())
+	    case DOM::Node::ENTITY_REFERENCE_NODE:
+	      for (DOM::Node p = node.get_firstChild(); p != 0; p = p.get_nextSibling())
 		MathMLizeTokenContent(p, parent);
 	      break;
 #endif 0
 
-	    case GMetaDOM::Node::ELEMENT_NODE:
+	    case DOM::Node::ELEMENT_NODE:
 	      {	    
 		if (p.get_namespaceURI() == MATHML_NS_URI)
 		  {
@@ -458,9 +457,6 @@ MathMLTokenElement::DoLayout(const class FormattingContext& ctxt)
 	   text++)
 	{
 	  assert(*text);
-
-	  // as the minimum layout, that we have previously done,
-	  // so we save some work.
 	  if (ctxt.GetLayoutType() == LAYOUT_MIN) (*text)->DoLayout(ctxt);
 
 	  // if we do not insert MathMLSpaceNodes in the layout, they will not be
@@ -481,6 +477,12 @@ void
 MathMLTokenElement::SetPosition(scaled x, scaled y)
 {
   MathMLElement::SetPosition(x, y);
+  SetContentPosition(x, y);
+}
+
+void
+MathMLTokenElement::SetContentPosition(scaled x, scaled y)
+{
   for (std::vector< Ptr<MathMLTextNode> >::const_iterator text = GetContent().begin(); 
        text != GetContent().end();
        text++)
@@ -609,14 +611,11 @@ MathMLTokenElement::AddItalicCorrection()
   assert(lastNode);
 
   Ptr<MathMLElement> next = findRightSibling(this);
-  if (!next || !is_a<MathMLEmbellishedOperatorElement>(next)) return;
+  if (!next) return;
 
-  Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(next);
-  assert(eOp);
-
-  Ptr<MathMLOperatorElement> op = eOp->GetCoreOperator();
-  if (!op) return;
-  bool isFence = op->IsFence();
+  Ptr<MathMLOperatorElement> coreOp = next->GetCoreOperatorTop();
+  if (!coreOp) return;
+  bool isFence = coreOp->IsFence();
   if (!isFence) return;
 
   const BoundingBox& lastBox = lastNode->GetBoundingBox();
@@ -625,13 +624,13 @@ MathMLTokenElement::AddItalicCorrection()
 }
 
 Ptr<MathMLTextNode>
-MathMLTokenElement::SubstituteMGlyphElement(const GMetaDOM::Element& node)
+MathMLTokenElement::SubstituteMGlyphElement(const DOM::Element& node)
 {
   assert(node);
 
-  GMetaDOM::GdomeString alt        = node.getAttribute("alt");
-  GMetaDOM::GdomeString fontFamily = node.getAttribute("fontfamily");
-  GMetaDOM::GdomeString index      = node.getAttribute("index");
+  DOM::GdomeString alt        = node.getAttribute("alt");
+  DOM::GdomeString fontFamily = node.getAttribute("fontfamily");
+  DOM::GdomeString index      = node.getAttribute("index");
 
   if (alt.empty() || fontFamily.empty() || index.empty()) {
     Globals::logger(LOG_WARNING, "malformed `mglyph' element (some required attribute is missing)\n");
@@ -655,11 +654,11 @@ MathMLTokenElement::SubstituteMGlyphElement(const GMetaDOM::Element& node)
 }
 
 Ptr<MathMLTextNode>
-MathMLTokenElement::SubstituteAlignMarkElement(const GMetaDOM::Element& node)
+MathMLTokenElement::SubstituteAlignMarkElement(const DOM::Element& node)
 {
   assert(node);
 
-  GMetaDOM::GdomeString edge = node.getAttribute("edge");
+  DOM::GdomeString edge = node.getAttribute("edge");
 
   MarkAlignType align = MARK_ALIGN_NOTVALID;
 

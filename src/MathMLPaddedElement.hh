@@ -27,14 +27,16 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLNormalizingContainerElement.hh"
 
-class MathMLPaddedElement : public MathMLNormalizingContainerElement
+class MathMLPaddedElement
+  : public MathMLNormalizingContainerElement, public MathMLEmbellishment
 {
 protected:
   MathMLPaddedElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLPaddedElement(const GMetaDOM::Element&);
+  MathMLPaddedElement(const DOM::Element&);
 #endif
   virtual ~MathMLPaddedElement();
 
@@ -42,16 +44,17 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLPaddedElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLPaddedElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
+  //virtual void Normalize(const Ptr<MathMLDocument>&);
   virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
   //virtual void SetDirty(const Rectangle* = NULL);
-  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 private:
   struct LengthDimension {

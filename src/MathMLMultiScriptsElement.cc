@@ -35,7 +35,6 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLMultiScriptsElement.hh"
 #include "FormattingContext.hh"
 
@@ -44,7 +43,7 @@ MathMLMultiScriptsElement::MathMLMultiScriptsElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLMultiScriptsElement::MathMLMultiScriptsElement(const GMetaDOM::Element& node)
+MathMLMultiScriptsElement::MathMLMultiScriptsElement(const DOM::Element& node)
   : MathMLContainerElement(node)
 {
 }
@@ -238,7 +237,7 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 
       while (i < n)
 	{
-	  GMetaDOM::Node node = children.item(i);
+	  DOM::Node node = children.item(i);
 
 	  if (i == 0)
 	    {
@@ -323,8 +322,6 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
       for_each_if(preSuperScript.begin(), preSuperScript.end(),
 		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
-
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -438,6 +435,8 @@ MathMLMultiScriptsElement::DoLayout(const class FormattingContext& ctxt)
 	  box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
 	}
 
+      DoEmbellishmentLayout(this, box);
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -447,6 +446,8 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
 {
   position.x = x;
   position.y = y;
+
+  SetEmbellishmentPosition(this, x, y);
 
   std::vector< Ptr<MathMLElement> >::reverse_iterator preSub;
   std::vector< Ptr<MathMLElement> >::reverse_iterator preSup;
@@ -620,10 +621,11 @@ MathMLMultiScriptsElement::GetRightEdge() const
     }
 }
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLMultiScriptsElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLMultiScriptsElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(base);
+  if (base) return base->GetCoreOperator();
+  else return 0;
 }
 
 #if 0

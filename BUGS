@@ -1,5 +1,30 @@
 * try putting scripts on a token with font size modified ;)
 * check rendering of backgrounds (mstyle, mtokens, selected elements)
+* try exporting to postscript a token with an apostrophe ' -> crash
+
+*** TESTSUITE November 30 2002 ***
+
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TokenElements/ms/msAquotes3.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/GeneralLayout/mfrac/mfracAkeyword9.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/GeneralLayout/menclose/rec-enclose3.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TablesAndMatrices/mtable/mtableAwidth1.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TablesAndMatrices/mtable/mtableAwidth3.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TablesAndMatrices/mtable/mtableAwidth4.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TablesAndMatrices/mtable/mtableBgap1.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TablesAndMatrices/nested/nestedAwidth1.mml
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/DynamicExpressions/maction/mactionBhigh1.mml
+
+Deprecated features we should support:
+
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TablesAndMatrices/mtable/deprecated-test3.mml
+
+Stretchy:
+
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TokenElements/mo/moAlargeop12.mml
+
+Crash:
+
+file:///home/luca/Projects/edit-gtkmathview/T1/testsuite/Presentation/TokenElements/mo/moAlrspace13.mml
 
 *** TESTSUITE ***
 

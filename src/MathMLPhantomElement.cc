@@ -26,14 +26,14 @@
 #include <stddef.h>
 
 #include "MathMLPhantomElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
+#include "MathMLOperatorElement.hh"
 
 MathMLPhantomElement::MathMLPhantomElement()
 {
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLPhantomElement::MathMLPhantomElement(const GMetaDOM::Element& node)
+MathMLPhantomElement::MathMLPhantomElement(const DOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
 }
@@ -50,14 +50,53 @@ MathMLPhantomElement::IsSpaceLike() const
   return child->IsSpaceLike();
 }
 
+#if 0
+void
+MathMLPhantomElement::Normalize(const Ptr<MathMLDocument>& doc)
+{
+  if (DirtyStructure())
+    {
+      MathMLNormalizingContainerElement::Normalize(doc);
+      if (Ptr<MathMLOperatorElement> coreOp = GetCoreOperator())
+	{
+	  Ptr<MathMLEmbellishedOperatorElement> eOp = coreOp->GetEmbellishment();
+	  assert(eOp && eOp->GetParent() == this);
+	  eOp->Lift(doc);
+	}
+      ResetDirtyStructure();
+    }
+}
+#endif
+
+void
+MathMLPhantomElement::DoLayout(const FormattingContext& ctxt)
+{
+  if (DirtyLayout(ctxt))
+    {
+      MathMLNormalizingContainerElement::DoLayout(ctxt);
+      DoEmbellishmentLayout(this, box);
+      ResetDirtyLayout(ctxt);
+    }
+}
+
+void
+MathMLPhantomElement::SetPosition(scaled x, scaled y)
+{
+  position.x = x;
+  position.y = y;
+  SetEmbellishmentPosition(this, x, y);
+  if (GetChild()) GetChild()->SetPosition(x, y);
+}
+
 void
 MathMLPhantomElement::Render(const DrawingArea&)
 {
   if (Dirty()) ResetDirty();
 }
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLPhantomElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLPhantomElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(GetChild());
+  if (GetChild()) return GetChild()->GetCoreOperator();
+  else return 0;
 }

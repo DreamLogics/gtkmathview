@@ -39,7 +39,7 @@ MathMLLinearContainerElement::MathMLLinearContainerElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLLinearContainerElement::MathMLLinearContainerElement(const GMetaDOM::Element& node)
+MathMLLinearContainerElement::MathMLLinearContainerElement(const DOM::Element& node)
   : MathMLContainerElement(node)
 {
 }
@@ -54,7 +54,7 @@ MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
-      // editing is supported with GMetaDOM only
+      // editing is supported with DOM only
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
 	{
@@ -65,8 +65,8 @@ MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
-	      GMetaDOM::Node node = children.item(i);
-	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	      DOM::Node node = children.item(i);
+	      assert(node.get_nodeType() == DOM::Node::ELEMENT_NODE);
 
 	      if (Ptr<MathMLElement> elem = doc->getFormattingNode(node))
 		newContent.push_back(elem);
@@ -80,7 +80,7 @@ MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  SwapChildren(newContent);
 	}
 #endif // HAVE_GMETADOM
-
+      
       // it is better to normalize elements only after all the rendering
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
@@ -145,54 +145,6 @@ MathMLLinearContainerElement::Inside(scaled x, scaled y)
     return 0;
 }
 
-#if 0
-void
-MathMLLinearContainerElement::SetDirtyLayout(bool children)
-{
-  MathMLElement::SetDirtyLayout(children);
-  if (children)
-    std::for_each(content.begin(), content.end(),
-		  std::bind2nd(SetDirtyLayoutAdaptor(), true));
-}
-
-void
-MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
-{
-  dirtyBackground =
-    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
-
-  if (IsDirty() || HasDirtyChildren()) return;
-  // if there is tweaking some tokens might still be visible but the whole box not
-  //if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
-
-  //dirty = 1;
-  //SetDirtyChildren();
-
-  std::for_each(content.begin(), content.end(),
-		std::bind2nd(SetDirtyAdaptor(), rect));
-}
-
-void
-MathMLLinearContainerElement::SetSelected()
-{
-  if (IsSelected()) return;
-
-  selected = 1;
-  std::for_each(content.begin(), content.end(), SetSelectedAdaptor());
-  SetDirty();
-}
-
-void
-MathMLLinearContainerElement::ResetSelected()
-{
-  if (!IsSelected()) return;
-
-  SetDirty();
-  std::for_each(content.begin(), content.end(), ResetSelectedAdaptor());
-  selected = 0;
-}
-#endif
-
 void
 MathMLLinearContainerElement::ReleaseGCs()
 {
@@ -227,8 +179,9 @@ MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& ele
   if (i == GetSize()) Append(elem);
   else if (content[i] != elem)
     {
-      content[i]->SetParent(0);
-      elem->SetParent(this);
+      assert(!elem || !elem->GetParent());
+      if (content[i]) content[i]->SetParent(0);
+      if (elem) elem->SetParent(this);
       content[i] = elem;
       SetDirtyLayout();
     }
@@ -237,6 +190,7 @@ MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& ele
 void
 MathMLLinearContainerElement::Append(const Ptr<MathMLElement>& elem)
 {
+  assert(!elem->GetParent());
   elem->SetParent(this);
   content.push_back(elem);
   SetDirtyLayout();
@@ -273,7 +227,6 @@ MathMLLinearContainerElement::SwapChildren(std::vector< Ptr<MathMLElement> >& ne
 	}
 
       content.swap(newContent);
-
       SetDirtyLayout();
     }
 }

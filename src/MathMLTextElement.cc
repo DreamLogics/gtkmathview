@@ -29,7 +29,7 @@ MathMLTextElement::MathMLTextElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLTextElement::MathMLTextElement(const GMetaDOM::Element& node)
+MathMLTextElement::MathMLTextElement(const DOM::Element& node)
   : MathMLTokenElement(node)
 {
 }

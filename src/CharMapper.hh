@@ -103,15 +103,15 @@ private:
   void ParseStretchySimple(mDOMNodeRef, CharMap*);
   void ParseStretchyCompound(mDOMNodeRef, CharMap*);
 #elif defined(HAVE_GMETADOM)
-  void ParseFontConfiguration(const GMetaDOM::Element&);
-  void ParseFont(const GMetaDOM::Element&);
-  void ParseMap(const GMetaDOM::Element&);
-  void ParseRange(const GMetaDOM::Element&, FontMap*);
-  void ParseMulti(const GMetaDOM::Element&, FontMap*);
-  void ParseSingle(const GMetaDOM::Element&, FontMap*);
-  void ParseStretchy(const GMetaDOM::Element&, FontMap*);
-  void ParseStretchySimple(const GMetaDOM::Element&, CharMap*);
-  void ParseStretchyCompound(const GMetaDOM::Element&, CharMap*);
+  void ParseFontConfiguration(const DOM::Element&);
+  void ParseFont(const DOM::Element&);
+  void ParseMap(const DOM::Element&);
+  void ParseRange(const DOM::Element&, FontMap*);
+  void ParseMulti(const DOM::Element&, FontMap*);
+  void ParseSingle(const DOM::Element&, FontMap*);
+  void ParseStretchy(const DOM::Element&, FontMap*);
+  void ParseStretchySimple(const DOM::Element&, CharMap*);
+  void ParseStretchyCompound(const DOM::Element&, CharMap*);
 #endif // HAVE_GMETADOM
 
   void PatchConfiguration(void);

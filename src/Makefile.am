@@ -81,7 +81,7 @@ libgtkmathview_la_SOURCES = \
   MathMLDocument.cc \
   MathMLDummyElement.cc \
   MathMLElement.cc \
-  MathMLEmbellishedOperatorElement.cc \
+  MathMLEmbellishment.cc \
   MathMLEncloseElement.cc \
   MathMLErrorElement.cc \
   MathMLFencedElement.cc \
@@ -123,7 +123,6 @@ libgtkmathview_la_SOURCES = \
   Rectangle.cc \
   RenderingEnvironment.cc \
   String.cc \
-  StringHash.cc \
   StringFactory.cc \
   StringTokenizer.cc \
   StringUnicode.cc \
@@ -189,7 +188,7 @@ noinst_HEADERS = \
   MathMLDocument.hh \
   MathMLDummyElement.hh \
   MathMLElement.hh \
-  MathMLEmbellishedOperatorElement.hh \
+  MathMLEmbellishment.hh \
   MathMLEncloseElement.hh \
   MathMLErrorElement.hh \
   MathMLFencedElement.hh \

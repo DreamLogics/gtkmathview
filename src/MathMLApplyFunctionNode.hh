@@ -36,7 +36,7 @@ public:
   { return Ptr<MathMLApplyFunctionNode>(new MathMLApplyFunctionNode()); }
 
   virtual void     Setup(class RenderingEnvironment&);
-  virtual void     DoLayout(void);
+  virtual void     DoLayout(const class FormattingContext&);
 
   virtual unsigned  GetLogicalContentLength(void) const;
   virtual String*   GetRawContent(void) const;

@@ -163,3 +163,31 @@ String::GetBiggestChar(unsigned offset, unsigned length) const
 
   return big;
 }
+
+size_t
+String::Hash::operator()(const String* s) const
+{
+  assert(s != 0);
+
+  size_t h = 0;
+  for (unsigned i = 0; i < s->GetLength(); i++)
+    {
+      h = (h << 4) + s->GetChar(i);
+      if (size_t g = h & 0xf0000000)
+	{
+	  h = h ^ (g >> 24);
+	  h = h ^ g;
+	}
+    }
+
+  return h;
+}
+
+bool
+String::Eq::operator()(const String* s1, const String* s2) const
+{
+  assert(s1 != 0);
+  assert(s2 != 0);
+  return s1->Equal(*s2);
+}
+

@@ -34,7 +34,7 @@ MathMLAlignMarkElement::MathMLAlignMarkElement()
 }
  
 #if defined(HAVE_GMETADOM)
-MathMLAlignMarkElement::MathMLAlignMarkElement(const GMetaDOM::Element& node)
+MathMLAlignMarkElement::MathMLAlignMarkElement(const DOM::Element& node)
   : MathMLElement(node)
 {
   edge = MARK_ALIGN_NOTVALID;

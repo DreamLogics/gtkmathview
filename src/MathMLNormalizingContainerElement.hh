@@ -36,7 +36,7 @@ class MathMLNormalizingContainerElement : public MathMLBinContainerElement
 protected:
   MathMLNormalizingContainerElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLNormalizingContainerElement(const GMetaDOM::Element&);
+  MathMLNormalizingContainerElement(const DOM::Element&);
 #endif
   virtual ~MathMLNormalizingContainerElement();
 
@@ -44,6 +44,8 @@ public:
   virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void Render(const DrawingArea&);
+
+  virtual void SetDirtyStructure(void);
 };
 
 #endif // MathMLNormalizingContainerElement_hh

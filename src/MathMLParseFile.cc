@@ -61,11 +61,11 @@ MathMLParseFile(const char* filename, bool subst)
 
 #elif defined(HAVE_GMETADOM)
 
-GMetaDOM::Document
+DOM::Document
 MathMLParseFile(const char* filename, bool subst)
 {
   if (!subst) {
-    GMetaDOM::DOMImplementation di;
+    DOM::DOMImplementation di;
     return di.createDocumentFromURI(filename);
   } else {
     GdomeDOMImplementation* di = gdome_di_mkref();
@@ -79,16 +79,16 @@ MathMLParseFile(const char* filename, bool subst)
     if (exc != 0) {
       gdome_di_unref(di, &exc);
       gdome_doc_unref(doc, &exc);
-      return GMetaDOM::Document(0);
+      return DOM::Document(0);
     }
 
     if (doc == 0) {
       // FIXME: this should be signalled as an exception, I think
       gdome_di_unref(di, &exc);
-      return GMetaDOM::Document(0);
+      return DOM::Document(0);
     }
 
-    GMetaDOM::Document res(doc);
+    DOM::Document res(doc);
     gdome_di_unref(di, &exc);
     assert(exc == 0);
     gdome_doc_unref(doc, &exc);

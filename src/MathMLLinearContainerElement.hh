@@ -36,7 +36,7 @@ class MathMLLinearContainerElement: public MathMLContainerElement
 protected:
   MathMLLinearContainerElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLLinearContainerElement(const GMetaDOM::Element&);
+  MathMLLinearContainerElement(const DOM::Element&);
 #endif
   virtual ~MathMLLinearContainerElement();
 
@@ -56,13 +56,6 @@ public:
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
-
-#if 0
-  virtual void SetDirtyLayout(bool = false);
-  virtual void SetDirty(const Rectangle* = NULL);
-  virtual void SetSelected(void);
-  virtual void ResetSelected(void);
-#endif
 
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;

@@ -25,7 +25,5 @@
 
 #include <functional>
 
-struct StringHash : public std::unary_function< class String*, size_t >
-{ size_t operator()(const class String*) const; };
 
 #endif // __StringHash_hh__

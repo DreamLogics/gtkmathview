@@ -50,7 +50,7 @@ MathMLInvisibleTimesNode::Setup(class RenderingEnvironment& env)
 }
 
 void
-MathMLInvisibleTimesNode::DoLayout()
+MathMLInvisibleTimesNode::DoLayout(const FormattingContext&)
 {
   // the following calculation cannot be done at setup time because
   // we need to know if the element *next* to this is a fence, and this
@@ -62,6 +62,7 @@ MathMLInvisibleTimesNode::DoLayout()
 
   box.Set(0, 0, 0);
 
+  // maybe we should seek for the top embellishment
   if (!is_a<MathMLOperatorElement>(GetParent())) return;
 
   Ptr<MathMLElement> prev = findLeftSibling(GetParent());
@@ -99,6 +100,6 @@ MathMLInvisibleTimesNode::GetLogicalContentLength() const
 String*
 MathMLInvisibleTimesNode::GetRawContent() const
 {
-  Char ch = U_APPLYFUNCTION;
+  Char ch = U_INVISIBLETIMES;
   return allocString(&ch, 1);
 }

@@ -29,7 +29,6 @@
 #include "ChildList.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLBinContainerElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLBinContainerElement::MathMLBinContainerElement()
@@ -37,7 +36,7 @@ MathMLBinContainerElement::MathMLBinContainerElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLBinContainerElement::MathMLBinContainerElement(const GMetaDOM::Element& node)
+MathMLBinContainerElement::MathMLBinContainerElement(const DOM::Element& node)
 #endif
   : MathMLContainerElement(node)
 {
@@ -56,8 +55,8 @@ MathMLBinContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
       ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
       if (children.get_length() > 0)
 	{
-	  GMetaDOM::Node node = children.item(0);
-	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  DOM::Node node = children.item(0);
+	  assert(node.get_nodeType() == DOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	  // it might be that we get a NULL. In that case it would probably make
 	  // sense to create a dummy element, because we filtered MathML
@@ -110,8 +109,7 @@ void
 MathMLBinContainerElement::SetPosition(scaled x, scaled y)
 {
   MathMLContainerElement::SetPosition(x, y);
-  assert(child);
-  child->SetPosition(x, y);
+  if (child) child->SetPosition(x, y);
 }
 
 void

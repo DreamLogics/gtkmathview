@@ -38,8 +38,8 @@ class MathMLDocument : public MathMLBinContainerElement
 protected:
   MathMLDocument(void);
 #if defined(HAVE_GMETADOM)
-  MathMLDocument(const GMetaDOM::Document&);
-  MathMLDocument(const GMetaDOM::Element&);
+  MathMLDocument(const DOM::Document&);
+  MathMLDocument(const DOM::Element&);
   void Init(void);
 #endif
   virtual ~MathMLDocument();
@@ -48,9 +48,9 @@ public:
   static Ptr<MathMLDocument> create(void)
   { return Ptr<MathMLDocument>(new MathMLDocument()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLDocument> create(const GMetaDOM::Document& doc)
+  static Ptr<MathMLDocument> create(const DOM::Document& doc)
   { return Ptr<MathMLDocument>(new MathMLDocument(doc)); }
-  static Ptr<MathMLDocument> create(const GMetaDOM::Element& elem)
+  static Ptr<MathMLDocument> create(const DOM::Element& elem)
   { return Ptr<MathMLDocument>(new MathMLDocument(elem)); }
 #endif
 
@@ -63,35 +63,39 @@ public:
   //void RegisterElement(const Ptr<MathMLElement>&);
   //void UnregisterElement(const Ptr<MathMLElement>&);
 
-  Ptr<MathMLElement> findFormattingNode(const GMetaDOM::Element&) const;
-  Ptr<MathMLElement> getFormattingNodeNoCreate(const GMetaDOM::Element&) const;
-  Ptr<MathMLElement> getFormattingNode(const GMetaDOM::Element&) const;
+  Ptr<MathMLElement> findFormattingNode(const DOM::Element&) const;
+  Ptr<MathMLElement> getFormattingNodeNoCreate(const DOM::Element&) const;
+  Ptr<MathMLElement> getFormattingNode(const DOM::Element&) const;
+  void               setFormattingNode(const DOM::Element&, const Ptr<MathMLElement>&) const;
+
+  void               notifySubtreeModified(const DOM::Element&) const;
+  void               notifyAttributeModified(const DOM::Element&) const;
 
 #if defined(HAVE_GMETADOM)
-  const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
-  const GMetaDOM::Element& GetDOMRoot(void) const { return DOMroot; }
+  const DOM::Document& GetDOMDocument(void) const { return DOMdoc; }
+  const DOM::Element& GetDOMRoot(void) const { return DOMroot; }
 
-  //Ptr<MathMLElement> getFormattingNode(const GMetaDOM::Element&) const;
+  //Ptr<MathMLElement> getFormattingNode(const DOM::Element&) const;
 
 protected:
 
-  class DOMSubtreeModifiedListener : public GMetaDOM::EventListener
+  class DOMSubtreeModifiedListener : public DOM::EventListener
   {
   public:
     DOMSubtreeModifiedListener(const Ptr<MathMLDocument> d) : doc(d) { };
     virtual ~DOMSubtreeModifiedListener() { };
-    virtual void handleEvent(const GMetaDOM::Event&);
+    virtual void handleEvent(const DOM::Event&);
 
   private:
     Ptr<MathMLDocument> doc;
   };
 
-  class DOMAttrModifiedListener : public GMetaDOM::EventListener
+  class DOMAttrModifiedListener : public DOM::EventListener
   {
   public:
     DOMAttrModifiedListener(const Ptr<MathMLDocument> d) : doc(d) { };
     virtual ~DOMAttrModifiedListener() { };
-    virtual void handleEvent(const GMetaDOM::Event&);
+    virtual void handleEvent(const DOM::Event&);
 
   private:
     Ptr<MathMLDocument> doc;
@@ -100,14 +104,12 @@ protected:
   DOMSubtreeModifiedListener* subtreeModifiedListener;
   DOMAttrModifiedListener* attrModifiedListener;
 
-  GMetaDOM::Document DOMdoc;  // can be 0
-  GMetaDOM::Element  DOMroot; // can be 0
+  DOM::Document DOMdoc;  // can be 0
+  DOM::Element  DOMroot; // can be 0
 
-  void               setFormattingNode(const GMetaDOM::Element&, const Ptr<MathMLElement>&) const;
-
-  struct DOM_hash : public std::unary_function< GMetaDOM::Element, size_t >
+  struct DOM_hash : public std::unary_function< DOM::Element, size_t >
   {
-    size_t operator()(const GMetaDOM::Element& elem) const
+    size_t operator()(const DOM::Element& elem) const
     {
       assert(elem);
       GdomeNode* node = elem.gdome_object();
@@ -119,7 +121,7 @@ protected:
     }
   };
 
-  typedef std::hash_map< GMetaDOM::Element, Ptr<MathMLElement>, DOM_hash > DOMNodeMap;
+  typedef std::hash_map< DOM::Element, Ptr<MathMLElement>, DOM_hash > DOMNodeMap;
   mutable DOMNodeMap nodeMap;
 #endif
 };

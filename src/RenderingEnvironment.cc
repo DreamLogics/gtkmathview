@@ -63,6 +63,7 @@ RenderingEnvironment::RenderingEnvironment(CharMapper& cm) : charMapper(cm)
 
 RenderingEnvironment::~RenderingEnvironment()
 {
+  while (!level.empty()) Drop();
 }
 
 void
@@ -84,7 +85,7 @@ RenderingEnvironment::Push(const MathMLAttributeList* aList)
 void
 RenderingEnvironment::Drop()
 {
-  assert(level.size() > 1);
+  assert(level.size() > 0);
   AttributeLevel* top = level.front();
   assert(top != 0);
   delete top;
@@ -467,19 +468,14 @@ RenderingEnvironment::GetRuleThickness() const
   AttributeLevel* top = level.front();
   assert(top != NULL);
 
+#ifdef TEXISH_MATHML
   // don't know if this is the correct heuristics
   scaled s = float2sp(sp2float(top->fontAttributes.size.ToScaledPoints()) * 0.04);
   return s;
-
-#if 0
-  const FontifiedChar* fChar = charMapper.FontifyChar(top->fontAttributes, '-');
-  assert(fChar != NULL);
-
-  BoundingBox minusBox;
-  fChar->GetBoundingBox(minusBox);
-  delete fChar;
-
-  return scaledMax(SCALED_POINTS_PER_PX, minusBox.ascent + minusBox.descent);
+#else
+  scaled s = scaledMin(SCALED_POINTS_PER_PX,
+		       float2sp(sp2float(top->fontAttributes.size.ToScaledPoints()) * 0.1));
+  return s;
 #endif
 }
 

@@ -37,7 +37,6 @@
 #include "MathMLTableElement.hh"
 #include "MathMLTableRowElement.hh"
 #include "MathMLTableCellElement.hh"
-#include "MathMLLabeledTableRowElement.hh"
 
 MathMLTableRowElement::MathMLTableRowElement()
 {
@@ -45,7 +44,7 @@ MathMLTableRowElement::MathMLTableRowElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLTableRowElement::MathMLTableRowElement(const GMetaDOM::Element& node)
+MathMLTableRowElement::MathMLTableRowElement(const DOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
   rowIndex = 0;
@@ -85,11 +84,13 @@ MathMLTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "mtd");
 	  unsigned n = children.get_length();
 
+	  cout << "redoing row normalize with " << n << " children" << endl;
+
 	  std::vector< Ptr<MathMLElement> > newContent;
 	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
-	      GMetaDOM::Node node = children.item(i);
+	      DOM::Node node = children.item(i);
 	      Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	      assert(elem);
 	      newContent.push_back(elem);
@@ -99,6 +100,8 @@ MathMLTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 #endif
       
       std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
+
+      cout << "the row has dirty layout " << DirtyLayout() << endl;
 
       ResetDirtyStructure();
     }
@@ -127,6 +130,12 @@ MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment& env)
 void
 MathMLTableRowElement::Setup(RenderingEnvironment& env)
 {
+  SetupAux(env, false);
+}
+
+void
+MathMLTableRowElement::SetupAux(RenderingEnvironment& env, bool labeledRow)
+{
   if (DirtyAttribute() || DirtyAttributeP())
     {
       assert(GetParent());
@@ -136,10 +145,10 @@ MathMLTableRowElement::Setup(RenderingEnvironment& env)
       const Value* value;
 
       value = GetAttributeValue(ATTR_COLUMNALIGN, false);
-      if (value != 0) mtable->SetupColumnAlignAux(value, rowIndex, 1, IsA() == TAG_MLABELEDTR);
+      if (value != 0) mtable->SetupColumnAlignAux(value, rowIndex, 1, labeledRow);
 
       value = GetAttributeValue(ATTR_ROWALIGN, false);
-      if (value != 0) mtable->SetupRowAlignAux(value, rowIndex, IsA() == TAG_MLABELEDTR);
+      if (value != 0) mtable->SetupRowAlignAux(value, rowIndex, labeledRow);
 
       value = GetAttributeValue(ATTR_GROUPALIGN, false);
       if (value != 0) mtable->SetupGroupAlignAux(value, rowIndex, 1);
@@ -181,3 +190,27 @@ MathMLTableRowElement::GetLabel(void) const
   return 0;
 }
 
+void
+MathMLTableRowElement::SetDirtyStructure()
+{
+  assert(GetParent());
+  assert(is_a<MathMLTableElement>(GetParent()));
+  Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent());
+  assert(table);
+  cout << "propagating dirty up" << endl;
+  table->SetDirtyStructure();
+  table->SetDirtyAttribute();
+  MathMLLinearContainerElement::SetDirtyStructure();
+}
+
+void
+MathMLTableRowElement::SetDirtyAttribute()
+{
+  assert(GetParent());
+  assert(is_a<MathMLTableElement>(GetParent()));
+  Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent());
+  assert(table);
+  table->SetDirtyStructure();
+  table->SetDirtyAttribute();
+  MathMLLinearContainerElement::SetDirtyStructure();
+}

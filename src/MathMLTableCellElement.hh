@@ -34,7 +34,7 @@ class MathMLTableCellElement: public MathMLNormalizingContainerElement
 protected:
   MathMLTableCellElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLTableCellElement(const GMetaDOM::Element&);
+  MathMLTableCellElement(const DOM::Element&);
 #endif
   virtual ~MathMLTableCellElement();
 
@@ -45,7 +45,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLTableCellElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLTableCellElement(el)); }
 #endif
 
@@ -66,6 +66,8 @@ public:
 
   friend class MathMLTableElement;
   friend class MathMLTableRowElement;
+
+  virtual void SetDirtyAttribute(void);
 
 protected:
   // the following method is declared static for efficiency reasons. In fact,

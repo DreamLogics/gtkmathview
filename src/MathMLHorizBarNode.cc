@@ -47,7 +47,7 @@ MathMLHorizBarNode::Setup(RenderingEnvironment& env)
 }
 
 void
-MathMLHorizBarNode::DoLayout()
+MathMLHorizBarNode::DoLayout(const FormattingContext&)
 {
   box.Set(0, thickness / 2, thickness - thickness / 2);
 }

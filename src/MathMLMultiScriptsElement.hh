@@ -29,15 +29,17 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLMultiScriptsElement : public MathMLContainerElement, public MathMLScriptCommonElement
+class MathMLMultiScriptsElement
+  : public MathMLContainerElement, public MathMLScriptCommonElement, public MathMLEmbellishment
 {
 protected:
   MathMLMultiScriptsElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLMultiScriptsElement(const GMetaDOM::Element&);
+  MathMLMultiScriptsElement(const DOM::Element&);
 #endif
   virtual ~MathMLMultiScriptsElement();
 
@@ -60,7 +62,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLMultiScriptsElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLMultiScriptsElement(el)); }
 #endif
 
@@ -79,7 +81,7 @@ public:
   virtual void ResetFlagDown(Flags);
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
-  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
   virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
 

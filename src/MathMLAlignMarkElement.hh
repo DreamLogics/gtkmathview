@@ -35,7 +35,7 @@ class MathMLAlignMarkElement: public MathMLElement
 protected:
   MathMLAlignMarkElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLAlignMarkElement(const GMetaDOM::Element&);
+  MathMLAlignMarkElement(const DOM::Element&);
 #endif
   virtual ~MathMLAlignMarkElement();
 
@@ -43,7 +43,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLAlignMarkElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLAlignMarkElement(el)); }
 #endif
 

@@ -30,8 +30,8 @@
 #include "ValueConversion.hh"
 #include "MathMLAttribute.hh"
 #include "MathMLStyleElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLAttributeList.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "RenderingEnvironment.hh"
 
 MathMLStyleElement::MathMLStyleElement()
@@ -39,7 +39,7 @@ MathMLStyleElement::MathMLStyleElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLStyleElement::MathMLStyleElement(const GMetaDOM::Element& node)
+MathMLStyleElement::MathMLStyleElement(const DOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
 }
@@ -85,6 +85,24 @@ MathMLStyleElement::GetAttributeSignature(AttributeId id) const
   return signature;
 }
 
+#if 0
+void
+MathMLStyleElement::Normalize(const Ptr<MathMLDocument>& doc)
+{
+  if (DirtyStructure())
+    {
+      MathMLNormalizingContainerElement::Normalize(doc);
+      if (Ptr<MathMLOperatorElement> coreOp = GetCoreOperator())
+	{
+	  Ptr<MathMLEmbellishedOperatorElement> eOp = coreOp->GetEmbellishment();
+	  assert(eOp && eOp->GetParent() == this);
+	  eOp->Lift(doc);
+	}
+      ResetDirtyStructure();
+    }
+}
+#endif
+
 void
 MathMLStyleElement::Setup(RenderingEnvironment& env)
 {
@@ -106,16 +124,16 @@ MathMLStyleElement::Setup(RenderingEnvironment& env)
 	}
       }
 #elif defined(HAVE_GMETADOM)
-      GMetaDOM::NamedNodeMap nnm = GetDOMElement().get_attributes();
+      DOM::NamedNodeMap nnm = GetDOMElement().get_attributes();
 
       for (unsigned i = 0; i < nnm.get_length(); i++) {
-	GMetaDOM::Node attribute = nnm.item(i);
+	DOM::Node attribute = nnm.item(i);
 
 	std::string s_name = nodeLocalName(attribute);
 	AttributeId id = AttributeIdOfName(s_name.c_str());
 
 	if (id != ATTR_NOTVALID) {
-	  GMetaDOM::GdomeString value = attribute.get_nodeValue();
+	  DOM::GdomeString value = attribute.get_nodeValue();
 	  String* sValue = allocString(value);
 	  attributes.Append(new MathMLAttribute(id, sValue));
 	}
@@ -289,6 +307,26 @@ MathMLStyleElement::Setup(RenderingEnvironment& env)
 }
 
 void
+MathMLStyleElement::DoLayout(const FormattingContext& ctxt)
+{
+  if (DirtyLayout(ctxt))
+    {
+      MathMLNormalizingContainerElement::DoLayout(ctxt);
+      DoEmbellishmentLayout(this, box);
+      ResetDirtyLayout(ctxt);
+    }
+}
+
+void
+MathMLStyleElement::SetPosition(scaled x, scaled y)
+{
+  position.x = x;
+  position.y = y;
+  SetEmbellishmentPosition(this, x, y);
+  if (GetChild()) GetChild()->SetPosition(x, y);
+}
+
+void
 MathMLStyleElement::Render(const DrawingArea& area)
 {
   if (Dirty())
@@ -329,8 +367,9 @@ MathMLStyleElement::SetDirtyAttribute()
   SetDirtyAttributeD();
 }
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLStyleElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLStyleElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(GetChild());
+  if (GetChild()) return GetChild()->GetCoreOperator();
+  else return 0;
 }

@@ -40,7 +40,7 @@ class MathMLTokenElement : public MathMLElement
 protected:
   MathMLTokenElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLTokenElement(const GMetaDOM::Element&);
+  MathMLTokenElement(const DOM::Element&);
 #endif
   virtual ~MathMLTokenElement();
 
@@ -48,7 +48,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLTokenElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLTokenElement(el)); }
 #endif
 
@@ -86,8 +86,10 @@ private:
   std::vector< Ptr<class MathMLTextNode> > content;
 
 protected:
-  static Ptr<class MathMLTextNode> SubstituteMGlyphElement(const GMetaDOM::Element&);
-  static Ptr<class MathMLTextNode> SubstituteAlignMarkElement(const GMetaDOM::Element&);
+  void SetContentPosition(scaled, scaled);
+
+  static Ptr<class MathMLTextNode> SubstituteMGlyphElement(const DOM::Element&);
+  static Ptr<class MathMLTextNode> SubstituteAlignMarkElement(const DOM::Element&);
   
   void AddItalicCorrection(void);
 

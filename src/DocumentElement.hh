@@ -34,14 +34,14 @@ class DocumentElement : public MathMLLinearContainerElement
 protected:
   DocumentElement(void);
 #if defined(HAVE_GMETADOM)
-  DocumentElement(const GMetaDOM::Document&);
+  DocumentElement(const DOM::Document&);
 #endif
   virtual ~DocumentElement();
 
 public:
   static MathMLElement* create(void) { return new DocumentElement(); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Document& el) { return new DocumentElement(el); }
+  static MathMLElement* create(const DOM::Document& el) { return new DocumentElement(el); }
 #endif
 
   virtual void Setup(RenderingEnvironment*);

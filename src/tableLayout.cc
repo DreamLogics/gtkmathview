@@ -36,6 +36,7 @@ MathMLTableElement::DoLayout(const FormattingContext& ctxt)
 {
   if (DirtyLayout(ctxt))
     {
+      cout << "redoing table layout with type " << ctxt.GetLayoutType() << endl;
       scaled aAvailWidth = PrepareLabelsLayout(ctxt);
 
       if (ctxt.GetLayoutType() == LAYOUT_MIN) DoHorizontalMinimumLayout();
@@ -68,6 +69,15 @@ MathMLTableElement::DoLayout(const FormattingContext& ctxt)
 	  }
 	}
       }
+
+      // because the table invokes directly the layout operations on its
+      // cells, we have to clean the dirty-layout flag on the rows here
+      // otherwise this will stop the propagation mechanism of the dirty
+      // layout flag when one of the rows changes
+      for (std::vector< Ptr<MathMLElement> >::iterator p = content.begin();
+	   p != content.end();
+	   p++)
+	(*p)->ResetDirtyLayout(ctxt);
 
       ResetDirtyLayout(ctxt);
     }
@@ -658,7 +668,7 @@ MathMLTableElement::StretchyCellsLayout()
 	      Ptr<MathMLElement> cellElem = cell[i][j].mtd->GetChild();
 	      assert(cellElem);
 	      Ptr<MathMLOperatorElement> op = findStretchyOperator(cellElem);
-
+	      cout << " core operator? " << (op != 0) << endl;
 	      if (op)
 		{
 		  scaled width = GetColumnWidth(j, cell[i][j].colSpan);

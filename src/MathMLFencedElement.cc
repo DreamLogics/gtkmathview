@@ -43,7 +43,7 @@ MathMLFencedElement::MathMLFencedElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLFencedElement::MathMLFencedElement(const GMetaDOM::Element& node)
+MathMLFencedElement::MathMLFencedElement(const DOM::Element& node)
   : MathMLBinContainerElement(node)
 {
   normalized = false;
@@ -106,7 +106,10 @@ MathMLFencedElement::Setup(RenderingEnvironment& env)
       else closeFence = NULL;
       delete value;
 
-      value = GetAttributeValue(ATTR_SEPARATORS, env, false);
+      if (GetDOMElement() && GetDOMElement().hasAttribute("separators"))
+	value = GetAttributeValue(ATTR_SEPARATORS, env, false);
+      else
+	value = GetAttributeValue(ATTR_SEPARATORS, env);
       if (value != NULL && value->ToString() != NULL) separators = value->ToString()->Clone();
       else separators = NULL;
       delete value;
@@ -129,8 +132,8 @@ MathMLFencedElement::DelayedNormalize(const Ptr<MathMLDocument>& doc)
 
       for (unsigned i = 0; i < nChildren; i++)
 	{
-	  GMetaDOM::Node node = children.item(i);
-	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  DOM::Node node = children.item(i);
+	  assert(node.get_nodeType() == DOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	  assert(elem);
 	  // we detach the element from its parent, which can be an
@@ -163,8 +166,8 @@ MathMLFencedElement::DelayedNormalize(const Ptr<MathMLDocument>& doc)
 
       for (unsigned i = 0; i < nChildren; i++)
 	{
-	  GMetaDOM::Node node = children.item(i);
-	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  DOM::Node node = children.item(i);
+	  assert(node.get_nodeType() == DOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> arg = doc->getFormattingNode(node);
 	  assert(arg);
 
@@ -188,7 +191,7 @@ MathMLFencedElement::DelayedNormalize(const Ptr<MathMLDocument>& doc)
       if (moreArguments) mainRow->Append(mrow);
 #endif // HAVE_GMETADOM
 
-      if (closeFence != NULL && closeFence->GetLength() > 0)
+      if (closeFence && closeFence->GetLength() > 0)
 	{
 	  fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
 	  assert(fence);
@@ -197,8 +200,11 @@ MathMLFencedElement::DelayedNormalize(const Ptr<MathMLDocument>& doc)
 	  mainRow->Append(fence);
 	}
 
-      mainRow->Normalize(doc);
       SetChild(mainRow);
+      mainRow->Normalize(doc);
+      // the mainRow will typically have the dirtyStructure flag set,
+      // hence we have to clean it again
+      ResetDirtyStructure();
 
       normalized = true;
     }

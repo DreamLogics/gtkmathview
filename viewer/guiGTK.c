@@ -67,6 +67,7 @@ static void options_verbosity(GtkWidget*, guint);
 static void options_anti_aliasing(GtkWidget*, gpointer);
 static void options_transparency(GtkWidget*, gpointer);
 static void edit_delete_selection(GtkWidget*, gpointer);
+static void edit_select_parent(GtkWidget*, gpointer);
 static void help_about(GtkWidget*, gpointer);
 
 static GtkItemFactoryEntry menu_items[] = {
@@ -79,6 +80,7 @@ static GtkItemFactoryEntry menu_items[] = {
 
   { "/_Edit",                          NULL, NULL,                  0,  "<Branch>" },
   { "/Edit/Delete Selection",          NULL, edit_delete_selection, 0,  NULL },
+  { "/Edit/Select Parent",             NULL, edit_select_parent,    0,  NULL },
 
   { "/_Options",                       NULL, NULL,                  0,  "<Branch>" },
   { "/Options/_Selection Mode",        NULL, NULL,                  0,  "<Branch>" },
@@ -357,6 +359,21 @@ edit_delete_selection(GtkWidget* widget, gpointer data)
 }
 
 static void
+edit_select_parent(GtkWidget* widget, gpointer data)
+{
+  if (root_selected != NULL)
+    {
+      GdomeException exc = 0;
+      GdomeElement* parent = gdome_n_parentNode(root_selected, &exc);
+      g_assert(exc == 0);
+      gdome_n_unref(root_selected, &exc);
+      g_assert(exc == 0);
+      root_selected = parent;
+      gtk_math_view_set_selection(GTK_MATH_VIEW(main_area), root_selected);
+    }
+}
+
+static void
 help_about(GtkWidget* widget, gpointer data)
 {
   GtkWidget* dialog;
@@ -364,7 +381,7 @@ help_about(GtkWidget* widget, gpointer data)
   GtkWidget* ok;
 
   dialog = gtk_dialog_new();
-  label = gtk_label_new("\n    MathML Viewer    \n    Copyright (C) 2000-2001 Luca Padovani    \n");
+  label = gtk_label_new("\n    MathML Viewer    \n    Copyright (C) 2000-2002 Luca Padovani    \n");
   ok = gtk_button_new_with_label("Close");
 
   gtk_signal_connect_object (GTK_OBJECT (ok), "clicked",

@@ -43,7 +43,7 @@ MathMLTableCellElement::MathMLTableCellElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLTableCellElement::MathMLTableCellElement(const GMetaDOM::Element& node)
+MathMLTableCellElement::MathMLTableCellElement(const DOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
   Init();
@@ -234,26 +234,29 @@ MathMLTableCellElement::Setup(RenderingEnvironment& env)
 {
   if (DirtyAttribute() || DirtyAttributeP())
     {
-      assert(cell != NULL);
+      // if the <mtd> element is not used inside a table, 
+      // the cell field is null
+      if (cell)
+	{
+	  const Value* value;
 
-      const Value* value;
+	  value = GetAttributeValue(ATTR_ROWALIGN, false);
+	  if (value != NULL) cell->rowAlign = ToRowAlignId(value);
+	  delete value;
 
-      value = GetAttributeValue(ATTR_ROWALIGN, false);
-      if (value != NULL) cell->rowAlign = ToRowAlignId(value);
-      delete value;
+	  value = GetAttributeValue(ATTR_COLUMNALIGN, false);
+	  if (value != NULL) cell->columnAlign = ToColumnAlignId(value);
+	  delete value;
 
-      value = GetAttributeValue(ATTR_COLUMNALIGN, false);
-      if (value != NULL) cell->columnAlign = ToColumnAlignId(value);
-      delete value;
-
-      value = GetAttributeValue(ATTR_GROUPALIGN, false);
-      if (value != NULL) {
-	for (unsigned k = 0; k < cell->nAlignGroup; k++) {
-	  const Value* p = value->Get(k);
-	  cell->aGroup[k].alignment = ToGroupAlignId(p);
+	  value = GetAttributeValue(ATTR_GROUPALIGN, false);
+	  if (value != NULL) {
+	    for (unsigned k = 0; k < cell->nAlignGroup; k++) {
+	      const Value* p = value->Get(k);
+	      cell->aGroup[k].alignment = ToGroupAlignId(p);
+	    }
+	  }
+	  delete value;
 	}
-      }
-      delete value;
 
       MathMLNormalizingContainerElement::Setup(env);
       ResetDirtyAttribute();
@@ -266,16 +269,17 @@ MathMLTableCellElement::SetupCellPosition(unsigned i, unsigned j, unsigned nRows
   rowIndex = i;
   columnIndex = j;
 
-  if (i + rowSpan > nRows) {
-    Globals::logger(LOG_WARNING, "`mtd' spans over the last row (truncated)");
-    rowSpan = nRows - i;
-  }
+  if (i + rowSpan > nRows)
+    {
+      Globals::logger(LOG_WARNING, "`mtd' spans over the last row (truncated)");
+      rowSpan = nRows - i;
+    }
 }
 
 void
 MathMLTableCellElement::SetupCell(TableCell* p)
 {
-  assert(p != NULL);
+  assert(p);
   cell = p;
 }
 
@@ -409,59 +413,92 @@ MathMLTableCellElement::CalcGroupsExtent()
 void
 MathMLTableCellElement::SetPosition(scaled x, scaled y)
 {
-  assert(cell != NULL);
-  assert(child);
+  if (GetChild())
+    {
+      if (cell)
+	{
+	  const BoundingBox& elemBox = child->GetBoundingBox();
 
-  const BoundingBox& elemBox = child->GetBoundingBox();
+	  position.x = x;
+	  position.y = y;
 
-  position.x = x;
-  position.y = y;
+	  scaled availableWidth  = box.width;
 
-  scaled availableWidth  = box.width;
+	  scaled cellXOffset = 0;
+	  switch (cell->columnAlign) {
+	  case COLUMN_ALIGN_RIGHT:
+	    cellXOffset = availableWidth - elemBox.width;
+	    break;
+	  case COLUMN_ALIGN_CENTER:
+	    cellXOffset = (availableWidth - elemBox.width) / 2;
+	    break;
+	  case COLUMN_ALIGN_LEFT:
+	  default:
+	    cellXOffset = 0;
+	    break;
+	  }
 
-  scaled cellXOffset = 0;
-  switch (cell->columnAlign) {
-  case COLUMN_ALIGN_RIGHT:
-    cellXOffset = availableWidth - elemBox.width;
-    break;
-  case COLUMN_ALIGN_CENTER:
-    cellXOffset = (availableWidth - elemBox.width) / 2;
-    break;
-  case COLUMN_ALIGN_LEFT:
-  default:
-    cellXOffset = 0;
-    break;
-  }
+	  scaled cellYOffset = 0;
+	  switch (cell->rowAlign) {
+	  case ROW_ALIGN_BOTTOM:
+	    cellYOffset = box.descent - elemBox.descent;
+	    break;
+	  case ROW_ALIGN_CENTER:
+	    cellYOffset = (box.GetHeight() - elemBox.GetHeight()) / 2 +
+	      elemBox.ascent - box.ascent;
+	    break;
+	  case ROW_ALIGN_BASELINE:
+	    cellYOffset = 0;
+	    break;
+	  case ROW_ALIGN_AXIS:
+	    assert(IMPOSSIBLE);
+	    break;
+	  case ROW_ALIGN_TOP:
+	    cellYOffset = elemBox.ascent - box.ascent;
+	    break;
+	  default:
+	    cellYOffset = 0;
+	    break;
+	  }
 
-  scaled cellYOffset = 0;
-  switch (cell->rowAlign) {
-  case ROW_ALIGN_BOTTOM:
-    cellYOffset = box.descent - elemBox.descent;
-    break;
-  case ROW_ALIGN_CENTER:
-    cellYOffset = (box.GetHeight() - elemBox.GetHeight()) / 2 +
-      elemBox.ascent - box.ascent;
-    break;
-  case ROW_ALIGN_BASELINE:
-    cellYOffset = 0;
-    break;
-  case ROW_ALIGN_AXIS:
-    assert(IMPOSSIBLE);
-    break;
-  case ROW_ALIGN_TOP:
-    cellYOffset = elemBox.ascent - box.ascent;
-    break;
-  default:
-    cellYOffset = 0;
-    break;
-  }
-
-  child->SetPosition(x + cellXOffset, y + cellYOffset);
+	  GetChild()->SetPosition(x + cellXOffset, y + cellYOffset);
+	}
+      else
+	GetChild()->SetPosition(x, y);
+    }
 }
 
 bool
 MathMLTableCellElement::IsStretchyOperator() const
 {
-  assert(child);
-  return isStretchyOperator(child);
+  if (GetChild()) return isStretchyOperator(GetChild());
+  else return false;
 }
+
+void
+MathMLTableCellElement::SetDirtyAttribute()
+{
+  assert(GetParent());
+  assert(GetParent()->GetParent());
+  assert(is_a<MathMLTableElement>(GetParent()->GetParent()));
+  Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent()->GetParent());
+  assert(table);
+  table->SetDirtyStructure();
+  table->SetDirtyAttribute();
+  MathMLNormalizingContainerElement::SetDirtyAttribute();
+}
+
+#if 0
+void
+MathMLTableCellElement::SetDirtyStructure()
+{
+  assert(GetParent());
+  assert(GetParent()->GetParent());
+  assert(is_a<MathMLTableElement>(GetParent()->GetParent()));
+  Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent()->GetParent());
+  assert(table);
+  table->SetDirtyStructure();
+  table->SetDirtyAttribute();
+  MathMLNormalizingContainerElement::SetDirtyAttribute();
+}
+#endif

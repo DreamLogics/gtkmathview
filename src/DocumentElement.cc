@@ -38,7 +38,7 @@ DocumentElement::DocumentElement()
 }
 
 #if defined(HAVE_GMETADOM)
-DocumentElement::DocumentElement(const GMetaDOM::Document& doc)
+DocumentElement::DocumentElement(const DOM::Document& doc)
   : MathMLLinearContainerElement(doc.get_documentElement())
 {
 }

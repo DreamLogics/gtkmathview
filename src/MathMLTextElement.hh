@@ -34,7 +34,7 @@ class MathMLTextElement: public MathMLTokenElement
 protected:
   MathMLTextElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLTextElement(const GMetaDOM::Element&);
+  MathMLTextElement(const DOM::Element&);
 #endif
   virtual ~MathMLTextElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLTextElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLTextElement(el)); }
 #endif
 

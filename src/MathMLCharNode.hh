@@ -44,7 +44,7 @@ public:
   virtual String*  GetRawContent(void) const;
   virtual unsigned GetLogicalContentLength(void) const;
 
-  bool             IsStretchyChar(void) const;
+  virtual bool     IsStretchyChar(void) const;
   virtual bool     HasDecimalPoint(void) const;
   virtual scaled   GetDecimalPointEdge(void) const;
 

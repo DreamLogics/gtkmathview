@@ -30,7 +30,7 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLFractionElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLFractionElement::MathMLFractionElement()
@@ -38,7 +38,7 @@ MathMLFractionElement::MathMLFractionElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLFractionElement::MathMLFractionElement(const GMetaDOM::Element& node)
+MathMLFractionElement::MathMLFractionElement(const DOM::Element& node)
   : MathMLContainerElement(node)
 {
 }
@@ -124,7 +124,6 @@ MathMLFractionElement::Normalize(const Ptr<MathMLDocument>& doc)
 
       if (numerator) numerator->Normalize(doc);
       if (denominator) denominator->Normalize(doc);
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -171,19 +170,21 @@ MathMLFractionElement::Setup(RenderingEnvironment& env)
 	  assert(number != NULL);
 	  assert(unit != NULL);
 
-	  if (unit->IsEmpty()) lineThickness = defaultRuleThickness * roundFloat(number->ToNumber());
-	  else {
-	    assert(unit->IsKeyword());
-	    UnitId unitId = ToUnitId(unit);
-	    if (unitId == UNIT_PERCENTAGE) {
-	      Globals::logger(LOG_WARNING, "line thickness given as percentage in `mfrac' element (taking default)");
-	      lineThickness = defaultRuleThickness;
-	    } else {
-	      UnitValue unitValue;
-	      unitValue.Set(number->ToNumber(), unitId);
-	      lineThickness = env.ToScaledPoints(unitValue);
+	  if (unit->IsEmpty())
+	    lineThickness = defaultRuleThickness * roundFloat(number->ToNumber());
+	  else
+	    {
+	      assert(unit->IsKeyword());
+	      UnitId unitId = ToUnitId(unit);
+	      if (unitId == UNIT_PERCENTAGE)
+		lineThickness = defaultRuleThickness * number->ToNumber() / 100;
+	      else
+		{
+		  UnitValue unitValue;
+		  unitValue.Set(number->ToNumber(), unitId);
+		  lineThickness = env.ToScaledPoints(unitValue);
+		}
 	    }
-	  }
 	}
 
 	lineThickness = scaledMax(0, lineThickness);
@@ -299,6 +300,8 @@ MathMLFractionElement::DoLayout(const class FormattingContext& ctxt)
 	box.width = scaledMax(box.width, box.rBearing);
       }
 
+      DoEmbellishmentLayout(this, box);
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -308,6 +311,8 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
 {
   position.x = x;
   position.y = y;
+
+  SetEmbellishmentPosition(this, x, y);
 
   assert(numerator && denominator);
 
@@ -487,8 +492,9 @@ MathMLFractionElement::Inside(scaled x, scaled y)
   return this;
 }
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLFractionElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLFractionElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(numerator);
+  if (numerator) return numerator->GetCoreOperator();
+  else return 0;
 }

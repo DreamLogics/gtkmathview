@@ -33,7 +33,7 @@ MathMLDummyElement::MathMLDummyElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLDummyElement::MathMLDummyElement(const GMetaDOM::Element& node)
+MathMLDummyElement::MathMLDummyElement(const DOM::Element& node)
   : MathMLElement(node)
 {
 }
@@ -54,13 +54,9 @@ MathMLDummyElement::Setup(RenderingEnvironment& env)
 {
   if (DirtyAttribute())
     {
-      FontifiedChar fChar;
-      
-      env.charMapper.FontifyChar(fChar, env.GetFontAttributes(), 'a');
-      assert(fChar.font);
-      
-      fChar.font->GetBoundingBox(box);
-      // memory leak n fChar fields???
+      background = env.GetBackgroundColor();
+      scaled size = env.ToScaledPoints(env.GetFontAttributes().size);
+      box.Set(size, size, 0);
       ResetDirtyAttribute();
     }
 }

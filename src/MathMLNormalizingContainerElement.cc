@@ -28,7 +28,6 @@
 #include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLDummyElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
 #include "FormattingContext.hh"
 
@@ -37,7 +36,7 @@ MathMLNormalizingContainerElement::MathMLNormalizingContainerElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLNormalizingContainerElement::MathMLNormalizingContainerElement(const GMetaDOM::Element& node)
+MathMLNormalizingContainerElement::MathMLNormalizingContainerElement(const DOM::Element& node)
   : MathMLBinContainerElement(node)
 {
 }
@@ -54,31 +53,44 @@ MathMLNormalizingContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
     {
 #if defined(HAVE_GMETADOM)
       ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
-      if (children.get_length() == 1)
+      unsigned n = children.get_length();
+      if (n == 1)
 	{
-	  GMetaDOM::Node node = children.item(0);
-	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+	  DOM::Node node = children.item(0);
+	  assert(node.get_nodeType() == DOM::Node::ELEMENT_NODE);
 	  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	  assert(elem);
 	  SetChild(elem);
 	}
-      else if (!child || child->GetDOMElement() != GetDOMElement())
+      else 
 	{
-	  Ptr<MathMLElement> row = MathMLRowElement::create(GetDOMElement());
-	  assert(row);
+	  Ptr<MathMLRowElement> row;
+	  if (GetChild() && is_a<MathMLRowElement>(GetChild()) && !GetChild()->GetDOMElement())
+	    // this must be an inferred mrow
+	    row = smart_cast<MathMLRowElement>(GetChild());
+	  else
+	    row = smart_cast<MathMLRowElement>(MathMLRowElement::create());
+	  assert(row && !row->GetDOMElement());
 	  SetChild(row);
+
+	  std::vector< Ptr<MathMLElement> > newContent;
+	  newContent.reserve(n);
+	  for (unsigned i = 0; i < n; i++)
+	    {
+	      Ptr<MathMLElement> elem = doc->getFormattingNode(children.item(i));
+	      assert(elem);
+	      newContent.push_back(elem);
+	    }
+
+	  row->SwapChildren(newContent);
 	}
 #else
-      if (!child)
-	{
-	  Ptr<MathMLElement> row = MathMLRowElement::create();
-	  assert(row);
-	  SetChild(row);
-	}
+      if (!GetChild()) SetChild(MathMLRowElement::create());
 #endif
 
-      if (child) child->Normalize(doc);
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
+      assert(GetChild());
+      GetChild()->Normalize(doc);
+
       ResetDirtyStructure();
     }
 }
@@ -108,4 +120,15 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
       if (child) child->Render(area);
       ResetDirty();
     }
+}
+
+void
+MathMLNormalizingContainerElement::SetDirtyStructure()
+{
+  MathMLBinContainerElement::SetDirtyStructure();
+  // if the structure of this element gets dirty, and there is
+  // an inferred mrow, then the mrow itself has a dirty strcuture,
+  // even if it has no corresponding DOM element
+  if (child && !child->GetDOMElement() && is_a<MathMLRowElement>(child))
+    child->SetDirtyStructure();
 }

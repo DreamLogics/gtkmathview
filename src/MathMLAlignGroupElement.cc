@@ -35,7 +35,7 @@ MathMLAlignGroupElement::MathMLAlignGroupElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLAlignGroupElement::MathMLAlignGroupElement(const GMetaDOM::Element& node)
+MathMLAlignGroupElement::MathMLAlignGroupElement(const DOM::Element& node)
   : MathMLElement(node)
 {
   Init();

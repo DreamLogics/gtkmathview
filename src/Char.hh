@@ -31,9 +31,9 @@
 
 #include "gmetadom.hh"
 
-typedef GMetaDOM::Char8  Char8;
-typedef GMetaDOM::Char16 Char16;
-typedef GMetaDOM::Char32 Char32;
+typedef DOM::Char8  Char8;
+typedef DOM::Char16 Char16;
+typedef DOM::Char32 Char32;
 
 #else
 

@@ -26,7 +26,7 @@
 #include "ChildList.hh"
 #include "MathMLDocument.hh"
 #include "MathMLDummyElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLSemanticsElement.hh"
 
 MathMLSemanticsElement::MathMLSemanticsElement()
@@ -34,7 +34,7 @@ MathMLSemanticsElement::MathMLSemanticsElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLSemanticsElement::MathMLSemanticsElement(const GMetaDOM::Element& node)
+MathMLSemanticsElement::MathMLSemanticsElement(const DOM::Element& node)
   : MathMLBinContainerElement(node)
 {
 }
@@ -62,7 +62,7 @@ MathMLSemanticsElement::Normalize(const Ptr<MathMLDocument>& doc)
 	      ChildList children(GetDOMElement(), MATHML_NS_URI, "annotation-xml");
 	      for (unsigned i = 0; i < children.get_length(); i++)
 		{
-		  GMetaDOM::Element elem = children.item(i);
+		  DOM::Element elem = children.item(i);
 		  assert(elem);
 		  if (elem.getAttribute("encoding") == "MathML-Presentation")
 		    {
@@ -81,10 +81,29 @@ MathMLSemanticsElement::Normalize(const Ptr<MathMLDocument>& doc)
 #endif
 
       if (GetChild()) GetChild()->Normalize(doc);
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
+}
+
+void
+MathMLSemanticsElement::DoLayout(const FormattingContext& ctxt)
+{
+  if (DirtyLayout(ctxt))
+    {
+      MathMLBinContainerElement::DoLayout(ctxt);
+      DoEmbellishmentLayout(this, box);
+      ResetDirtyLayout(ctxt);
+    }
+}
+
+void
+MathMLSemanticsElement::SetPosition(scaled x, scaled y)
+{
+  position.x = x;
+  position.y = y;
+  SetEmbellishmentPosition(this, x, y);
+  if (GetChild()) GetChild()->SetPosition(x, y);
 }
 
 #if 0
@@ -96,3 +115,10 @@ MathMLSemanticsElement::IsExpanding() const
   return content.GetFirst()->IsExpanding();
 }
 #endif
+
+Ptr<MathMLOperatorElement>
+MathMLSemanticsElement::GetCoreOperator()
+{
+  if (GetChild()) return GetChild()->GetCoreOperator();
+  else return 0;
+}

@@ -40,7 +40,7 @@ MathMLLabeledTableRowElement::MathMLLabeledTableRowElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLLabeledTableRowElement::MathMLLabeledTableRowElement(const GMetaDOM::Element& node)
+MathMLLabeledTableRowElement::MathMLLabeledTableRowElement(const DOM::Element& node)
   : MathMLTableRowElement(node)
 {
 }
@@ -77,6 +77,12 @@ MathMLLabeledTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 
       ResetDirtyStructure();
     }
+}
+
+void
+MathMLLabeledTableRowElement::Setup(RenderingEnvironment& env)
+{
+  SetupAux(env, true);
 }
 
 Ptr<MathMLElement>

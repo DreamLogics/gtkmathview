@@ -34,7 +34,7 @@ class MathMLRadicalElement : public MathMLContainerElement
 protected:
   MathMLRadicalElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLRadicalElement(const GMetaDOM::Element&);
+  MathMLRadicalElement(const DOM::Element&);
 #endif
   virtual ~MathMLRadicalElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLRadicalElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLRadicalElement(el)); }
 #endif
 

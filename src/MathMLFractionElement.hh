@@ -27,14 +27,16 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLContainerElement.hh"
 
-class MathMLFractionElement: public MathMLContainerElement
+class MathMLFractionElement
+  : public MathMLContainerElement, public MathMLEmbellishment
 {
 protected:
   MathMLFractionElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLFractionElement(const GMetaDOM::Element&);
+  MathMLFractionElement(const DOM::Element&);
 #endif
   virtual ~MathMLFractionElement();
 
@@ -42,7 +44,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLFractionElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLFractionElement(el)); }
 #endif
 
@@ -68,7 +70,7 @@ public:
   virtual scaled GetRightEdge(void) const;
   virtual void   ReleaseGCs(void);
   virtual Ptr<class MathMLElement> Inside(scaled, scaled);
-  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
   Ptr<MathMLElement> GetNumerator(void) const { return numerator; }
   Ptr<MathMLElement> GetDenominator(void) const { return denominator; }

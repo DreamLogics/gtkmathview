@@ -30,8 +30,8 @@
 #include "MathMLCharNode.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLUnderOverElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLUnderOverElement::MathMLUnderOverElement()
@@ -40,7 +40,7 @@ MathMLUnderOverElement::MathMLUnderOverElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLUnderOverElement::MathMLUnderOverElement(const GMetaDOM::Element& node)
+MathMLUnderOverElement::MathMLUnderOverElement(const DOM::Element& node)
   : MathMLContainerElement(node)
 {
 }
@@ -157,7 +157,7 @@ MathMLUnderOverElement::Normalize(const Ptr<MathMLDocument>& doc)
 		SetUnderScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetUnderScript()))
 		SetUnderScript(MathMLDummyElement::create());
-	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(2)))
 		SetOverScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetOverScript()))
 		SetOverScript(MathMLDummyElement::create());
@@ -172,7 +172,6 @@ MathMLUnderOverElement::Normalize(const Ptr<MathMLDocument>& doc)
       base->Normalize(doc);
       if (underScript) underScript->Normalize(doc);
       if (overScript) overScript->Normalize(doc);
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -322,7 +321,10 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 	      Ptr<MathMLOperatorElement> underOp = findStretchyOperator(underScript, STRETCH_HORIZONTAL);
 	      Ptr<MathMLOperatorElement> overOp  = findStretchyOperator(overScript, STRETCH_HORIZONTAL);
 
-	      Globals::logger(LOG_DEBUG, "stretchy: %p %p %p", baseOp, underOp, overOp);
+	      Globals::logger(LOG_DEBUG, "stretchy: %p %p %p",
+			      static_cast<MathMLElement*>(baseOp),
+			      static_cast<MathMLElement*>(underOp),
+			      static_cast<MathMLElement*>(overOp));
 
 	      if (!baseOp) base->DoLayout(ctxt);
 	      if (underScript && !underOp) underScript->DoLayout(ctxt);
@@ -398,15 +400,8 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 		  underShiftY = -underShiftY;
 
 #if defined(ENABLE_EXTENSIONS)
-		  if (underScript->IsEmbellishedOperator())
-		    {
-		      Ptr<MathMLEmbellishedOperatorElement> eOp =
-			smart_cast<MathMLEmbellishedOperatorElement>(underScript);
-		      assert(eOp);
-		      Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-		      assert(coreOp);
-		      underShiftY += coreOp->GetTopPadding();
-		    }
+		  if (Ptr<MathMLOperatorElement> coreOp = underScript->GetCoreOperatorTop())
+		    underShiftY += coreOp->GetTopPadding();
 #endif
 		} 
 	      else
@@ -432,13 +427,8 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 				  cChar->GetChar(), bChar->GetChar());
 
 #if defined(ENABLE_EXTENSIONS)
-		  if (overScript->IsEmbellishedOperator())
+		  if (Ptr<MathMLOperatorElement> coreOp = overScript->GetCoreOperatorTop())
 		    {
-		      Ptr<MathMLEmbellishedOperatorElement> eOp =
-			smart_cast<MathMLEmbellishedOperatorElement>(overScript);
-		      assert(eOp);
-		      Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-		      assert(coreOp);
 		      Globals::logger(LOG_DEBUG, "the accent will get en extra spacing of %d", sp2ipx(coreOp->GetBottomPadding()));
 		      overShiftY += coreOp->GetBottomPadding();
 		    }
@@ -488,6 +478,8 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 	  box.ascent += overClearance;
 	}
 
+      DoEmbellishmentLayout(this, box);
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -497,6 +489,8 @@ MathMLUnderOverElement::SetPosition(scaled x, scaled y)
 {
   position.x = x;
   position.y = y;
+
+  SetEmbellishmentPosition(this, x, y);
 
   if (base) base->SetPosition(x + baseShiftX, y);
 
@@ -563,37 +557,18 @@ MathMLUnderOverElement::GetRightEdge() const
   return m;
 }
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLUnderOverElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLUnderOverElement::GetCoreOperator()
 {
-  return smart_cast<MathMLEmbellishedOperatorElement>(base);
-}
-
-#if 0
-void
-MathMLUnderOverElement::SetDirty(const Rectangle* rect)
-{
-  if (!IsDirty() && !HasDirtyChildren())
-    {
-      MathMLElement::SetDirty(rect);
-      if (base) base->SetDirty(rect);
-      if (underScript) underScript->SetDirty(rect);
-      if (overScript) overScript->SetDirty(rect);
-    }
+  if (base) return base->GetCoreOperator();
+  else return 0;
 }
 
 void
-MathMLUnderOverElement::SetDirtyLayout(bool children)
+MathMLUnderOverElement::SetDirtyAttribute()
 {
-  MathMLElement::SetDirtyLayout(children);
-  if (children)
-    {
-      if (base) base->SetDirtyLayout(children);
-      if (underScript) underScript->SetDirtyLayout(children);
-      if (overScript) overScript->SetDirtyLayout(children);
-    }
+  SetDirtyAttributeD();
 }
-#endif
 
 void
 MathMLUnderOverElement::SetFlagDown(Flags f)

@@ -34,7 +34,7 @@ class MathMLAlignGroupElement: public MathMLElement
 protected:
   MathMLAlignGroupElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLAlignGroupElement(const GMetaDOM::Element&);
+  MathMLAlignGroupElement(const DOM::Element&);
 #endif
   virtual ~MathMLAlignGroupElement();
 private:
@@ -44,7 +44,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLAlignGroupElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLAlignGroupElement(el)); }
 #endif
 

@@ -36,7 +36,7 @@ MathMLSpaceElement::MathMLSpaceElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLSpaceElement::MathMLSpaceElement(const GMetaDOM::Element& node)
+MathMLSpaceElement::MathMLSpaceElement(const DOM::Element& node)
   : MathMLElement(node)
 {
   breakability = BREAK_AUTO;

@@ -27,15 +27,17 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLUnderOverElement : public MathMLContainerElement, private MathMLScriptCommonElement
+class MathMLUnderOverElement
+  : public MathMLContainerElement, private MathMLScriptCommonElement, public MathMLEmbellishment
 {
 protected:
   MathMLUnderOverElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLUnderOverElement(const GMetaDOM::Element&);
+  MathMLUnderOverElement(const DOM::Element&);
 #endif
   virtual ~MathMLUnderOverElement();
 
@@ -43,7 +45,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLUnderOverElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLUnderOverElement(el)); }
 #endif
 
@@ -63,17 +65,14 @@ public:
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
 
-#if 0
-  virtual void SetDirty(const Rectangle* = 0);
-  virtual void SetDirtyLayout(bool = false);
-#endif
+  virtual void SetDirtyAttribute(void);
   virtual void SetFlagDown(Flags);
   virtual void ResetFlagDown(Flags);
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
-  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 protected:
   bool   scriptize;

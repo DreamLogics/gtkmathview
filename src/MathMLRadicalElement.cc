@@ -44,7 +44,7 @@ MathMLRadicalElement::MathMLRadicalElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLRadicalElement::MathMLRadicalElement(const GMetaDOM::Element& node)
+MathMLRadicalElement::MathMLRadicalElement(const DOM::Element& node)
   : MathMLContainerElement(node)
 {
   Init();
@@ -71,6 +71,7 @@ MathMLRadicalElement::SetRadicand(const Ptr<MathMLElement>& elem)
 {
   if (elem != radicand)
     {
+      assert(!elem->GetParent());
       if (elem) elem->SetParent(this);
       if (radicand) radicand->SetParent(0);
       radicand = elem;
@@ -83,6 +84,7 @@ MathMLRadicalElement::SetIndex(const Ptr<MathMLElement>& elem)
 {
   if (elem != index)
     {
+      assert(!elem->GetParent());
       if (elem) elem->SetParent(this);
       if (index) index->SetParent(0);
       index = elem;
@@ -103,8 +105,8 @@ MathMLRadicalElement::Normalize(const Ptr<MathMLDocument>& doc)
 	      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	      if (children.get_length() == 1)
 		{
-		  GMetaDOM::Node node = children.item(0);
-		  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+		  DOM::Node node = children.item(0);
+		  assert(node.get_nodeType() == DOM::Node::ELEMENT_NODE);
 		  SetRadicand(doc->getFormattingNode(node));
 		}
 	      else

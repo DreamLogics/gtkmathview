@@ -27,6 +27,7 @@
 #include <hash_map>
 
 #include "String.hh"
+#include "StringEq.hh"
 #include "StringHash.hh"
 
 class OperatorDictionary
@@ -45,18 +46,16 @@ public:
 private:
   struct FormDefaults
   {
+    FormDefaults(void) { prefix = infix = postfix = 0; };
+    ~FormDefaults();
     const class MathMLAttributeList* prefix;
     const class MathMLAttributeList* infix;
     const class MathMLAttributeList* postfix;
   };
 
   void Delete(void);
-  const MathMLAttributeList* AlreadyDefined(const MathMLAttributeList&) const;
 
-  typedef std::vector<const class MathMLAttributeList*> AttributeListContainer;
-  typedef std::hash_map<const String*, FormDefaults, StringHash> Dictionary;
-
-  AttributeListContainer defaults;
+  typedef std::hash_map<const String*, FormDefaults, String::Hash, String::Eq> Dictionary;
   Dictionary items;
 };
 

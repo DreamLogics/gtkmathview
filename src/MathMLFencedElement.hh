@@ -34,7 +34,7 @@ class MathMLFencedElement: public MathMLBinContainerElement
 protected:
   MathMLFencedElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLFencedElement(const GMetaDOM::Element&);
+  MathMLFencedElement(const DOM::Element&);
 #endif
   virtual ~MathMLFencedElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLFencedElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLFencedElement(el)); }
 #endif
 

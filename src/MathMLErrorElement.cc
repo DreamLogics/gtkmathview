@@ -31,7 +31,7 @@ MathMLErrorElement::MathMLErrorElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLErrorElement::MathMLErrorElement(const GMetaDOM::Element& node)
+MathMLErrorElement::MathMLErrorElement(const DOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
 }

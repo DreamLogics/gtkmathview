@@ -36,7 +36,7 @@
 #include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLSpaceElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLRowElement::MathMLRowElement()
@@ -44,7 +44,7 @@ MathMLRowElement::MathMLRowElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLRowElement::MathMLRowElement(const GMetaDOM::Element& node)
+MathMLRowElement::MathMLRowElement(const DOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
 }
@@ -54,6 +54,7 @@ MathMLRowElement::~MathMLRowElement()
 {
 }
 
+#if 0
 // Row must redefine Normalize because it can be inferred
 // when a Row is inferred, it has no DOm node attached, hence
 // the LinearContainer::Normalize would stop normalizing
@@ -62,7 +63,7 @@ MathMLRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
-      // editing is supported with GMetaDOM only
+      // editing is supported with DOM only
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement() || (GetParent() && GetParent()->GetDOMElement()))
 	{
@@ -70,37 +71,28 @@ MathMLRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 			     MATHML_NS_URI, "*");
 	  unsigned n = children.get_length();
 
-	  std::vector< Ptr<MathMLElement> > newContent;
-	  newContent.reserve(n);
-	  for (unsigned i = 0; i < n; i++)
-	    {
-	      GMetaDOM::Node node = children.item(i);
-	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-
-	      if (Ptr<MathMLElement> elem = doc->getFormattingNode(node))
-		newContent.push_back(elem);
-	      else
-		{
-		  // it might be that we get a NULL. In that case it would probably make
-		  // sense to create a dummy element, because we filtered MathML
-		  // elements only
-		}
-	    }
-	  SwapChildren(newContent);
 	}
 
-      assert(GetDOMElement() || (GetParent() && (!GetParent()->GetDOMElement() || GetSize() != 1)));
+      //assert(GetDOMElement() || !GetParent() || !GetParent()->GetDOMElement() || GetSize() != 1);
 #endif // HAVE_GMETADOM
 
       // it is better to normalize elements only after all the rendering
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
+      //std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
       std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
-      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
-
+#if 0
+      for (std::vector< Ptr<MathMLElement> >::iterator p = content.begin();
+	   p != content.end();
+	   p++)
+	{
+	  (*p)->Normalize(doc);
+	}
+#endif
       ResetDirtyStructure();
     }
 }
+#endif
 
 void
 MathMLRowElement::Setup(RenderingEnvironment& env)
@@ -127,6 +119,7 @@ MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 	}
 
       DoStretchyLayout();
+      DoEmbellishmentLayout(this, box);
       ResetDirtyLayout(ctxt);
     }
 }
@@ -147,19 +140,16 @@ MathMLRowElement::DoStretchyLayout()
   for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
        elem != content.end();
        elem++)
-    {
-      Ptr<MathMLOperatorElement> op = findStretchyOperator(*elem, STRETCH_VERTICAL);
-      if (op)
-	{
-	  opBox.Append(op->GetMinBoundingBox());
-	  nStretchy++;      
-	} 
-      else
-	{
-	  rowBox.Append((*elem)->GetBoundingBox());
-	  nOther++;
-	}
-    }
+    if (Ptr<MathMLOperatorElement> op = findStretchyOperator(*elem, STRETCH_VERTICAL))
+      {
+	opBox.Append(op->GetMinBoundingBox());
+	nStretchy++;      
+      } 
+    else
+      {
+	rowBox.Append((*elem)->GetBoundingBox());
+	nOther++;
+      }
 
   if (nStretchy > 0)
     {
@@ -174,22 +164,20 @@ MathMLRowElement::DoStretchyLayout()
       for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
 	   elem != content.end();
 	   elem++)
-	{
-	  Ptr<MathMLOperatorElement> op = findStretchyOperator(*elem, STRETCH_VERTICAL);
-
-	  if (op)
-	    {
-	      op->VerticalStretchTo(toAscent, toDescent);
-	      (*elem)->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
-	    }
-	}
+	if (Ptr<MathMLOperatorElement> op = findStretchyOperator(*elem, STRETCH_VERTICAL))
+	  {
+	    op->VerticalStretchTo(toAscent, toDescent);
+	    (*elem)->DoLayout(FormattingContext(LAYOUT_AUTO, 0));
+	  }
     }
 }
 
 void
 MathMLRowElement::SetPosition(scaled x, scaled y)
 {
-  MathMLLinearContainerElement::SetPosition(x, y);
+  position.x = x;
+  position.y = y;
+  SetEmbellishmentPosition(this, x, y);
   for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin();
        elem != content.end();
        elem++)
@@ -203,7 +191,7 @@ bool
 MathMLRowElement::IsSpaceLike() const
 {
   return std::find_if(content.begin(), content.end(),
-		      std::not1(IsSpaceLikePredicate())) != content.end();
+		      std::not1(IsSpaceLikePredicate())) == content.end();
 }
 
 OperatorFormId
@@ -258,21 +246,20 @@ MathMLRowElement::GetCoreOperator()
 }
 #endif
 
-Ptr<class MathMLEmbellishedOperatorElement>
-MathMLRowElement::GetEmbellishment() const
+Ptr<class MathMLOperatorElement>
+MathMLRowElement::GetCoreOperator()
 {
   Ptr<MathMLElement> candidate = 0;
 
   for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
        elem != content.end();
        elem++)
-    {
-      if (!(*elem)->IsSpaceLike())
-	{
-	  if (!candidate) candidate = *elem;
-	  else return 0;
-	}
-    }
+    if (!(*elem)->IsSpaceLike())
+      {
+	if (!candidate) candidate = *elem;
+	else return 0;
+      }
 
-  return smart_cast<MathMLEmbellishedOperatorElement>(candidate);
+  if (candidate) return candidate->GetCoreOperator();
+  else return 0;
 }

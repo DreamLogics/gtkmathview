@@ -34,7 +34,7 @@ class MathMLmathElement: public MathMLNormalizingContainerElement
 protected:
   MathMLmathElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLmathElement(const GMetaDOM::Element&);
+  MathMLmathElement(const DOM::Element&);
 #endif
   virtual ~MathMLmathElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLmathElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLmathElement(el)); }
 #endif
 

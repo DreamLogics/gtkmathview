@@ -29,7 +29,7 @@ MathMLIdentifierElement::MathMLIdentifierElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLIdentifierElement::MathMLIdentifierElement(const GMetaDOM::Element& node)
+MathMLIdentifierElement::MathMLIdentifierElement(const DOM::Element& node)
   : MathMLTokenElement(node)
 {
 }

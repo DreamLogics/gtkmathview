@@ -214,9 +214,9 @@ Configuration::Load(const char* confPath)
   Globals::logger(LOG_DEBUG, "loading configuration from `%s'...", confPath);
 
   try {
-    GMetaDOM::Document doc = MathMLParseFile(confPath, false);
+    DOM::Document doc = MathMLParseFile(confPath, false);
 
-    GMetaDOM::Element root = doc.get_documentElement();
+    DOM::Element root = doc.get_documentElement();
     if (!root) {
       Globals::logger(LOG_WARNING, "configuration file `%s' has no root node", confPath);
       return false;
@@ -230,21 +230,21 @@ Configuration::Load(const char* confPath)
     ParseConfiguration(root);
 
     return true;
-  } catch (GMetaDOM::DOMException) {
+  } catch (DOM::DOMException) {
     return false;
   }
 }
 
 void
-Configuration::ParseConfiguration(const GMetaDOM::Element& node)
+Configuration::ParseConfiguration(const DOM::Element& node)
 {
-  for (GMetaDOM::Node p = node.get_firstChild(); p; p = p.get_nextSibling()) {
-    if (p.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE) {
-      GMetaDOM::Element elem(p);
-      GMetaDOM::GdomeString name = elem.get_nodeName();
+  for (DOM::Node p = node.get_firstChild(); p; p = p.get_nextSibling()) {
+    if (p.get_nodeType() == DOM::Node::ELEMENT_NODE) {
+      DOM::Element elem(p);
+      DOM::GdomeString name = elem.get_nodeName();
     
       if (name == "dictionary-path") {
-	GMetaDOM::GdomeString path = elementValue(elem);
+	DOM::GdomeString path = elementValue(elem);
 	if (!path.empty()) {
 	  std::string s_path = path;
 	  Globals::logger(LOG_DEBUG, "found dictionary path `%s'", s_path.c_str());
@@ -254,7 +254,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  dictionaries.push_back(s);
 	}
       } else if (name == "font-configuration-path") {
-	GMetaDOM::GdomeString path = elementValue(elem);
+	DOM::GdomeString path = elementValue(elem);
 	if (!path.empty()) {
 	  std::string s_path = path;
 	  Globals::logger(LOG_DEBUG, "found font configuration path `%s'", s_path.c_str());
@@ -264,7 +264,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  fonts.push_back(s);
 	}
       } else if (name == "entities-table-path") {
-	GMetaDOM::GdomeString path = elementValue(elem);
+	DOM::GdomeString path = elementValue(elem);
 	if (!path.empty()) {
 	  std::string s_path = path;
 	  Globals::logger(LOG_DEBUG, "found entities table path `%s'", s_path.c_str());
@@ -274,7 +274,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  entities.push_back(s);
 	}
       } else if (name == "t1-config-path") {
-	GMetaDOM::GdomeString path = elementValue(elem);
+	DOM::GdomeString path = elementValue(elem);
 	if (!path.empty() && t1Configs.empty()) {
 	  std::string s_path = path;
 	  Globals::logger(LOG_DEBUG, "found t1lib config path `%s'", s_path.c_str());
@@ -284,7 +284,7 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	  t1Configs.push_back(s);
 	}
       } else if (name == "font-size") {
-	GMetaDOM::GdomeString attr = elem.getAttribute("size");
+	DOM::GdomeString attr = elem.getAttribute("size");
 	if (attr.empty()) {
 	  Globals::logger(LOG_WARNING, "malformed `font-size' element, cannot find `size' attribute");
 	} else {
@@ -309,17 +309,17 @@ Configuration::ParseConfiguration(const GMetaDOM::Element& node)
 	std::string s_name = name;
 	Globals::logger(LOG_WARNING, "unrecognized element `%s' in configuration file (ignored)", s_name.c_str());
       }
-    } else if (!GMetaDOM::nodeIsBlank(p)) {
+    } else if (!DOM::nodeIsBlank(p)) {
       Globals::logger(LOG_WARNING, "unrecognized node type `%d' in configuration file (ignored)", p.get_nodeType());
     }
   }
 }
 
 bool
-Configuration::ParseColor(const GMetaDOM::Element& node, RGBValue& f, RGBValue& b)
+Configuration::ParseColor(const DOM::Element& node, RGBValue& f, RGBValue& b)
 {
-  GMetaDOM::GdomeString fs = node.getAttribute("foreground");
-  GMetaDOM::GdomeString bs = node.getAttribute("background");
+  DOM::GdomeString fs = node.getAttribute("foreground");
+  DOM::GdomeString bs = node.getAttribute("background");
 
   if (fs.empty() || bs.empty()) {
     std::string s_name = node.get_nodeName();

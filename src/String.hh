@@ -23,6 +23,8 @@
 #ifndef String_hh
 #define String_hh
 
+#include <functional>
+
 #include "defs.h"
 #include "Char.hh"
 
@@ -64,6 +66,12 @@ public:
 #ifdef DEBUG
   static int GetCounter(void) { return counter; }
 #endif
+
+  struct Hash : public std::unary_function< class String*, size_t >
+  { size_t operator()(const class String*) const; };
+
+  struct Eq : public std::binary_function< class String*, class String*, bool >
+  { bool operator()(const class String*, const class String*) const; };
 
 private:
   void ToCAux(char*) const;

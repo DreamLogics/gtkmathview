@@ -32,7 +32,6 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLApplyFunctionNode.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLFencedElement.hh"
 
 MathMLApplyFunctionNode::MathMLApplyFunctionNode() : MathMLSpaceNode(0)
@@ -50,7 +49,7 @@ MathMLApplyFunctionNode::Setup(class RenderingEnvironment& env)
 }
 
 void
-MathMLApplyFunctionNode::DoLayout()
+MathMLApplyFunctionNode::DoLayout(const FormattingContext&)
 {
   // the following calculation cannot be done at setup time because
   // we need to know if the element *next* to this is a fence, and this
@@ -69,12 +68,8 @@ MathMLApplyFunctionNode::DoLayout()
 
   if (is_a<MathMLFencedElement>(next)) return;
   
-  if (Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(next))
-    {
-      Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
-      assert(coreOp);
-      if (coreOp->IsFence()) return;
-    }
+  if (Ptr<MathMLOperatorElement> coreOp = next->GetCoreOperatorTop())
+    if (coreOp->IsFence()) return;
 
   // FIXME: the following constant should be defined somewhere
   box.Set((sppm * 5) / 18, 0, 0);

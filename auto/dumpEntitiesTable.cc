@@ -76,24 +76,24 @@ dump(const char* fileName)
 bool
 dump(const char* fileName)
 {
-  GMetaDOM::DOMImplementation di;
+  DOM::DOMImplementation di;
 
   try {
-    GMetaDOM::Document doc = di.createDocumentFromURI(fileName, 0);
+    DOM::Document doc = di.createDocumentFromURI(fileName, 0);
     if (!doc) return false;
   
-    GMetaDOM::Element root = doc.get_documentElement();
+    DOM::Element root = doc.get_documentElement();
     if (!root) return false;
 
-    for (GMetaDOM::Node p = root.get_firstChild(); p; p = p.get_nextSibling()) {
-      if (p.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE) {
-	GMetaDOM::Element elem(p);
+    for (DOM::Node p = root.get_firstChild(); p; p = p.get_nextSibling()) {
+      if (p.get_nodeType() == DOM::Node::ELEMENT_NODE) {
+	DOM::Element elem(p);
 
 	std::string name = elem.getAttribute("name");
-	GMetaDOM::GdomeString value = elem.getAttribute("value");
+	DOM::GdomeString value = elem.getAttribute("value");
 
 	if (!name.empty() && !value.empty()) {
-	  GMetaDOM::UTF8String s_value = value;
+	  DOM::UTF8String s_value = value;
 
 	  printf("{ \"%s\", \"", name.c_str());
 	  for (unsigned i = 0; i < s_value.length(); i++) printf("\\x%02x", s_value[i] & 0xff);
@@ -103,7 +103,7 @@ dump(const char* fileName)
     }
 
     return true;
-  } catch (GMetaDOM::DOMException) {
+  } catch (DOM::DOMException) {
     return false;
   }
 }

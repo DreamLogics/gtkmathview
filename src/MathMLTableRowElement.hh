@@ -35,7 +35,7 @@ class MathMLTableRowElement
 protected:
   MathMLTableRowElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLTableRowElement(const GMetaDOM::Element&);
+  MathMLTableRowElement(const DOM::Element&);
 #endif
   virtual ~MathMLTableRowElement();
 
@@ -43,7 +43,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLTableRowElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLTableRowElement(el)); }
 #endif
 
@@ -58,7 +58,11 @@ public:
 
   friend class MathMLTableElement;
 
+  virtual void SetDirtyStructure(void);
+  virtual void SetDirtyAttribute(void);
+
 protected:
+  void SetupAux(RenderingEnvironment&, bool);
   void SetupCellSpanning(RenderingEnvironment&);
   void SetupGroupAlign(RenderingEnvironment&);
   void SetupRowIndex(unsigned);

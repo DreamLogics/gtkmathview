@@ -33,7 +33,7 @@ MathMLmathElement::MathMLmathElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLmathElement::MathMLmathElement(const GMetaDOM::Element& node)
+MathMLmathElement::MathMLmathElement(const DOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
 }

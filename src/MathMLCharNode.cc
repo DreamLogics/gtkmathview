@@ -115,7 +115,7 @@ MathMLCharNode::DoLayout(const FormattingContext&)
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
-#if 0
+#if 1
   Globals::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
 #endif // DEBUG
 

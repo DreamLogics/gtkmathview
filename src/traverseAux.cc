@@ -38,8 +38,6 @@
 #include "MathMLStyleElement.hh"
 #include "MathMLPhantomElement.hh"
 #include "MathMLPaddedElement.hh"
-// ...
-#include "MathMLEmbellishedOperatorElement.hh"
 
 Ptr<MathMLElement>
 findEmbellishedOperatorRoot(const Ptr<MathMLElement>& op)
@@ -107,32 +105,18 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 Ptr<MathMLOperatorElement>
 findStretchyOperator(const Ptr<MathMLElement>& elem)
 {
-  if (!elem) return Ptr<MathMLOperatorElement>(0);
-
-  if (is_a<MathMLEmbellishedOperatorElement>(elem)) {
-    Ptr<MathMLEmbellishedOperatorElement> eop = smart_cast<MathMLEmbellishedOperatorElement>(elem);
-    assert(eop);
-    Ptr<MathMLOperatorElement> op = eop->GetCoreOperator();
-    assert(op);
-
-    if (op->IsStretchy()) return op;
-    else return NULL;
-  } else if (is_a<MathMLOperatorElement>(elem)) {
-    Ptr<MathMLOperatorElement> op = smart_cast<MathMLOperatorElement>(elem);
-    assert(op);
-    if (op->IsStretchy()) return op;
-    else return 0;
-  } else
-    return 0;
+  if (elem)
+    if (Ptr<MathMLOperatorElement> coreOp = elem->GetCoreOperator())
+      if (coreOp->IsStretchy()) return coreOp;
+  return 0;
 }
 
 Ptr<MathMLOperatorElement>
 findStretchyOperator(const Ptr<MathMLElement>& elem, StretchId id)
 {
-  Ptr<MathMLOperatorElement> op = findStretchyOperator(elem);
-  if (!op) return 0;
-  if (op->GetStretch() != id) return Ptr<MathMLOperatorElement>(0);
-  return op;
+  if (Ptr<MathMLOperatorElement> coreOp = findStretchyOperator(elem))
+    if (coreOp->GetStretch() == id) return coreOp;
+  return 0;
 }
 
 Ptr<MathMLElement>
@@ -186,7 +170,7 @@ findActionElement(const Ptr<MathMLElement>& elem)
 
 #if defined(HAVE_GMETADOM)
 
-GMetaDOM::Element
+DOM::Element
 findDOMNode(const Ptr<MathMLElement>& elem)
 {
   Ptr<MathMLElement> elemP(elem);
@@ -195,11 +179,11 @@ findDOMNode(const Ptr<MathMLElement>& elem)
     elemP = elemP->GetParent();
 
   if (elemP) return elemP->GetDOMElement();
-  else return GMetaDOM::Element(0);
+  else return DOM::Element(0);
 }
 
 Ptr<MathMLElement>
-findMathMLElement(const Ptr<MathMLDocument>& doc, const GMetaDOM::Element& node)
+findMathMLElement(const Ptr<MathMLDocument>& doc, const DOM::Element& node)
 {
   Ptr<MathMLElement> elem = doc->getFormattingNode(node);
   assert(elem);

@@ -42,7 +42,7 @@ class MathMLElement: public MathMLFrame
 protected:
   MathMLElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLElement(const GMetaDOM::Element&);
+  MathMLElement(const DOM::Element&);
 #endif
   virtual ~MathMLElement();
 private:
@@ -78,8 +78,8 @@ public:
   // some queries
   TagId        	 IsA(void) const;
 #if defined(HAVE_GMETADOM)
-  const GMetaDOM::Element& GetDOMElement(void) const { return node; }
-  static Ptr<MathMLElement> getRenderingInterface(const GMetaDOM::Element&);
+  const DOM::Element& GetDOMElement(void) const { return node; }
+  static Ptr<MathMLElement> getRenderingInterface(const DOM::Element&);
 #endif
   virtual bool 	 IsSpaceLike(void) const;
   virtual bool 	 IsInside(scaled, scaled) const;
@@ -88,7 +88,8 @@ public:
   unsigned     	 GetDepth(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
-  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
+  Ptr<class MathMLOperatorElement> GetCoreOperatorTop(void);
 
   bool DirtyBackground(void) const
   {
@@ -158,7 +159,7 @@ protected:
 
 private:
 #if defined(HAVE_GMETADOM)
-  const GMetaDOM::Element node; // reference to the DOM node
+  const DOM::Element node; // reference to the DOM node
 #endif
 };
 

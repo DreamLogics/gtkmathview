@@ -34,7 +34,7 @@ class MathMLIdentifierElement: public MathMLTokenElement
 protected:
   MathMLIdentifierElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLIdentifierElement(const GMetaDOM::Element&);
+  MathMLIdentifierElement(const DOM::Element&);
 #endif
   virtual ~MathMLIdentifierElement();
 
@@ -42,7 +42,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLIdentifierElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLIdentifierElement(el)); }
 #endif
 };

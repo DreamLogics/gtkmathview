@@ -62,7 +62,7 @@ MathMLTableElement::Setup(RenderingEnvironment& env)
       MathMLLinearContainerElement::Setup(env);
       SetupAlignMarks();
 
-#if 0
+#if 1
       for (unsigned i = 0; i < nRows; i++)
 	for (unsigned j = 0; j < nColumns; j++) {
 	  printf("(%d,%d) rowAlign: %d columnAlign: %d\n", i, j, cell[i][j].rowAlign, cell[i][j].columnAlign);
@@ -474,31 +474,32 @@ MathMLTableElement::SetupRowAlignAux(const Value* value,
 void
 MathMLTableElement::SetupLabels()
 {
-  unsigned i = 0;
-
   if (rowLabel) {
     delete rowLabel;
     rowLabel = NULL;
   }
 
   bool hasLabels = false;
-  for (i = 0; i < nRows && !hasLabels; i++) {
-    assert(row[i].mtr);
-    hasLabels = is_a<MathMLLabeledTableRowElement>(row[i].mtr);
-  }
+  for (unsigned i = 0; i < nRows && !hasLabels; i++)
+    {
+      assert(row[i].mtr);
+      hasLabels = is_a<MathMLLabeledTableRowElement>(row[i].mtr);
+    }
 
-  if (!hasLabels) return;
-
-  rowLabel = new RowLabel[nRows];
-  for (i = 0; i < nRows; i++) {
-    assert(row[i].mtr);
-    rowLabel[i].labelElement = row[i].mtr->GetLabel();
-    if (side == TABLE_SIDE_LEFT || side == TABLE_SIDE_LEFTOVERLAP)
-      rowLabel[i].columnAlign = COLUMN_ALIGN_LEFT;
-    else
-      rowLabel[i].columnAlign = COLUMN_ALIGN_RIGHT;
-    rowLabel[i].rowAlign = ROW_ALIGN_BASELINE;
-  }
+  if (hasLabels)
+    {
+      rowLabel = new RowLabel[nRows];
+      for (unsigned i = 0; i < nRows; i++)
+	{
+	  assert(row[i].mtr);
+	  rowLabel[i].labelElement = row[i].mtr->GetLabel();
+	  if (side == TABLE_SIDE_LEFT || side == TABLE_SIDE_LEFTOVERLAP)
+	    rowLabel[i].columnAlign = COLUMN_ALIGN_LEFT;
+	  else
+	    rowLabel[i].columnAlign = COLUMN_ALIGN_RIGHT;
+	  rowLabel[i].rowAlign = ROW_ALIGN_BASELINE;
+	}
+    }
 }
 
 void

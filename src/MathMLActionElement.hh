@@ -27,14 +27,16 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLEmbellishment.hh"
 #include "MathMLLinearContainerElement.hh"
 
-class MathMLActionElement : public MathMLLinearContainerElement
+class MathMLActionElement
+  : public MathMLLinearContainerElement, public MathMLEmbellishment
 {
 protected:
   MathMLActionElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLActionElement(const GMetaDOM::Element&);
+  MathMLActionElement(const DOM::Element&);
 #endif
   virtual ~MathMLActionElement();
 
@@ -42,7 +44,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLActionElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLActionElement(el)); }
 #endif
 
@@ -70,6 +72,8 @@ public:
 
   unsigned GetSelectedIndex(void) const;
   void     SetSelectedIndex(unsigned);
+
+  virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
 
 private:
   unsigned selection;

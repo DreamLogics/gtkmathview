@@ -57,6 +57,7 @@
 #include "MathMLTableCellElement.hh"
 #include "MathMLTableElement.hh"
 #include "MathMLTableRowElement.hh"
+#include "MathMLLabeledTableRowElement.hh"
 #include "MathMLTextElement.hh"
 #include "MathMLTextNode.hh"
 #include "MathMLTokenElement.hh"

@@ -6,11 +6,11 @@
     <mi>Luca</mi>
     <mtable>
       <mtr>
-        <mi>a</mi>
-	<mi>b</mi>
+        <mtd><mi>a</mi></mtd>
+	<mtd><mi>b</mi></mtd>
       </mtr>
       <mtr>
-        <mi>c</mi>
+        <mtd><mi>c</mi></mtd>
       </mtr>
     </mtable>
   </mfenced>

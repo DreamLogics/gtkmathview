@@ -37,7 +37,6 @@
 #include "MathMLRowElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLOperatorElement::MathMLOperatorElement()
@@ -46,7 +45,7 @@ MathMLOperatorElement::MathMLOperatorElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLOperatorElement::MathMLOperatorElement(const GMetaDOM::Element& node)
+MathMLOperatorElement::MathMLOperatorElement(const DOM::Element& node)
   : MathMLTokenElement(node)
 {
   Init();
@@ -95,11 +94,13 @@ MathMLOperatorElement::GetAttributeSignature(AttributeId id) const
   return signature;
 }
 
+#if 0
 void
 MathMLOperatorElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
+#if 0
       if (!eOp)
 	{
 	  Ptr<MathMLElement> op = MathMLEmbellishedOperatorElement::create(this);
@@ -115,10 +116,15 @@ MathMLOperatorElement::Normalize(const Ptr<MathMLDocument>& doc)
       assert(pContainer);
       pContainer->Replace(this, eOp);
       eOp->SetChild(this);
+#if defined(HAVE_GMETADOM)
+      doc->setFormattingNode(GetDOMElement(), eOp);
+#endif
+#endif
 
       MathMLTokenElement::Normalize(doc);
     }
 }
+#endif
 
 void
 MathMLOperatorElement::Setup(RenderingEnvironment& env)
@@ -168,7 +174,10 @@ MathMLOperatorElement::Setup(RenderingEnvironment& env)
       assert(value != NULL);
       resValue = Resolve(value, env);
       assert(resValue != NULL && resValue->IsNumberUnit());
-      lSpace = env.ToScaledPoints(resValue->ToNumberUnit());
+      if (env.GetScriptLevel() <= 0)
+	lSpace = env.ToScaledPoints(resValue->ToNumberUnit());
+      else
+	lSpace = 0;
       delete resValue;
       delete value;
 
@@ -176,7 +185,10 @@ MathMLOperatorElement::Setup(RenderingEnvironment& env)
       assert(value != NULL);
       resValue = Resolve(value, env);
       assert(resValue != NULL && resValue->IsNumberUnit());
-      rSpace = env.ToScaledPoints(resValue->ToNumberUnit());
+      if (env.GetScriptLevel() <= 0)
+	rSpace = env.ToScaledPoints(resValue->ToNumberUnit());
+      else
+	rSpace = 0;
       delete resValue;
       delete value;
 
@@ -246,11 +258,12 @@ MathMLOperatorElement::Setup(RenderingEnvironment& env)
 void
 MathMLOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
-  if (DirtyLayout())
+  if (DirtyLayout(ctxt))
     {
       MathMLTokenElement::DoLayout(ctxt);
+      DoEmbellishmentLayout(this, box);
       if (ctxt.GetLayoutType() == LAYOUT_MIN) minBox = box;
-      ResetDirtyLayout();
+      ResetDirtyLayout(ctxt);
     }
 }
 
@@ -385,6 +398,15 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 }
 
 void
+MathMLOperatorElement::SetPosition(scaled x, scaled y)
+{
+  position.x = x;
+  position.y = y;
+  SetEmbellishmentPosition(this, x, y);
+  SetContentPosition(x, y);
+}
+
+void
 MathMLOperatorElement::ParseLimitValue(const Value* value,
 				       const RenderingEnvironment& env,
 				       float& multiplier,
@@ -470,10 +492,10 @@ MathMLOperatorElement::GetOperatorAttributeValue(AttributeId id,
 }
 
 OperatorFormId
-MathMLOperatorElement::InferOperatorForm() const
+MathMLOperatorElement::InferOperatorForm()
 {
+  Ptr<MathMLElement> eOp = findEmbellishedOperatorRoot(this);
   assert(eOp);
-
   Ptr<MathMLElement> elem = eOp->GetParent();
   assert(elem);
 
@@ -509,4 +531,3 @@ MathMLOperatorElement::GetCoreOperator()
 {
   return this;
 }
-

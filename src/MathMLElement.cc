@@ -33,7 +33,7 @@
 #include "ValueConversion.hh"
 #include "MathMLStyleElement.hh"
 #include "MathMLAttributeList.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "RenderingEnvironment.hh"
 #include "FormattingContext.hh"
 
@@ -54,7 +54,7 @@ MathMLElement::MathMLElement()
 // the attributes and provides some facility functions to access and parse
 // attributes.
 #if defined(HAVE_GMETADOM)
-MathMLElement::MathMLElement(const GMetaDOM::Element& n)
+MathMLElement::MathMLElement(const DOM::Element& n)
   : node(n)
 {
   Init();
@@ -143,7 +143,7 @@ MathMLElement::GetAttribute(AttributeId id, bool searchDefault) const
 #elif defined(HAVE_GMETADOM)
   if (node)
     {
-      GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
+      DOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
       if (!value.empty()) sValue = allocString(value);
     }
 #endif // HAVE_GMETADOM
@@ -194,7 +194,7 @@ MathMLElement::GetAttributeValue(AttributeId id, bool searchDefault) const
 #elif defined(HAVE_GMETADOM)
   if (node)
     {
-      GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
+      DOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
       if (!value.empty()) sValue = allocString(value);
     }
 #endif // HAVE_GMETADOM
@@ -399,10 +399,10 @@ MathMLElement::HasLink() const
 
   return p != NULL;
 #elif defined(HAVE_GMETADOM)
-  GMetaDOM::Element p = GetDOMElement();
+  DOM::Element p = GetDOMElement();
 
   while (p && !p.hasAttribute("href")) {
-    GMetaDOM::Node parent = p.get_parentNode();
+    DOM::Node parent = p.get_parentNode();
     p = parent;
   }
 
@@ -410,9 +410,18 @@ MathMLElement::HasLink() const
 #endif // HAVE_GMETADOM
 }
 
-Ptr<MathMLEmbellishedOperatorElement>
-MathMLElement::GetEmbellishment() const
+Ptr<MathMLOperatorElement>
+MathMLElement::GetCoreOperator()
 {
+  return 0;
+}
+
+Ptr<MathMLOperatorElement>
+MathMLElement::GetCoreOperatorTop()
+{
+  if (Ptr<MathMLOperatorElement> coreOp = GetCoreOperator())
+    if (!GetParent() || GetParent()->GetCoreOperator() != coreOp)
+      return coreOp;
   return 0;
 }
 
@@ -576,7 +585,7 @@ MathMLElement::SetFlagUp(Flags f)
 void
 MathMLElement::ResetFlagUp(Flags f)
 {
-  for (Ptr<MathMLElement> p = GetParent(); p && !p->GetFlag(f); p = p->GetParent())
+  for (Ptr<MathMLElement> p = GetParent(); p && p->GetFlag(f); p = p->GetParent())
     p->ResetFlag(f);
 }
 

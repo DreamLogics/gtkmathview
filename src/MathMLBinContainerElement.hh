@@ -35,7 +35,7 @@ class MathMLBinContainerElement: public MathMLContainerElement
 protected:
   MathMLBinContainerElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLBinContainerElement(const GMetaDOM::Element&);
+  MathMLBinContainerElement(const DOM::Element&);
 #endif
   virtual ~MathMLBinContainerElement();
 

@@ -34,7 +34,7 @@
 #if defined(HAVE_MINIDOM)
 String* allocString(mDOMConstStringRef);
 #elif defined(HAVE_GMETADOM)
-String* allocString(const GMetaDOM::GdomeString&);
+String* allocString(const DOM::GdomeString&);
 #endif
 
 String* allocString(const String&, unsigned, unsigned);

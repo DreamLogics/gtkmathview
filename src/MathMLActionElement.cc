@@ -28,6 +28,7 @@
 #include "StringUnicode.hh"
 #include "AttributeParser.hh"
 #include "MathMLActionElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLActionElement::MathMLActionElement(void)
@@ -36,7 +37,7 @@ MathMLActionElement::MathMLActionElement(void)
 }
 
 #if defined(HAVE_GMETADOM)
-  MathMLActionElement::MathMLActionElement(const GMetaDOM::Element& node)
+  MathMLActionElement::MathMLActionElement(const DOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
   selection = 0;
@@ -99,6 +100,8 @@ MathMLActionElement::DoLayout(const class FormattingContext& ctxt)
       else
 	box.Null();
 
+      DoEmbellishmentLayout(this, box);
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -106,8 +109,7 @@ MathMLActionElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLActionElement::DoStretchyLayout()
 {
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem) elem->DoStretchyLayout();
+  if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->DoStretchyLayout();
 }
 
 void
@@ -115,9 +117,8 @@ MathMLActionElement::SetPosition(scaled x, scaled y)
 {
   position.x = x;
   position.y = y;
-
-  Ptr<MathMLElement> elem = GetSelectedElement();
-  if (elem) elem->SetPosition(x, y);
+  SetEmbellishmentPosition(this, x, y);
+  if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->SetPosition(x, y);
 }
 
 void
@@ -251,4 +252,13 @@ MathMLActionElement::ResetFlagDown(Flags f)
 {
   MathMLElement::ResetFlag(f);
   if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->ResetFlagDown(f);
+}
+
+Ptr<MathMLOperatorElement>
+MathMLActionElement::GetCoreOperator()
+{
+  if (Ptr<MathMLElement> elem = GetSelectedElement())
+    return elem->GetCoreOperator();
+  else
+    return 0;
 }

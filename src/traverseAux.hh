@@ -37,9 +37,9 @@ Ptr<class MathMLElement>         findCommonAncestor(const Ptr<class MathMLElemen
 						    const Ptr<class MathMLElement>&);
 Ptr<class MathMLActionElement>   findActionElement(const Ptr<class MathMLElement>&);
 #if defined(HAVE_GMETADOM)
-GMetaDOM::Element                findDOMNode(const Ptr<class MathMLElement>&);
+DOM::Element                findDOMNode(const Ptr<class MathMLElement>&);
 Ptr<class MathMLElement>         findMathMLElement(const Ptr<class MathMLDocument>&,
-						   const GMetaDOM::Element&);
+						   const DOM::Element&);
 #endif
 Ptr<class MathMLElement>         findRightmostChild(const Ptr<class MathMLElement>&);
 Ptr<class MathMLElement>         findLeftmostChild(const Ptr<class MathMLElement>&);

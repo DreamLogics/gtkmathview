@@ -35,7 +35,7 @@ MathMLStringLitElement::MathMLStringLitElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLStringLitElement::MathMLStringLitElement(const GMetaDOM::Element& node)
+MathMLStringLitElement::MathMLStringLitElement(const DOM::Element& node)
   : MathMLTokenElement(node)
 {
   setupDone = false;

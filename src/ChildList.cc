@@ -26,18 +26,18 @@
 
 #if defined(HAVE_GMETADOM)
 
-ChildList::ChildList(const GMetaDOM::Element& root0,
-		     const GMetaDOM::GdomeString& ns0,
-		     const GMetaDOM::GdomeString& name0)
+ChildList::ChildList(const DOM::Element& root0,
+		     const DOM::GdomeString& ns0,
+		     const DOM::GdomeString& name0)
   : root(root0), ns(ns0), name(name0)
 {
   assert(root);
 }
 
-GMetaDOM::Node
+DOM::Node
 ChildList::item(unsigned long i) const
 {
-  GMetaDOM::Node p = root.get_firstChild();
+  DOM::Node p = root.get_firstChild();
 
   while (p)
     {
@@ -58,7 +58,7 @@ unsigned long
 ChildList::get_length() const
 {
   unsigned long length = 0;
-  GMetaDOM::Node p = root.get_firstChild();
+  DOM::Node p = root.get_firstChild();
 
   while (p)
     {

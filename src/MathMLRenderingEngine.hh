@@ -43,8 +43,8 @@ public:
 
 #if defined(HAVE_GMETADOM)
   bool Load(const char*);
-  bool Load(const GMetaDOM::Document&);
-  bool Load(const GMetaDOM::Element&);
+  bool Load(const DOM::Document&);
+  bool Load(const DOM::Element&);
 #endif
   void Unload(void);
 

@@ -25,7 +25,7 @@
 
 #include <GdomeSmartDOM.hh>
 
-namespace GMetaDOM = GdomeSmartDOM;
+namespace DOM = GdomeSmartDOM;
 
 namespace GdomeSmartDOM {
 

@@ -45,21 +45,36 @@ MathMLEmbellishedOperatorElement::~MathMLEmbellishedOperatorElement()
 void
 MathMLEmbellishedOperatorElement::Normalize(const Ptr<class MathMLDocument>& doc)
 {
+#if 0
   if (DirtyStructure())
     {
-      assert(child);
+#endif
+      assert(GetChild());
+      assert(coreOp);
+      coreOp->SetDirtyStructure();
 
       Ptr<MathMLElement> p = GetParent();
       assert(p);
 
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
       assert(pContainer);
-      pContainer->Replace(this, child);
+      cout << "removing embellishment " << endl; 
 
-      child->Normalize(doc);
+      Ptr<MathMLElement> oldChild = GetChild();
+      SetChild(0);
+      pContainer->Replace(this, oldChild);
+      oldChild->SetDirtyStructure();
+      oldChild->SetDirtyAttributeD();
+      oldChild->Normalize(doc);
+
+#if defined(HAVE_GMETADOM)
+      doc->setFormattingNode(oldChild->GetDOMElement(), oldChild);
+#endif
 
       ResetDirtyStructure();
+#if 0
     }
+#endif
 }
 
 void
@@ -75,6 +90,8 @@ MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment& env)
 void
 MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
 {
+  cout << "embellishment layout " << this << " dirty " << DirtyLayout(ctxt) << endl;
+
   if (DirtyLayout(ctxt))
     {
       assert(child);
@@ -83,6 +100,8 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
       scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
 
       //Globals::logger(LOG_DEBUG, "layout of embellishment %p script %d padding %d", this, script, sp2ipx(totalPadding));
+
+      cout << "child " << static_cast<MathMLElement*>(child) << " dirty layout " << child->DirtyLayout() << endl;
 
       child->DoLayout(ctxt);
       box = child->GetBoundingBox();
@@ -121,12 +140,6 @@ MathMLEmbellishedOperatorElement::SetPosition(scaled x, scaled y)
 #endif // ENABLE_EXTENSIONS
 }
 
-bool
-MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
-{
-  return true;
-}
-
 Ptr<MathMLCharNode>
 MathMLEmbellishedOperatorElement::GetCharNode() const
 {
@@ -134,4 +147,27 @@ MathMLEmbellishedOperatorElement::GetCharNode() const
     return 0;
   else
     return coreOp->GetCharNode();
+}
+
+void
+MathMLEmbellishedOperatorElement::Lift(const Ptr<MathMLDocument>& doc)
+{
+  assert(GetChild());
+
+  Ptr<MathMLContainerElement> parent = smart_cast<MathMLContainerElement>(GetParent());
+  assert(parent);
+
+  Ptr<MathMLContainerElement> grandParent = smart_cast<MathMLContainerElement>(parent->GetParent());
+  assert(grandParent);
+
+  cout << "lifting " << this << " from " << static_cast<MathMLContainerElement*>(parent) << " to " 
+       << static_cast<MathMLContainerElement*>(grandParent) << endl;
+
+  parent->Replace(this, GetChild());
+  grandParent->Replace(parent, this);
+
+#if defined(HAVE_GMETADOM)
+  doc->setFormattingNode(GetChild()->GetDOMElement(), GetChild());
+  doc->setFormattingNode(parent->GetDOMElement(), this);
+#endif
 }

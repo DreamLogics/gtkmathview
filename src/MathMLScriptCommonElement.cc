@@ -27,7 +27,6 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLScriptCommonElement.hh"
-#include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLScriptCommonElement::MathMLScriptCommonElement()
 {
@@ -71,14 +70,7 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
   Ptr<MathMLElement> rel = findRightmostChild(base);
   assert(rel);
 
-  Ptr<MathMLOperatorElement> coreOp = 0;
-  if (is_a<MathMLOperatorElement>(rel)) coreOp = smart_cast<MathMLOperatorElement>(rel);
-  else if (is_a<MathMLEmbellishedOperatorElement>(rel))
-    {
-      Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(rel);
-      assert(eOp);
-      coreOp = eOp->GetCoreOperator();
-    }
+  Ptr<MathMLOperatorElement> coreOp = rel->GetCoreOperator();
 
   if ((is_a<MathMLTokenElement>(rel) && !coreOp) ||
       (coreOp && !coreOp->IsStretchy() && coreOp->IsFence()))

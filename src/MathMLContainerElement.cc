@@ -32,7 +32,7 @@ MathMLContainerElement::MathMLContainerElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLContainerElement::MathMLContainerElement(const GMetaDOM::Element& node)
+MathMLContainerElement::MathMLContainerElement(const DOM::Element& node)
   : MathMLElement(node)
 {
 }

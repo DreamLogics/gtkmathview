@@ -37,7 +37,7 @@ public:
   { return Ptr<MathMLHorizBarNode>(new MathMLHorizBarNode(c)); }
 
   virtual void 	 Setup(class RenderingEnvironment&);
-  virtual void 	 DoLayout(void);
+  virtual void 	 DoLayout(const class FormattingContext&);
   virtual void 	 Render(const DrawingArea&);
 
   virtual bool   IsStretchyChar(void) const;

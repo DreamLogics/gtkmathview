@@ -41,7 +41,7 @@ MathMLTableElement::MathMLTableElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLTableElement::MathMLTableElement(const GMetaDOM::Element& node)
+MathMLTableElement::MathMLTableElement(const DOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
   Init();
@@ -108,11 +108,13 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  unsigned n = children.get_length();
 
+	  cout << "redoing table normalize with " << n << " children" << endl;
+
 	  std::vector< Ptr<MathMLElement> > newContent;
 	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
-	      GMetaDOM::Element node = children.item(i);
+	      DOM::Element node = children.item(i);
 	      assert(node);
 	      if (nodeLocalName(node) == "mtr" || nodeLocalName(node) == "mlabeledtr")
 		{
@@ -133,7 +135,9 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 	Append(smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create()));
 
       std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
-      
+
+      cout << "the table has dirty layout " << DirtyLayout() << endl;
+
       ResetDirtyStructure();
     }
 }

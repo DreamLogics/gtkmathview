@@ -28,14 +28,16 @@
 #endif
 
 #include "CharMap.hh"
+#include "MathMLEmbellishment.hh"
 #include "MathMLTokenElement.hh"
 
-class MathMLOperatorElement: public MathMLTokenElement
+class MathMLOperatorElement
+  : public MathMLTokenElement, public MathMLEmbellishment
 {
 protected:
   MathMLOperatorElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLOperatorElement(const GMetaDOM::Element&);
+  MathMLOperatorElement(const DOM::Element&);
 #endif
   virtual ~MathMLOperatorElement();
 
@@ -46,14 +48,15 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLOperatorElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLOperatorElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Normalize(const Ptr<class MathMLDocument>&);
+  //virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
+  virtual void SetPosition(scaled, scaled);
 
   bool         IsStretchy(void) const { return stretchy != 0; }
   StretchId    GetStretch(void) const;
@@ -81,17 +84,15 @@ public:
   void         VerticalStretchTo(scaled, scaled, bool = false);
 
   virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
-
-  static void SetEmbellishmentPosition(const Ptr<MathMLElement>&, scaled&, scaled&);
-  static void DoEmbellishmentLayout(const Ptr<MathMLElement>&, BoundingBox&);
+  //Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 
 private:
-  OperatorFormId InferOperatorForm(void) const;
+  OperatorFormId InferOperatorForm(void);
   const Value* GetOperatorAttributeValue(AttributeId,
 					 const class RenderingEnvironment&) const;
   void ParseLimitValue(const Value*, const class RenderingEnvironment&, float&, scaled&);
 
-  Ptr<class MathMLEmbellishedOperatorElement> eOp; // ptr to the root of the embellished operator
+  //Ptr<class MathMLEmbellishedOperatorElement> eOp; // ptr to the root of the embellished operator
 
   OperatorFormId form;
   const class MathMLAttributeList* defaults;

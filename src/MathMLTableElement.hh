@@ -134,7 +134,7 @@ class MathMLTableElement
 protected:
   MathMLTableElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLTableElement(const GMetaDOM::Element&);
+  MathMLTableElement(const DOM::Element&);
 #endif
   virtual ~MathMLTableElement();
 
@@ -145,7 +145,7 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLTableElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLTableElement(el)); }
 #endif
 
@@ -165,6 +165,12 @@ public:
 
   //virtual void SetDirty(const Rectangle* rect);
   bool         HasLabels(void) const { return rowLabel != NULL; }
+
+  virtual void SetDirtyAttribute(void)
+  {
+    MathMLLinearContainerElement::SetDirtyAttribute();
+    SetDirtyStructure();
+  };
 
 protected:
   TableCell*   GetCell(unsigned r, unsigned c) { return &cell[r][c]; }

@@ -41,7 +41,7 @@ class MathMLEncloseElement: public MathMLNormalizingContainerElement
 protected:
   MathMLEncloseElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLEncloseElement(const GMetaDOM::Element&);
+  MathMLEncloseElement(const DOM::Element&);
 #endif
   virtual ~MathMLEncloseElement();
 
@@ -49,11 +49,12 @@ public:
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLEncloseElement()); }
 #if defined(HAVE_GMETADOM)
-  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  static Ptr<MathMLElement> create(const DOM::Element& el)
   { return Ptr<MathMLElement>(new MathMLEncloseElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
+  virtual void Normalize(const Ptr<MathMLDocument>&);
   virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);

@@ -103,7 +103,7 @@ MathMLRenderingEngine::Load(const char* fileName)
 #if defined(HAVE_MINIDOM)
   mDOMDocRef doc = MathMLParseFile(fileName, true);
 #elif defined(HAVE_GMETADOM)
-  GMetaDOM::Document doc = MathMLParseFile(fileName, true);
+  DOM::Document doc = MathMLParseFile(fileName, true);
 #endif
   perf.Stop();
   Globals::logger(LOG_INFO, "parsing time: %dms", perf());
@@ -118,7 +118,7 @@ MathMLRenderingEngine::Load(const char* fileName)
 
 #if defined(HAVE_GMETADOM)
 bool
-MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
+MathMLRenderingEngine::Load(const DOM::Document& doc)
 {
   assert(doc);
 
@@ -132,7 +132,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 
 #if 0
 bool
-MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
+MathMLRenderingEngine::Load(const DOM::Element& elem)
 {
   assert(elem);
 

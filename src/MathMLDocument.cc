@@ -27,6 +27,7 @@
 #include "MathML.hh"
 #include "Globals.hh"
 #include "MathMLDocument.hh"
+#include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 
 MathMLDocument::MathMLDocument()
@@ -38,7 +39,7 @@ MathMLDocument::MathMLDocument()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
+MathMLDocument::MathMLDocument(const DOM::Document& doc)
   : MathMLBinContainerElement()
   , DOMdoc(doc), DOMroot(0)
 {
@@ -46,7 +47,7 @@ MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
   Init();
 }
 
-MathMLDocument::MathMLDocument(const GMetaDOM::Element& root)
+MathMLDocument::MathMLDocument(const DOM::Element& root)
   : MathMLBinContainerElement()
   , DOMdoc(0)
   , DOMroot(root)
@@ -59,7 +60,7 @@ MathMLDocument::Init()
 {
   if (DOMroot)
     {
-      GMetaDOM::EventTarget et(DOMroot);
+      DOM::EventTarget et(DOMroot);
       assert(et);
 
       subtreeModifiedListener = new DOMSubtreeModifiedListener(this);
@@ -76,7 +77,7 @@ MathMLDocument::~MathMLDocument()
 #if defined(HAVE_GMETADOM)
   if (DOMroot)
     {
-      GMetaDOM::EventTarget et(DOMroot);
+      DOM::EventTarget et(DOMroot);
       assert(et);
 
       et.removeEventListener("DOMSubtreeModified", *subtreeModifiedListener, false);
@@ -96,8 +97,8 @@ MathMLDocument::Normalize()
   if (DirtyStructure())
     {
 #if defined(HAVE_GMETADOM)
-      GMetaDOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
-      if (GMetaDOM::Node mathRoot = nodeList.item(0))
+      DOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
+      if (DOM::Node mathRoot = nodeList.item(0))
 	{
 	  Ptr<MathMLElement> elem = getFormattingNode(mathRoot);
 	  assert(elem);
@@ -105,7 +106,7 @@ MathMLDocument::Normalize()
 	}	  
 #endif // HAVE_GMETADOM
 
-      if (child) child->Normalize(this);
+      if (GetChild()) GetChild()->Normalize(this);
 
       ResetDirtyStructure();
     }
@@ -137,24 +138,44 @@ MathMLDocument::SetDirtyAttribute()
 #if defined(HAVE_GMETADOM)
 
 void
-MathMLDocument::DOMSubtreeModifiedListener::handleEvent(const GMetaDOM::Event& ev)
+MathMLDocument::DOMSubtreeModifiedListener::handleEvent(const DOM::Event& ev)
 {
-  const GMetaDOM::MutationEvent& me(ev);
+  const DOM::MutationEvent& me(ev);
   assert(me);
   assert(doc);
-  if (Ptr<MathMLElement> elem = doc->findFormattingNode(me.get_relatedNode()))
+  doc->notifySubtreeModified(me.get_relatedNode());
+}
+
+void
+MathMLDocument::notifySubtreeModified(const DOM::Element& el) const
+{
+  assert(el);
+  if (Ptr<MathMLElement> elem = findFormattingNode(el))
     {
-      printf("notifying event\n");
+      cout << "notifying subtree modified event" << endl;
       elem->SetDirtyStructure();
+      elem->SetDirtyAttributeD();
     }
 }
 
 void
-MathMLDocument::DOMAttrModifiedListener::handleEvent(const GMetaDOM::Event& ev)
+MathMLDocument::DOMAttrModifiedListener::handleEvent(const DOM::Event& ev)
 {
-  const GMetaDOM::MutationEvent& me(ev);
+  const DOM::MutationEvent& me(ev);
   assert(me);
-  printf("an attribute changed\n");
+  assert(doc);
+  doc->notifyAttributeModified(me.get_relatedNode());
+}
+
+void
+MathMLDocument::notifyAttributeModified(const DOM::Element& el) const
+{
+  assert(el);
+  if (Ptr<MathMLElement> elem = findFormattingNode(el))
+    {
+      cout << "notifying attribute modified event" << endl;
+      elem->SetDirtyAttribute();
+    }
 }
 
 #if 0
@@ -180,7 +201,7 @@ MathMLDocument::UnregisterElement(const Ptr<MathMLElement>& elem)
 #endif
 
 Ptr<MathMLElement>
-MathMLDocument::getFormattingNodeNoCreate(const GMetaDOM::Element& el) const
+MathMLDocument::getFormattingNodeNoCreate(const DOM::Element& el) const
 {
   assert(el);
 
@@ -190,9 +211,9 @@ MathMLDocument::getFormattingNodeNoCreate(const GMetaDOM::Element& el) const
 }
 
 Ptr<MathMLElement>
-MathMLDocument::findFormattingNode(const GMetaDOM::Element& el) const
+MathMLDocument::findFormattingNode(const DOM::Element& el) const
 {
-  for (GMetaDOM::Element p = el; p; p = p.get_parentNode())
+  for (DOM::Element p = el; p; p = p.get_parentNode())
     if (Ptr<MathMLElement> fNode = getFormattingNodeNoCreate(p))
       return fNode;
   
@@ -200,27 +221,17 @@ MathMLDocument::findFormattingNode(const GMetaDOM::Element& el) const
 }
 
 Ptr<MathMLElement>
-MathMLDocument::getFormattingNode(const GMetaDOM::Element& el) const
+MathMLDocument::getFormattingNode(const DOM::Element& el) const
 {
-  assert(el);
+  if (!el) return 0;
 
   DOMNodeMap::iterator p = nodeMap.find(el);
   if (p != nodeMap.end()) return (*p).second;
 
-  std::string s_tag = nodeLocalName(el);
-
-  TagId tag = TagIdOfName(s_tag.c_str());
-
-  if (tag == TAG_NOTVALID)
-    {
-      Globals::logger(LOG_WARNING, "skipping unrecognized element");
-      return 0;
-    }
-
   static struct
   {
     TagId tag;
-    Ptr<MathMLElement> (*create)(const GMetaDOM::Element&);
+    Ptr<MathMLElement> (*create)(const DOM::Element&);
   } tab[] = {
     { TAG_MATH,          &MathMLmathElement::create },
     { TAG_MI,            &MathMLIdentifierElement::create },
@@ -247,7 +258,7 @@ MathMLDocument::getFormattingNode(const GMetaDOM::Element& el) const
     { TAG_MMULTISCRIPTS, &MathMLMultiScriptsElement::create },
     { TAG_MTABLE,        &MathMLTableElement::create },
     { TAG_MTR,           &MathMLTableRowElement::create },
-    { TAG_MLABELEDTR,    &MathMLTableRowElement::create },
+    { TAG_MLABELEDTR,    &MathMLLabeledTableRowElement::create },
     { TAG_MTD,           &MathMLTableCellElement::create },
     { TAG_MALIGNGROUP,   &MathMLAlignGroupElement::create },
     { TAG_MALIGNMARK,    &MathMLAlignMarkElement::create },
@@ -258,16 +269,32 @@ MathMLDocument::getFormattingNode(const GMetaDOM::Element& el) const
     { TAG_NOTVALID,      0 }
   };
 
+  std::string s_tag = nodeLocalName(el);
+  TagId tag = TagIdOfName(s_tag.c_str());
+  if (tag == TAG_NOTVALID)
+    {
+      Globals::logger(LOG_WARNING, "unrecognized element `%s'", s_tag.c_str());
+      return MathMLDummyElement::create(el);
+    }
+
   unsigned i;
   for (i = 0; tab[i].tag != TAG_NOTVALID && tab[i].tag != tag; i++) ;
   assert(tab[i].create != 0);
 
-  Ptr<MathMLElement> res = tab[i].create(el);
-  assert(res);
+  if (Ptr<MathMLElement> res = tab[i].create(el))
+    {
+      setFormattingNode(el, res);
+      return res;
+    }
+  else
+    return MathMLDummyElement::create(el);
+}
 
-  nodeMap[el] = res;
-
-  return res;
+void
+MathMLDocument::setFormattingNode(const DOM::Element& el, const Ptr<MathMLElement>& elem) const
+{
+  assert(el);
+  nodeMap[el] = elem;
 }
 
 #endif // HAVE_GMETADOM

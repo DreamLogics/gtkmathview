@@ -142,22 +142,22 @@ allocString(mDOMConstStringRef str)
 #elif defined(HAVE_GMETADOM)
 
 String*
-allocString(const GMetaDOM::GdomeString& str)
+allocString(const DOM::GdomeString& str)
 {
   if (str.null()) return new StringC("?");
 
   Char big = 0;
-  GMetaDOM::UCS4String s4 = str;
+  DOM::UCS4String s4 = str;
   for (unsigned i = 0; i < s4.length(); i++)
     if (s4[i] > big) big = s4[i];
 
   String* res = NULL;
 
   if (isPlain(big)) {
-    GMetaDOM::UTF8String s = str;
+    DOM::UTF8String s = str;
     res = new StringU<Char8>(s.data(), s.length());
   } else if (isUnicode16(big)) {
-    GMetaDOM::UTF16String s = str;
+    DOM::UTF16String s = str;
     res = new StringU<Char16>(s.data(), s.length());
   } else
     res = new StringU<Char32>(s4.data(), s4.length());

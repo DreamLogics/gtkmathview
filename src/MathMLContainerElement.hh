@@ -35,7 +35,7 @@ class MathMLContainerElement: public MathMLElement
 protected:
   MathMLContainerElement(void);
 #if defined(HAVE_GMETADOM)
-  MathMLContainerElement(const GMetaDOM::Element&);
+  MathMLContainerElement(const DOM::Element&);
 #endif
   virtual ~MathMLContainerElement();
 
