@@ -95,8 +95,6 @@ MathMLTokenElement::Append(const String* s)
 
   if (s->GetLength() == 0) return;
 
-  rawContentLength += s->GetLength();
-
   MathMLTextNode* last = NULL;
   if (content.GetSize() > 0 &&
       content.GetLast() != NULL &&
@@ -121,16 +119,21 @@ MathMLTokenElement::Append(const String* s)
       } else
 	node = new MathMLSpaceNode(spacing, bid);
       i += len;
+      rawContentLength += len;
       lastBreak = true;
     } else if (i + 1 < sLength && isCombining(s->GetChar(i + 1))) {
       node = allocCombinedCharNode(s->GetChar(i), s->GetChar(i + 1));
       i += 2;
+      rawContentLength++;
 
       if (last != NULL && !lastBreak) last->SetBreakability(BREAK_NO);
       lastBreak = false;
     } else if (iswalnum(s->GetChar(i))) {
       unsigned start = i;
-      while (i < sLength && iswalnum(s->GetChar(i))) i++;
+      while (i < sLength && iswalnum(s->GetChar(i))) {
+	i++;
+	rawContentLength++;
+      }
       assert(start < i);
 
       const String* sText = allocString(*s, start, i - start);
@@ -141,12 +144,14 @@ MathMLTokenElement::Append(const String* s)
     } else if (!isVariant(s->GetChar(i))) {
       node = allocCharNode(s->GetChar(i));
       i++;
+      rawContentLength++;
 
       if (last != NULL && !lastBreak) last->SetBreakability(BREAK_NO);
       lastBreak = false;
     } else {
       MathEngine::logger(LOG_WARNING, "ignoring variant modifier char U+%04x", s->GetChar(i));
       i++;
+      rawContentLength++;
     }
     
     if (node != NULL) {

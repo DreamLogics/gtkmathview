@@ -23,6 +23,8 @@
 #include <config.h>
 #include <assert.h>
 
+#include <math.h>
+
 #include "CharMapper.hh"
 #include "MathEngine.hh"
 #include "MathMLElement.hh"
@@ -46,6 +48,10 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
 
   MathMLCharNode::Setup(env);
 
+  env->Push();
+  env->SetFontMode(FONT_MODE_ANY);
+  env->SetFontStyle(FONT_STYLE_NORMAL);
+
   if (!env->charMapper.FontifyChar(cChar, env->GetFontAttributes(), cch)) {
     cChar.font = NULL;
     cChar.charMap = NULL;
@@ -57,6 +63,8 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
     MathEngine::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cch);
 
   sppex = env->GetScaledPointsPerEx();
+
+  env->Drop();
 }
 
 void
@@ -81,8 +89,10 @@ MathMLCombinedCharNode::DoLayout()
       else
 	shiftX = 0;
 #endif
-
-      shiftX = (box.width - cBox.width) / 2;
+      printf("italic angle of the base char is %f %f\n",
+	     fChar.font->GetItalicAngle(),
+	     cChar.font->GetItalicAngle()
+	     );
 
 #if 0
       if (scaledEq(shiftX, 0))
@@ -91,6 +101,17 @@ MathMLCombinedCharNode::DoLayout()
 
       //shiftY = box.ascent + cBox.descent + cChar.font->GetLineThickness();
       shiftY = box.ascent - sppex;
+
+      float ia = 90 + fChar.font->GetItalicAngle() - cChar.font->GetItalicAngle();
+      printf("combined italic angle degree: %f\n", ia);
+
+      ia = (M_PI * ia) / 180;
+      printf("combined italic angle radiant %f the cosine: %f the ray: %f\n", ia, cos(ia), sp2float(shiftY));
+
+      scaled correction = float2sp(sp2float(2 * shiftY) * cos(ia));
+      printf("the correction turns out to be of %d\n", sp2ipx(correction));
+
+      shiftX = correction + (box.width - cBox.width) / 2;
     }
 
     charBox.ascent = scaledMax(box.ascent, cBox.ascent + shiftY);
