@@ -103,4 +103,4 @@ private:
   scaled   minLineSpacing;
 };
 
-#endif
+#endif // Layout_hh

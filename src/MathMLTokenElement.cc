@@ -36,6 +36,7 @@
 #include "Iterator.hh"
 #include "stringAux.hh"
 #include "MathEngine.hh"
+#include "traverseAux.hh"
 #include "ShapeFactory.hh"
 #include "allocTextNode.hh"
 #include "StringUnicode.hh"
@@ -48,6 +49,8 @@
 #include "MathMLStringNode.hh"
 #include "MathMLTokenElement.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLTokenElement::MathMLTokenElement(mDOMNodeRef node, TagId t) : MathMLElement(node, t)
 {
@@ -327,6 +330,8 @@ MathMLTokenElement::DoLayout(LayoutId id, Layout& layout)
     i.Next();
   }
 
+  AddItalicCorrection(layout);
+
   ResetDirtyLayout(id);
 }
 
@@ -505,4 +510,24 @@ MathMLTokenElement::GetCharNode() const
   if (!node->IsChar() || node->IsCombinedChar()) return NULL;
 
   return TO_CHAR(node);
+}
+
+void
+MathMLTokenElement::AddItalicCorrection(Layout& layout)
+{
+  if (IsA() != TAG_MI && IsA() != TAG_MN && IsA() != TAG_MTEXT) return;
+
+  MathMLTextNode* lastNode = content.GetLast();
+  if (lastNode == NULL) return;
+
+  MathMLElement* next = findRightSibling(this);
+  if (next == NULL || next->IsA() != TAG_MO) return;
+
+  MathMLOperatorElement* op = findCoreOperator(next);
+  if (op == NULL) return;
+  if (!op->IsFence()) return;
+
+  const BoundingBox& box = lastNode->GetBoundingBox();
+  MathEngine::logger(LOG_DEBUG, "adding italic correction: %d %d", sp2ipx(box.rBearing), sp2ipx(box.width));
+  if (box.rBearing > box.width) layout.Append(box.rBearing - box.width);
 }

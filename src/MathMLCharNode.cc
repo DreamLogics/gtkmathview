@@ -546,10 +546,15 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
     // and that that font has a valid glyph for x as position 'x'
     shiftY = box.ascent - cFont->GetEx();
 
-    float ia = (M_PI * (90 + fChar.font->GetItalicAngle() - cFont->GetItalicAngle())) / 180;
-    scaled correction = float2sp(sp2float(2 * shiftY) * cos(ia));
+    float ia = (M_PI * (90 + fChar.font->GetItalicAngle())) / 180;
 
-    shiftX = correction + (box.width - cBox.width) / 2;
+    if (shiftY > 0) {
+      scaled correction = float2sp(sp2float(box.ascent) * cos(ia));
+      shiftX = correction + (box.width - cBox.rBearing + cBox.lBearing) / 2 - cBox.lBearing;
+    } else
+      shiftX = 0;
+
+    printf("%04x ic: %f height: %f\n", GetChar(), scaledMax(0, box.rBearing - box.width), box.ascent);
   }
 
   return true;

@@ -62,6 +62,7 @@ public:
 
 protected:
   void Free(void);
+  void AddItalicCorrection(Layout&);
 
   // for tokens the content is protected so that users have to
   // use the Append methods. For read-only operations there is
