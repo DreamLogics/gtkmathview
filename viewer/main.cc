@@ -22,7 +22,9 @@
 
 #include <config.h>
 #include <assert.h>
+#ifdef HAVE_GETOPT_H
 #include <getopt.h>
+#endif // HAVE_GETOPT_H
 #include <stdlib.h>
 
 #include "defs.h"

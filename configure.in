@@ -51,6 +51,18 @@ AC_ARG_WITH(
 	t1lib=auto
 )
 
+AC_ARG_WITH(
+        t1lib-prefix,
+        [  --with-t1lib-prefix=PFX prefix dir where t1lib is installed],
+        [
+                with_t1lib_prefix=yes
+                T1LIB_PREFIX=$withval
+        ],
+        [
+                with_t1lib_prefix=no
+        ]
+)
+
 AC_ARG_ENABLE(
 	export-PS,
 	[  --enable-export-PS[=ARG] enable support for exporting PostScript [default=auto]],
@@ -77,6 +89,7 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADER(wctype.h,,AC_MSG_ERROR(could not find required header file `wctype.h'))
 AC_CHECK_HEADER(iconv.h,,AC_MSG_ERROR(could not find required header file `iconv.h'))
+AC_CHECK_HEADERS(getopt.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -178,6 +191,11 @@ fi
 if test $t1lib = "yes"; then
 	LIBS="$LIBS -lt1x -lt1"
 	AC_DEFINE(HAVE_LIBT1)
+
+        if test $with_t1lib_prefix = "yes"; then
+                CFLAGS="-I$T1LIB_PREFIX/include $CFLAGS"
+                CXXFLAGS="-I$T1LIB_PREFIX/include $CXXFLAGS"
+        fi
 fi
 
 if test "(" $t1lib = "no" ")" -a "(" $export_PS = "yes" ")"; then

@@ -29,7 +29,7 @@
 #include <string.h>
 #include <malloc.h>
 
-#include <t1lib.h>
+#include "t1lib.h"
 
 #include "Iterator.hh"
 #include "Container.hh"
