@@ -7,11 +7,13 @@ noinst_PROGRAMS = mathml2ps.debug
 
 mathml2ps_SOURCES = main.cc
 mathml2ps_LDADD = \
+  -lstdc++ \
   $(DOM_LIBS) \
   $(top_builddir)/src/libgtkmathview.la
 
 mathml2ps_debug_SOURCES = main.cc
 mathml2ps_debug_LDADD = \
+  -lstdc++ \
   $(DOM_LIBS) \
   $(top_builddir)/src/libgtkmathview.la
 

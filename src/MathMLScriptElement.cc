@@ -180,7 +180,6 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
   DoScriptLayout(relBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
 
   box = baseBox;
-
   box.width = scaledMax(box.width,
 			scaledMax(superShiftX + superScriptBox.width,
 				  subShiftX + subScriptBox.width));

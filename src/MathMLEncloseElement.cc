@@ -36,18 +36,24 @@ MathMLEncloseElement::MathMLEncloseElement(const GMetaDOM::Element& node)
   : MathMLNormalizingContainerElement(node, TAG_MENCLOSE)
 {
   normalized = false;
+  notation = 0;
 }
 
 MathMLEncloseElement::~MathMLEncloseElement()
 {
+  if (notation)
+    {
+      delete notation;
+      notation = 0;
+    }
 }
 
 const AttributeSignature*
 MathMLEncloseElement::GetAttributeSignature(AttributeId id) const
 {
   static AttributeSignature sig[] = {
-    { ATTR_NOTATION, notationParser, new StringC("longdiv"), NULL },
-    { ATTR_NOTVALID, NULL,           NULL,                   NULL }
+    { ATTR_NOTATION, stringParser, new StringC("longdiv"), NULL },
+    { ATTR_NOTVALID, NULL,         NULL,                   NULL }
   };
 
   const AttributeSignature* signature = GetAttributeSignatureAux(id, sig);
@@ -78,12 +84,10 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
+  if (notation) delete notation;
   const Value* value = GetAttributeValue(ATTR_NOTATION, env);
   assert(value != NULL);
-  if (value->IsKeyword(KW_LONGDIV)) notation = NOTATION_LONGDIV;
-  else if (value->IsKeyword(KW_ACTUARIAL)) notation = NOTATION_ACTUARIAL;
-  else if (value->IsKeyword(KW_RADICAL)) notation = NOTATION_RADICAL;
-  else assert(IMPOSSIBLE);
+  notation = value->ToString()->Clone();
   delete value;
 
   spacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_MEDIUM));
@@ -91,7 +95,7 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
   color = env->GetColor();
 
   if (!normalized) {
-    if (notation == NOTATION_RADICAL) NormalizeRadicalElement();
+    if (notation->Equal("radical")) NormalizeRadicalElement();
     normalized = true;
   }
 
@@ -109,7 +113,7 @@ MathMLEncloseElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
   MathMLNormalizingContainerElement::DoBoxedLayout(id, BREAK_NO, availWidth);
   box = content.GetFirst()->GetBoundingBox();
 
-  if (notation != NOTATION_RADICAL) {
+  if (notation->Equal("actuarial") || notation->Equal("longdiv")) {
     box = content.GetFirst()->GetBoundingBox();
     box.ascent += spacing + lineThickness;
     box.width += spacing + lineThickness;
@@ -129,14 +133,10 @@ MathMLEncloseElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  if (notation == NOTATION_RADICAL)
+  if (notation->Equal("longdiv"))
+    content.GetFirst()->SetPosition(x + spacing + lineThickness, y);
+  else
     content.GetFirst()->SetPosition(x, y);
-  else {
-    if (notation == NOTATION_LONGDIV)
-      content.GetFirst()->SetPosition(x + spacing + lineThickness, y);
-    else
-      content.GetFirst()->SetPosition(x, y);
-  }
 }
 
 void
@@ -155,14 +155,23 @@ MathMLEncloseElement::Render(const DrawingArea& area)
     fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND);
   }
 
-  if (notation == NOTATION_LONGDIV) {
+  if (notation->Equal("longdiv")) {
     area.MoveTo(GetX() + lineThickness / 2, GetY() + box.descent);
     area.DrawLineTo(fGC[IsSelected()], GetX() + lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() - box.ascent + lineThickness / 2);
-  } else if (notation == NOTATION_ACTUARIAL) {
+  } else if (notation->Equal("actuarial")) {
     area.MoveTo(GetX(), GetY() - box.ascent + lineThickness / 2);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width - lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width - lineThickness / 2, GetY() + box.descent);
+  } else if (notation->Equal("overstrike")) {
+    area.MoveTo(GetX(), GetY() - box.ascent / 2);
+    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() - box.ascent / 2);
+  } else if (notation->Equal("NESWslash")) {
+    area.MoveTo(GetX(), GetY() + box.descent);
+    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() - box.ascent);
+  } else if (notation->Equal("NWSEslash")) {
+    area.MoveTo(GetX(), GetY() - box.ascent);
+    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() + box.descent);
   }
 
   ResetDirty();

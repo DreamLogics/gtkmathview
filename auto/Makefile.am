@@ -2,7 +2,7 @@
 noinst_PROGRAMS = dumpEntitiesTable
 
 dumpEntitiesTable_SOURCES = dumpEntitiesTable.cc
-dumpEntitiesTable_LDADD = @DOM_LIBS@
+dumpEntitiesTable_LDADD = @DOM_LIBS@ -lstdc++
 
 AUTOFILES = \
   attribute.dec attribute.def \

@@ -10,6 +10,7 @@ noinst_HEADERS = guiGTK.h
 mathmlviewer_SOURCES = main.cc guiGTK.c
 
 mathmlviewer_LDADD = \
+  -lstdc++ \
   $(DOM_LIBS) \
   $(GTK_LIBS) \
   $(top_builddir)/src/libgtkmathview.la
@@ -17,6 +18,7 @@ mathmlviewer_LDADD = \
 mathmlviewer_debug_SOURCES = main.cc guiGTK.c
 
 mathmlviewer_debug_LDADD = \
+  -lstdc++ \
   $(DOM_LIBS) \
   $(GTK_LIBS) \
   $(top_builddir)/src/libgtkmathview.la

@@ -32,11 +32,13 @@
 #include "RGBValue.hh"
 #include "MathMLNormalizingContainerElement.hh"
 
+#if 0
 enum NotationType {
   NOTATION_LONGDIV,
   NOTATION_ACTUARIAL,
   NOTATION_RADICAL
 };
+#endif
 
 class MathMLEncloseElement: public MathMLNormalizingContainerElement
 {
@@ -58,7 +60,8 @@ protected:
 
   bool         normalized;
 
-  NotationType notation;
+  const String* notation;
+  //NotationType notation;
   scaled       spacing;
   scaled       lineThickness;
   RGBValue     color;

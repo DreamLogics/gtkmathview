@@ -1,6 +1,7 @@
 <math>
-  <menclose notation="radical">
-    <mspace height="0.5cm" depth="0.25cm"/>
-    <mtext>menclose test</mtext>
+  <menclose notation="overstrike">
+    <msup><mi>x</mi><mn>2</mn></msup>
+    <mo>+</mo>
+    <mn>1</mn>
   </menclose>
 </math>
