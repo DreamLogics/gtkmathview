@@ -235,7 +235,6 @@ noinst_HEADERS = \
   RGBValue.hh \
   Rectangle.hh \
   RenderingEnvironment.hh \
-  Stack.hh \
   String.hh \
   StringFactory.hh \
   StringTokenizer.hh \
