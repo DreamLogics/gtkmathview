@@ -134,7 +134,7 @@ MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
     Ptr<MathMLElement> (*create)(const GMetaDOM::Element&);
   } tab[] = {
     { TAG_MATH,          &MathMLmathElement::create },
-    { TAG_MI,            &MathMLTokenElement::create },
+    { TAG_MI,            &MathMLIdentifierElement::create },
     { TAG_MN,            &MathMLTokenElement::create },
     { TAG_MO,            &MathMLOperatorElement::create },
     { TAG_MTEXT,         &MathMLTextElement::create },

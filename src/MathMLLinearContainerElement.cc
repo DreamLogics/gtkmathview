@@ -406,16 +406,13 @@ Ptr<MathMLElement>
 MathMLLinearContainerElement::GetChild(unsigned i) const
 {
   assert(i < GetSize());
-  Ptr<MathMLElement> elem = content.Get(i);
-  assert(elem != 0);
-  return elem;
+  return content.Get(i);
 }
 
 void
 MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& elem)
 {
   assert(i <= GetSize());
-  assert(elem != 0);
 
   if (i == GetSize()) Append(elem);
   else
@@ -434,7 +431,6 @@ MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& ele
 void
 MathMLLinearContainerElement::Append(const Ptr<MathMLElement>& elem)
 {
-  assert(elem != 0);
   elem->SetParent(this);
   content.Append(elem);
   SetDirtyStructure();
@@ -443,7 +439,6 @@ MathMLLinearContainerElement::Append(const Ptr<MathMLElement>& elem)
 void
 MathMLLinearContainerElement::Remove(const Ptr<MathMLElement>& elem)
 {
-  assert(elem != 0);
   assert(content.Contains(elem));
   content.Remove(elem);
   SetDirtyStructure();
@@ -453,8 +448,6 @@ void
 MathMLLinearContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
 				      const Ptr<MathMLElement>& newElem)
 {
-  assert(oldElem != 0);
-  assert(newElem != 0);
   assert(content.Contains(oldElem));
   SetChild(content.IndexOf(oldElem), newElem);
 }

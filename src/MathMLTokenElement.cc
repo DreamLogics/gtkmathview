@@ -271,9 +271,8 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
 
   env->Push();
 
-  if (IsA() == TAG_MTEXT || IsA() == TAG_MN) {
+  if (!is_a<MathMLIdentifierElement>(this) && !is_a<MathMLOperatorElement>(this))
     env->SetFontMode(FONT_MODE_TEXT);
-  }
 
   const Value* value = NULL;
 
@@ -328,10 +327,10 @@ MathMLTokenElement::Setup(RenderingEnvironment* env)
     if (value != NULL) {
       Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
       env->SetFontStyle(ToFontStyleId(value));
-    } else if (IsA() == TAG_MI) {
+    } else if (is_a<MathMLIdentifierElement>(this)) {
       if (GetLogicalContentLength() == 1) {
 	Ptr<MathMLTextNode> node = content.GetFirst();
-	assert(node != NULL);
+	assert(node != 0);
 
 	if (node->IsChar()) {
 	  Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(node);
@@ -622,7 +621,9 @@ MathMLTokenElement::GetCharNode() const
 void
 MathMLTokenElement::AddItalicCorrection(Layout& layout)
 {
-  if (IsA() != TAG_MI && IsA() != TAG_MN && IsA() != TAG_MTEXT) return;
+  if (!is_a<MathMLIdentifierElement>(this) &&
+      !is_a<MathMLNumberElement>(this) &&
+      !is_a<MathMLTextElement>(this)) return;
   
   if (content.GetSize() == 0) return;
 
@@ -630,7 +631,9 @@ MathMLTokenElement::AddItalicCorrection(Layout& layout)
   assert(lastNode != 0);
 
   Ptr<MathMLElement> next = findRightSibling(this);
-  if (next == 0 || next->IsA() != TAG_MO) return;
+  if (next == 0 ||
+      !is_a<MathMLOperatorElement>(next) ||
+      !is_a<MathMLEmbellishedOperatorElement>(next)) return;
 
   Ptr<MathMLOperatorElement> op = next->GetCoreOperator();
   if (op == 0) return;

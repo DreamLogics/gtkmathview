@@ -30,7 +30,9 @@
 #include "MathMLElement.hh"
 #include "MathMLRowElement.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLFractionElement.hh"
 #include "MathMLOperatorElement.hh"
+#include "MathMLIdentifierElement.hh"
 #include "MathMLInvisibleTimesNode.hh"
 
 MathMLInvisibleTimesNode::MathMLInvisibleTimesNode() : MathMLSpaceNode(0, BREAK_NO)
@@ -67,21 +69,26 @@ MathMLInvisibleTimesNode::DoLayout()
   Ptr<MathMLElement> next = findRightSibling(GetParent());
   if (prev == 0 || next == 0) return;
 
-  if (prev->IsA() == TAG_MI && next->IsA() == TAG_MI) {
-    Ptr<MathMLTokenElement> prevToken = smart_cast<MathMLTokenElement>(prev);
-    Ptr<MathMLTokenElement> nextToken = smart_cast<MathMLTokenElement>(next);
-    assert(prevToken != 0 && nextToken != 0);
+  if (is_a<MathMLIdentifierElement>(prev) && is_a<MathMLIdentifierElement>(next))
+    {
+      Ptr<MathMLTokenElement> prevToken = smart_cast<MathMLTokenElement>(prev);
+      Ptr<MathMLTokenElement> nextToken = smart_cast<MathMLTokenElement>(next);
+      assert(prevToken != 0 && nextToken != 0);
     
-    if (prevToken->GetLogicalContentLength() <= 1 &&
-	nextToken->GetLogicalContentLength() <= 1) return;
+      if (prevToken->GetLogicalContentLength() <= 1 &&
+	  nextToken->GetLogicalContentLength() <= 1) return;
     
-    // FIXME: the following constants should be defined somewhere
-    box.Set((sppm * 5) / 18, 0, 0);
-  } else if (prev->IsA() == TAG_MFRAC && next->IsA() == TAG_MFRAC) {
-    box.Set((sppm * 5) / 18, 0, 0);
-  } else if (prev->IsA() == TAG_MFRAC || next->IsA() == TAG_MFRAC) {
-    box.Set((sppm * 4) / 18, 0, 0);
-  }
+      // FIXME: the following constants should be defined somewhere
+      box.Set((sppm * 5) / 18, 0, 0);
+    } 
+  else if (is_a<MathMLFractionElement>(prev) && is_a<MathMLFractionElement>(next))
+    {
+      box.Set((sppm * 5) / 18, 0, 0);
+    } 
+  else if (is_a<MathMLFractionElement>(prev) || is_a<MathMLFractionElement>(next))
+    {
+      box.Set((sppm * 4) / 18, 0, 0);
+    }
 }
 
 unsigned

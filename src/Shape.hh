@@ -32,7 +32,8 @@ class Shape {
 public:
   Shape(Rectangle* = NULL);
   ~Shape();
-  
+
+  bool GetRectangle(Rectangle&) const;
   bool IsInside(scaled, scaled) const;
   bool Overlaps(const Rectangle&) const;
   void Dump(void) const;

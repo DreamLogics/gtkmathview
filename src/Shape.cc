@@ -41,12 +41,28 @@ Shape::~Shape()
 }
 
 bool
+Shape::GetRectangle(Rectangle& rect) const
+{
+  if (content.GetSize() == 0) return false;
+
+  for (Iterator<Rectangle*> i(content); i.More(); i.Next())
+    {
+      assert(i() != NULL);
+      if (i.IsFirst()) rect = *i();
+      else rect.Union(*i());
+    }
+
+  return true;
+}
+
+bool
 Shape::IsInside(scaled x, scaled y) const
 {
-  for (Iterator<Rectangle*> rect(content); rect.More(); rect.Next()) {
-    assert(rect() != NULL);
-    if (rect()->IsInside(x, y)) return true;
-  }
+  for (Iterator<Rectangle*> rect(content); rect.More(); rect.Next())
+    {
+      assert(rect() != NULL);
+      if (rect()->IsInside(x, y)) return true;
+    }
 
   return false;
 }
@@ -54,10 +70,11 @@ Shape::IsInside(scaled x, scaled y) const
 bool
 Shape::Overlaps(const Rectangle& rect) const
 {
-  for (Iterator<Rectangle*> r(content); r.More(); r.Next()) {
-    assert(r() != NULL);
-    if (r()->Overlaps(rect)) return true;
-  }
+  for (Iterator<Rectangle*> r(content); r.More(); r.Next())
+    {
+      assert(r() != NULL);
+      if (r()->Overlaps(rect)) return true;
+    }
 
   return false;
 }
@@ -66,10 +83,11 @@ void
 Shape::Dump() const
 {
   putchar('[');
-  for (Iterator<Rectangle*> rect(content); rect.More(); rect.Next()) {
-    assert(rect() != NULL);
-    putchar(' ');
-    rect()->Dump();
-  }
+  for (Iterator<Rectangle*> rect(content); rect.More(); rect.Next())
+    {
+      assert(rect() != NULL);
+      putchar(' ');
+      rect()->Dump();
+    }
   printf(" ]");
 }

@@ -706,8 +706,14 @@ extern "C" GtkFrame*
 gtk_math_view_get_frame(GtkMathView* math_view)
 {
   g_return_val_if_fail(math_view != NULL, NULL);
-
   return math_view->frame != NULL ? GTK_FRAME(math_view->frame) : NULL;
+}
+
+extern "C" GtkDrawingArea*
+gtk_math_view_get_drawing_area(GtkMathView* math_view)
+{
+  g_return_val_if_fail(math_view != NULL, NULL);
+  return math_view->area != NULL ? GTK_DRAWING_AREA(math_view->area) : NULL;
 }
 
 extern "C" void
@@ -756,6 +762,19 @@ gtk_math_view_reset_selection(GtkMathView* math_view, GdomeElement* elem)
 
   math_view->interface->ResetSelected(findMathMLElement(elem));
   paint_widget(math_view);
+}
+
+extern "C" gboolean
+gtk_math_view_is_selected(GtkMathView* math_view, GdomeElement* elem)
+{
+  g_return_val_if_fail(math_view != NULL, FALSE);
+  g_return_val_if_fail(math_view->interface != NULL, FALSE);
+  g_return_val_if_fail(elem != NULL, FALSE);
+
+  Ptr<MathMLElement> el = findMathMLElement(elem);
+  if (el == 0) return FALSE;
+
+  return el->IsSelected() ? TRUE : FALSE;
 }
 
 extern "C" gint
@@ -848,6 +867,53 @@ gtk_math_view_get_element_at(GtkMathView* math_view, gint x, gint y)
 							     math_view->vadjustment->value + px2sp(y));
 
   return gdome_cast_el(findDOMNode(at).gdome_object());
+}
+
+extern "C" gboolean
+gtk_math_view_get_element_coords(GtkMathView* math_view, GdomeElement* elem, gint* x, gint* y)
+{
+  g_return_val_if_fail(math_view != NULL, FALSE);
+  g_return_val_if_fail(elem != NULL, FALSE);
+
+  Ptr<MathMLElement> el = findMathMLElement(elem);
+  if (el == 0) return FALSE;
+
+  if (x != NULL) *x = sp2px(el->GetX());
+  if (y != NULL) *y = sp2px(el->GetY());
+
+  return TRUE;
+}
+
+extern "C" gboolean
+gtk_math_view_get_element_rectangle(GtkMathView* math_view, GdomeElement* elem, GdkRectangle* rect)
+{
+  g_return_val_if_fail(math_view != NULL, FALSE);
+  g_return_val_if_fail(elem != NULL, FALSE);
+  g_return_val_if_fail(rect != NULL, FALSE);
+
+  Ptr<MathMLElement> el = findMathMLElement(elem);
+  if (el == 0) return FALSE;
+
+  if (el->IsBreakable())
+    {
+      const Shape& shape = el->GetShape();
+      Rectangle r;
+      shape.GetRectangle(r);
+      rect->x = sp2ipx(r.x);
+      rect->y = sp2ipx(r.y);
+      rect->width = sp2ipx(r.width);
+      rect->height = sp2ipx(r.height);
+    }
+  else
+    {
+      const BoundingBox& box = el->GetBoundingBox();
+      rect->x = sp2ipx(el->GetX());
+      rect->y = sp2ipx(el->GetY() - box.ascent);
+      rect->width = sp2ipx(box.width);
+      rect->height = sp2ipx(box.GetHeight());
+    }
+
+  return TRUE;
 }
 
 extern "C" void

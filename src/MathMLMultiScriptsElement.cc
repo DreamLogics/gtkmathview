@@ -48,15 +48,42 @@ MathMLMultiScriptsElement::~MathMLMultiScriptsElement()
 void
 MathMLMultiScriptsElement::Normalize()
 {
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+#if defined(HAVE_GMETADOM)
+      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+      for (unsigned i = 0; i < children.get_length(); i++)
+	{
+	  GMetaDOM::Node node = children.item(i);
+	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+
+	  if (i == 0 &&
+	      (node.get_nodeName() == "none" || node.get_nodeName() == "mprescripts"))
+	    {
+	      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+	      assert(mdummy != 0);
+	      SetChild(0, mdummy);
+	    }
+	  else
+
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  // it might be that we get a NULL. In that case it would probably make
+	  // sense to create a dummy element, because we filtered MathML
+	  // elements only
+	  assert(elem != 0);
+	  SetChild(i, elem);
+	}
+
+      // the following is to be sure that no spurious elements remain at the
+      // end of the container
+      SetSize(children.get_length());
+#endif // HAVE_GMETADOM
+    }
+
   if (content.GetSize() == 0 ||
       (content.GetFirst() != 0 && content.GetFirst()->IsA() == TAG_NONE) ||
       (content.GetFirst() != 0 && content.GetFirst()->IsA() == TAG_MPRESCRIPTS))
     {
-      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
-
-      mdummy->SetParent(this);
-      content.AddFirst(mdummy);
     }
 
   base = content.GetFirst();
@@ -103,8 +130,7 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
   elem.Next();
   while (elem.More())
     {
-      assert(elem() != 0);
-      elem()->Setup(env);
+      if (elem() != 0) elem()->Setup(env);
       elem.Next();
     }
 

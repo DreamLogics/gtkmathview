@@ -110,7 +110,7 @@ MathMLTableElement::Normalize()
       Ptr<MathMLElement> elem = content.RemoveFirst();
       assert(elem != 0);
 
-      if (elem->IsA() != TAG_MTR && elem->IsA() != TAG_MLABELEDTR)
+      if (smart_cast<MathMLTableRowElement>(elem) == 0)
 	{
 	  Ptr<MathMLTableRowElement> inferredTableRow = 
 	    smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
@@ -120,6 +120,7 @@ MathMLTableElement::Normalize()
 	  inferredTableRow->SetParent(this);
 	  elem = inferredTableRow;
 	}
+
       elem->Normalize();
       content.Append(elem);
     }

@@ -37,6 +37,7 @@
 #include "MathMLFencedElement.hh"
 #include "MathMLFractionElement.hh"
 #include "MathMLGlyphNode.hh"
+#include "MathMLIdentifierElement.hh"
 #include "MathMLMarkNode.hh"
 #include "MathMLMultiScriptsElement.hh"
 #include "MathMLNode.hh"

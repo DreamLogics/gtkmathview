@@ -43,7 +43,8 @@ public:
   friend bool operator==(const Ptr& p, const Ptr& q) { return p.ptr == q.ptr; }
   friend bool operator!=(const Ptr& p, const Ptr& q) { return p.ptr != q.ptr; }
   template <class Q> friend Ptr<Q> smart_cast(const Ptr& p) { return Ptr<Q>(dynamic_cast<Q*>(p.ptr)); }  
-  
+  template <class Q> friend bool is_a(const Ptr& p) { return dynamic_cast<Q*>(p.ptr) != 0; }
+
   // NOTE: due to the following conversion operator there can be many
   // ambiguities when comparing different smart pointers
   template <class Q> operator Ptr<Q>() const { return Ptr<Q>(ptr); }

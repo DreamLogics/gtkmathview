@@ -69,7 +69,10 @@ extern "C" {
 #if defined(HAVE_GMETADOM)
   void           gtk_math_view_set_selection(GtkMathView*, GdomeElement*);
   void           gtk_math_view_reset_selection(GtkMathView*, GdomeElement*);
+  gboolean       gtk_math_view_is_selected(GtkMathView*, GdomeElement*);
   GdomeElement*  gtk_math_view_get_element_at(GtkMathView*, gint, gint);
+  gboolean       gtk_math_view_get_element_coords(GtkMathView*, GdomeElement*, gint*, gint*);
+  gboolean       gtk_math_view_get_element_rectangle(GtkMathView*, GdomeElement*, GdkRectangle*);
 #endif
   gint      	 gtk_math_view_get_width(GtkMathView*);
   gint      	 gtk_math_view_get_height(GtkMathView*);
@@ -80,6 +83,7 @@ extern "C" {
   GtkAdjustment* gtk_math_view_get_vadjustment(GtkMathView*);
   GdkPixmap*     gtk_math_view_get_buffer(GtkMathView*);
   GtkFrame*      gtk_math_view_get_frame(GtkMathView*);
+  GtkDrawingArea* gtk_math_view_get_drawing_area(GtkMathView*);
   void           gtk_math_view_set_font_size(GtkMathView*, guint);
   guint          gtk_math_view_get_font_size(GtkMathView*);
   void           gtk_math_view_set_anti_aliasing(GtkMathView*, gboolean);

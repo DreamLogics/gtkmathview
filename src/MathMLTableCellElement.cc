@@ -88,9 +88,8 @@ MathMLTableCellElement::SetupGroups(const Ptr<MathMLElement>& elem,
 {
   // this static method is probably to be rewritten completely
   // as a set of virtual methods in the various Element classes
-#if 0
   assert(elem != 0);
-
+#if 0
   // if countGroups == TRUE  requires: normalization, alignment scopes
   // if countGroups == FALSE requires: normalization, alignment scopes, group alignment 
 
@@ -105,7 +104,7 @@ MathMLTableCellElement::SetupGroups(const Ptr<MathMLElement>& elem,
 	  status.group->GetDecimalPoint() == NULL)
 	status.group->SetDecimalPoint(token);
 
-      for (Iterator<Ptr<MathMLTextNode>> p(token->GetContent()); p.More(); p.Next())
+      for (Iterator< Ptr<MathMLTextNode> > p(token->GetContent()); p.More(); p.Next())
 	{
 	  if (p()->IsMark() && status.group != NULL)
 	    {
@@ -122,7 +121,7 @@ MathMLTableCellElement::SetupGroups(const Ptr<MathMLElement>& elem,
       Ptr<MathMLContainerElement> container = smart_cast<MathMLContainerElement>(elem);
       assert(container != 0);
 
-      Iterator<Ptr<MathMLElement>> p(container->content);
+      Iterator< Ptr<MathMLElement> > p(container->GetContent());
 
       switch (container->IsA())
 	{

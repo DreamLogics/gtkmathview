@@ -33,6 +33,7 @@
 #include "MathMLOperatorElement.hh"
 #include "MathMLApplyFunctionNode.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
+#include "MathMLFencedElement.hh"
 
 MathMLApplyFunctionNode::MathMLApplyFunctionNode() : MathMLSpaceNode(0, BREAK_NO)
 {
@@ -65,36 +66,20 @@ MathMLApplyFunctionNode::DoLayout()
   if (!GetParent()->IsOperator()) return;
 
   Ptr<MathMLElement> next = findRightSibling(GetParent());
-  if (next == NULL) return;
+  if (next == 0) return;
 
-  switch (next->IsA()) {
-  case TAG_MFENCED:
-    return;
-
-  case TAG_MO:
+  if (is_a<MathMLFencedElement>(next)) return;
+  
+  if (is_a<MathMLEmbellishedOperatorElement>(next) ||
+      is_a<MathMLOperatorElement>(next))
     {
-      Ptr<MathMLOperatorElement> coreOp;
-
-      if (next->IsEmbellishedOperator()) {
-	Ptr<MathMLEmbellishedOperatorElement> op = smart_cast<MathMLEmbellishedOperatorElement>(next);
-	assert(op != 0);
-	coreOp = op->GetCoreOperator();
-      } else {
-	coreOp = smart_cast<MathMLOperatorElement>(next);
-      }
+      Ptr<MathMLOperatorElement> coreOp = next->GetCoreOperator();
       assert(coreOp != 0);
-
       if (coreOp->IsFence()) return;
     }
 
-    // OK fallback
-
-  default:
-    {
-      // FIXME: the following constant should be defined somewhere
-      box.Set((sppm * 5) / 18, 0, 0);
-    }
-  }
+  // FIXME: the following constant should be defined somewhere
+  box.Set((sppm * 5) / 18, 0, 0);
 }
 
 unsigned

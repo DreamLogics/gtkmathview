@@ -71,17 +71,17 @@ MathMLTableRowElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLTableRowElement::Normalize()
 {
-  if (IsA() == TAG_MLABELEDTR &&
+  if (is_a<MathML() == TAG_MLABELEDTR &&
       (content.GetSize() == 0 ||
        (content.GetSize() > 0 &&
 	content.GetFirst() != 0 &&
 	content.GetFirst()->IsA() == TAG_MTD)))
     {
-      Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
       Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
       assert(mdummy != 0);
       mdummy->SetParent(this);
       content.AddFirst(mdummy);
+      Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
     }
 
   for (unsigned i = 0; i < content.GetSize(); i++)
