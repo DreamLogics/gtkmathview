@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <t1lib.h>
+#include "t1lib.h"
 
 #include "T1_Font.hh"
 #include "Iterator.hh"

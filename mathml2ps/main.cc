@@ -22,7 +22,7 @@
 
 #include <config.h>
 
-#define MATHML2PS_VERSION "0.0.6"
+#define MATHML2PS_VERSION "0.0.7"
 
 #include <assert.h>
 #ifdef HAVE_GETOPT_H
@@ -53,7 +53,8 @@ enum CommandLineOptionId {
   OPTION_MARGINS,
   OPTION_FONT_SIZE,
   OPTION_COLORS,
-  OPTION_SUBSETTING,
+  OPTION_SUBSET,
+  OPTION_CROP,
   //OPTION_KERNING,
   OPTION_CONFIG
 };
@@ -68,6 +69,7 @@ static double yMargin = 2;
 static double fontSize = 10;
 static bool   colors = false;
 static bool   subsetting = true;
+static bool   cropping = true;
 //static bool   kerning = false;
 static const char* configPath = NULL;
 static int logLevel = LOG_ERROR;
@@ -97,7 +99,8 @@ Usage: mathml2ps [options] file ...\n\n\
   -f, --font-size=<float>         Default font size (in pt, default=10)\n\
   -k, --kerning[=yes|no]          Enable/disable kerning (default='no')\n\
   -c, --colors[=yes|no]           Enable/disable colors (default='no')\n\
-  -s, --subsetting[=yes|no]       Enable/disable font subsetting (default='yes')\n\
+  -s, --subset[=yes|no]           Enable/disable font subsetting (default='yes')\n\
+  -r, --crop[=yes|no]             Enable/disable cropping to bounding box (default='yes')\n\
   --config=<path>                 Configuration file path\n\
   --verbose[=0-3]                 Display messages\n\n\
 Valid units are:\n\n\
@@ -252,7 +255,8 @@ main(int argc, char *argv[])
       { "margins",       required_argument, NULL, OPTION_MARGINS },
       { "font-size",     required_argument, NULL, OPTION_FONT_SIZE },
       { "colors",        optional_argument, NULL, OPTION_COLORS },
-      { "subsetting",    optional_argument, NULL, OPTION_SUBSETTING },
+      { "subset",        optional_argument, NULL, OPTION_SUBSET },
+      { "crop",          optional_argument, NULL, OPTION_CROP },
       //{ "kerning",       optional_argument, NULL, OPTION_KERNING },
       { "config",        required_argument, NULL, OPTION_CONFIG },
 
@@ -309,10 +313,16 @@ main(int argc, char *argv[])
       else if (!parseBoolean(optarg, colors)) parseError("colors");
       break;
 
-    case OPTION_SUBSETTING:
+    case OPTION_SUBSET:
     case 's':
       if (optarg == NULL) subsetting = true;
-      else if (!parseBoolean(optarg, subsetting)) parseError("subsetting");
+      else if (!parseBoolean(optarg, subsetting)) parseError("subset");
+      break;
+
+    case OPTION_CROP:
+    case 'r':
+      if (optarg == NULL) cropping = true;
+      else if (!parseBoolean(optarg, cropping)) parseError("crop");
       break;
 
 #if 0
@@ -413,7 +423,7 @@ main(int argc, char *argv[])
       engine.Render(&sheet);
       area.SetOutputFile(outFile);
 
-      area.DumpHeader(appName, argv[optind], rect);
+      area.DumpHeader(appName, argv[optind], cropping ? rect : sheet);
       fm.DumpFontDictionary(outFile, subsetting);
 
       area.DumpPreamble();
