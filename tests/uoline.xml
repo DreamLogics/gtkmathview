@@ -1,0 +1,27 @@
+<math>
+  <mover>
+    <mrow>
+      <mo>(</mo>
+      <mrow>
+        <mi>x</mi>
+        <mo>+</mo>
+        <mn>1</mn>
+      </mrow>
+      <mo>)</mo>
+    </mrow>
+    <mo>&#x0305;</mo>
+  </mover>
+  <mo>&times;</mo>
+  <munder>
+    <mrow>
+      <mo>(</mo>
+      <mrow>
+        <mi>y</mi>
+        <mo>-</mo>
+        <mn>1</mn>
+      </mrow>
+      <mo>)</mo>
+    </mrow>
+    <mo>&#x0332;</mo>
+  </munder>
+</math>
