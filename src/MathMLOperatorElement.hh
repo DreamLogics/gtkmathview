@@ -43,9 +43,11 @@ private:
   void Init(void);
 
 public:
-  static MathMLElement* create(void) { return new MathMLOperatorElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLOperatorElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLOperatorElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLOperatorElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -78,7 +80,7 @@ public:
   void         HorizontalStretchTo(scaled, bool = false);
   void         VerticalStretchTo(scaled, scaled, bool = false);
 
-  virtual MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
 
 private:
   OperatorFormId InferOperatorForm(void) const;
@@ -86,7 +88,7 @@ private:
 					 const class RenderingEnvironment*) const;
   void ParseLimitValue(const Value*, const class RenderingEnvironment*, float&, scaled&);
 
-  class MathMLEmbellishedOperatorElement* eOp; // ptr to the root of the embellished operator
+  Ptr<class MathMLEmbellishedOperatorElement> eOp; // ptr to the root of the embellished operator
 
   OperatorFormId form;
   const class MathMLAttributeList* defaults;
@@ -114,9 +116,5 @@ private:
   float  minMultiplier;   // if <0 => absolute min size constraint
   scaled minSize;
 };
-
-typedef MathMLOperatorElement* MathMLOperatorElementPtr;
-
-#define TO_OPERATOR(node) (dynamic_cast<MathMLOperatorElement*>(node))
 
 #endif // MathMLOperatorElement_hh

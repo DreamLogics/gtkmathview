@@ -40,9 +40,11 @@ protected:
   virtual ~MathMLAlignMarkElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLAlignMarkElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLAlignMarkElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLAlignMarkElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLAlignMarkElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -58,7 +60,5 @@ public:
 protected:
   MarkAlignType edge;
 };
-
-#define TO_ALIGN_MARK(obj) (dynamic_cast<MathMLAlignMarkElement*>(obj))
 
 #endif // MathMLAlignMarkElement_hh

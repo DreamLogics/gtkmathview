@@ -39,9 +39,11 @@ public:
   virtual ~MathMLStyleElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLStyleElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLStyleElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLStyleElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLStyleElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;

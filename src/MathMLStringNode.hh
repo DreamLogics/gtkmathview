@@ -33,7 +33,8 @@ protected:
   virtual ~MathMLStringNode();
 
 public:
-  static MathMLStringNode* create(const String* s) { return new MathMLStringNode(s); }
+  static Ptr<MathMLStringNode> create(const String* s)
+  { return Ptr<MathMLStringNode>(new MathMLStringNode(s)); }
 
   virtual void     Setup(class RenderingEnvironment*);
   virtual void     DoLayout(void);
@@ -51,7 +52,5 @@ private:
   const String* content;
   const FontifiedString* fContent;
 };
-
-#define TO_STRING(node) (dynamic_cast<MathMLStringNode*>(node))
 
 #endif // MathMLStringNode_hh

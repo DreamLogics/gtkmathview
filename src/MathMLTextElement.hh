@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLTextElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLTextElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLTextElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTextElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLTextElement(el)); }
 #endif
 
   virtual bool IsSpaceLike(void) const;

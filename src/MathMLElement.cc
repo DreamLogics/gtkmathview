@@ -59,8 +59,8 @@ MathMLElement::MathMLElement(const GMetaDOM::Element& n)
 {
   if (node != 0)
     {
-      MathMLElement* elem = ::getRenderingInterface(node);
-      if (elem == NULL) ::setRenderingInterface(node, this);
+      Ptr<MathMLElement> elem = ::getRenderingInterface(node);
+      if (elem == 0) ::setRenderingInterface(node, this);
     }
 
   Init();
@@ -89,9 +89,8 @@ MathMLElement::~MathMLElement()
 #if defined(HAVE_GMETADOM)
   if (node != 0)
     {
-      MathMLElement* elem = ::getRenderingInterface(node);
-      if (elem == this) ::setRenderingInterface(node, NULL);
-      elem->Release();
+      Ptr<MathMLElement> elem = ::getRenderingInterface(node);
+      if (elem == this) ::setRenderingInterface(node, 0);
     }
 #endif
 
@@ -106,19 +105,13 @@ MathMLElement::~MathMLElement()
 }
 
 #if defined(HAVE_GMETADOM)
-MathMLElement*
+Ptr<MathMLElement>
 MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
 {
   assert(el != 0);
 
-  MathMLElement* elem = 0;
-
-  elem = ::getRenderingInterface(el);
-  if (elem != 0)
-    {
-      elem->AddRef();
-      return elem;
-    }
+  Ptr<MathMLElement> elem = ::getRenderingInterface(el);
+  if (elem != 0) return elem;
 
   char* s_tag = NULL;
   if (el.get_namespaceURI() == 0)
@@ -138,7 +131,7 @@ MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
   static struct
   {
     TagId tag;
-    MathMLElement* (*create)(const GMetaDOM::Element&);
+    Ptr<MathMLElement> (*create)(const GMetaDOM::Element&);
   } tab[] = {
     { TAG_MATH,          &MathMLmathElement::create },
     { TAG_MI,            &MathMLTokenElement::create },
@@ -180,10 +173,7 @@ MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
   for (i = 0; tab[i].tag != TAG_NOTVALID && tab[i].tag != tag; i++) ;
   assert(tab[i].create != 0);
 
-  elem = tab[i].create(el);
-  assert(elem != 0);
-
-  return elem;
+  return tab[i].create(el);
 }
 #endif // HAVE_GMETADOM
 
@@ -584,22 +574,23 @@ MathMLElement::GetLinearBoundingBox(BoundingBox& b) const
   b = box;
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLElement::Inside(scaled x, scaled y)
 {
-  return IsInside(x, y) ? this : NULL;
+  return IsInside(x, y) ? this : 0;
 }
 
 unsigned
 MathMLElement::GetDepth() const
 {
   unsigned depth = 0;
-  const MathMLElement* p = this;
+  Ptr<const MathMLElement> p = this;
   
-  while (p != NULL) {
-    depth++;
-    p = p->GetParent();
-  }
+  while (p != 0)
+    {
+      depth++;
+      p = p->GetParent();
+    }
 
   return depth;
 }
@@ -659,7 +650,7 @@ MathMLElement::HasLink() const
 #endif // HAVE_GMETADOM
 }
 
-MathMLOperatorElement*
+Ptr<MathMLOperatorElement>
 MathMLElement::GetCoreOperator()
 {
   // it's not clear whether this should be an abstract method, since
@@ -686,13 +677,11 @@ MathMLElement::SetDirtyStructure()
 {
   dirtyStructure = 1;
   
-  MathMLElement* parent = GetParent();
-  while (parent != NULL)
+  Ptr<MathMLElement> parent = GetParent();
+  while (parent != 0)
     {
       parent->childWithDirtyStructure = 1;
-      MathMLElement* grandParent = parent->GetParent();
-      parent->Release();
-      parent = grandParent;
+      parent = parent->GetParent();
     }
 }
 
@@ -701,12 +690,10 @@ MathMLElement::SetDirtyAttribute()
 {
   dirtyAttribute = 1;
 
-  MathMLElement* parent = GetParent();
-  while (parent != NULL)
+  Ptr<MathMLElement> parent = GetParent();
+  while (parent != 0)
     {
       parent->childWithDirtyAttribute = 1;
-      MathMLElement* grandParent = parent->GetParent();
-      parent->Release();
-      parent = grandParent;
+      parent = parent->GetParent();
     }
 }

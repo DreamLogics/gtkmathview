@@ -30,10 +30,10 @@
 #include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLEmbellishedOperatorElement::
-MathMLEmbellishedOperatorElement(MathMLOperatorElement* op) // the core operator
+MathMLEmbellishedOperatorElement(const Ptr<MathMLOperatorElement>& op)
+  : coreOp(op)
 {
-  assert(op != NULL);
-  coreOp = op;
+  assert(coreOp != 0);
   script = false;
 }
 
@@ -46,15 +46,14 @@ MathMLEmbellishedOperatorElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      assert(child != NULL);
+      assert(child != 0);
 
-      MathMLElement* p = GetParent();
-      assert(p != NULL);
+      Ptr<MathMLElement> p = GetParent();
+      assert(p != 0);
 
-      MathMLContainerElement* pContainer = TO_CONTAINER(p);
-      assert(pContainer != NULL);
+      Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
+      assert(pContainer != 0);
       pContainer->Replace(this, child);
-      p->Release();
 
       child->Normalize();
 
@@ -84,7 +83,7 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
   box = child->GetBoundingBox();
 
   // WARNING: maybe in this case we should ask for the LAST char node...
-  const MathMLCharNode* node = coreOp->GetCharNode();
+  Ptr<const MathMLCharNode> node = coreOp->GetCharNode();
   if (node != NULL && isIntegral(node->GetChar())) {
     // WARNING
     // the following patch is needed in order to have integral sign working
@@ -140,18 +139,9 @@ MathMLEmbellishedOperatorElement::IsEmbellishedOperator() const
   return true;
 }
 
-const MathMLCharNode*
+Ptr<MathMLCharNode>
 MathMLEmbellishedOperatorElement::GetCharNode() const
 {
-  if (coreOp == NULL || child != coreOp)
-    return NULL;
-
+  if (coreOp == 0 || child != Ptr<MathMLElement>(coreOp)) return 0;
   return coreOp->GetCharNode();
-}
-
-MathMLOperatorElement*
-MathMLEmbellishedOperatorElement::GetCoreOperator()
-{
-  if (coreOp != 0) coreOp->AddRef();
-  return coreOp;
 }

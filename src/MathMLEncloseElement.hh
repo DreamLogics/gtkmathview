@@ -46,9 +46,11 @@ protected:
   virtual ~MathMLEncloseElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLEncloseElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLEncloseElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLEncloseElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLEncloseElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;

@@ -27,6 +27,7 @@
 #include "gmetadom.hh"
 #endif
 
+#include "MathMLTableCellElement.hh"
 #include "MathMLTableRowElement.hh"
 #include "MathMLLinearContainerElement.hh"
 #include "MathMLAlignGroupElement.hh"
@@ -56,7 +57,7 @@ struct AlignmentGroup {
 
 struct TableCell {
   // phase 1: MathMLTableElement::SetupTable
-  MathMLTableCellElement* mtd;  // ptr to <mtd> element
+  Ptr<MathMLTableCellElement> mtd;  // ptr to <mtd> element
   bool     spanned;             // true if mtd is a pointer to the spanning cell
   unsigned rowSpan;             // spanning rows
   unsigned colSpan;             // spanning columns
@@ -70,11 +71,11 @@ struct TableCell {
 
   // following fields are only temporarily used while arranging groups
   unsigned iGroup;                // group index
-  MathMLAlignGroupElement* group; // last group found
+  Ptr<MathMLAlignGroupElement> group; // last group found
 
   // some facilities
-  bool ColumnSpanning(void) { return mtd != NULL && !spanned && colSpan > 1; }
-  bool RowSpanning(void) { return mtd != NULL && !spanned && rowSpan > 1; }
+  bool ColumnSpanning(void) { return mtd != 0 && !spanned && colSpan > 1; }
+  bool RowSpanning(void) { return mtd != 0 && !spanned && rowSpan > 1; }
 };
 
 typedef TableCell* TableCellPtr;
@@ -105,7 +106,7 @@ struct TableColumn {
 };
 
 struct TableRow {
-  MathMLTableRowElement* mtr;   // Table Row element
+  Ptr<MathMLTableRowElement> mtr;   // Table Row element
 
   SpacingId   spacingType;      // type of spacing (absolute or %)
   union {
@@ -122,7 +123,7 @@ struct TableRow {
 };
 
 struct RowLabel {
-  MathMLElement* labelElement;
+  Ptr<MathMLElement> labelElement;
   RowAlignId     rowAlign;
   ColumnAlignId  columnAlign;
 };
@@ -140,9 +141,11 @@ private:
   void Init(void);
 
 public:
-  static MathMLElement* create(void) { return new MathMLTableElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLTableElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTableElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLTableElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -153,7 +156,7 @@ public:
   virtual void Render(const class DrawingArea&);
   virtual void ReleaseGCs(void);
 
-  virtual MathMLElement* Inside(scaled x, scaled y);
+  virtual Ptr<MathMLElement> Inside(scaled x, scaled y);
 
   void 	       SetupColumnAlignAux(const Value*, unsigned, unsigned, bool = false);
   void 	       SetupRowAlignAux(const Value*, unsigned, bool = false);
@@ -298,7 +301,5 @@ private:
   float         wScale;
   float         hScale;
 };
-
-#define TO_TABLE(object) (dynamic_cast<MathMLTableElement*>(object))
 
 #endif // MathMLTableElement_hh

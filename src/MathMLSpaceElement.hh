@@ -40,9 +40,11 @@ protected:
   virtual ~MathMLSpaceElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLSpaceElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLSpaceElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLSpaceElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLSpaceElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -68,9 +70,5 @@ private:
   bool    autoLineBreak; // valid if lineBreaking == true
   BreakId breakability; // valid if auto == false
 };
-
-typedef MathMLSpaceElement* MathMLSpaceElementPtr;
-
-#define TO_SPACE(node) (dynamic_cast<MathMLSpaceElement*>(node))
 
 #endif // MathMLSpaceElement_hh

@@ -40,9 +40,11 @@ protected:
   virtual ~MathMLMultiScriptsElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLMultiScriptsElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLMultiScriptsElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLMultiScriptsElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLMultiScriptsElement(el)); }
 #endif
 
   virtual void Normalize(void);
@@ -50,7 +52,7 @@ public:
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
 
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 private:
   unsigned nPre;

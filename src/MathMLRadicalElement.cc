@@ -38,24 +38,17 @@
 
 MathMLRadicalElement::MathMLRadicalElement()
 {
-  radical = NULL;
 }
 
 #if defined(HAVE_GMETADOM)
 MathMLRadicalElement::MathMLRadicalElement(const GMetaDOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
-  radical = NULL;
 }
 #endif
 
 MathMLRadicalElement::~MathMLRadicalElement()
 {
-  if (radical != NULL)
-    {
-      radical->Release();
-      radical = NULL;
-    }
 }
 
 void
@@ -63,26 +56,25 @@ MathMLRadicalElement::Normalize()
 {
   if (IsA() == TAG_MSQRT)
     MathMLLinearContainerElement::Normalize();
-  else {
-    assert(IsA() == TAG_MROOT);
+  else
+    {
+      assert(IsA() == TAG_MROOT);
 
-    while (content.GetSize() < 2) {
-      MathMLElement* mdummy = MathMLDummyElement::create();
-      assert(mdummy != 0);
-      Append(mdummy);
-    }
+      while (content.GetSize() < 2)
+	{
+	  Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+	  assert(mdummy != 0);
+	  Append(mdummy);
+	}
     
-    while (content.GetSize() > 2) {
-      MathMLElement* elem = content.RemoveLast();
-      elem->Release();
+      while (content.GetSize() > 2)
+	content.RemoveLast();
+
+      MathMLLinearContainerElement::Normalize();
     }
 
-    MathMLLinearContainerElement::Normalize();
-  }
-
-  if (radical != NULL) radical->Release();
   radical = MathMLCharNode::create(U_SQRT);
-  assert(radical != NULL);
+  assert(radical != 0);
   radical->SetParent(this);
 }
 
@@ -96,24 +88,24 @@ MathMLRadicalElement::Setup(RenderingEnvironment* env)
   background    = env->GetBackgroundColor();
   lineThickness = env->GetRuleThickness();
 
-  MathMLElement* base = content.GetFirst();
-  assert(base != NULL);
+  Ptr<MathMLElement> base = content.GetFirst();
+  assert(base != 0);
   base->Setup(env);
 
-  assert(radical != NULL);
+  assert(radical != 0);
   radical->Setup(env);
 
-  if (IsA() == TAG_MROOT) {
-    MathMLElement* script = content.GetLast();
-    assert(script != NULL);
+  if (IsA() == TAG_MROOT)
+    {
+      Ptr<MathMLElement> script = content.GetLast();
+      assert(script != 0);
     
-    env->Push();
-    env->SetDisplayStyle(false);
-    env->AddScriptLevel(2);
-    script->Setup(env);
-    env->Drop();
-  }
-
+      env->Push();
+      env->SetDisplayStyle(false);
+      env->AddScriptLevel(2);
+      script->Setup(env);
+      env->Drop();
+    }
 }
 
 void
@@ -121,13 +113,13 @@ MathMLRadicalElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
 {
   if (!HasDirtyLayout(id, availWidth)) return;
 
-  MathMLElement* base = content.GetFirst();
-  assert(base != NULL);
+  Ptr<MathMLElement> base = content.GetFirst();
+  assert(base != 0);
 
   base->DoBoxedLayout(id, BREAK_NO, availWidth / content.GetSize());
   box = base->GetBoundingBox();
 
-  assert(radical != NULL);
+  assert(radical != 0);
   radical->DoLayout();
   radical->DoVerticalStretchyLayout(box.ascent + lineThickness, box.descent, 0, false);
   const BoundingBox& radBox = radical->GetBoundingBox();
@@ -139,20 +131,22 @@ MathMLRadicalElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
   box.descent = scaledMax(box.descent, radBox.descent);
   box.tDescent = scaledMax(box.tDescent, box.descent);
 
-  if (IsA() == TAG_MROOT) {
-    MathMLElement* script = content.GetLast();
-    assert(script != NULL);
+  if (IsA() == TAG_MROOT)
+    {
+      Ptr<MathMLElement> script = content.GetLast();
+      assert(script != 0);
 
-    script->DoBoxedLayout(id, BREAK_NO, availWidth / 2);
-    const BoundingBox& scriptBox = script->GetBoundingBox();
+      script->DoBoxedLayout(id, BREAK_NO, availWidth / 2);
+      const BoundingBox& scriptBox = script->GetBoundingBox();
 
-    box.width += scriptBox.width;
+      box.width += scriptBox.width;
 
-    if (box.GetHeight() / 2 < scriptBox.GetHeight()) {
-      box.ascent += scriptBox.GetHeight() - box.GetHeight() / 2;
-      box.tAscent += scriptBox.descent + scriptBox.tAscent - box.GetHeight() / 2;
+      if (box.GetHeight() / 2 < scriptBox.GetHeight())
+	{
+	  box.ascent += scriptBox.GetHeight() - box.GetHeight() / 2;
+	  box.tAscent += scriptBox.descent + scriptBox.tAscent - box.GetHeight() / 2;
+	}
     }
-  }
 
   ConfirmLayout(id);
 
@@ -165,26 +159,29 @@ MathMLRadicalElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  MathMLElement* base = content.GetFirst();
-  assert(base != NULL);
+  Ptr<MathMLElement> base = content.GetFirst();
+  assert(base != 0);
 
-  assert(radical != NULL);
+  assert(radical != 0);
   const BoundingBox& radBox = radical->GetBoundingBox();
 
-  if (IsA() == TAG_MROOT) {
-    MathMLElement* script = content.GetLast();
-    assert(script != NULL);
+  if (IsA() == TAG_MROOT)
+    {
+      Ptr<MathMLElement> script = content.GetLast();
+      assert(script != 0);
 
-    const BoundingBox& baseBox   = base->GetBoundingBox();
-    const BoundingBox& scriptBox = script->GetBoundingBox();
+      const BoundingBox& baseBox   = base->GetBoundingBox();
+      const BoundingBox& scriptBox = script->GetBoundingBox();
 
-    script->SetPosition(x, y + (baseBox.GetHeight() / 2 - baseBox.ascent) - scriptBox.descent);
-    radical->SetPosition(x + scriptBox.width, y);
-    base->SetPosition(x + scriptBox.width + radBox.width, y);
-  } else {
-    radical->SetPosition(x, y - box.ascent + radBox.ascent);
-    base->SetPosition(x + radBox.width, y);
-  }
+      script->SetPosition(x, y + (baseBox.GetHeight() / 2 - baseBox.ascent) - scriptBox.descent);
+      radical->SetPosition(x + scriptBox.width, y);
+      base->SetPosition(x + scriptBox.width + radBox.width, y);
+    } 
+  else
+    {
+      radical->SetPosition(x, y - box.ascent + radBox.ascent);
+      base->SetPosition(x + radBox.width, y);
+    }
 }
 
 void
@@ -202,12 +199,12 @@ MathMLRadicalElement::Render(const DrawingArea& area)
     fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND | GC_MASK_LINE_WIDTH);
   }
 
-  assert(radical != NULL);
+  assert(radical != 0);
   radical->SetDirty();
   radical->Render(area);
 
-  MathMLElement* base = content.GetFirst();
-  assert(base != NULL);
+  Ptr<MathMLElement> base = content.GetFirst();
+  assert(base != 0);
 
   const BoundingBox& radBox = radical->GetBoundingBox();
 
@@ -220,14 +217,14 @@ MathMLRadicalElement::Render(const DrawingArea& area)
 bool
 MathMLRadicalElement::IsExpanding() const
 {
-  MathMLElement* base = content.GetFirst();
-  assert(base != NULL);
+  Ptr<MathMLElement> base = content.GetFirst();
+  assert(base != 0);
   return base->IsExpanding();
 }
 
 scaled
 MathMLRadicalElement::GetLeftEdge() const
 {
-  assert(radical != NULL);
+  assert(radical != 0);
   return scaledMin(MathMLLinearContainerElement::GetLeftEdge(), radical->GetLeftEdge());
 }

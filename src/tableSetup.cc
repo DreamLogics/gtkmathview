@@ -72,15 +72,16 @@ MathMLTableElement::Setup(RenderingEnvironment* env)
 void
 MathMLTableElement::SetupCellSpanning(RenderingEnvironment* env)
 {
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next()) {
-    assert(i() != NULL);
-    assert(i()->IsA() == TAG_MTR || i()->IsA() == TAG_MLABELEDTR);
+  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+    {
+      assert(i() != 0);
+      assert(i()->IsA() == TAG_MTR || i()->IsA() == TAG_MLABELEDTR);
 
-    MathMLTableRowElement* mtr = TO_TABLEROW(i());
-    assert(mtr != NULL);
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(i());
+      assert(mtr != 0);
 
-    mtr->SetupCellSpanning(env);
-  }
+      mtr->SetupCellSpanning(env);
+    }
 }
 
 // CalcTableSize: requires normalization and spanning attributes
@@ -142,39 +143,43 @@ MathMLTableElement::CalcTableSize()
   TempRow* r = new TempRow[nRows];
 
   i = 0;
-  for (Iterator<MathMLElement*> p(content); p.More(); p.Next()) {
-    assert(p() != NULL);
-    assert(p()->IsA() == TAG_MTR || p()->IsA() == TAG_MLABELEDTR);
+  for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
+    {
+      assert(p() != 0);
+      assert(p()->IsA() == TAG_MTR || p()->IsA() == TAG_MLABELEDTR);
 
-    MathMLTableRowElement* mtr = TO_TABLEROW(p());
-    assert(mtr != NULL);
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(p());
+      assert(mtr != 0);
 
-    Iterator<MathMLElement*> q(mtr->content);
-    if (mtr->IsA() == TAG_MLABELEDTR) {
-      assert(q.More());
-      q.Next();
+      Iterator< Ptr<MathMLElement> > q(mtr->content);
+      if (mtr->IsA() == TAG_MLABELEDTR)
+	{
+	  assert(q.More());
+	  q.Next();
+	}
+
+      while (q.More())
+	{
+	  assert(q() != 0);
+	  assert(q()->IsA() == TAG_MTD);
+
+	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(q());
+	  assert(mtd != 0);
+
+	  unsigned j = r[i].AddCell(mtd->GetColumnSpan());
+
+	  for (unsigned k = 1; k < mtd->GetRowSpan(); k++)
+	    {
+	      r[i + k].AddSpanningCell(j, mtd->GetColumnSpan());
+	    }
+
+	  mtd->SetupCellPosition(i, j, nRows);
+
+	  q.Next();
+	}
+
+      i++;
     }
-
-    while (q.More()) {
-      assert(q() != NULL);
-      assert(q()->IsA() == TAG_MTD);
-
-      MathMLTableCellElement* mtd = TO_TABLECELL(q());
-      assert(mtd != NULL);
-
-      unsigned j = r[i].AddCell(mtd->GetColumnSpan());
-
-      for (unsigned k = 1; k < mtd->GetRowSpan(); k++) {
-	r[i + k].AddSpanningCell(j, mtd->GetColumnSpan());
-      }
-
-      mtd->SetupCellPosition(i, j, nRows);
-
-      q.Next();
-    }
-
-    i++;
-  }
 
   for (i = 0; i < nRows; i++) if (r[i].GetColumns() > nColumns) nColumns = r[i].GetColumns();
 
@@ -201,45 +206,49 @@ MathMLTableElement::SetupCells()
     }
   }
 
-  for (Iterator<MathMLElement*> p(content); p.More(); p.Next()) {
-    assert(p() != NULL);
-    assert(p()->IsA() == TAG_MTR || p()->IsA() == TAG_MLABELEDTR);
+  for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
+    {
+      assert(p() != 0);
+      assert(p()->IsA() == TAG_MTR || p()->IsA() == TAG_MLABELEDTR);
 
-    MathMLTableRowElement* mtr = TO_TABLEROW(p());
-    assert(mtr != NULL);
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(p());
+      assert(mtr != 0);
 
-    Iterator<MathMLElement*> q(mtr->content);
-    if (mtr->IsA() == TAG_MLABELEDTR) {
-      assert(q.More());
-      q.Next();
-    }
-
-    while (q.More()) {
-      assert(q() != NULL);
-      assert(q()->IsA() == TAG_MTD);
-
-      MathMLTableCellElement* mtd = TO_TABLECELL(q());
-      assert(mtd != NULL);
-
-      unsigned i0 = mtd->GetRowIndex();
-      unsigned j0 = mtd->GetColumnIndex();
-      unsigned n = mtd->GetRowSpan();
-      unsigned m = mtd->GetColumnSpan();
-
-      mtd->SetupCell(&cell[i0][j0]);
-
-      for (unsigned i = 0; i < n; i++)
-	for (unsigned j = 0; j < m; j++) {
-	  assert(cell[i0 + i][j0 + j].mtd == NULL);
-	  cell[i0 + i][j0 + j].mtd = mtd;
-	  cell[i0 + i][j0 + j].rowSpan = n - i;
-	  cell[i0 + i][j0 + j].colSpan = m - j;
-	  cell[i0 + i][j0 + j].spanned = (i > 0) || (j > 0);
+      Iterator< Ptr<MathMLElement> > q(mtr->content);
+      if (mtr->IsA() == TAG_MLABELEDTR)
+	{
+	  assert(q.More());
+	  q.Next();
 	}
 
-      q.Next();
+      while (q.More())
+	{
+	  assert(q() != 0);
+	  assert(q()->IsA() == TAG_MTD);
+
+	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(q());
+	  assert(mtd != 0);
+
+	  unsigned i0 = mtd->GetRowIndex();
+	  unsigned j0 = mtd->GetColumnIndex();
+	  unsigned n = mtd->GetRowSpan();
+	  unsigned m = mtd->GetColumnSpan();
+
+	  mtd->SetupCell(&cell[i0][j0]);
+
+	  for (unsigned i = 0; i < n; i++)
+	    for (unsigned j = 0; j < m; j++) 
+	      {
+		assert(cell[i0 + i][j0 + j].mtd == 0);
+		cell[i0 + i][j0 + j].mtd = mtd;
+		cell[i0 + i][j0 + j].rowSpan = n - i;
+		cell[i0 + i][j0 + j].colSpan = m - j;
+		cell[i0 + i][j0 + j].spanned = (i > 0) || (j > 0);
+	      }
+
+	  q.Next();
+	}
     }
-  }
 }
 
 void
@@ -384,18 +393,19 @@ MathMLTableElement::SetupRows(RenderingEnvironment* env)
   }
 
   i = 0;
-  for (Iterator<MathMLElement*> rowElem(content); rowElem.More(); rowElem.Next()) {
-    assert(i < nRows);
-    assert(rowElem()->IsA() == TAG_MTR || rowElem()->IsA() == TAG_MLABELEDTR);
+  for (Iterator< Ptr<MathMLElement> > rowElem(content); rowElem.More(); rowElem.Next())
+    {
+      assert(i < nRows);
+      assert(rowElem()->IsA() == TAG_MTR || rowElem()->IsA() == TAG_MLABELEDTR);
 
-    MathMLTableRowElement* mtr = TO_TABLEROW(rowElem());
-    assert(mtr != NULL);
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(rowElem());
+      assert(mtr != 0);
 
-    row[i].mtr = mtr;
-    mtr->SetupRowIndex(i);
+      row[i].mtr = mtr;
+      mtr->SetupRowIndex(i);
 
-    i++;
-  }
+      i++;
+    }
 
   const Value* value = GetAttributeValue(ATTR_ROWSPACING, env);
   assert(value != NULL);

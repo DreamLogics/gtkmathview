@@ -78,16 +78,17 @@ MathMLGlyphNode::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  if (font != NULL) {
-    assert(GetParent() != NULL);
-    assert(GetParent()->IsToken());
-    MathMLTokenElement* token = TO_TOKEN(GetParent());
-    assert(token != NULL);
+  if (font != NULL)
+    {
+      assert(GetParent() != 0);
+      assert(GetParent()->IsToken());
+      Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(GetParent());
+      assert(token != 0);
 
-    const GraphicsContext* gc = token->GetForegroundGC();
+      const GraphicsContext* gc = token->GetForegroundGC();
 
-    area.DrawChar(gc, font, GetX(), GetY(), nch);
-  }
+      area.DrawChar(gc, font, GetX(), GetY(), nch);
+    }
 
   ResetDirty();
 }

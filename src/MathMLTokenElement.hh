@@ -43,9 +43,11 @@ protected:
   virtual ~MathMLTokenElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLTokenElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLTokenElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTokenElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLTokenElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -56,7 +58,7 @@ public:
   virtual void 	 Render(const class DrawingArea&);
 
   void           Append(const String*);
-  void           Append(class MathMLTextNode*);
+  void           Append(const Ptr<class MathMLTextNode>&);
 
   virtual bool   IsLast(void) const;
   virtual bool 	 IsToken(void) const;
@@ -72,29 +74,23 @@ public:
 
   RGBValue       GetColor(void) const { return color; }
 
-  virtual const class MathMLCharNode* GetCharNode(void) const;
-  const Container<class MathMLTextNode*>& GetContent(void) const { return content; }
+  virtual Ptr<class MathMLCharNode> GetCharNode(void) const;
+  const Container< Ptr<class MathMLTextNode> >& GetContent(void) const { return content; }
   String*        GetRawContent(void) const;
   unsigned       GetLogicalContentLength(void) const;
 
 protected:
-  static class MathMLTextNode* SubstituteMGlyphElement(const GMetaDOM::Element&);
-  static class MathMLTextNode* SubstituteAlignMarkElement(const GMetaDOM::Element&);
+  static Ptr<class MathMLTextNode> SubstituteMGlyphElement(const GMetaDOM::Element&);
+  static Ptr<class MathMLTextNode> SubstituteAlignMarkElement(const GMetaDOM::Element&);
   
-  void Free(void);
   void AddItalicCorrection(Layout&);
 
   // for tokens the content is protected so that users have to
   // use the Append methods. For read-only operations there is
   // the access method GetContent
-  Container<class MathMLTextNode*> content;
+  Container< Ptr<class MathMLTextNode> > content;
   scaled   sppm;
   RGBValue color;
 };
-
-typedef MathMLTokenElement* MathMLTokenElementPtr;
-
-#define TO_TOKEN(object) (dynamic_cast<MathMLTokenElement*>(object))
-#define TO_CONST_TOKEN(object) (dynamic_cast<const MathMLTokenElement*>(object))
 
 #endif // MathMLTokenElement_hh

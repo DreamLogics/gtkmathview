@@ -46,10 +46,6 @@ private:
   void Init(void);
 
 public:
-#if defined(HAVE_GMETADOM)
-  static MathMLElement* getRenderingInterface(const GMetaDOM::Element&);
-#endif
-
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void) = 0;
   virtual void Setup(class RenderingEnvironment*); // setup attributes
@@ -66,7 +62,7 @@ public:
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
   virtual void SetDirty(const Rectangle* = NULL);
-  virtual MathMLElement* Inside(scaled, scaled);
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
   virtual bool IsElement(void) const;
 
   const class GraphicsContext* GetForegroundGC(void) const { return fGC[IsSelected()]; }
@@ -97,6 +93,7 @@ public:
   TagId        	 IsA(void) const;
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Element& GetDOMElement(void) const { return node; }
+  static Ptr<MathMLElement> getRenderingInterface(const GMetaDOM::Element&);
 #endif
 
   virtual bool 	 IsSpaceLike(void) const;
@@ -111,7 +108,7 @@ public:
   const Shape&   GetShape(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
   bool HasDirtyLayout(void) const { return MathMLFrame::HasDirtyLayout(); }
   void ResetDirtyLayout(void) { MathMLFrame::ResetDirtyLayout(); }
@@ -166,10 +163,6 @@ private:
   static int counter;
 #endif // DEBUG
 };
-
-typedef MathMLElement* MathMLElementPtr;
-
-#define TO_ELEMENT(object) (dynamic_cast<MathMLElement*>(object))
 
 inline void
 MathMLElement::ConfirmLayout(LayoutId id)

@@ -66,14 +66,14 @@ MathMLStringNode::DoLayout()
 void
 MathMLStringNode::Render(const DrawingArea& area)
 {
-  assert(GetParent() != NULL);
+  assert(GetParent() != 0);
   assert(GetParent()->IsToken());
   assert(fContent != NULL);
 
   if (!HasDirtyChildren()) return;
 
-  MathMLTokenElement* token = TO_TOKEN(GetParent());
-  assert(token != NULL);
+  Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(GetParent());
+  assert(token != 0);
 
   const GraphicsContext* gc = token->GetForegroundGC();
 
@@ -97,11 +97,11 @@ scaled
 MathMLStringNode::GetDecimalPointEdge() const
 {
   assert(content != NULL);
-  assert(GetParent() != NULL);
+  assert(GetParent() != 0);
   assert(GetParent()->IsToken());
 
-  const MathMLTokenElement* parent = TO_CONST_TOKEN(GetParent());
-  assert(parent != NULL);
+  Ptr<MathMLTokenElement> parent = smart_cast<MathMLTokenElement>(GetParent());
+  assert(parent != 0);
 
   // let's find the position of the decimal point
   unsigned i;

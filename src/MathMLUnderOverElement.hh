@@ -40,9 +40,11 @@ protected:
   virtual ~MathMLUnderOverElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLUnderOverElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLUnderOverElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLUnderOverElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLUnderOverElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -53,7 +55,7 @@ public:
 
   virtual bool IsExpanding(void) const;
 
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 protected:
   bool   scriptize;
@@ -71,8 +73,8 @@ protected:
   scaled overShiftX;
   scaled overShiftY;
 
-  MathMLElement* underScript;
-  MathMLElement* overScript;
+  Ptr<MathMLElement> underScript;
+  Ptr<MathMLElement> overScript;
 };
 
 #endif // MathMLUnderOverElement_hh

@@ -47,7 +47,7 @@ public:
   virtual void Freeze(void);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
-  virtual MathMLElement* Inside(scaled, scaled);
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
   virtual void SetDirtyLayout(bool = false);
   virtual void SetDirty(const Rectangle* = NULL);
@@ -65,24 +65,22 @@ public:
   // the content can be accessed directly, but only in a read-only
   // way, because other operation involves SetParent and other
   // memory-management issues
-  const Container<MathMLElement*>& GetContent(void) const { return content; }
+  const Container< Ptr<MathMLElement> >& GetContent(void) const { return content; }
 
   unsigned GetSize(void) const { return content.GetSize(); }
   void     SetSize(unsigned);
-  MathMLElement* GetChild(unsigned) const;
-  void     SetChild(unsigned, MathMLElement*);
+  Ptr<MathMLElement> GetChild(unsigned) const;
+  void     SetChild(unsigned, const Ptr<MathMLElement>&);
 
-  virtual void Append(MathMLElement*);
-  virtual void Remove(MathMLElement*);
-  virtual void Replace(MathMLElement*, MathMLElement*);
-  void         Prepend(MathMLElement*);
+  virtual void Append(const Ptr<MathMLElement>&);
+  virtual void Remove(const Ptr<MathMLElement>&);
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
+  void         Prepend(const Ptr<MathMLElement>&);
   void         RemoveFirst(void);
   void         RemoveLast(void);
 
 protected:
-  Container<MathMLElement*> content;
+  Container< Ptr<MathMLElement> > content;
 };
-
-#define TO_LINEAR_CONTAINER(object) (dynamic_cast<MathMLLinearContainerElement*>(object))
 
 #endif // MathMLLinearContainerElement_hh

@@ -310,7 +310,7 @@ MathMLStyleElement::Render(const DrawingArea& area)
 
   RenderBackground(area);
 
-  assert(child != NULL);
+  assert(child != 0);
   child->Render(area);
 
   ResetDirty();
@@ -319,7 +319,7 @@ MathMLStyleElement::Render(const DrawingArea& area)
 bool
 MathMLStyleElement::IsSpaceLike() const
 {
-  assert(child != NULL);
+  assert(child != 0);
   return child->IsSpaceLike();
 }
 

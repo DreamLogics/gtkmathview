@@ -38,9 +38,6 @@ MathMLCombinedCharNode::MathMLCombinedCharNode(Char c, Char cc) :
 
 MathMLCombinedCharNode::~MathMLCombinedCharNode()
 {
-  assert(cChar !=  NULL);
-  cChar->Release();
-  cChar = NULL;
 }
 
 void
@@ -54,13 +51,13 @@ MathMLCombinedCharNode::Setup(RenderingEnvironment* env)
   env->SetFontMode(FONT_MODE_ANY);
   env->SetFontStyle(FONT_STYLE_NORMAL);
 
-  assert(cChar != NULL);
   // this is really ugly, but in some sense is also true...
   cChar->SetParent(GetParent());
   cChar->Setup(env);
 
   if (cChar->GetFont() != fChar.font)
-    Globals::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts", ch, cChar->GetChar());
+    Globals::logger(LOG_WARNING, "base char `U+%04x' and combining char `U+%04x' use different fonts",
+		    ch, cChar->GetChar());
 
   env->Drop();
 }

@@ -33,7 +33,8 @@ protected:
   virtual ~MathMLMarkNode();
 
 public:
-  static MathMLMarkNode* create(MarkAlignType t) { return new MathMLMarkNode(t); }
+  static Ptr<MathMLMarkNode> create(MarkAlignType t)
+  { return Ptr<MathMLMarkNode>(new MathMLMarkNode(t)); }
   
   virtual void     Setup(class RenderingEnvironment*);
   virtual void     DoLayout(void);
@@ -49,7 +50,5 @@ public:
 protected:
   MarkAlignType edge;
 };
-
-#define TO_MARK(object) (dynamic_cast<MathMLMarkNode*>(object))
 
 #endif // MathMLMarkNode_hh

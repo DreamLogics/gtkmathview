@@ -63,17 +63,18 @@ DocumentElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
 
   box.Null();
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
 
-    elem()->DoBoxedLayout(id, bid, maxWidth);
-    const BoundingBox& elemBox = elem()->GetBoundingBox();
-    if (box.IsNull()) box = elemBox;
-    else {
-      box.width = scaledMax(box.width, elemBox.width);
-      box.descent += elemBox.GetHeight() + 2 * sppm;
+      elem()->DoBoxedLayout(id, bid, maxWidth);
+      const BoundingBox& elemBox = elem()->GetBoundingBox();
+      if (box.IsNull()) box = elemBox;
+      else {
+	box.width = scaledMax(box.width, elemBox.width);
+	box.descent += elemBox.GetHeight() + 2 * sppm;
+      }
     }
-  }
 
   ConfirmLayout(id);
 
@@ -88,13 +89,14 @@ DocumentElement::SetPosition(scaled x, scaled y)
 
   scaled offset = y;
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
 
-    const BoundingBox& elemBox = elem()->GetBoundingBox();
+      const BoundingBox& elemBox = elem()->GetBoundingBox();
 
-    if (!elem.IsFirst()) offset += elemBox.ascent;
-    elem()->SetPosition(x, offset);
-    offset += elemBox.descent + 2 * sppm;
-  }
+      if (!elem.IsFirst()) offset += elemBox.ascent;
+      elem()->SetPosition(x, offset);
+      offset += elemBox.descent + 2 * sppm;
+    }
 }

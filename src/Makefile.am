@@ -153,6 +153,7 @@ pkginclude_HEADERS = \
   gtkmathview.h
 
 noinst_HEADERS = \
+  Ptr.hh \
   AFont.hh \
   Array.hh \
   Array.icc \

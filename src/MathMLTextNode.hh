@@ -61,6 +61,4 @@ protected:
   int breakability : 3; // breakability after the node
 };
 
-#define TO_TEXT(object) (dynamic_cast<MathMLTextNode*>(object))
-
 #endif // MathMLTextNode_hh

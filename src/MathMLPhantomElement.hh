@@ -39,9 +39,11 @@ public:
   virtual ~MathMLPhantomElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLPhantomElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLPhantomElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLPhantomElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLPhantomElement(el)); }
 #endif
 
   virtual void Render(const DrawingArea&);

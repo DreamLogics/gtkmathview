@@ -42,22 +42,27 @@
 #endif
 
 MathMLRenderingEngine::MathMLRenderingEngine()
+  : document(0), root(0), selected(0)
 {
   area = NULL;
   fontManager = NULL;
   charMapper = NULL;
 
+  selectionMode = STRUCTURED;
   defaultFontSize = Globals::configuration.GetFontSize();
-
-  document = NULL;
-  root = NULL;
-  selected = NULL;
 }
 
 MathMLRenderingEngine::~MathMLRenderingEngine()
 {
   Unload();
+  assert(document == 0);
+  assert(root == 0);
+
   delete charMapper;
+  charMapper = NULL;
+
+  // WARNING: do we have to delete the font manager?
+  fontManager = NULL;
 }
 
 void
@@ -123,8 +128,8 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 
   Unload();
 
-  MathMLDocument* document = MathMLDocument::create(doc);
-  assert(document != NULL);
+  Ptr<MathMLDocument> document = MathMLDocument::create(doc);
+  assert(document != 0);
 
   Clock perf;
   perf.Start();
@@ -133,7 +138,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
   Globals::logger(LOG_INFO, "normalization time: %dms", perf());
     
   root = document->GetRoot();
-  assert(root != NULL);
+  assert(root != 0);
 
   Setup();
 
@@ -143,16 +148,15 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 void
 MathMLRenderingEngine::Unload()
 {
-  if (document != NULL) document->Release();
-  document = NULL;
-  root = NULL;
-  selected = NULL;
+  document = 0;
+  root = 0;
+  selected = 0;
 }
 
 void
 MathMLRenderingEngine::Setup()
 {
-  if (root == NULL) return;
+  if (root == 0) return;
 
   Clock perf;
 
@@ -174,7 +178,7 @@ MathMLRenderingEngine::Setup()
 void
 MathMLRenderingEngine::MinMaxLayout()
 {
-  if (root == NULL) return;
+  if (root == 0) return;
 
   Clock perf;
 
@@ -194,7 +198,7 @@ MathMLRenderingEngine::Layout()
 {
   assert(area != NULL);
 
-  if (root == NULL) return;
+  if (root == 0) return;
 
   Clock perf;
   perf.Start();
@@ -208,14 +212,14 @@ MathMLRenderingEngine::Layout()
 void
 MathMLRenderingEngine::SetDirty(const Rectangle* rect)
 {
-  if (root == NULL) return;
+  if (root == 0) return;
   root->SetDirty(rect);
 }
 
 void
 MathMLRenderingEngine::Render(const Rectangle* rect)
 {
-  if (root != NULL) root->SetDirty(rect);
+  if (root != 0) root->SetDirty(rect);
   Update(rect);
 }
 
@@ -224,13 +228,14 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 {
   assert(area != NULL);
 
-  if (root != NULL) {
-    Clock perf;
-    perf.Start();
-    root->Render(*area);
-    perf.Stop();
-    Globals::logger(LOG_INFO, "rendering time: %dms", perf());
-  }
+  if (root != 0)
+    {
+      Clock perf;
+      perf.Start();
+      root->Render(*area);
+      perf.Stop();
+      Globals::logger(LOG_INFO, "rendering time: %dms", perf());
+    }
 
   if (rect != NULL) area->Update(*rect);
   else area->Update();
@@ -239,10 +244,11 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 void
 MathMLRenderingEngine::GetDocumentBoundingBox(BoundingBox& box) const
 {
-  if (root == NULL) {
-    box.Null();
-    return;
-  }
+  if (root == 0)
+    {
+      box.Null();
+      return;
+    }
 
   box = root->GetBoundingBox();  
 }
@@ -260,45 +266,132 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 
 #if 0
 void
-MathMLRenderingEngine::SetSelectionFirst(MathMLElement* elem)
+MathMLRenderingEngine::SetSelectionFirst(const Ptr<MathMLElement>& elem)
 {
   selectionFirst = elem;
 }
 
 void
-MathMLRenderingEngine::SetSelectionLast(MathMLElement* selectionLast)
+MathMLRenderingEngine::SetSelectionLast(const Ptr<MathMLElement>& selectionLast)
 {
-  if (selectionFirst == NULL) return;
-  if (selectionLast == NULL) return;
+  if (selectionFirst == 0) return;
+  if (selectionLast == 0) return;
 
   selectionRoot = SelectMinimumTree(selectionFirst, selectionLast);
-  while (selectionRoot != NULL && selectionRoot->GetDOMElement() == NULL)
+  while (selectionRoot != 0 && selectionRoot->GetDOMElement() == 0)
     selectionRoot = selectionRoot->GetParent();
 }
 
 void
 MathMLRenderingEngine::ResetSelectionRoot()
 {
-  selectionFirst = selectionRoot = NULL;
+  selectionFirst = 0;
+  selectionRoot = 0;
 }
-#endif
 
 void
-MathMLRenderingEngine::SetSelected(MathMLElement* elem)
+MathMLRenderingEngine::SetSelectionMode(SelectionMode sm)
 {
-  if (selected == elem) return;
+  SetSelected(NULL);
+  selectionMode = sm;
+}
 
-  if (selected != NULL) selected->ResetSelected();
-  selected = elem;
-  if (selected != NULL) selected->SetSelected();
+void
+MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
+{
+  if (elem == rootSelected) return;
+
+  if (rootSelected != 0) rootSelected->ResetSelected();
+  rootSelected = firstSelected = lastSelected = elem;
+  if (rootSelected != 0) rootSelected->SetSelected();
 
   Update();
 }
 
-MathMLElement*
+void
+MathMLRenderingEngine::AddSelected(const Ptr<MathMLElement>& elem)
+{
+  if (elem == 0 || elem == lastSelected) return;
+
+  if (rootSelected != 0) rootSelected->ResetSelected();
+  if (firstSelected == 0) firstSelected = elem;
+  lastSelected = elem;
+  rootSelected = findCommonAncestor(firstSelected, lastSelected);
+  SetSelection();
+
+  Update();
+}
+
+void
+MathMLRenderingEngine::SetSelection()
+{
+  assert(firstSelected != 0 && lastSelected != 0 && rootSelected != 0);
+
+  switch (selectionMode)
+    {
+    case STRUCTURED:
+      rootSelected->SetSelected();
+      break;
+
+    case LINEAR:
+      Ptr<MathMLElement> firstParent = firstSelected->GetParent();
+      Ptr<MathMLElement> lastParent = lastSelected->GetParent();
+      assert(firstParent != 0 && lastParent != 0);
+      if (firstParent == lastParent) 
+	{
+	  assert(rootSelected == firstParent);
+	  SetLinearSelection(rootSelected);
+	}
+      else
+	firstParent->SetSelected();
+      break;
+
+    default:
+      assert(IMPOSSIBLE);
+      break;
+    }
+}
+
+unsigned
+MathMLRenderingEngine::SetLinearSelection(const Ptr<MathMLElement>& p, unsigned count)
+{
+  assert(p != 0);
+  assert(count < 2);
+
+  if (p == firstSelected) 
+    {
+      count++;
+      p->SetSelected();
+    }
+  if (p == lastSelected)
+    {
+      count++;
+      p->SetSelected();
+    }
+
+  if (p == 2) return 2;
+  assert(p < 2);
+
+  ...
+}
+#endif
+
+void
+MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
+{
+  if (selected == elem) return;
+
+  if (selected != 0) selected->ResetSelected();
+  selected = elem;
+  if (selected != 0) selected->SetSelected();
+
+  Update();
+}
+
+Ptr<MathMLElement>
 MathMLRenderingEngine::GetElementAt(scaled x, scaled y) const
 {
-  if (root == NULL) return NULL;
+  if (root == 0) return root;
   // WARNING: x and y must be absolute coordinates w.r.t. the drawing area, because
   // at this level we do not known whether the drawing area is scrollable (as in
   // the case of Gtk_DrawingArea) or not (PS_DrawingArea). The caller must

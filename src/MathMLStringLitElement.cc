@@ -32,7 +32,6 @@
 
 MathMLStringLitElement::MathMLStringLitElement()
 {
-  lQuote = rQuote = NULL;
   setupDone = false;
 }
 
@@ -40,24 +39,12 @@ MathMLStringLitElement::MathMLStringLitElement()
 MathMLStringLitElement::MathMLStringLitElement(const GMetaDOM::Element& node)
   : MathMLTokenElement(node)
 {
-  lQuote = rQuote = NULL;
   setupDone = false;
 }
 #endif
 
 MathMLStringLitElement::~MathMLStringLitElement()
 {
-  if (lQuote != NULL)
-    {
-      lQuote->Release();
-      lQuote = NULL;
-    }
-
-  if (rQuote != NULL)
-    {
-      rQuote->Release();
-      rQuote = NULL;
-    }
 }
 
 const AttributeSignature*
@@ -82,12 +69,11 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
 
   const String* s = NULL;
 
-  if (setupDone) {
-    MathMLFrame* frame = content.RemoveFirst();
-    delete frame;
-    frame = content.RemoveLast();
-    delete frame;
-  }
+  if (setupDone)
+    {
+      content.RemoveFirst();
+      content.RemoveLast();
+    }
 
   s = GetAttribute(ATTR_LQUOTE, env);
   assert(s != NULL);

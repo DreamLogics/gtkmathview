@@ -27,8 +27,10 @@
 #include "gmetadom.hh"
 #endif
 
+#include "Ptr.hh"
 #include "scaled.hh"
 #include "RGBValue.hh"
+#include "MathMLElement.hh"
 
 class MathMLRenderingEngine
 {
@@ -53,11 +55,22 @@ public:
   void  Render(const struct Rectangle*);
   void  Update(const struct Rectangle* = NULL);
 
-  class MathMLElement* GetRoot(void) const { return root; }
-  class MathMLElement* GetElementAt(scaled, scaled) const;
+  Ptr<MathMLElement> GetRoot(void) const { return root; }
+  Ptr<MathMLElement> GetElementAt(scaled, scaled) const;
 
-  void                 SetSelected(class MathMLElement*);
-  class MathMLElement* GetSelected(void) const { return selected; }
+  enum SelectionMode
+  {
+    STRUCTURED,
+    LINEAR
+  };
+
+#if 0
+  void                 SetSelectionMode(SelectionMode);
+  SelectionMode        GetSelectionMode(void) const { return selectionMode; }
+  void                 AddSelected(const Ptr<MathMLElement>&);
+#endif
+  void                 SetSelected(const Ptr<MathMLElement>&);
+  const Ptr<MathMLElement>& GetSelected(void) const { return selected; }
 
   // BoundingBox, and Rectangle are structs, not classes, 
   void GetDocumentBoundingBox(struct BoundingBox&) const;
@@ -76,15 +89,21 @@ public:
   bool GetTransparency(void) const;
 
 private:
-  unsigned defaultFontSize;
+  SelectionMode         selectionMode;
+  unsigned              defaultFontSize;
 
-  class MathMLDocument* document;
-  class MathMLElement*  root;
-  class MathMLElement*  selected;
+  Ptr<class MathMLDocument> document;
+  Ptr<class MathMLElement>  root;
+  Ptr<class MathMLElement>  selected;
+#if 0
+  Ptr<class MathMLElement>  firstSelected;
+  Ptr<class MathMLElement>  lastSelected;
+  Ptr<class MathMLElement>  rootSelected;
+#endif
 
-  class DrawingArea* area;
-  class FontManager* fontManager;
-  class CharMapper*  charMapper;
+  class DrawingArea*    area;
+  class FontManager*    fontManager;
+  class CharMapper*     charMapper;
 };
 
 #endif // MathMLRenderingEngine_hh

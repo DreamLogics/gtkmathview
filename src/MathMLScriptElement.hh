@@ -40,9 +40,11 @@ protected:
   virtual ~MathMLScriptElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLScriptElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLScriptElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLScriptElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLScriptElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -51,11 +53,11 @@ public:
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);
 
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 private:
-  MathMLElement* subScript;
-  MathMLElement* superScript;
+  Ptr<MathMLElement> subScript;
+  Ptr<MathMLElement> superScript;
 
   scaled subShiftX;
   scaled subShiftY;

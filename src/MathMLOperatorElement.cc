@@ -56,7 +56,6 @@ MathMLOperatorElement::MathMLOperatorElement(const GMetaDOM::Element& node)
 void
 MathMLOperatorElement::Init()
 {
-  eOp = NULL;
   defaults = NULL;
 
   fence = separator = stretchy = symmetric = infiniteMaxSize = accent = movableLimits = 0;
@@ -65,11 +64,6 @@ MathMLOperatorElement::Init()
 
 MathMLOperatorElement::~MathMLOperatorElement()
 {
-  if (eOp != NULL)
-    {
-      eOp->Release();
-      eOp = NULL;
-    }
 }
 
 const AttributeSignature*
@@ -106,31 +100,28 @@ MathMLOperatorElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      MathMLElement* root = findEmbellishedOperatorRoot(this);
-      assert(root != NULL);
+      Ptr<MathMLElement> root = findEmbellishedOperatorRoot(this);
+      assert(root != 0);
 
-      MathMLElement* p = root->GetParent();
-      assert(p != NULL);
+      Ptr<MathMLElement> p = root->GetParent();
+      assert(p != 0);
 
-      if (eOp == NULL)
+      if (eOp == 0)
 	{
-	  MathMLElement* op = MathMLEmbellishedOperatorElement::create(this);
-	  assert(op != NULL);
-	  eOp = TO_EMBELLISHED_OPERATOR(op);
+	  Ptr<MathMLElement> op = MathMLEmbellishedOperatorElement::create(this);
+	  assert(op != 0);
+	  eOp = smart_cast<MathMLEmbellishedOperatorElement>(op);
 	}
-      assert(eOp != NULL);
+      assert(eOp != 0);
 
       eOp->SetChild(root);
 
       // now we have to substitute the root of the embellished operator
       // with the embellished operator object just created
       assert(p->IsContainer());
-      MathMLContainerElement* pContainer = TO_CONTAINER(p);
-      assert(pContainer != NULL);
+      Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
+      assert(pContainer != 0);
       pContainer->Replace(root, eOp);
-
-      root->Release();
-      p->Release();
 
       MathMLTokenElement::Normalize();
     }
@@ -249,14 +240,16 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
 
   MathMLTokenElement::Setup(env);
 
-  if (content.GetSize() == 1 && largeOp && env->GetDisplayStyle()) {
-    assert(content.GetFirst() != NULL);
-    if (content.GetFirst()->IsStretchyChar()) {
-      MathMLCharNode* sNode = TO_CHAR(content.GetFirst());
-      assert(sNode != NULL);
-      sNode->SetDefaultLargeGlyph(true);
+  if (content.GetSize() == 1 && largeOp && env->GetDisplayStyle())
+    {
+      assert(content.GetFirst() != 0);
+      if (content.GetFirst()->IsStretchyChar())
+	{
+	  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
+	  assert(sNode != 0);
+	  sNode->SetDefaultLargeGlyph(true);
+	}
     }
-  }
 }
 
 void
@@ -307,25 +300,28 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   assert(content.GetFirst() != NULL);
   if (!content.GetFirst()->IsStretchyChar())
     {
-      MathMLCharNode* cNode = TO_CHAR(content.GetFirst());
-      assert(cNode != NULL);
+      Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
+      assert(cNode != 0);
       Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
       return;
     }
 
-  MathMLCharNode* sNode = TO_CHAR(content.GetFirst());
-  assert(sNode != NULL);
+  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
+  assert(sNode != 0);
 
   scaled adjustedHeight = 0;
   scaled adjustedDepth = 0;
 
-  if (symmetric) {
-    adjustedHeight = adjustedSize / 2;
-    adjustedDepth = adjustedSize / 2;
-  } else {
-    adjustedHeight = scaledProp(height, adjustedSize, desiredSize);
-    adjustedDepth = scaledProp(depth, adjustedSize, desiredSize);
-  }
+  if (symmetric)
+    {
+      adjustedHeight = adjustedSize / 2;
+      adjustedDepth = adjustedSize / 2;
+    }
+  else
+    {
+      adjustedHeight = scaledProp(height, adjustedSize, desiredSize);
+      adjustedDepth = scaledProp(depth, adjustedSize, desiredSize);
+    }
 
   Globals::logger(LOG_DEBUG, "adjusted stretchy size %d", sp2ipx(adjustedSize));
 
@@ -368,14 +364,14 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
   assert(content.GetFirst() != NULL);
   if (!content.GetFirst()->IsStretchyChar())
     {
-      MathMLCharNode* cNode = TO_CHAR(content.GetFirst());
-      assert(cNode != NULL);
+      Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(content.GetFirst());
+      assert(cNode != 0);
       Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
       return;
     }
 
-  MathMLCharNode* sNode = TO_CHAR(content.GetFirst());
-  assert(sNode != NULL);
+  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(content.GetFirst());
+  assert(sNode != 0);
 
   // now we do the stretchy layout. fontAttributes will be used to find the
   // proper font
@@ -395,39 +391,48 @@ MathMLOperatorElement::ParseLimitValue(const Value* value,
   assert(value != NULL);
   assert(env != NULL);
 
-  if (value->IsKeyword()) { // it must be a named math space
-    const Value* resValue = Resolve(value, env);
-    assert(resValue->IsNumberUnit());
-    multiplier = -1;
-    size = env->ToScaledPoints(resValue->ToNumberUnit());
-    delete resValue;
-  } else {
-    assert(value->IsSequence());
-    const ValueSequence* seq = value->ToValueSequence();
-    const Value* v = seq->GetFirstValue();
-    const Value* unitV = seq->GetLastValue();
-    assert(v != NULL);
-    assert(v->IsNumber());
-    assert(unitV != NULL);
-    
-    if (unitV->IsEmpty()) {      
-      multiplier = floatMax(EPSILON, v->ToNumber());
-    } else {
-      assert(unitV->IsKeyword());
+  if (value->IsKeyword())
+    { // it must be a named math space
+      const Value* resValue = Resolve(value, env);
+      assert(resValue->IsNumberUnit());
       multiplier = -1;
-
-      UnitValue siz;
-      siz.Set(v->ToNumber(), ToUnitId(unitV));
-
-      if (siz.IsPercentage()) {
-	Globals::logger(LOG_WARNING, "percentage value specified in maxsize attribute (mo) (ignored)");
-	multiplier = floatMax(EPSILON, siz.GetValue());
-      } else {
-	multiplier = -1;
-	size = env->ToScaledPoints(siz);
-      }
+      size = env->ToScaledPoints(resValue->ToNumberUnit());
+      delete resValue;
     }
-  }
+  else
+    {
+      assert(value->IsSequence());
+      const ValueSequence* seq = value->ToValueSequence();
+      const Value* v = seq->GetFirstValue();
+      const Value* unitV = seq->GetLastValue();
+      assert(v != NULL);
+      assert(v->IsNumber());
+      assert(unitV != NULL);
+    
+      if (unitV->IsEmpty()) 
+	{
+	  multiplier = floatMax(EPSILON, v->ToNumber());
+	}
+      else
+	{
+	  assert(unitV->IsKeyword());
+	  multiplier = -1;
+
+	  UnitValue siz;
+	  siz.Set(v->ToNumber(), ToUnitId(unitV));
+
+	  if (siz.IsPercentage())
+	    {
+	      Globals::logger(LOG_WARNING, "percentage value specified in maxsize attribute (mo) (ignored)");
+	      multiplier = floatMax(EPSILON, siz.GetValue());
+	    } 
+	  else
+	    {
+	      multiplier = -1;
+	      size = env->ToScaledPoints(siz);
+	    }
+	}
+    }
 }
 
 const Value*
@@ -470,16 +475,17 @@ MathMLOperatorElement::InferOperatorForm() const
 {
   assert(eOp != NULL);
 
-  MathMLElement* elem = eOp->GetParent();
-  assert(elem != NULL);
+  Ptr<MathMLElement> elem = eOp->GetParent();
+  assert(elem != 0);
 
   OperatorFormId res = OP_FORM_INFIX;
 
-  if (elem->IsA() == TAG_MROW) {
-    MathMLRowElement* row = TO_ROW(elem);
-    assert(row != NULL);
-    res = row->GetOperatorForm(eOp);
-  }
+  if (elem->IsA() == TAG_MROW)
+    {
+      Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
+      assert(row != 0);
+      res = row->GetOperatorForm(eOp);
+    }
 
   return res;
 }
@@ -490,12 +496,12 @@ MathMLOperatorElement::GetStretch() const
   if (!IsStretchy()) return STRETCH_NO;
 
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
 
   if (!content.GetFirst()->IsStretchyChar()) return STRETCH_NO;
 
-  MathMLCharNode* sChar = TO_CHAR(content.GetFirst());
-  assert(sChar != NULL);
+  Ptr<MathMLCharNode> sChar = smart_cast<MathMLCharNode>(content.GetFirst());
+  assert(sChar != 0);
 
   return sChar->GetStretch();
 }
@@ -512,7 +518,7 @@ MathMLOperatorElement::IsBreakable() const
   return false;
 }
 
-MathMLOperatorElement*
+Ptr<MathMLOperatorElement>
 MathMLOperatorElement::GetCoreOperator()
 {
   return this;

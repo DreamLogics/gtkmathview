@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLFractionElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLFractionElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLFractionElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLFractionElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLFractionElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -52,7 +54,7 @@ public:
   virtual void Render(const DrawingArea&);
 
   virtual bool IsExpanding(void) const;
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 private:
   scaled          axis;

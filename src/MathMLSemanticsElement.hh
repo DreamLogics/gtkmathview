@@ -39,16 +39,18 @@ protected:
   virtual ~MathMLSemanticsElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLSemanticsElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLSemanticsElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLSemanticsElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLSemanticsElement(el)); }
 #endif
 
   virtual void Normalize(void);
 
   virtual bool IsBreakable(void) const;
   virtual bool IsExpanding(void) const;
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 };
 
 #endif // MathMLSemanticsElement_hh

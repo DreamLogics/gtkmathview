@@ -39,10 +39,11 @@ protected:
   virtual ~MathMLActionElement();
 
 public:
-#if defined(HAVE_MINIDOM)
-  static MathMLElement* create(mDOMNodeRef el) { return new MathMLActionElement(el); }
-#elif defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLActionElement(el); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLActionElement()); }
+#if defined(HAVE_GMETADOM)
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLActionElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -67,8 +68,8 @@ public:
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 
-  virtual MathMLElement* Inside(scaled, scaled);
-  MathMLElement* GetSelectedElement(void) const;
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
+  Ptr<MathMLElement> GetSelectedElement(void) const;
 
   unsigned GetSelectedIndex(void) const;
   void     SetSelectedIndex(unsigned);
@@ -76,7 +77,5 @@ public:
 private:
   unsigned selection;
 };
-
-#define TO_ACTION(obj) (dynamic_cast<MathMLActionElement*>(obj))
 
 #endif // MathMLActionElement_hh

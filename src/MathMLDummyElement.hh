@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLDummyElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLDummyElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLDummyElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLDummyElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLDummyElement(el)); }
 #endif
 
   virtual void Normalize(void);

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "MathMLDummyElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLSemanticsElement.hh"
 
 MathMLSemanticsElement::MathMLSemanticsElement()
@@ -44,21 +45,19 @@ MathMLSemanticsElement::~MathMLSemanticsElement()
 void
 MathMLSemanticsElement::Normalize()
 {
-  while (content.GetSize() > 1) {
-    MathMLElement* elem = content.RemoveLast();
-    assert(elem != 0);
-    elem->Release();
-  }
+  while (content.GetSize() > 1)
+    content.RemoveLast();
 
-  if (content.GetSize() == 0) {
-    MathMLElement* mdummy = MathMLDummyElement::create();
-    assert(mdummy != 0);
-    mdummy->SetParent(this);
-    content.Append(mdummy);
-  }
+  if (content.GetSize() == 0)
+    {
+      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+      assert(mdummy != 0);
+      mdummy->SetParent(this);
+      content.Append(mdummy);
+    }
 
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
   content.GetFirst()->Normalize();
 }
 
@@ -66,7 +65,7 @@ bool
 MathMLSemanticsElement::IsBreakable() const
 {
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
   return content.GetFirst()->IsBreakable();
 }
 
@@ -74,14 +73,14 @@ bool
 MathMLSemanticsElement::IsExpanding() const
 {
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
   return content.GetFirst()->IsExpanding();
 }
 
-class MathMLOperatorElement*
+Ptr<class MathMLOperatorElement>
 MathMLSemanticsElement::GetCoreOperator()
 {
   assert(content.GetSize() == 1);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
   return content.GetFirst()->GetCoreOperator();
 }

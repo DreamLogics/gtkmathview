@@ -23,6 +23,7 @@
 #ifndef MathMLNode_hh
 #define MathMLNode_hh
 
+#include "Ptr.hh"
 #include "MathMLObject.hh"
 
 class MathMLNode: public MathMLObject
@@ -34,17 +35,13 @@ protected:
 public:
   virtual bool IsNode(void) const;
 
-  void SetParent(class MathMLElement*);
-  class MathMLElement* GetParent(void) const;
+  void SetParent(const Ptr<class MathMLElement>&);
+  Ptr<class MathMLElement> GetParent(void) const;
 
-  virtual const class MathMLCharNode* GetCharNode(void) const;
+  virtual Ptr<class MathMLCharNode> GetCharNode(void) const;
 
 private:
-  class MathMLElement* parent;
+  Ptr<MathMLElement> parent;
 };
-
-typedef MathMLNode* MathMLNodePtr;
-
-#define TO_NODE(object) (dynamic_cast<MathMLNode*>(object))
 
 #endif // MathMLNode_hh

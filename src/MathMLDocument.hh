@@ -39,15 +39,17 @@ protected:
   virtual ~MathMLDocument();
 
 public:
-  static MathMLDocument* create(void) { return new MathMLDocument(); }
+  static Ptr<MathMLDocument> create(void)
+  { return Ptr<MathMLDocument>(new MathMLDocument()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLDocument* create(const GMetaDOM::Document& doc) { return new MathMLDocument(doc); }
+  static Ptr<MathMLDocument> create(const GMetaDOM::Document& doc)
+  { return Ptr<MathMLDocument>(new MathMLDocument(doc)); }
 #endif
 
   virtual void Normalize(void);
   virtual bool IsDocument(void) const;
 
-  MathMLElement* GetRoot(void) const { return GetChild(); }
+  Ptr<MathMLElement> GetRoot(void) const { return GetChild(); }
 
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
@@ -84,9 +86,5 @@ protected:
   GMetaDOM::Document DOMdoc;
 #endif
 };
-
-typedef MathMLDocument* MathMLDocumentPtr;
-
-#define TO_DOCUMENT(object) ((MathMLDocumentPtr) (object))
 
 #endif // MathMLDocument_hh

@@ -28,6 +28,7 @@
 #include "MathMLDummyElement.hh"
 #include "MathMLScriptElement.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLOperatorElement.hh"
 
 MathMLScriptElement::MathMLScriptElement()
 {
@@ -75,31 +76,31 @@ MathMLScriptElement::Normalize()
 {
   unsigned n = (IsA() == TAG_MSUBSUP) ? 3 : 2;
 
-  while (content.GetSize() > n) {
-    MathMLElement* elem = content.RemoveLast();
-    elem->Release();
-  }
+  while (content.GetSize() > n)
+    content.RemoveLast();
 
-  while (content.GetSize() < n) {
-    MathMLElement* mdummy = MathMLDummyElement::create();
-    assert(mdummy != 0);
-    mdummy->SetParent(this);
-    content.Append(mdummy);
-  }
+  while (content.GetSize() < n)
+    {
+      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+      assert(mdummy != 0);
+      mdummy->SetParent(this);
+      content.Append(mdummy);
+    }
 
   // BEWARE: normalization has to be done here, since it may
   // change the content!!!
   MathMLLinearContainerElement::Normalize();
 
   base = content.GetFirst();
-  assert(base != NULL);
+  assert(base != 0);
 
   if (IsA() == TAG_MSUB) subScript = content.GetLast();
   else if (IsA() == TAG_MSUP) superScript = content.GetLast();
-  else {
-    subScript   = content.Get(1);
-    superScript = content.Get(2);
-  }
+  else
+    {
+      subScript   = content.Get(1);
+      superScript = content.Get(2);
+    }
 }
 
 void
@@ -109,7 +110,7 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 
   ScriptSetup(env);
 
-  assert(base != NULL);
+  assert(base != 0);
   base->Setup(env);
 
   env->Push();
@@ -118,37 +119,41 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 
   const Value* value = NULL;
 
-  if (subScript != NULL) {
-    subScript->Setup(env);
+  if (subScript != 0)
+    {
+      subScript->Setup(env);
 
-    value = GetAttributeValue(ATTR_SUBSCRIPTSHIFT, env, false);
-    if (value != NULL) {
-      assert(value->IsNumberUnit());
+      value = GetAttributeValue(ATTR_SUBSCRIPTSHIFT, env, false);
+      if (value != NULL)
+	{
+	  assert(value->IsNumberUnit());
 
-      UnitValue unitValue = value->ToNumberUnit();
-      assert(!unitValue.IsPercentage());
+	  UnitValue unitValue = value->ToNumberUnit();
+	  assert(!unitValue.IsPercentage());
 
-      subMinShift = env->ToScaledPoints(unitValue);
+	  subMinShift = env->ToScaledPoints(unitValue);
 
-      delete value;
+	  delete value;
+	}
     }
-  }
 
-  if (superScript != NULL) {
-    superScript->Setup(env);
+  if (superScript != 0)
+    {
+      superScript->Setup(env);
 
-    value = GetAttributeValue(ATTR_SUPERSCRIPTSHIFT, env, false);
-    if (value != NULL) {
-      assert(value->IsNumberUnit());
+      value = GetAttributeValue(ATTR_SUPERSCRIPTSHIFT, env, false);
+      if (value != NULL)
+	{
+	  assert(value->IsNumberUnit());
       
-      UnitValue unitValue = value->ToNumberUnit();
-      assert(!unitValue.IsPercentage());
+	  UnitValue unitValue = value->ToNumberUnit();
+	  assert(!unitValue.IsPercentage());
 
-      superMinShift = env->ToScaledPoints(unitValue);
+	  superMinShift = env->ToScaledPoints(unitValue);
 
-      delete value;
+	  delete value;
+	}
     }
-  }
 
   env->Drop();
 }
@@ -158,14 +163,14 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
 {
   if (!HasDirtyLayout(id, maxWidth)) return;
 
-  assert(base != NULL);
+  assert(base != 0);
 
   base->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
-  if (subScript != NULL) subScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
-  if (superScript != NULL) superScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
+  if (subScript != 0) subScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
+  if (superScript != 0) superScript->DoBoxedLayout(id, BREAK_NO, maxWidth / 2);
 
-  const MathMLElement* rel = findRightmostChild(base);
-  assert(rel != NULL);
+  Ptr<MathMLElement> rel = findRightmostChild(base);
+  assert(rel != 0);
 
   const BoundingBox& baseBox = base->GetBoundingBox();
   BoundingBox relBox = rel->GetBoundingBox();
@@ -176,10 +181,10 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
   BoundingBox superScriptBox;
 
   subScriptBox.Null();
-  if (subScript != NULL) subScriptBox = subScript->GetBoundingBox();
+  if (subScript != 0) subScriptBox = subScript->GetBoundingBox();
 
   superScriptBox.Null();
-  if (superScript != NULL) superScriptBox = superScript->GetBoundingBox();
+  if (superScript != 0) superScriptBox = superScript->GetBoundingBox();
 
   DoScriptLayout(relBox, subScriptBox, superScriptBox, subShiftX, subShiftY, superShiftX, superShiftY);
 
@@ -192,19 +197,21 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
 			   scaledMax(superShiftX + superScriptBox.rBearing,
 				     subShiftX + subScriptBox.rBearing));
 
-  if (subScript != NULL) {
-    box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
-    box.tAscent  = scaledMax(box.tAscent, subScriptBox.tAscent - subShiftY);
-    box.descent  = scaledMax(box.descent, subScriptBox.descent + subShiftY);
-    box.tDescent = scaledMax(box.tDescent, subScriptBox.tDescent + subShiftY);
-  }
+  if (subScript != 0)
+    {
+      box.ascent   = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
+      box.tAscent  = scaledMax(box.tAscent, subScriptBox.tAscent - subShiftY);
+      box.descent  = scaledMax(box.descent, subScriptBox.descent + subShiftY);
+      box.tDescent = scaledMax(box.tDescent, subScriptBox.tDescent + subShiftY);
+    }
 
-  if (superScript != NULL) {
-    box.ascent   = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
-    box.tAscent  = scaledMax(box.tAscent, superScriptBox.tAscent + superShiftY);
-    box.descent  = scaledMax(box.descent, superScriptBox.descent - superShiftY);
-    box.tDescent = scaledMax(box.tDescent, superScriptBox.tDescent - superShiftY);
-  }
+  if (superScript != 0)
+    {
+      box.ascent   = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
+      box.tAscent  = scaledMax(box.tAscent, superScriptBox.tAscent + superShiftY);
+      box.descent  = scaledMax(box.descent, superScriptBox.descent - superShiftY);
+      box.tDescent = scaledMax(box.tDescent, superScriptBox.tDescent - superShiftY);
+    }
 
   ConfirmLayout(id);
 
@@ -214,23 +221,23 @@ MathMLScriptElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled maxWidth)
 void
 MathMLScriptElement::SetPosition(scaled x, scaled y)
 {
-  assert(base != NULL);
+  assert(base != 0);
 
   position.x = x;
   position.y = y;
 
   base->SetPosition(x, y);
 
-  if (subScript != NULL)
+  if (subScript != 0)
     subScript->SetPosition(x + subShiftX, y + subShiftY);
 
-  if (superScript != NULL)
+  if (superScript != 0)
     superScript->SetPosition(x + superShiftX, y - superShiftY);
 }
 
-class MathMLOperatorElement*
+Ptr<class MathMLOperatorElement>
 MathMLScriptElement::GetCoreOperator()
 {
-  assert(base != NULL);
+  assert(base != 0);
   return base->GetCoreOperator();
 }

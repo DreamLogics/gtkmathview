@@ -37,14 +37,12 @@
 
 MathMLRowElement::MathMLRowElement()
 {
-  lastElement = NULL;
 }
 
 #if defined(HAVE_GMETADOM)
 MathMLRowElement::MathMLRowElement(const GMetaDOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
-  lastElement = NULL;
 }
 #endif
 
@@ -64,12 +62,11 @@ MathMLRowElement::Setup(RenderingEnvironment* env)
 {
   MathMLLinearContainerElement::Setup(env);
 
-  Iterator<MathMLElement*> i(content);
+  Iterator< Ptr<MathMLElement> > i(content);
   i.ResetLast();
-  while (i.More() && i() != NULL &&
-	 (i()->IsSpaceLike() || i()->IsEmbellishedOperator())) {
+  while (i.More() && i() != 0 &&
+	 (i()->IsSpaceLike() || i()->IsEmbellishedOperator()))
     i.Prev();
-  }
 	      
   if (i.More() && i() != NULL) lastElement = i();
 }
@@ -83,73 +80,85 @@ MathMLRowElement::DoLayout(LayoutId id, Layout& layout)
 
   BreakId lastBreakability = BREAK_AUTO;
 
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next()) {
-    MathMLElement* elem = i();
-    assert(elem != NULL);
+  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+    {
+      Ptr<MathMLElement> elem = i();
+      assert(elem != 0);
 
-    BreakId bid = BREAK_NO;
+      BreakId bid = BREAK_NO;
 
-    if (elem == lastElement) {
-      // if elem is the last element but it preceeded by a separator,
-      // then we have still to set the right breakability after that
-      // separator, which otherwise would get a BREAK_NO.
-      if (state == STATE_C && !elem->IsEmbellishedOperator() && !elem->IsSpaceLike()) bid = BREAK_BAD;
-      state = STATE_E;
-    } else {
-      switch (state) {
-      case STATE_A:
-	if (!elem->IsEmbellishedOperator() && !elem->IsSpaceLike()) state = STATE_B;
-	break;
-      case STATE_B:
-	if (elem->IsEmbellishedOperator()) {
-	  MathMLOperatorElement* op = elem->GetCoreOperator();
-	  assert(op != NULL);
-	  // we cannot allow the expression to be broken
-	  // before or after the operator if it is non-marking
-	  // (i.e. it is only made of non-marking characters)
-	  if (!op->IsNonMarking()) {
-	    if (op->IsSeparator()) state = STATE_C;
-	    else {
-	      bid = BREAK_BAD;
-	      state = STATE_D;
+      if (elem == lastElement)
+	{
+	  // if elem is the last element but it preceeded by a separator,
+	  // then we have still to set the right breakability after that
+	  // separator, which otherwise would get a BREAK_NO.
+	  if (state == STATE_C && !elem->IsEmbellishedOperator() && !elem->IsSpaceLike()) bid = BREAK_BAD;
+	  state = STATE_E;
+	} 
+      else
+	{
+	  switch (state)
+	    {
+	    case STATE_A:
+	      if (!elem->IsEmbellishedOperator() && !elem->IsSpaceLike()) state = STATE_B;
+	      break;
+	    case STATE_B:
+	      if (elem->IsEmbellishedOperator())
+		{
+		  Ptr<MathMLOperatorElement> op = elem->GetCoreOperator();
+		  assert(op != 0);
+		  // we cannot allow the expression to be broken
+		  // before or after the operator if it is non-marking
+		  // (i.e. it is only made of non-marking characters)
+		  if (!op->IsNonMarking())
+		    {
+		      if (op->IsSeparator()) state = STATE_C;
+		      else
+			{
+			  bid = BREAK_BAD;
+			  state = STATE_D;
+			}
+		    }
+		}
+	      break;
+	    case STATE_C:
+	      if (elem->IsSpaceLike())
+		{
+		  bid = BREAK_BAD;
+		  state = STATE_D;
+		}
+	      else if (elem->IsEmbellishedOperator())
+		{
+		  Ptr<MathMLOperatorElement> op = elem->GetCoreOperator();
+		  assert(op != 0);
+		  if (!op->IsSeparator())
+		    {
+		      bid = BREAK_BAD;
+		      state = STATE_D;
+		    }
+		} 
+	      else
+		{
+		  bid = BREAK_BAD;
+		  state = STATE_B;
+		}
+	      break;
+	    case STATE_D:
+	      if (!elem->IsSpaceLike() && !elem->IsEmbellishedOperator()) state = STATE_B;
+	      break;
+	    case STATE_E:
+	      break;
 	    }
-	  }
-	  op->Release();
 	}
-	break;
-      case STATE_C:
-	if (elem->IsSpaceLike()) {
-	  bid = BREAK_BAD;
-	  state = STATE_D;
-	} else if (elem->IsEmbellishedOperator()) {
-	  MathMLOperatorElement* op = elem->GetCoreOperator();
-	  assert(op != NULL);
-	  if (!op->IsSeparator()) {
-	    bid = BREAK_BAD;
-	    state = STATE_D;
-	    op->Release();
-	  }
-	} else {
-	  bid = BREAK_BAD;
-	  state = STATE_B;
-	}
-	break;
-      case STATE_D:
-	if (!elem->IsSpaceLike() && !elem->IsEmbellishedOperator()) state = STATE_B;
-	break;
-      case STATE_E:
-	break;
-      }
+
+      if (lastBreakability != BREAK_AUTO) bid = lastBreakability;
+
+      lastBreakability = elem->GetBreakability();
+      layout.SetLastBreakability(bid);
+
+      if (elem->IsBreakable()) elem->DoLayout(id, layout);
+      else layout.Append(elem, 0);
     }
-
-    if (lastBreakability != BREAK_AUTO) bid = lastBreakability;
-
-    lastBreakability = elem->GetBreakability();
-    layout.SetLastBreakability(bid);
-
-    if (elem->IsBreakable()) elem->DoLayout(id, layout);
-    else layout.Append(elem, 0);
-  }
 
   layout.Out();
 
@@ -169,49 +178,57 @@ MathMLRowElement::DoStretchyLayout()
   rowBox.Null();
   opBox.Null();
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    BoundingBox elemLinearBox;
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      BoundingBox elemLinearBox;
 
-    MathMLOperatorElement* op = findStretchyOperator(elem(), STRETCH_VERTICAL);
-    if (op != NULL) {
-      opBox.Append(op->GetMinBoundingBox());
-      nStretchy++;      
-    } else {
-      elem()->GetLinearBoundingBox(elemLinearBox);
-      rowBox.Append(elemLinearBox);
-      nOther++;
+      Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
+      if (op != 0)
+	{
+	  opBox.Append(op->GetMinBoundingBox());
+	  nStretchy++;      
+	} 
+      else
+	{
+	  elem()->GetLinearBoundingBox(elemLinearBox);
+	  rowBox.Append(elemLinearBox);
+	  nOther++;
+	}
     }
-  }
 
-  if (nStretchy > 0) {
-    scaled toAscent  = (nOther == 0) ? opBox.ascent : rowBox.ascent;
-    scaled toDescent = (nOther == 0) ? opBox.descent : rowBox.descent;
+  if (nStretchy > 0)
+    {
+      scaled toAscent  = (nOther == 0) ? opBox.ascent : rowBox.ascent;
+      scaled toDescent = (nOther == 0) ? opBox.descent : rowBox.descent;
 
 #if 0
-    printf("%s(%p): found %d stretchy (%d other), now stretch to %d %d\n",
-	   NameOfTagId(IsA()), this, nStretchy, nOther, sp2ipx(toAscent), sp2ipx(toDescent));
+      printf("%s(%p): found %d stretchy (%d other), now stretch to %d %d\n",
+	     NameOfTagId(IsA()), this, nStretchy, nOther, sp2ipx(toAscent), sp2ipx(toDescent));
 #endif
 
-    for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-      assert(elem() != NULL);
-      MathMLOperatorElement* op = findStretchyOperator(elem(), STRETCH_VERTICAL);
+      for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+	{
+	  assert(elem() != 0);
+	  Ptr<MathMLOperatorElement> op = findStretchyOperator(elem(), STRETCH_VERTICAL);
 
-      if (op != NULL) {
-	op->VerticalStretchTo(toAscent, toDescent);
-	elem()->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, elem()->GetMaxBoundingBox().width);
-      }
+	  if (op != 0)
+	    {
+	      op->VerticalStretchTo(toAscent, toDescent);
+	      elem()->DoBoxedLayout(LAYOUT_AUTO, BREAK_NO, elem()->GetMaxBoundingBox().width);
+	    }
+	}
     }
-  }
 }
 
 bool
 MathMLRowElement::IsSpaceLike() const
 {
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    if (!elem()->IsSpaceLike()) return false;
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      if (!elem()->IsSpaceLike()) return false;
+    }
 
   return true;
 }
@@ -225,16 +242,17 @@ MathMLRowElement::IsBreakable() const
 bool
 MathMLRowElement::IsExpanding() const
 {
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    if (elem()->IsExpanding()) return true;
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      if (elem()->IsExpanding()) return true;
+    }
 
   return false;
 }
 
 OperatorFormId
-MathMLRowElement::GetOperatorForm(MathMLElement* eOp) const
+MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
 {
   assert(eOp != 0);
 
@@ -242,14 +260,14 @@ MathMLRowElement::GetOperatorForm(MathMLElement* eOp) const
 
   unsigned rowLength = 0;
   unsigned position  = 0;
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next())
+  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
-      const MathMLElement* p = i();
-      assert(p != NULL);
+      Ptr<const MathMLElement> p = i();
+      assert(p != 0);
 
       if (!p->IsSpaceLike())
 	{
-	  if (p == eOp) position = rowLength;
+	  if (p == Ptr<const MathMLElement>(eOp)) position = rowLength;
 	  rowLength++;
 	}
     }
@@ -263,21 +281,22 @@ MathMLRowElement::GetOperatorForm(MathMLElement* eOp) const
   return res;
 }
 
-class MathMLOperatorElement*
+Ptr<class MathMLOperatorElement>
 MathMLRowElement::GetCoreOperator()
 {
-  MathMLElement* core = NULL;
+  Ptr<MathMLElement> core = 0;
 
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next())
+  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
     {
-      MathMLElement* elem = i();
-      assert(elem != NULL);
+      Ptr<MathMLElement> elem = i();
+      assert(elem != 0);
 
-      if (!elem->IsSpaceLike()) {
-	if (core == NULL) core = elem;
-	else return NULL;
-      }
+      if (!elem->IsSpaceLike())
+	{
+	  if (core == 0) core = elem;
+	  else return 0;
+	}
     }
 
-  return (core != NULL) ? core->GetCoreOperator() : NULL;
+  return (core != 0) ? core->GetCoreOperator() : 0;
 }

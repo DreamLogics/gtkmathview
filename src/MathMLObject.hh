@@ -42,8 +42,8 @@ protected:
   virtual ~MathMLObject();
 
 public:
-  void AddRef(void) const;
-  void Release(void) const;
+  void ref(void) const;
+  void unref(void) const;
 
   virtual bool IsNode(void) const;
   virtual bool IsText(void) const;
@@ -78,7 +78,5 @@ private:
 #endif // DEBUG
   static unsigned indentLevel;
 };
-
-typedef MathMLObject* MathMLObjectPtr;
 
 #endif // MathMLObject_hh

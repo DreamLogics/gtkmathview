@@ -45,7 +45,7 @@ MathMLPhantomElement::~MathMLPhantomElement()
 bool
 MathMLPhantomElement::IsSpaceLike() const
 {
-  assert(child != NULL);
+  assert(child != 0);
   return child->IsSpaceLike();
 }
 
@@ -59,6 +59,5 @@ void
 MathMLPhantomElement::Render(const DrawingArea&)
 {
   if (!HasDirtyChildren()) return;
-
   ResetDirty();
 }

@@ -659,12 +659,11 @@ MathMLTableElement::StretchyCellsLayout()
 	{
 	  if (cell[i][j].mtd != NULL && !cell[i][j].spanned)
 	    {
-	      MathMLElement* cellElem = cell[i][j].mtd->GetChild();
+	      Ptr<MathMLElement> cellElem = cell[i][j].mtd->GetChild();
 	      assert(cellElem != 0);
-	      MathMLOperatorElement* op = findStretchyOperator(cellElem);
-	      cellElem->Release();
+	      Ptr<MathMLOperatorElement> op = findStretchyOperator(cellElem);
 
-	      if (op != NULL)
+	      if (op != 0)
 		{
 		  scaled width = GetColumnWidth(j, cell[i][j].colSpan);
 

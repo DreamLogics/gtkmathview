@@ -27,6 +27,7 @@
 #include "Iterator.hh"
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLMultiScriptsElement.hh"
 
 MathMLMultiScriptsElement::MathMLMultiScriptsElement()
@@ -48,43 +49,49 @@ void
 MathMLMultiScriptsElement::Normalize()
 {
   if (content.GetSize() == 0 ||
-      (content.GetFirst() != NULL && content.GetFirst()->IsA() == TAG_NONE) ||
-      (content.GetFirst() != NULL && content.GetFirst()->IsA() == TAG_MPRESCRIPTS)) {
-    MathMLElement* mdummy = MathMLDummyElement::create();
-    assert(mdummy != 0);
+      (content.GetFirst() != 0 && content.GetFirst()->IsA() == TAG_NONE) ||
+      (content.GetFirst() != 0 && content.GetFirst()->IsA() == TAG_MPRESCRIPTS))
+    {
+      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+      assert(mdummy != 0);
 
-    mdummy->SetParent(this);
-    content.AddFirst(mdummy);
-  }
+      mdummy->SetParent(this);
+      content.AddFirst(mdummy);
+    }
 
   base = content.GetFirst();
-  assert(base != NULL);
+  assert(base != 0);
 
   unsigned i = 0;
   bool     preScripts = false;
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next(), i++) {
-    assert(elem() != NULL);
-    if (elem()->IsA() == TAG_MPRESCRIPTS) {
-      preScripts = true;
-      break;
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next(), i++)
+    {
+      assert(elem() != 0);
+      if (elem()->IsA() == TAG_MPRESCRIPTS) 
+	{
+	  preScripts = true;
+	  break;
+	}
     }
-  }
 
-  if (preScripts) {
-    nPre  = content.GetSize() - i - 1;
-    nPost = content.GetSize() - nPre - 2;
-  } else {
-    nPre  = 0;
-    nPost = content.GetSize() - 1;
-  }
+  if (preScripts)
+    {
+      nPre  = content.GetSize() - i - 1;
+      nPost = content.GetSize() - nPre - 2;
+    }
+  else
+    {
+      nPre  = 0;
+      nPost = content.GetSize() - 1;
+    }
 }
 
 void
 MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
 {
   assert(content.GetSize() > 0);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
 
   content.GetFirst()->Setup(env);
   
@@ -92,13 +99,14 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
   env->AddScriptLevel(1);
   env->SetDisplayStyle(false);
 
-  Iterator<MathMLElement*> elem(content);
+  Iterator< Ptr<MathMLElement> > elem(content);
   elem.Next();
-  while (elem.More()) {
-    assert(elem() != NULL);
-    elem()->Setup(env);
-    elem.Next();
-  }
+  while (elem.More())
+    {
+      assert(elem() != 0);
+      elem()->Setup(env);
+      elem.Next();
+    }
 
   ScriptSetup(env);
 
@@ -110,7 +118,7 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
 {
   if (!HasDirtyLayout(id, availWidth)) return;
 
-  assert(base != NULL);
+  assert(base != 0);
 
   unsigned n = 1 + nPre / 2 + nPost / 2;
   assert(n > 0);
@@ -127,48 +135,57 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
   scaled subScriptWidth = 0;
   bool preScript = false;
   unsigned i = 0;
-  Iterator<MathMLElement*> elem(content);
+  Iterator< Ptr<MathMLElement> > elem(content);
   elem.Next();
 
-  while (elem.More()) {
-    assert(elem() != NULL);
+  while (elem.More())
+    {
+      assert(elem() != 0);
 
-    elem()->DoBoxedLayout(id, BREAK_NO, availWidth / n);
+      elem()->DoBoxedLayout(id, BREAK_NO, availWidth / n);
 
-    if (!preScript && elem()->IsA() == TAG_MPRESCRIPTS) {
-      preScript = true;
-      i = 0;
-    } else {
-      if (i % 2 == 0) {
-	const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	subScriptBox.Append(scriptBox);
-	subScriptWidth = scriptBox.width;
-      } else {
-	const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	superScriptBox.Append(scriptBox);
-	totalWidth += scaledMax(subScriptWidth, scriptBox.width);
-      }
+      if (!preScript && elem()->IsA() == TAG_MPRESCRIPTS)
+	{
+	  preScript = true;
+	  i = 0;
+	}
+      else
+	{
+	  if (i % 2 == 0)
+	    {
+	      const BoundingBox& scriptBox = elem()->GetBoundingBox();
+	      subScriptBox.Append(scriptBox);
+	      subScriptWidth = scriptBox.width;
+	    } 
+	  else
+	    {
+	      const BoundingBox& scriptBox = elem()->GetBoundingBox();
+	      superScriptBox.Append(scriptBox);
+	      totalWidth += scaledMax(subScriptWidth, scriptBox.width);
+	    }
 
-      i++;
+	  i++;
+	}
+
+      elem.Next();
     }
-
-    elem.Next();
-  }
 
   DoScriptLayout(base->GetBoundingBox(), subScriptBox, superScriptBox,
 		 subShiftX, subShiftY, superShiftX, superShiftY);
 
   box = base->GetBoundingBox();
 
-  if (!subScriptBox.IsNull()) {
-    box.ascent  = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
-    box.descent = scaledMax(box.descent, subScriptBox.descent + subShiftY);
-  }
+  if (!subScriptBox.IsNull())
+    {
+      box.ascent  = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
+      box.descent = scaledMax(box.descent, subScriptBox.descent + subShiftY);
+    }
 
-  if (!superScriptBox.IsNull()) {
-    box.ascent  = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
-    box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
-  }
+  if (!superScriptBox.IsNull())
+    {
+      box.ascent  = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
+      box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
+    }
 
   ConfirmLayout(id);
 
@@ -181,76 +198,90 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  Iterator<MathMLElement*> elem(content);
+  Iterator< Ptr<MathMLElement> > elem(content);
   elem.More();
 
   scaled subScriptWidth = 0;
   bool preScript = false;
   unsigned i = 0;
 
-  if (nPre > 0) {
-    while (elem.More()) {
-      assert(elem() != NULL);
+  if (nPre > 0)
+    {
+      while (elem.More())
+	{
+	  assert(elem() != 0);
 
-      if (preScript) {
-	if (i % 2 == 0) {
-	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	  subScriptWidth = scriptBox.width;
-	  elem()->SetPosition(x, y + subShiftY);
-	} else {
-	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	  elem()->SetPosition(x, y - superShiftY);
-	  x += scaledMax(subScriptWidth, scriptBox.width);
+	  if (preScript)
+	    {
+	      if (i % 2 == 0)
+		{
+		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
+		  subScriptWidth = scriptBox.width;
+		  elem()->SetPosition(x, y + subShiftY);
+		} 
+	      else
+		{
+		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
+		  elem()->SetPosition(x, y - superShiftY);
+		  x += scaledMax(subScriptWidth, scriptBox.width);
+		}
+
+	      i++;
+	    } 
+	  else if (elem()->IsA() == TAG_MPRESCRIPTS)
+	    {
+	      preScript = true;
+	      i = 0;
+	    }
+
+	  elem.Next();
 	}
-
-	i++;
-      } else if (elem()->IsA() == TAG_MPRESCRIPTS) {
-	preScript = true;
-	i = 0;
-      }
-
-      elem.Next();
     }
-  }
 
   base->SetPosition(x, y);
 
-  if (nPost > 0) {
-    x += scaledMax(subShiftX, superShiftX);
+  if (nPost > 0)
+    {
+      x += scaledMax(subShiftX, superShiftX);
 
-    elem.ResetFirst();
-    elem.Next();
-
-    subScriptWidth = 0;
-    preScript = false;
-    i = 0;
-    
-    while (elem.More() && !preScript) {
-      assert(elem() != NULL);
-
-      if (elem()->IsA() == TAG_MPRESCRIPTS) preScript = true;
-      else {
-	if (i % 2 == 0) {
-	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	  subScriptWidth = scriptBox.width;
-	  elem()->SetPosition(x, y + subShiftY);
-	} else {
-	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	  elem()->SetPosition(x, y - superShiftY);
-	  x += scaledMax(subScriptWidth, scriptBox.width);
-	}
-
-	i++;
-      }
-
+      elem.ResetFirst();
       elem.Next();
+
+      subScriptWidth = 0;
+      preScript = false;
+      i = 0;
+    
+      while (elem.More() && !preScript)
+	{
+	  assert(elem() != 0);
+
+	  if (elem()->IsA() == TAG_MPRESCRIPTS) preScript = true;
+	  else
+	    {
+	      if (i % 2 == 0)
+		{
+		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
+		  subScriptWidth = scriptBox.width;
+		  elem()->SetPosition(x, y + subShiftY);
+		} 
+	      else
+		{
+		  const BoundingBox& scriptBox = elem()->GetBoundingBox();
+		  elem()->SetPosition(x, y - superShiftY);
+		  x += scaledMax(subScriptWidth, scriptBox.width);
+		}
+
+	      i++;
+	    }
+
+	  elem.Next();
+	}
     }
-  }
 }
 
-class MathMLOperatorElement*
+Ptr<class MathMLOperatorElement>
 MathMLMultiScriptsElement::GetCoreOperator()
 {
-  assert(base != NULL);
+  assert(base != 0);
   return base->GetCoreOperator();
 }

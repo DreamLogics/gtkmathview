@@ -28,6 +28,7 @@
 #include "ChildList.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLDummyElement.hh"
+#include "MathMLOperatorElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
 
 MathMLNormalizingContainerElement::MathMLNormalizingContainerElement()
@@ -58,29 +59,26 @@ MathMLNormalizingContainerElement::Normalize()
 	{
 	  GMetaDOM::Node node = children.item(0);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-	  MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
 	  assert(elem != 0);
 	  SetChild(elem);
-	  elem->Release();
 	}
-      else if (child == NULL || child->GetDOMElement() != GetDOMElement())
+      else if (child == 0 || child->GetDOMElement() != GetDOMElement())
 	{
-	  MathMLElement* row = MathMLRowElement::create(GetDOMElement());
-	  assert(row != NULL);
+	  Ptr<MathMLElement> row = MathMLRowElement::create(GetDOMElement());
+	  assert(row != 0);
 	  SetChild(row);
-	  row->Release();
 	}
 #else
       if (child == NULL)
 	{
-	  MathMLElement* row = MathMLRowElement::create();
-	  assert(row != NULL);
+	  Ptr<MathMLElement> row = MathMLRowElement::create();
+	  assert(row != 0);
 	  SetChild(row);
-	  row->Release();
 	}
 #endif
 
-      assert(child != NULL);
+      assert(child != 0);
       child->Normalize();
 
       ResetDirtyStructure();
@@ -92,7 +90,7 @@ MathMLNormalizingContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scale
 {
   if (!HasDirtyLayout(id, maxWidth)) return;
 
-  assert(child != NULL);
+  assert(child != 0);
 
   child->DoBoxedLayout(id, bid, maxWidth);
   box = child->GetBoundingBox();
@@ -126,10 +124,11 @@ MathMLNormalizingContainerElement::SetPosition(scaled x, scaled y)
   position.y = y;
 
   if (HasLayout()) layout->SetPosition(x, y);
-  else {
-    assert(child != NULL);
-    child->SetPosition(x, y);
-  }
+  else
+    {
+      assert(child != 0);
+      child->SetPosition(x, y);
+    }
 }
 
 void
@@ -148,14 +147,14 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
 bool
 MathMLNormalizingContainerElement::IsExpanding() const
 {
-  assert(child != NULL);
+  assert(child != 0);
   return child->IsExpanding();
 }
 
-class MathMLOperatorElement*
+Ptr<class MathMLOperatorElement>
 MathMLNormalizingContainerElement::GetCoreOperator()
 {
-  assert(child != NULL);
+  assert(child != 0);
 
   switch (IsA())
     {
@@ -164,6 +163,6 @@ MathMLNormalizingContainerElement::GetCoreOperator()
     case TAG_MPADDED:
       return child->GetCoreOperator();
     default:
-      return NULL;
+      return 0;
     }
 }

@@ -49,13 +49,13 @@ MathMLObject::~MathMLObject()
 }
 
 void
-MathMLObject::AddRef() const
+MathMLObject::ref() const
 {
   refCounter++;
 }
 
 void
-MathMLObject::Release() const
+MathMLObject::unref() const
 {
   if (--refCounter == 0) delete this;
 }

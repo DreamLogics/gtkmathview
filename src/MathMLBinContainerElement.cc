@@ -34,7 +34,6 @@
 
 MathMLBinContainerElement::MathMLBinContainerElement()
 {
-  child = NULL;
 }
 
 #if defined(HAVE_GMETADOM)
@@ -42,16 +41,10 @@ MathMLBinContainerElement::MathMLBinContainerElement(const GMetaDOM::Element& no
 #endif
   : MathMLContainerElement(node)
 {
-  child = NULL;
 }
 
 MathMLBinContainerElement::~MathMLBinContainerElement()
 {
-  if (child != NULL)
-    {
-      child->Release();
-      child = NULL;
-    }
 }
 
 void
@@ -66,13 +59,12 @@ MathMLBinContainerElement::Normalize()
 	  GMetaDOM::Node node = children.item(0);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-	  MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
 	  // it might be that we get a NULL. In that case it would probably make
 	  // sense to create a dummy element, because we filtered MathML
 	  // elements only
 	  assert(elem != 0);
 	  SetChild(elem);
-	  elem->Release();
 	}
 #endif // HAVE_GMETADOM
 
@@ -168,19 +160,17 @@ MathMLBinContainerElement::GetLinearBoundingBox(BoundingBox& b) const
     }
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLBinContainerElement::Inside(scaled x, scaled y)
 {
   if (!IsInside(x, y)) return NULL;
 
   if (child != 0)
     {
-      MathMLElement* inside = child->Inside(x, y);
+      Ptr<MathMLElement> inside = child->Inside(x, y);
       if (inside != 0) return inside;
     }
   
-  AddRef();
-
   return this;
 }
 
@@ -283,20 +273,20 @@ MathMLBinContainerElement::ReleaseGCs()
 }
 
 void
-MathMLBinContainerElement::Remove(MathMLElement* elem)
+MathMLBinContainerElement::Remove(const Ptr<MathMLElement>& elem)
 {
   assert(elem != 0);
   assert(elem == child);
 
   elem->SetParent(0);
-  elem->Release();
   child = 0;
 
   SetDirtyStructure();
 }
 
 void
-MathMLBinContainerElement::Replace(MathMLElement* oldElem, MathMLElement* newElem)
+MathMLBinContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
+				   const Ptr<MathMLElement>& newElem)
 {
   assert(oldElem != 0);
   assert(newElem != 0);
@@ -305,30 +295,15 @@ MathMLBinContainerElement::Replace(MathMLElement* oldElem, MathMLElement* newEle
   if (oldElem != newElem)
     {
       Remove(oldElem);
-      newElem->AddRef();
       newElem->SetParent(this);
       child = newElem;
       SetDirtyStructure();
     }  
 }
 
-MathMLElement*
-MathMLBinContainerElement::GetChild() const
-{
-  if (child != NULL) child->AddRef();
-  return child;
-}
-
 void
-MathMLBinContainerElement::SetChild(MathMLElement* elem)
+MathMLBinContainerElement::SetChild(const Ptr<MathMLElement>& elem)
 {
-  if (elem != NULL)
-    {
-      elem->AddRef();
-      elem->SetParent(this);
-    }
-
-  if (child != NULL) elem->Release();
-
+  if (elem != 0) elem->SetParent(this);
   child = elem;
 }

@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLRowElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLRowElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLRowElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLRowElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLRowElement(el)); }
 #endif
 
   // virtual void Normalize(void);
@@ -53,11 +55,11 @@ public:
   virtual bool IsSpaceLike(void) const;
   virtual bool IsExpanding(void) const;
 
-  OperatorFormId GetOperatorForm(MathMLElement*) const;
-  virtual class MathMLOperatorElement* GetCoreOperator();
+  OperatorFormId GetOperatorForm(const Ptr<MathMLElement>&) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator();
 
 private:
-  MathMLElement* lastElement;
+  Ptr<MathMLElement> lastElement;
 };
 
 #define TO_ROW(obj) (dynamic_cast<MathMLRowElement*>(obj))

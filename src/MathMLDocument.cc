@@ -39,20 +39,33 @@ MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
   : MathMLBinContainerElement()
   , DOMdoc(doc)
 {
-  assert(doc != 0);
-  
-  GMetaDOM::EventTarget et(doc);
-  assert(et != 0);
+  if (DOMdoc != 0)
+    {
+      GMetaDOM::EventTarget et(DOMdoc);
+      assert(et != 0);
 
-  et.addEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);
-  et.addEventListener("DOMNodeInserted", nodeInsertedListener, false);
-  et.addEventListener("DOMNodeRemoved", nodeRemovedListener, false);
-  et.addEventListener("DOMAttrModified", attrModifiedListener, false);
+      et.addEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);
+      et.addEventListener("DOMNodeInserted", nodeInsertedListener, false);
+      et.addEventListener("DOMNodeRemoved", nodeRemovedListener, false);
+      et.addEventListener("DOMAttrModified", attrModifiedListener, false);
+    }
 }
 #endif
 
 MathMLDocument::~MathMLDocument()
 {
+#if defined(HAVE_GMETADOM)
+  if (DOMdoc != 0)
+    {
+      GMetaDOM::EventTarget et(DOMdoc);
+      assert(et != 0);
+
+      et.removeEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);
+      et.removeEventListener("DOMNodeInserted", nodeInsertedListener, false);
+      et.removeEventListener("DOMNodeRemoved", nodeRemovedListener, false);
+      et.removeEventListener("DOMAttrModified", attrModifiedListener, false);
+    }
+#endif
 }
 
 void
@@ -65,10 +78,9 @@ MathMLDocument::Normalize()
       assert(node != 0);
       assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-      MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
       assert(elem != 0);
       SetChild(elem);
-      elem->Release();
 #endif // HAVE_GMETADOM
 
       if (child != 0) child->Normalize();

@@ -39,7 +39,7 @@ protected:
 		      scaled&, scaled&,
 		      scaled&, scaled&);
 
-  MathMLElement* base;
+  Ptr<MathMLElement> base;
 
   scaled sppex;
   scaled ruleThickness;

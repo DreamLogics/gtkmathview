@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLErrorElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLErrorElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLErrorElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLErrorElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLErrorElement(el)); }
 #endif
 
   virtual void Setup(RenderingEnvironment*);

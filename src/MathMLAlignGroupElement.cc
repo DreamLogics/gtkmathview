@@ -23,6 +23,9 @@
 #include <config.h>
 #include <assert.h>
 
+#include "MathMLMarkNode.hh"
+#include "MathMLTokenElement.hh"
+#include "MathMLAlignMarkElement.hh"
 #include "MathMLAlignGroupElement.hh"
 
 MathMLAlignGroupElement::MathMLAlignGroupElement()
@@ -42,9 +45,6 @@ void
 MathMLAlignGroupElement::Init()
 {
   width = 0;
-  decimalPoint = NULL;
-  alignMarkNode = NULL;
-  alignMarkElement = NULL;
 }
 
 MathMLAlignGroupElement::~MathMLAlignGroupElement()
@@ -61,26 +61,26 @@ MathMLAlignGroupElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth)
 }
 
 void
-MathMLAlignGroupElement::SetDecimalPoint(class MathMLTokenElement* token)
+MathMLAlignGroupElement::SetDecimalPoint(const Ptr<class MathMLTokenElement>& token)
 {
-  assert(token != NULL);
-  assert(decimalPoint == NULL);
+  assert(token != 0);
+  assert(decimalPoint == 0);
   decimalPoint = token;
 }
 
 void
-MathMLAlignGroupElement::SetAlignmentMark(class MathMLMarkNode* mark)
+MathMLAlignGroupElement::SetAlignmentMark(const Ptr<class MathMLMarkNode>& mark)
 {
-  assert(mark != NULL);
-  assert(alignMarkNode == NULL);
+  assert(mark != 0);
+  assert(alignMarkNode == 0);
   alignMarkNode = mark;
 }
 
 void
-MathMLAlignGroupElement::SetAlignmentMark(class MathMLAlignMarkElement* mark)
+MathMLAlignGroupElement::SetAlignmentMark(const Ptr<class MathMLAlignMarkElement>& mark)
 {
-  assert(mark != NULL);
-  assert(alignMarkElement == NULL);
+  assert(mark != 0);
+  assert(alignMarkElement == 0);
   alignMarkElement = mark;
 }
 

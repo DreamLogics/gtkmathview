@@ -31,35 +31,39 @@
 #include "MathMLContainerElement.hh"
 
 const BoundingBox&
-getFrameBoundingBox(MathMLFrame* frame, LayoutId id)
+getFrameBoundingBox(const Ptr<MathMLFrame>& frame, LayoutId id)
 {
-  assert(frame != NULL);
+  // why is this cast needed???
+  assert(frame != Ptr<MathMLFrame>(0));
 
-  if (id == LAYOUT_AUTO || !frame->IsElement()) return frame->GetBoundingBox();
-  else {
-    MathMLElement* elem = TO_ELEMENT(frame);
-    assert(elem != NULL);
-    if (id == LAYOUT_MIN) return elem->GetMinBoundingBox();
-    else return elem->GetMaxBoundingBox();
-  }
+  if (id == LAYOUT_AUTO || !frame->IsElement()) 
+    return frame->GetBoundingBox();
+  else
+    {
+      Ptr<MathMLElement> elem = smart_cast<MathMLElement>(frame);
+      assert(elem != 0);
+      if (id == LAYOUT_MIN) return elem->GetMinBoundingBox();
+      else return elem->GetMaxBoundingBox();
+    }
 }
 
-MathMLFrame*
-getFrameLeftSibling(const MathMLFrame* frame)
+Ptr<MathMLFrame>
+getFrameLeftSibling(const Ptr<MathMLFrame>& frame)
 {
-  assert(frame != NULL);
-  assert(frame->GetParent() != NULL);
+  assert(frame != 0);
+  assert(frame->GetParent() != 0);
 
   if (frame->GetParent()->IsToken())
     {
-      MathMLTokenElement* token = TO_TOKEN(frame->GetParent());
-      assert(token != NULL);
+      Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(frame->GetParent());
+      assert(token != 0);
 
-      MathMLFrame* left = NULL;
-      for (Iterator<MathMLTextNode*> p(token->GetContent()); p.More(); p.Next()) {
-	if (p() == frame) return left;
-	left = p();
-      }
+      Ptr<MathMLFrame> left = 0;
+      for (Iterator< Ptr<MathMLTextNode> > p(token->GetContent()); p.More(); p.Next())
+	{
+	  if (Ptr<MathMLFrame>(p()) == frame) return left;
+	  left = p();
+	}
     }
 #if 0
   // to be reimplemented when things stabilize again
@@ -69,32 +73,33 @@ getFrameLeftSibling(const MathMLFrame* frame)
       assert(row != NULL);
 
       MathMLElement* left = NULL;
-      for (Iterator<MathMLElement*> p(container->content); p.More(); p.Next()) {
+      for (Iterator< Ptr<MathMLElement> > p(container->content); p.More(); p.Next()) {
 	if (p() == frame) return left;
 	left = p();
       }
     }
 #endif
 
-  return NULL;
+  return 0;
 }
 
-MathMLFrame*
-getFrameRightSibling(const MathMLFrame* frame)
+Ptr<MathMLFrame>
+getFrameRightSibling(const Ptr<MathMLFrame>& frame)
 {
-  assert(frame != NULL);
-  assert(frame->GetParent() != NULL);
+  assert(frame != 0);
+  assert(frame->GetParent() != 0);
 
   if (frame->GetParent()->IsToken())
     {
-      MathMLTokenElement* token = TO_TOKEN(frame->GetParent());
-      assert(token != NULL);
+      Ptr<MathMLTokenElement> token = smart_cast<MathMLTokenElement>(frame->GetParent());
+      assert(token != 0);
 
-      for (Iterator<MathMLTextNode*> p(token->GetContent()); p.More(); p.Next())
-	if (p() == frame) {
-	  p.Next();
-	  if (p.More()) return p();
-	}
+      for (Iterator< Ptr<MathMLTextNode> > p(token->GetContent()); p.More(); p.Next())
+	if (Ptr<MathMLFrame>(p()) == frame)
+	  {
+	    p.Next();
+	    if (p.More()) return p();
+	  }
     } 
 #if 0
   // to be reimplemented when things stabilize again
@@ -111,5 +116,5 @@ getFrameRightSibling(const MathMLFrame* frame)
     }
 #endif
 
-  return NULL;
+  return 0;
 }

@@ -35,7 +35,7 @@
 #include "MathMLInvisibleTimesNode.hh"
 #include "MathMLStringNode.hh"
 
-MathMLTextNode*
+Ptr<MathMLTextNode>
 allocCharNode(Char ch)
 {
   switch (ch) {
@@ -54,13 +54,13 @@ allocCharNode(Char ch)
   }
 }
 
-MathMLTextNode*
+Ptr<MathMLTextNode>
 allocCombinedCharNode(Char ch, Char cch)
 {
   return MathMLCombinedCharNode::create(ch, cch);
 }
 
-MathMLTextNode*
+Ptr<MathMLTextNode>
 allocTextNode(const String** str)
 {
   assert(str != NULL);
@@ -70,7 +70,7 @@ allocTextNode(const String** str)
 
   unsigned len = s->GetLength();
 
-  MathMLTextNode* node = NULL;
+  Ptr<MathMLTextNode> node = 0;
 
   if (len == 1) {
     node = allocCharNode(s->GetChar(0));

@@ -28,12 +28,15 @@
 #include "MathMLNode.hh"
 #include "DrawingArea.hh"
 
-class MathMLFrame : public MathMLNode {
-public:
+class MathMLFrame : public MathMLNode
+{
+protected:
   MathMLFrame(void);
+  virtual ~MathMLFrame();
+
+public:
   virtual void   SetPosition(scaled, scaled) = 0;
   virtual void   Render(const DrawingArea&) = 0;
-  virtual ~MathMLFrame();
 
   scaled         GetX(void) const { return position.x; }
   scaled         GetY(void) const { return position.y; }
@@ -74,9 +77,5 @@ protected:
   unsigned    dirtyLayout : 1;
   unsigned    last : 1; // is != 0 is this frame is the last in a row
 };
-
-typedef MathMLFrame* MathMLFramePtr;
-
-#define TO_FRAME(object) (dynamic_cast<MathMLFrame*>(object))
 
 #endif // MathMLFrame_hh

@@ -88,9 +88,9 @@ MathMLActionElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
 {
   if (!HasDirtyLayout(id, availWidth)) return;
 
-  MathMLElement* elem = GetSelectedElement();
+  Ptr<MathMLElement> elem = GetSelectedElement();
 
-  if (elem != NULL) {
+  if (elem != 0) {
     elem->DoBoxedLayout(id, bid, availWidth);
     box = elem->GetBoundingBox();
   } else
@@ -104,16 +104,16 @@ MathMLActionElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled availWidth)
 void
 MathMLActionElement::DoLayout(LayoutId id, Layout& layout)
 {
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->DoLayout(id, layout);
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->DoLayout(id, layout);
   ResetDirtyLayout(id);
 }
 
 void
 MathMLActionElement::DoStretchyLayout()
 {
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->DoStretchyLayout();
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->DoStretchyLayout();
 }
 
 void
@@ -122,15 +122,15 @@ MathMLActionElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->SetPosition(x, y);
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->SetPosition(x, y);
 }
 
 void
 MathMLActionElement::Freeze()
 {
-  MathMLElement* elem = GetSelectedElement();
-  assert(elem != NULL);
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  assert(elem != 0);
 
   elem->Freeze();
 
@@ -149,8 +149,8 @@ MathMLActionElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
 
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->Render(area);
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->Render(area);
 
   ResetDirty();
 }
@@ -158,8 +158,8 @@ MathMLActionElement::Render(const DrawingArea& area)
 void
 MathMLActionElement::SetDirty(const Rectangle* rect)
 {
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) {
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) {
     elem->SetDirty(rect);
     // dirty-children has to be called explicitly because if the child is already
     // dirty, then it does not invoke SetDirtyChildren by itself
@@ -172,29 +172,29 @@ MathMLActionElement::SetDirty(const Rectangle* rect)
 bool
 MathMLActionElement::IsBreakable() const
 {
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->IsBreakable() : false;
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->IsBreakable() : false;
 }
 
 bool
 MathMLActionElement::IsExpanding() const
 {
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->IsExpanding() : false;
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->IsExpanding() : false;
 }
 
 bool
 MathMLActionElement::IsLast() const
 {
   if (last != 0) return true;
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->IsLast() : false;
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->IsLast() : false;
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLActionElement::GetSelectedElement() const
 {
-  return (selection < content.GetSize()) ? content.Get(selection) : NULL;
+  return (selection < content.GetSize()) ? content.Get(selection) : 0;
 }
 
 void
@@ -204,8 +204,8 @@ MathMLActionElement::SetSelectedIndex(unsigned i)
   if (selection == i - 1) return;
   selection = i - 1;
 
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->SetDirtyLayout(true);
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->SetDirtyLayout(true);
 }
 
 unsigned
@@ -217,31 +217,31 @@ MathMLActionElement::GetSelectedIndex() const
 BreakId
 MathMLActionElement::GetBreakability() const
 {
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->GetBreakability() : BREAK_AUTO;
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->GetBreakability() : BREAK_AUTO;
 }
 
 scaled
 MathMLActionElement::GetLeftEdge() const
 {
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->GetLeftEdge() : GetX();
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->GetLeftEdge() : GetX();
 }
 
 scaled
 MathMLActionElement::GetRightEdge() const
 {
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->GetRightEdge() : GetX();
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->GetRightEdge() : GetX();
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLActionElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return NULL;
+  if (!IsInside(x, y)) return 0;
 
-  MathMLElement* elem = GetSelectedElement();
-  return (elem != NULL) ? elem->Inside(x, y) : this;
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  return (elem != 0) ? elem->Inside(x, y) : this;
 }
 
 void
@@ -251,8 +251,8 @@ MathMLActionElement::SetSelected()
 
   selected = 1;
 
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->SetSelected();
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->SetSelected();
 
   SetDirty();
 }
@@ -264,8 +264,8 @@ MathMLActionElement::ResetSelected()
 
   SetDirty();
 
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->ResetSelected();
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->ResetSelected();
 
   selected = 0;
 }
@@ -274,8 +274,8 @@ void
 MathMLActionElement::ResetLast()
 {
   last = 0;
-  MathMLElement* elem = GetSelectedElement();
-  if (elem != NULL) elem->ResetLast();
+  Ptr<MathMLElement> elem = GetSelectedElement();
+  if (elem != 0) elem->ResetLast();
 }
 
 void
@@ -283,7 +283,7 @@ MathMLActionElement::SetDirtyLayout(bool children)
 {
   MathMLElement::SetDirtyLayout(children);
   if (children) {
-    MathMLElement* elem = GetSelectedElement();
-    if (elem != NULL) elem->SetDirtyLayout(children);
+    Ptr<MathMLElement> elem = GetSelectedElement();
+    if (elem != 0) elem->SetDirtyLayout(children);
   }
 }

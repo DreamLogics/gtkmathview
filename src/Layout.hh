@@ -25,14 +25,17 @@
 
 #include <stddef.h>
 
+#include "Ptr.hh"
 #include "scaled.hh"
 #include "keyword.hh"
 #include "Container.hh"
+#include "MathMLFrame.hh"
 
 #define INDENT_SPACING SCALED_POINTS_PER_CM
 #define MAX_PENALTY    10000
 
-class Layout {
+class Layout
+{
 public:
   explicit Layout(scaled, BreakId = BREAK_NO);
   ~Layout();
@@ -40,7 +43,7 @@ public:
   void   In(void);
   void   Out(void);
   int    GetPenalty(void) const { return penalty; }
-  void   Append(class MathMLFrame*, scaled, BreakId = BREAK_NO);
+  void   Append(const Ptr<class MathMLFrame>&, scaled, BreakId = BREAK_NO);
   void   Append(scaled, BreakId = BREAK_NO);
   void   DoLayout(LayoutId) const;
   void   SetLastBreakability(BreakId);
@@ -53,20 +56,24 @@ public:
   void   GetBoundingBox(struct BoundingBox&, LayoutId = LAYOUT_AUTO) const;
 
 private:
-  struct Atom {
-    class MathMLFrame* frame;
+  struct Atom
+  {
+    Atom(const Ptr<MathMLFrame>& f, scaled s, int p) : frame(f), spacing(s), penalty(p) { }
+
+    Ptr<MathMLFrame> frame;
     scaled spacing; // spacing after the frame (or just spacing if frame == NULL)
     int    penalty; // penalty if breaking after this atom
 
     scaled GetWidth(LayoutId) const;
     void   GetBoundingBox(struct BoundingBox&, LayoutId) const;
-    bool   IsFrame(void) const { return frame != NULL; }
-    bool   IsSpace(void) const { return frame == NULL; }
+    bool   IsFrame(void) const { return frame != 0; }
+    bool   IsSpace(void) const { return frame == 0; }
     bool   IsDiscardable(void) const { return IsSpace() && penalty < MAX_PENALTY; }
     void   SetPosition(scaled, scaled);
   };
 
-  struct Row {
+  struct Row
+  {
     Row(void);
 
     Container<Atom*> content;
@@ -83,7 +90,7 @@ private:
   };
 
   int  GetPenalty(BreakId) const;
-  void AppendAtom(class MathMLFrame*, scaled, BreakId);
+  void AppendAtom(const Ptr<class MathMLFrame>&, scaled, BreakId);
   void NewRow(void);
   void FindBreakPoint(Row*);
   void UpdateBreakPoint(Atom*);

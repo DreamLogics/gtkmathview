@@ -36,7 +36,7 @@
 MathMLFencedElement::MathMLFencedElement()
 {
   normalized = false;
-  openFence = closeFence = separators = NULL;  
+  openFence = closeFence = separators = NULL;
 }
 
 #if defined(HAVE_GMETADOM)
@@ -110,14 +110,14 @@ MathMLFencedElement::Normalize()
 void
 MathMLFencedElement::NormalizeFencedElement()
 {
-  MathMLRowElement* mainRow = TO_ROW(MathMLRowElement::create());
+  Ptr<MathMLRowElement> mainRow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
   assert(mainRow != 0);
 
-  MathMLRowElement* mrow = NULL;
-  MathMLOperatorElement* fence = NULL;
+  Ptr<MathMLRowElement> mrow = 0;
+  Ptr<MathMLOperatorElement> fence = 0;
 
-  if (openFence != NULL && openFence->GetLength() > 0) {
-    fence = TO_OPERATOR(MathMLOperatorElement::create());
+  if (openFence != 0 && openFence->GetLength() > 0) {
+    fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
     assert(fence != 0);
 
     fence->Append(openFence);
@@ -128,14 +128,14 @@ MathMLFencedElement::NormalizeFencedElement()
 
   bool moreArguments = content.GetSize() > 1;
 
-  if (moreArguments) mrow = TO_ROW(MathMLRowElement::create());
+  if (moreArguments) mrow = smart_cast<MathMLRowElement>(MathMLRowElement::create());
   else mrow = mainRow;
   assert(mrow != 0);
 
   unsigned i = 0;
   while (content.GetSize() > 0) {
-    MathMLElement* arg = content.RemoveFirst();
-    assert(arg != NULL);
+    Ptr<MathMLElement> arg = content.RemoveFirst();
+    assert(arg != 0);
 
     arg->SetParent(mrow);
     mrow->Append(arg);
@@ -147,7 +147,7 @@ MathMLFencedElement::NormalizeFencedElement()
       const String* sep = allocString(*separators, offset, 1);
       assert(sep != NULL);
 
-      MathMLOperatorElement* separator = TO_OPERATOR(MathMLOperatorElement::create());
+      Ptr<MathMLOperatorElement> separator = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
       assert(separator != 0);
 
       separator->SetSeparator();
@@ -165,7 +165,7 @@ MathMLFencedElement::NormalizeFencedElement()
   }
 
   if (closeFence != NULL && closeFence->GetLength() > 0) {
-    fence = TO_OPERATOR(MathMLOperatorElement::create());
+    fence = smart_cast<MathMLOperatorElement>(MathMLOperatorElement::create());
     assert(fence != 0);
 
     fence->Append(closeFence);

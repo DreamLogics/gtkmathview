@@ -556,9 +556,9 @@ MathMLCharNode::GetStretch() const
 }
 
 bool
-MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled& shiftY) const
+MathMLCharNode::CombineWith(const Ptr<MathMLCharNode>& cChar, scaled& shiftX, scaled& shiftY) const
 {
-  assert(cChar != NULL);
+  assert(cChar != 0);
   if (!IsFontified() || cChar->IsCombinedChar() || !cChar->IsFontified()) return false;
   if (!isCombining(cChar->GetChar())) return false;
 

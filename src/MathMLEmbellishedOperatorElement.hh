@@ -28,12 +28,12 @@
 class MathMLEmbellishedOperatorElement: public MathMLBinContainerElement
 {
 protected:
-  MathMLEmbellishedOperatorElement(class MathMLOperatorElement*);
+  MathMLEmbellishedOperatorElement(const Ptr<class MathMLOperatorElement>&);
   virtual ~MathMLEmbellishedOperatorElement();
 
 public:
-  static MathMLEmbellishedOperatorElement* create(class MathMLOperatorElement* elem)
-  { return new MathMLEmbellishedOperatorElement(elem); }
+  static Ptr<MathMLEmbellishedOperatorElement> create(const Ptr<class MathMLOperatorElement>& elem)
+  { return Ptr<MathMLEmbellishedOperatorElement>(new MathMLEmbellishedOperatorElement(elem)); }
 
   virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
@@ -41,17 +41,12 @@ public:
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsEmbellishedOperator(void) const;
-  virtual class MathMLOperatorElement* GetCoreOperator(void);
-
-  virtual const class MathMLCharNode* GetCharNode(void) const;
+  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void) { return coreOp; }
+  virtual Ptr<class MathMLCharNode> GetCharNode(void) const;
 
 private:
-  class MathMLOperatorElement* coreOp;
+  Ptr<class MathMLOperatorElement> coreOp;
   bool  script;
 };
-
-typedef MathMLEmbellishedOperatorElement* MathMLEmbellishedOperatorElementPtr;
-
-#define TO_EMBELLISHED_OPERATOR(node) (dynamic_cast<MathMLEmbellishedOperatorElement*>(node))
 
 #endif // MathMLEmbellishedOperatorElement_hh

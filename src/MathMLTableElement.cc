@@ -94,31 +94,35 @@ MathMLTableElement::~MathMLTableElement()
 void
 MathMLTableElement::Normalize()
 {
-  if (content.GetSize() == 0) {
-    MathMLTableRowElement* mtr = new MathMLTableRowElement(NULL);
-    mtr->SetParent(this);
-    content.Append(mtr);
+  if (content.GetSize() == 0)
+    {
+      Ptr<MathMLTableRowElement> mtr = smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
+      mtr->SetParent(this);
+      content.Append(mtr);
 
-    MathMLTableCellElement* mtd = new MathMLTableCellElement(NULL);
-    mtd->SetParent(mtr);
-    mtr->content.Append(mtd);
-  }
-
-  for (unsigned i = 0; i < content.GetSize(); i++) {
-    MathMLElement* elem = content.RemoveFirst();
-    assert(elem != NULL);
-
-    if (elem->IsA() != TAG_MTR && elem->IsA() != TAG_MLABELEDTR) {
-      MathMLTableRowElement *inferredTableRow = new MathMLTableRowElement(NULL);
-      inferredTableRow->content.Append(elem);
-
-      elem->SetParent(inferredTableRow);
-      inferredTableRow->SetParent(this);
-      elem = inferredTableRow;
+      Ptr<MathMLElement> mtd = MathMLTableCellElement::create();
+      mtd->SetParent(mtr);
+      mtr->content.Append(mtd);
     }
-    elem->Normalize();
-    content.Append(elem);
-  }
+
+  for (unsigned i = 0; i < content.GetSize(); i++)
+    {
+      Ptr<MathMLElement> elem = content.RemoveFirst();
+      assert(elem != 0);
+
+      if (elem->IsA() != TAG_MTR && elem->IsA() != TAG_MLABELEDTR)
+	{
+	  Ptr<MathMLTableRowElement> inferredTableRow = 
+	    smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create());
+	  inferredTableRow->content.Append(elem);
+
+	  elem->SetParent(inferredTableRow);
+	  inferredTableRow->SetParent(this);
+	  elem = inferredTableRow;
+	}
+      elem->Normalize();
+      content.Append(elem);
+    }
 }
 
 void
@@ -133,20 +137,20 @@ MathMLTableElement::SetPosition(scaled x, scaled y)
     scaled xOffset = frameHorizontalSpacing;
 
     if (HasLabels()) {
-      if (rowLabel[i].labelElement != NULL &&
+      if (rowLabel[i].labelElement != 0 &&
 	  (side == TABLE_SIDE_LEFT || side == TABLE_SIDE_LEFTOVERLAP))
 	  SetLabelPosition(i, x, y + yOffset + row[i].ascent);
       
       xOffset += leftPadding;
     }
 
-    if (row[i].mtr != NULL)
+    if (row[i].mtr != 0)
       row[i].mtr->SetPosition(x + xOffset, y + yOffset + row[i].ascent);
 
     for (unsigned j = 0; j < nColumns; j++) {
       TableCell* cell = GetCell(i, j);
 
-      if (cell->mtd != NULL && !cell->spanned) {
+      if (cell->mtd != 0 && !cell->spanned) {
 	const BoundingBox& cellBox = cell->mtd->GetBoundingBox();
 	cell->mtd->SetPosition(x + xOffset, y + yOffset + cellBox.ascent);
       }
@@ -158,7 +162,7 @@ MathMLTableElement::SetPosition(scaled x, scaled y)
     if (HasLabels()) {
       xOffset += frameHorizontalSpacing;
 
-      if (rowLabel[i].labelElement != NULL &&
+      if (rowLabel[i].labelElement != 0 &&
 	  (side == TABLE_SIDE_RIGHT || side == TABLE_SIDE_RIGHTOVERLAP))
 	SetLabelPosition(i, x + xOffset, y + yOffset + row[i].ascent);
     }
@@ -175,8 +179,8 @@ void
 MathMLTableElement::SetLabelPosition(unsigned i, scaled x, scaled y)
 {
   assert(i < nRows);
-  assert(rowLabel != NULL);
-  assert(rowLabel[i].labelElement != NULL);
+  assert(rowLabel != 0);
+  assert(rowLabel[i].labelElement != 0);
 
   const BoundingBox& labelBox = rowLabel[i].labelElement->GetBoundingBox();
 
@@ -234,7 +238,7 @@ MathMLTableElement::RenderTableBackground(const DrawingArea& area)
 
 #if 0   
   for (unsigned i = 0; i < nRows; i++) {
-    assert(row[i].mtr != NULL);
+    assert(row[i].mtr != 0);
     if (row[i].mtr->IsSelected()) {
       row[i].mtr->RenderBackground(area);
       return;
@@ -345,17 +349,16 @@ MathMLTableElement::Render(const DrawingArea& area)
   ResetDirty();
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLTableElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return NULL;
+  if (!IsInside(x, y)) return 0;
   
   for (unsigned i = 0; i < nRows; i++)
     for (unsigned j = 0; j < nColumns; j++)
       if (cell[i][j].mtd != NULL && !cell[i][j].spanned) {
-	MathMLElement* inside = cell[i][j].mtd->Inside(x, y);
-	
-	if (inside != NULL) return inside;
+	Ptr<MathMLElement> inside = cell[i][j].mtd->Inside(x, y);
+	if (inside != 0) return inside;
       }
 
   return MathMLLinearContainerElement::Inside(x, y);
@@ -393,10 +396,11 @@ MathMLTableElement::SetDirty(const Rectangle* rect)
     SetDirtyChildren();
   }
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->SetDirty(rect);
-  }  
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->SetDirty(rect);
+    }  
 }
 
 void

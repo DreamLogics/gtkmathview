@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLTableRowElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLTableRowElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLTableRowElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTableRowElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLTableRowElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -51,7 +53,7 @@ public:
   virtual void SetDirty(const Rectangle*);
   virtual bool IsInside(scaled, scaled) const;
 
-  MathMLElement* GetLabel(void) const;
+  Ptr<MathMLElement> GetLabel(void) const;
 
   friend class MathMLTableElement;
 

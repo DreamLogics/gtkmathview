@@ -21,6 +21,7 @@
 // <luca.padovani@cs.unibo.it>
 
 #include <config.h>
+#include <assert.h>
 
 #include "MathMLFrame.hh"
 #include "MathMLElement.hh"
@@ -63,7 +64,9 @@ MathMLFrame::SetDirtyChildren()
 {
   if (HasDirtyChildren()) return;
   dirtyChildren = 1;
-  for (MathMLElement* elem = GetParent(); elem != NULL && !elem->HasDirtyChildren(); elem = elem->GetParent())
+  for (Ptr<MathMLElement> elem = GetParent(); 
+       elem != 0 && !elem->HasDirtyChildren(); 
+       elem = elem->GetParent())
     elem->dirtyChildren = 1;
 }
 
@@ -72,7 +75,9 @@ MathMLFrame::SetDirtyLayout(bool)
 {
   if (HasDirtyLayout()) return;
   dirtyLayout = 1;
-  for (MathMLElement* elem = GetParent(); elem != NULL && !elem->HasDirtyLayout(); elem = elem->GetParent())
+  for (Ptr<MathMLElement> elem = GetParent(); 
+       elem != 0 && !elem->HasDirtyLayout(); 
+       elem = elem->GetParent())
     elem->dirtyLayout = 1;
 }
 

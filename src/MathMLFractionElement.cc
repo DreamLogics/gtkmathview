@@ -29,6 +29,7 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLFractionElement.hh"
+#include "MathMLOperatorElement.hh"
 
 MathMLFractionElement::MathMLFractionElement()
 {
@@ -65,18 +66,17 @@ MathMLFractionElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLFractionElement::Normalize()
 {
-  while (content.GetSize() > 2) {
-    MathMLElement* elem = content.RemoveLast();
-    if (elem != NULL) elem->Release();
-  }
+  while (content.GetSize() > 2)
+    content.RemoveLast();
 
-  while (content.GetSize() < 2) {
-    MathMLElement* mdummy = MathMLDummyElement::create();
-    assert(mdummy != 0);
+  while (content.GetSize() < 2)
+    {
+      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+      assert(mdummy != 0);
 
-    mdummy->SetParent(this);
-    content.Append(mdummy);
-  }
+      mdummy->SetParent(this);
+      content.Append(mdummy);
+    }
 
   MathMLLinearContainerElement::Normalize();
 }
@@ -187,9 +187,9 @@ MathMLFractionElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
 {
   if (!HasDirtyLayout(id, maxWidth)) return;
 
-  MathMLElement* num   = content.GetFirst();
-  MathMLElement* denom = content.GetLast();
-  assert(num != NULL && denom != NULL);
+  Ptr<MathMLElement> num   = content.GetFirst();
+  Ptr<MathMLElement> denom = content.GetLast();
+  assert(num != 0 && denom != 0);
 
   if (bevelled) {
     // the fraction is bevelled
@@ -265,9 +265,9 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
   position.x = x;
   position.y = y;
 
-  MathMLElement* num   = content.GetFirst();
-  MathMLElement* denom = content.GetLast();
-  assert(num != NULL && denom != NULL);
+  Ptr<MathMLElement> num   = content.GetFirst();
+  Ptr<MathMLElement> denom = content.GetLast();
+  assert(num != 0 && denom != 0);
 
   const BoundingBox& box      = GetBoundingBox();
   const BoundingBox& numBox   = num->GetBoundingBox();
@@ -327,9 +327,9 @@ MathMLFractionElement::Render(const DrawingArea& area)
 
   if (lineThickness > SP_EPSILON) {
     if (bevelled) {
-      MathMLElement* num   = content.GetFirst();
-      MathMLElement* denom = content.GetLast();
-      assert(num != NULL && denom != NULL);
+      Ptr<MathMLElement> num   = content.GetFirst();
+      Ptr<MathMLElement> denom = content.GetLast();
+      assert(num != 0 && denom != 0);
 
       const BoundingBox& numBox   = num->GetBoundingBox();
       const BoundingBox& denomBox = denom->GetBoundingBox();
@@ -354,9 +354,9 @@ MathMLFractionElement::Render(const DrawingArea& area)
 bool
 MathMLFractionElement::IsExpanding() const
 {
-  MathMLElement* num   = content.GetFirst();
-  MathMLElement* denom = content.GetLast();
-  assert(num != NULL && denom != NULL);
+  Ptr<MathMLElement> num   = content.GetFirst();
+  Ptr<MathMLElement> denom = content.GetLast();
+  assert(num != 0 && denom != 0);
 
   if (num->IsExpanding()) return true;
   if (denom->IsExpanding()) return true;
@@ -364,10 +364,10 @@ MathMLFractionElement::IsExpanding() const
   return false;
 }
 
-class MathMLOperatorElement*
+Ptr<class MathMLOperatorElement>
 MathMLFractionElement::GetCoreOperator()
 {
-  MathMLElement* num = content.GetFirst();
-  assert(num != NULL);
+  Ptr<MathMLElement> num = content.GetFirst();
+  assert(num != 0);
   return num->GetCoreOperator();
 }

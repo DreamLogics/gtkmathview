@@ -32,8 +32,8 @@ protected:
   virtual ~MathMLSpaceNode();
 
 public:
-  static MathMLSpaceNode* create(int s = 0, BreakId bid = BREAK_AUTO)
-  { return new MathMLSpaceNode(s, bid); }
+  static Ptr<MathMLSpaceNode> create(int s = 0, BreakId bid = BREAK_AUTO)
+  { return Ptr<MathMLSpaceNode>(new MathMLSpaceNode(s, bid)); }
 
   virtual void     Setup(class RenderingEnvironment*);
   virtual void     DoLayout(void);

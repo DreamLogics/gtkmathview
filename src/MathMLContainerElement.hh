@@ -49,7 +49,7 @@ public:
   virtual void Render(const DrawingArea&) = 0;
   virtual void ReleaseGCs(void) = 0;
   virtual bool IsContainer(void) const;
-  virtual MathMLElement* Inside(scaled, scaled) = 0;
+  virtual Ptr<MathMLElement> Inside(scaled, scaled) = 0;
 
   virtual bool IsLast(void) const = 0;
   virtual bool IsExpanding(void) const = 0;
@@ -58,12 +58,8 @@ public:
   virtual scaled GetLeftEdge(void) const = 0;
   virtual scaled GetRightEdge(void) const = 0;
 
-  virtual void Remove(MathMLElement*) = 0;
-  virtual void Replace(MathMLElement*, MathMLElement*) = 0;
+  virtual void Remove(const Ptr<MathMLElement>&) = 0;
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&) = 0;
 };
-
-typedef MathMLContainerElement* MathMLContainerElementPtr;
-
-#define TO_CONTAINER(object) (dynamic_cast<MathMLContainerElement*>(object))
 
 #endif // MathMLContainerElement_hh

@@ -62,9 +62,10 @@ MathMLEncloseElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLEncloseElement::NormalizeRadicalElement()
 {
-  assert(child != NULL);
+  assert(child != 0);
 
-  MathMLLinearContainerElement* sqrt = TO_LINEAR_CONTAINER(MathMLRadicalElement::create());
+  Ptr<MathMLLinearContainerElement> sqrt = smart_cast<MathMLLinearContainerElement>(MathMLRadicalElement::create());
+  assert(sqrt != 0);
   sqrt->Append(child);
   child->SetParent(sqrt);
   sqrt->SetParent(this);

@@ -39,9 +39,11 @@ protected:
   virtual ~MathMLRadicalElement();
 
 public:
-  static MathMLElement* create(void) { return new MathMLRadicalElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLRadicalElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLRadicalElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLRadicalElement(el)); }
 #endif
 
   virtual void Normalize(void);
@@ -54,14 +56,14 @@ public:
   virtual scaled GetLeftEdge(void) const;
 
 private:
-  class MathMLElement* GetNucleus(void) const;
-  class MathMLCharNode* GetRadicalSign(void) const;
+  Ptr<class MathMLElement> GetNucleus(void) const;
+  Ptr<class MathMLCharNode> GetRadicalSign(void) const;
   void DoBaseLayoutAux(BoundingBox&, const BoundingBox&);
 
   scaled spacing;
   scaled lineThickness;
 
-  MathMLCharNode* radical;
+  Ptr<MathMLCharNode> radical;
 
   RGBValue color;
 };

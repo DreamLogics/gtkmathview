@@ -45,10 +45,6 @@ MathMLLinearContainerElement::MathMLLinearContainerElement(const GMetaDOM::Eleme
 
 MathMLLinearContainerElement::~MathMLLinearContainerElement()
 {
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next()) {
-    assert(i() != 0);
-    i()->Release();
-  }
 }
 
 void
@@ -64,13 +60,12 @@ MathMLLinearContainerElement::Normalize()
 	  GMetaDOM::Node node = children.item(i);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-	  MathMLElement* elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
 	  // it might be that we get a NULL. In that case it would probably make
 	  // sense to create a dummy element, because we filtered MathML
 	  // elements only
 	  assert(elem != 0);
 	  SetChild(i, elem);
-	  elem->Release();
 	}
 
       // the following is to be sure that no spurious elements remain at the
@@ -82,10 +77,9 @@ MathMLLinearContainerElement::Normalize()
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
 
-      for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next())
+      for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
 	{
 	  assert(elem() != 0);
-	  printf("this: %p normalize: %p\n", this, elem());
 	  elem()->Normalize();
 	}
 
@@ -100,8 +94,8 @@ MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
 
   background = env->GetBackgroundColor();
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
+    assert(elem() != 0);
     elem()->Setup(env);
   }
 }
@@ -131,8 +125,8 @@ MathMLLinearContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled ava
     // an unbreakable container element will have all of its
     // children boxed, however the minimum box is to be called
     // by the overriding method!
-    for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-      assert(elem() != NULL);
+    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next()) {
+      assert(elem() != 0);
       elem()->DoBoxedLayout(id, bid, availWidth);
     }
   }
@@ -143,11 +137,12 @@ MathMLLinearContainerElement::DoBoxedLayout(LayoutId id, BreakId bid, scaled ava
 void
 MathMLLinearContainerElement::DoLayout(LayoutId id, Layout& layout)
 {
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    if (elem()->IsBreakable()) elem()->DoLayout(id, layout);
-    else layout.Append(elem(), 0);
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      if (elem()->IsBreakable()) elem()->DoLayout(id, layout);
+      else layout.Append(elem(), 0);
+    }
 
   ResetDirtyLayout(id);
 }
@@ -155,29 +150,32 @@ MathMLLinearContainerElement::DoLayout(LayoutId id, Layout& layout)
 void
 MathMLLinearContainerElement::DoStretchyLayout()
 {
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->DoStretchyLayout();
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->DoStretchyLayout();
+    }
 }
 
 void
 MathMLLinearContainerElement::Freeze()
 {
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->Freeze();
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->Freeze();
+    }
 
   if (!IsBreakable() || HasLayout()) MathMLElement::Freeze();
   else {
     if (shape != NULL) delete shape;
     ShapeFactory shapeFactory;
-    for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-      assert(elem() != NULL);
-      shapeFactory.Add(elem()->GetShape());
-      if (elem()->IsLast()) shapeFactory.SetNewRow();
-    }
+    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+      {
+	assert(elem() != 0);
+	shapeFactory.Add(elem()->GetShape());
+	if (elem()->IsLast()) shapeFactory.SetNewRow();
+      }
     shape = shapeFactory.GetShape();
   }
 }
@@ -189,10 +187,11 @@ MathMLLinearContainerElement::Render(const DrawingArea& area)
 
   RenderBackground(area);
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->Render(area);
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->Render(area);
+    }
 
   ResetDirty();
 }
@@ -204,26 +203,28 @@ MathMLLinearContainerElement::GetLinearBoundingBox(BoundingBox& b) const
     b = box;
   else {
     b.Null();
-    for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-      assert(elem() != NULL);
-      BoundingBox elemBox;
-      elem()->GetLinearBoundingBox(elemBox);
-      b.Append(elemBox);
-    }
+    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+      {
+	assert(elem() != 0);
+	BoundingBox elemBox;
+	elem()->GetLinearBoundingBox(elemBox);
+	b.Append(elemBox);
+      }
   }
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLLinearContainerElement::Inside(scaled x, scaled y)
 {
-  if (!IsInside(x, y)) return NULL;
+  if (!IsInside(x, y)) return 0;
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
 
-    MathMLElement* inside = elem()->Inside(x, y);
-    if (inside != NULL) return inside;
-  }
+      Ptr<MathMLElement> inside = elem()->Inside(x, y);
+      if (inside != 0) return inside;
+    }
 
   return this;
 }
@@ -233,10 +234,11 @@ MathMLLinearContainerElement::SetDirtyLayout(bool children)
 {
   MathMLElement::SetDirtyLayout(children);
   if (children) {
-    for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-      assert(elem() != NULL);
-      elem()->SetDirtyLayout(children);
-    }
+    for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+      {
+	assert(elem() != 0);
+	elem()->SetDirtyLayout(children);
+      }
   }
 }
 
@@ -255,7 +257,7 @@ MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
 #endif
 
   dirtyBackground =
-    (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+    (GetParent() != 0 && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
   if (IsDirty()) return;
   if (rect != NULL && !shape->Overlaps(*rect)) return;
@@ -263,10 +265,11 @@ MathMLLinearContainerElement::SetDirty(const Rectangle* rect)
   dirty = 1;
   SetDirtyChildren();
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->SetDirty(rect);
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->SetDirty(rect);
+    }
 }
 
 void
@@ -276,10 +279,11 @@ MathMLLinearContainerElement::SetSelected()
 
   selected = 1;
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->SetSelected();
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->SetSelected();
+    }
 
   SetDirty();
 }
@@ -291,10 +295,11 @@ MathMLLinearContainerElement::ResetSelected()
 
   SetDirty();
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->ResetSelected();
-  }  
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->ResetSelected();
+    }  
 
   selected = 0;
 }
@@ -303,23 +308,23 @@ void
 MathMLLinearContainerElement::ResetLast()
 {
   last = 0;
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next()) {
-    MathMLElement* elem = i();
-    assert(elem != NULL);
-
-    elem->ResetLast();
-  }  
+  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+    {
+      Ptr<MathMLElement> elem = i();
+      assert(elem != 0);
+      elem->ResetLast();
+    }  
 }
 
 bool
 MathMLLinearContainerElement::IsExpanding() const
 {
-  for (Iterator<MathMLElement*> i(content); i.More(); i.Next()) {
-    MathMLElement* elem = i();
-    assert(elem != NULL);
-
-    if (elem->IsExpanding()) return true;
-  }  
+  for (Iterator< Ptr<MathMLElement> > i(content); i.More(); i.Next())
+    {
+      Ptr<MathMLElement> elem = i();
+      assert(elem != 0);
+      if (elem->IsExpanding()) return true;
+    }  
   
   return false;
 }
@@ -328,10 +333,12 @@ bool
 MathMLLinearContainerElement::IsLast() const
 {
   if (last != 0) return true;
-  if (content.GetSize() > 0) {
-    assert(content.GetLast() != NULL);
-    return content.GetLast()->IsLast();
-  } else
+  if (content.GetSize() > 0)
+    {
+      assert(content.GetLast() != 0);
+      return content.GetLast()->IsLast();
+    }
+  else
     return false;
 }
 
@@ -339,7 +346,7 @@ BreakId
 MathMLLinearContainerElement::GetBreakability() const
 {
   if (content.GetSize() > 0 &&
-      content.GetLast() != NULL &&
+      content.GetLast() != 0 &&
       IsBreakable())
     return content.GetLast()->GetBreakability();
 
@@ -351,11 +358,12 @@ MathMLLinearContainerElement::GetLeftEdge() const
 {
   scaled edge = 0;
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    if (elem.IsFirst()) edge = elem()->GetLeftEdge();
-    else edge = scaledMin(edge, elem()->GetLeftEdge());
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      if (elem.IsFirst()) edge = elem()->GetLeftEdge();
+      else edge = scaledMin(edge, elem()->GetLeftEdge());
+    }
 
   return edge;
 }
@@ -365,11 +373,12 @@ MathMLLinearContainerElement::GetRightEdge() const
 {
   scaled edge = 0;
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    if (elem.IsFirst()) edge = elem()->GetRightEdge();
-    else edge = scaledMax(edge, elem()->GetRightEdge());
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      if (elem.IsFirst()) edge = elem()->GetRightEdge();
+      else edge = scaledMax(edge, elem()->GetRightEdge());
+    }
 
   return edge;
 }
@@ -379,10 +388,11 @@ MathMLLinearContainerElement::ReleaseGCs()
 {
   MathMLElement::ReleaseGCs();
 
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->ReleaseGCs();
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->ReleaseGCs();
+    }
 }
 
 void
@@ -392,18 +402,17 @@ MathMLLinearContainerElement::SetSize(unsigned size)
   while (size < GetSize()) Remove(content.GetLast());
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLLinearContainerElement::GetChild(unsigned i) const
 {
   assert(i < GetSize());
-  MathMLElement* elem = content.Get(i);
+  Ptr<MathMLElement> elem = content.Get(i);
   assert(elem != 0);
-  elem->AddRef();
   return elem;
 }
 
 void
-MathMLLinearContainerElement::SetChild(unsigned i, MathMLElement* elem)
+MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& elem)
 {
   assert(i <= GetSize());
   assert(elem != 0);
@@ -411,13 +420,11 @@ MathMLLinearContainerElement::SetChild(unsigned i, MathMLElement* elem)
   if (i == GetSize()) Append(elem);
   else
     {
-      MathMLElement* oldElem = content.Get(i);
+      Ptr<MathMLElement> oldElem = content.Get(i);
       assert(oldElem != 0);
       if (oldElem != elem)
 	{
-	  elem->AddRef();
 	  elem->SetParent(this);
-	  oldElem->Release();
 	  content.Set(i, elem);
 	  SetDirtyStructure();
 	}
@@ -425,27 +432,26 @@ MathMLLinearContainerElement::SetChild(unsigned i, MathMLElement* elem)
 }
 
 void
-MathMLLinearContainerElement::Append(MathMLElement* elem)
+MathMLLinearContainerElement::Append(const Ptr<MathMLElement>& elem)
 {
   assert(elem != 0);
-  elem->AddRef();
   elem->SetParent(this);
   content.Append(elem);
   SetDirtyStructure();
 }
 
 void
-MathMLLinearContainerElement::Remove(MathMLElement* elem)
+MathMLLinearContainerElement::Remove(const Ptr<MathMLElement>& elem)
 {
   assert(elem != 0);
   assert(content.Contains(elem));
   content.Remove(elem);
-  elem->Release();
   SetDirtyStructure();
 }
 
 void
-MathMLLinearContainerElement::Replace(MathMLElement* oldElem, MathMLElement* newElem)
+MathMLLinearContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
+				      const Ptr<MathMLElement>& newElem)
 {
   assert(oldElem != 0);
   assert(newElem != 0);

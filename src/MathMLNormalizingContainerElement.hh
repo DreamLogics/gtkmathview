@@ -48,7 +48,7 @@ public:
 
   virtual void RecalcBoundingBox(LayoutId, scaled = 0);
   virtual bool IsExpanding(void) const;
-  virtual MathMLOperatorElement* GetCoreOperator(void);
+  virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
 };
 
 #endif // MathMLNormalizingContainerElement_hh

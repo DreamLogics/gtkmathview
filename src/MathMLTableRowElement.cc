@@ -29,6 +29,7 @@
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
 #include "MathMLDummyElement.hh"
+#include "MathMLTableElement.hh"
 #include "MathMLTableRowElement.hh"
 #include "MathMLTableCellElement.hh"
 
@@ -73,30 +74,35 @@ MathMLTableRowElement::Normalize()
   if (IsA() == TAG_MLABELEDTR &&
       (content.GetSize() == 0 ||
        (content.GetSize() > 0 &&
-	content.GetFirst() != NULL &&
-	content.GetFirst()->IsA() == TAG_MTD))) {
-    Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
-    MathMLElement* mdummy = MathMLDummyElement::create();
-    assert(mdummy != 0);
-    mdummy->SetParent(this);
-    content.AddFirst(mdummy);
-  }
-
-  for (unsigned i = 0; i < content.GetSize(); i++) {
-    MathMLElement* elem = content.RemoveFirst();
-    assert(elem != NULL);
-
-    // if this is a labeled row, then the first child is always the label
-    // because of normalization (see above)
-    if (elem->IsA() != TAG_MTD && (IsA() == TAG_MTR || i > 0)) {
-      MathMLTableCellElement* inferredTableCell = new MathMLTableCellElement(NULL);
-      inferredTableCell->SetParent(this);
-      inferredTableCell->SetChild(elem);
-      elem = inferredTableCell;
+	content.GetFirst() != 0 &&
+	content.GetFirst()->IsA() == TAG_MTD)))
+    {
+      Globals::logger(LOG_WARNING, "`mlabeledtr' element without label (dummy label added)");
+      Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+      assert(mdummy != 0);
+      mdummy->SetParent(this);
+      content.AddFirst(mdummy);
     }
-    elem->Normalize();
-    content.Append(elem);
-  }
+
+  for (unsigned i = 0; i < content.GetSize(); i++)
+    {
+      Ptr<MathMLElement> elem = content.RemoveFirst();
+      assert(elem != 0);
+
+      // if this is a labeled row, then the first child is always the label
+      // because of normalization (see above)
+      if (elem->IsA() != TAG_MTD && (IsA() == TAG_MTR || i > 0))
+	{
+	  Ptr<MathMLTableCellElement> inferredTableCell =
+	    smart_cast<MathMLTableCellElement>(MathMLTableCellElement::create());
+	  assert(inferredTableCell != 0);
+	  inferredTableCell->SetParent(this);
+	  inferredTableCell->SetChild(elem);
+	  elem = inferredTableCell;
+	}
+      elem->Normalize();
+      content.Append(elem);
+    }
 }
 
 void
@@ -108,26 +114,28 @@ MathMLTableRowElement::SetupRowIndex(unsigned i)
 void
 MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 {
-  for (Iterator<MathMLElement*> p(content); p.More(); p.Next()) {
-    assert(p() != NULL);
+  for (Iterator< Ptr<MathMLElement> > p(content); p.More(); p.Next())
+    {
+      assert(p() != 0);
 
-    if (IsA() == TAG_MTR || p() != content.GetFirst()) {
-      assert(p()->IsA() == TAG_MTD);
+      if (IsA() == TAG_MTR || p() != content.GetFirst())
+	{
+	  assert(p()->IsA() == TAG_MTD);
 
-      MathMLTableCellElement* mtd = TO_TABLECELL(p());
-      assert(mtd != NULL);
+	  Ptr<MathMLTableCellElement> mtd = smart_cast<MathMLTableCellElement>(p());
+	  assert(mtd != 0);
 
-      mtd->SetupCellSpanning(env);
+	  mtd->SetupCellSpanning(env);
+	}
     }
-  }
 }
 
 void
 MathMLTableRowElement::Setup(RenderingEnvironment* env)
 {
-  assert(GetParent() != NULL);
-  MathMLTableElement* mtable = TO_TABLE(GetParent());
-  assert(mtable != NULL);
+  assert(GetParent() != 0);
+  Ptr<MathMLTableElement> mtable = smart_cast<MathMLTableElement>(GetParent());
+  assert(mtable != 0);
 
   const Value* value;
 
@@ -149,31 +157,33 @@ MathMLTableRowElement::SetDirty(const Rectangle* rect)
   // this function is needed because a table row does not have a
   // valid shape, its sole purpose is to call recursively SetDirty on
   // its children
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    elem()->SetDirty(rect);
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      elem()->SetDirty(rect);
+    }
 }
 
 bool
 MathMLTableRowElement::IsInside(scaled x, scaled y) const
 {
   // same arguments as for the SetDirty method above
-  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
-    assert(elem() != NULL);
-    if (elem()->IsInside(x, y)) return true;
-  }
+  for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+    {
+      assert(elem() != 0);
+      if (elem()->IsInside(x, y)) return true;
+    }
 
   return false;
 }
 
-MathMLElement*
+Ptr<MathMLElement>
 MathMLTableRowElement::GetLabel(void) const
 {
-  if (IsA() != TAG_MLABELEDTR) return NULL;
+  if (IsA() != TAG_MLABELEDTR) return 0;
 
   assert(content.GetSize() > 0);
-  assert(content.GetFirst() != NULL);
+  assert(content.GetFirst() != 0);
   assert(content.GetFirst()->IsA() != TAG_MTD);
 
   return content.GetFirst();

@@ -24,34 +24,14 @@
 
 #include "MathMLNode.hh"
 #include "MathMLElement.hh"
+#include "MathMLCharNode.hh"
 
-MathMLNode::MathMLNode()
+MathMLNode::MathMLNode() : parent(0)
 {
-  parent = 0;
 }
 
 MathMLNode::~MathMLNode()
 {
-  if (parent != 0)
-    {
-      parent->Release();
-      parent = 0;
-    }
-}
-
-MathMLElement*
-MathMLNode::GetParent() const
-{
-  if (parent != 0) parent->AddRef();
-  return parent;
-}
-
-void
-MathMLNode::SetParent(MathMLElement* p)
-{
-  if (p != 0) p->AddRef();
-  if (parent != 0) parent->Release();
-  parent = p;
 }
 
 bool
@@ -60,8 +40,20 @@ MathMLNode::IsNode() const
   return true;
 }
 
-const class MathMLCharNode*
+Ptr<MathMLCharNode>
 MathMLNode::GetCharNode() const
 {
   return 0;
+}
+
+void
+MathMLNode::SetParent(const Ptr<MathMLElement>& p)
+{
+  parent = p;
+}
+
+Ptr<MathMLElement>
+MathMLNode::GetParent() const
+{
+  return parent;
 }

@@ -27,7 +27,6 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLTableElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
 
 class MathMLTableCellElement: public MathMLNormalizingContainerElement
@@ -43,9 +42,11 @@ private:
   void Init(void);
 
 public:
-  static MathMLElement* create(void) { return new MathMLTableCellElement(); }
+  static Ptr<MathMLElement> create(void)
+  { return Ptr<MathMLElement>(new MathMLTableCellElement()); }
 #if defined(HAVE_GMETADOM)
-  static MathMLElement* create(const GMetaDOM::Element& el) { return new MathMLTableCellElement(el); }
+  static Ptr<MathMLElement> create(const GMetaDOM::Element& el)
+  { return Ptr<MathMLElement>(new MathMLTableCellElement(el)); }
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
@@ -68,12 +69,12 @@ protected:
   // the following method is declared static for efficiency reasons. In fact,
   // it does not access any non-static method of the class but it is recursive
   // (and relevant to the table cell)
-  static void SetupGroups(MathMLElement*, bool, bool, TableCell&);
+  static void SetupGroups(const Ptr<MathMLElement>&, bool, bool, class TableCell&);
   void CalcGroupsExtent(void);
 
   void SetupCellPosition(unsigned, unsigned, unsigned);
   void SetupCellSpanning(RenderingEnvironment*);
-  void SetupCell(TableCell*);
+  void SetupCell(class TableCell*);
 
 private:
   unsigned rowSpan;
@@ -81,13 +82,9 @@ private:
 
   unsigned rowIndex;
   unsigned columnIndex;
-  TableCell* cell;
+  class TableCell* cell;
 
   bool     alignmentScope;      // TRUE if this cell is within an alignment scope
 };
-
-typedef MathMLTableCellElement* MathMLTableCellElementPtr;
-
-#define TO_TABLECELL(object) (dynamic_cast<MathMLTableCellElement*>(object))
 
 #endif // MathMLTableCellElement_hh

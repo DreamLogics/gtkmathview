@@ -58,13 +58,13 @@ MathMLApplyFunctionNode::DoLayout()
   // left to right, at setup time for this node the information is not
   // available
 
-  assert(GetParent() != NULL);
+  assert(GetParent() != 0);
 
   box.Set(0, 0, 0);
 
   if (!GetParent()->IsOperator()) return;
 
-  MathMLElement* next = findRightSibling(GetParent());
+  Ptr<MathMLElement> next = findRightSibling(GetParent());
   if (next == NULL) return;
 
   switch (next->IsA()) {
@@ -73,16 +73,16 @@ MathMLApplyFunctionNode::DoLayout()
 
   case TAG_MO:
     {
-      MathMLOperatorElement* coreOp;
+      Ptr<MathMLOperatorElement> coreOp;
 
       if (next->IsEmbellishedOperator()) {
-	MathMLEmbellishedOperatorElement* op = TO_EMBELLISHED_OPERATOR(next);
-	assert(op != NULL);
+	Ptr<MathMLEmbellishedOperatorElement> op = smart_cast<MathMLEmbellishedOperatorElement>(next);
+	assert(op != 0);
 	coreOp = op->GetCoreOperator();
       } else {
-	coreOp = TO_OPERATOR(next);
+	coreOp = smart_cast<MathMLOperatorElement>(next);
       }
-      assert(coreOp != NULL);
+      assert(coreOp != 0);
 
       if (coreOp->IsFence()) return;
     }

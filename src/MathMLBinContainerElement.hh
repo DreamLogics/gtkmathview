@@ -48,7 +48,7 @@ public:
   virtual void Freeze(void);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
-  virtual MathMLElement* Inside(scaled, scaled);
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
   virtual void SetDirtyLayout(bool = false);
   virtual void SetDirty(const Rectangle* = NULL);
@@ -63,16 +63,14 @@ public:
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
 
-  virtual void Remove(MathMLElement*);
-  virtual void Replace(MathMLElement*, MathMLElement*);
+  virtual void Remove(const Ptr<MathMLElement>&);
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
 
-  MathMLElement* GetChild(void) const;
-  void         SetChild(MathMLElement*);
+  Ptr<MathMLElement> GetChild(void) const { return child; }
+  void         SetChild(const Ptr<MathMLElement>&);
 
 protected:
-  MathMLElement* child;
+  Ptr<MathMLElement> child;
 };
-
-#define TO_BIN_CONTAINER(object) (dynamic_cast<MathMLBinContainerElement*>(object))
 
 #endif // MathMLContainerElement_hh

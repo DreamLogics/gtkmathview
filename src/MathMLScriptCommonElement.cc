@@ -31,7 +31,6 @@
 
 MathMLScriptCommonElement::MathMLScriptCommonElement()
 {
-  base = NULL;
 }
 
 void
@@ -55,51 +54,64 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
 					  scaled& subShiftX, scaled& subShiftY,
 					  scaled& superShiftX, scaled& superShiftY)
 {
-  assert(base != NULL);
+  assert(base != 0);
 
   scaled u;
   scaled v;
 
-  MathMLElement* rel = findRightmostChild(base);
-  assert(rel != NULL);
+  Ptr<MathMLElement> rel = findRightmostChild(base);
+  assert(rel != 0);
 
-  const MathMLOperatorElement* coreOp = NULL;
-  if (rel->IsOperator()) coreOp = TO_OPERATOR(rel);
-  else if (rel->IsEmbellishedOperator()) {
-    MathMLEmbellishedOperatorElement* eOp = TO_EMBELLISHED_OPERATOR(rel);
-    assert(eOp != NULL);
-    coreOp = eOp->GetCoreOperator();
-  }
-
-  if ((rel->IsToken() && coreOp == NULL) || (coreOp != NULL && !coreOp->IsStretchy() && coreOp->IsFence())) {
-    u = v = 0;
-  } else {
-    u = baseBox.ascent - scriptAxis;
-    v = baseBox.descent + scriptAxis / 2;
-  }
-
-  if (superScriptBox.IsNull()) {
-    u = 0;
-    v = scaledMax(v, scaledMax(subMinShift, subScriptBox.ascent - (4 * sppex) / 5));
-  } else {
-    u = scaledMax(u, scaledMax(superMinShift, superScriptBox.descent + sppex / 4));
-
-    if (subScriptBox.IsNull()) {
-      v = 0;
-    } else {
-      v = scaledMax(v, subMinShift);
-
-      if ((u - superScriptBox.descent) - (subScriptBox.ascent - v) < 4 * ruleThickness) {
-	v = 4 * ruleThickness - u + superScriptBox.descent + subScriptBox.ascent;
-
-	scaled psi = (4 * sppex) / 5 - (u - superScriptBox.descent);
-	if (psi > 0) {
-	  u += psi;
-	  v -= psi;
-	}
-      }
+  Ptr<MathMLOperatorElement> coreOp = 0;
+  if (rel->IsOperator()) coreOp = smart_cast<MathMLOperatorElement>(rel);
+  else if (rel->IsEmbellishedOperator())
+    {
+      Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(rel);
+      assert(eOp != 0);
+      coreOp = eOp->GetCoreOperator();
     }
-  }
+
+  if ((rel->IsToken() && coreOp == 0) ||
+      (coreOp != 0 && !coreOp->IsStretchy() && coreOp->IsFence()))
+    {
+      u = v = 0;
+    } 
+  else
+    {
+      u = baseBox.ascent - scriptAxis;
+      v = baseBox.descent + scriptAxis / 2;
+    }
+
+  if (superScriptBox.IsNull())
+    {
+      u = 0;
+      v = scaledMax(v, scaledMax(subMinShift, subScriptBox.ascent - (4 * sppex) / 5));
+    } 
+  else
+    {
+      u = scaledMax(u, scaledMax(superMinShift, superScriptBox.descent + sppex / 4));
+
+      if (subScriptBox.IsNull())
+	{
+	  v = 0;
+	} 
+      else
+	{
+	  v = scaledMax(v, subMinShift);
+
+	  if ((u - superScriptBox.descent) - (subScriptBox.ascent - v) < 4 * ruleThickness)
+	    {
+	      v = 4 * ruleThickness - u + superScriptBox.descent + subScriptBox.ascent;
+
+	      scaled psi = (4 * sppex) / 5 - (u - superScriptBox.descent);
+	      if (psi > 0)
+		{
+		  u += psi;
+		  v -= psi;
+		}
+	    }
+	}
+    }
 
   superShiftY = u;
   superShiftX = scaledMax(baseBox.width, baseBox.rBearing + sppex / 5);
@@ -111,6 +123,6 @@ MathMLScriptCommonElement::DoScriptLayout(const BoundingBox& baseBox,
 bool
 MathMLScriptCommonElement::IsExpanding() const
 {
-  assert(base != NULL);
+  assert(base != 0);
   return base->IsExpanding();
 }

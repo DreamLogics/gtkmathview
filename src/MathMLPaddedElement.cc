@@ -49,7 +49,8 @@ MathMLPaddedElement::~MathMLPaddedElement()
 const AttributeSignature*
 MathMLPaddedElement::GetAttributeSignature(AttributeId id) const
 {
-  static AttributeSignature sig[] = {
+  static AttributeSignature sig[] =
+  {
     { ATTR_WIDTH,    paddedWidthParser, NULL,               NULL },
     { ATTR_LSPACE,   paddedValueParser, new StringC("0em"), NULL },
     { ATTR_HEIGHT,   paddedValueParser, NULL,               NULL },

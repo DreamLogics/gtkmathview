@@ -57,22 +57,23 @@ MathMLInvisibleTimesNode::DoLayout()
   // left to right, at setup time for this node the information is not
   // available
 
-  assert(GetParent() != NULL);
+  assert(GetParent() != 0);
 
   box.Set(0, 0, 0);
 
   if (!GetParent()->IsOperator()) return;
 
-  MathMLElement* prev = findLeftSibling(GetParent());
-  MathMLElement* next = findRightSibling(GetParent());
-  if (prev == NULL || next == NULL) return;
+  Ptr<MathMLElement> prev = findLeftSibling(GetParent());
+  Ptr<MathMLElement> next = findRightSibling(GetParent());
+  if (prev == 0 || next == 0) return;
 
   if (prev->IsA() == TAG_MI && next->IsA() == TAG_MI) {
-    MathMLTokenElement* prevToken = TO_TOKEN(prev);
-    MathMLTokenElement* nextToken = TO_TOKEN(next);
-    assert(prevToken != NULL && nextToken != NULL);
+    Ptr<MathMLTokenElement> prevToken = smart_cast<MathMLTokenElement>(prev);
+    Ptr<MathMLTokenElement> nextToken = smart_cast<MathMLTokenElement>(next);
+    assert(prevToken != 0 && nextToken != 0);
     
-    if (prevToken->GetLogicalContentLength() <= 1 && nextToken->GetLogicalContentLength() <= 1) return;
+    if (prevToken->GetLogicalContentLength() <= 1 &&
+	nextToken->GetLogicalContentLength() <= 1) return;
     
     // FIXME: the following constants should be defined somewhere
     box.Set((sppm * 5) / 18, 0, 0);

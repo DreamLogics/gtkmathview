@@ -33,7 +33,8 @@ protected:
   virtual ~MathMLCharNode();
 
 public:
-  static MathMLCharNode* create(Char c) { return new MathMLCharNode(c); }
+  static Ptr<MathMLCharNode> create(Char c)
+  { return Ptr<MathMLCharNode>(new MathMLCharNode(c)); }
 
   virtual void 	   Setup(class RenderingEnvironment*);
   virtual void 	   DoLayout(void);
@@ -57,7 +58,7 @@ public:
   virtual StretchId GetStretch(void) const;
   const AFont*     GetFont(void) const { return fChar.font; }
 
-  bool             CombineWith(const MathMLCharNode*, scaled&, scaled&) const;
+  bool             CombineWith(const Ptr<MathMLCharNode>&, scaled&, scaled&) const;
 
 protected:
   void DoVerticalStretchyLayoutAux(scaled, bool);
@@ -80,7 +81,5 @@ protected:
 
   StretchyCharLayout* layout;
 };
-
-#define TO_CHAR(node) (dynamic_cast<MathMLCharNode*>(node))
 
 #endif // MathMLCharNode_hh

@@ -25,8 +25,8 @@
 
 #include "MathMLElement.hh"
 
-const BoundingBox& getFrameBoundingBox(class MathMLFrame*, LayoutId = LAYOUT_AUTO);
-MathMLFrame* getFrameLeftSibling(const class MathMLFrame*);
-MathMLFrame* getFrameRightSibling(const class MathMLFrame*);
+const BoundingBox& getFrameBoundingBox(const Ptr<MathMLFrame>&, LayoutId = LAYOUT_AUTO);
+Ptr<MathMLFrame> getFrameLeftSibling(const Ptr<MathMLFrame>&);
+Ptr<MathMLFrame> getFrameRightSibling(const Ptr<MathMLFrame>&);
 
 #endif // frameAux_hh
