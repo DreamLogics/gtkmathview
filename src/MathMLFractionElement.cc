@@ -287,7 +287,7 @@ MathMLFractionElement::SetPosition(scaled x, scaled y)
     scaled denomXOffset = 0;
     switch (denomAlign) {
     case FRAC_ALIGN_CENTER:
-      denomXOffset = (box.width - scaledMax(denomBox.width, denomBox.rBearing)) / 2;
+      denomXOffset = (box.width - denomBox.width) / 2 - scaledMax(0, denomBox.rBearing - denomBox.width);
       break;
     case FRAC_ALIGN_RIGHT:
       denomXOffset = box.width - denomBox.width;

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "Layout.hh"
+#include "MathMLCharNode.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
@@ -62,10 +63,14 @@ MathMLEmbellishedOperatorElement::DoBoxedLayout(LayoutId id, BreakId, scaled ava
 
   content.GetFirst()->DoBoxedLayout(id, BREAK_NO, scaledMax(0, availWidth - totalPadding));
   box = content.GetFirst()->GetBoundingBox();
-  // WARNING
-  // the following patch is needed in order to have integral sign working
-  // fine, but it could affect badly other slanted symbols like /
-  box.width = scaledMax(box.width, box.rBearing);
+
+  // WARNING: maybe in this case we should ask for the LAST char node...
+  const MathMLCharNode* node = coreOp->GetCharNode();
+  if (node != NULL && isIntegral(node->GetChar())) {
+    // WARNING
+    // the following patch is needed in order to have integral sign working
+    box.width = scaledMax(box.width, box.rBearing);
+  }
   box.width += totalPadding;
 
   ConfirmLayout(id);
