@@ -2,7 +2,6 @@
 config.h
 config.h.in
 config.cache
-config.guess
 config.log
 config.status
 configure
