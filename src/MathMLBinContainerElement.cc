@@ -74,12 +74,11 @@ MathMLBinContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLBinContainerElement::Setup(RenderingEnvironment* env)
+MathMLBinContainerElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != 0);
   if (DirtyAttributeP())
     {
-      background = env->GetBackgroundColor();
+      background = env.GetBackgroundColor();
       if (child) child->Setup(env);
       ResetDirtyAttribute();
     }

@@ -27,7 +27,6 @@
 
 #include "Layout.hh"
 #include "ShapeFactory.hh"
-#include "RenderingEnvironment.hh"
 #include "MathMLContainerElement.hh"
 
 MathMLContainerElement::MathMLContainerElement()

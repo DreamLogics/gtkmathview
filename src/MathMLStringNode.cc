@@ -48,12 +48,12 @@ MathMLStringNode::IsString() const
 }
 
 void
-MathMLStringNode::Setup(RenderingEnvironment* env)
+MathMLStringNode::Setup(RenderingEnvironment& env)
 {
   assert(content != NULL);
 
   if (fContent != NULL) delete fContent;
-  fContent = new FontifiedString(*content, env->GetFontAttributes(), env->charMapper);
+  fContent = new FontifiedString(*content, env.GetFontAttributes(), env.charMapper);
 }
 
 void

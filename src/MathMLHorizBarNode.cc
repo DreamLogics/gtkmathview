@@ -41,10 +41,9 @@ MathMLHorizBarNode::~MathMLHorizBarNode()
 }
 
 void
-MathMLHorizBarNode::Setup(RenderingEnvironment* env)
+MathMLHorizBarNode::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-  thickness = env->GetRuleThickness();
+  thickness = env.GetRuleThickness();
 }
 
 void

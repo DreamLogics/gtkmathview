@@ -125,44 +125,56 @@ MathMLElement::GetDefaultAttributeValue(AttributeId id) const
 }
 
 const String*
-MathMLElement::GetAttribute(AttributeId id,
-			    const RenderingEnvironment* env,
-			    bool searchDefault) const
+MathMLElement::GetAttribute(AttributeId id, bool searchDefault) const
 {
-  const String* sValue = NULL;
+  const String* sValue = 0;
 
   // if this element is not connected with a DOM element
   // then it cannot have attributes. This may happen for
   // elements inferred with normalization
 #if defined(HAVE_MINIDOM)
-  if (node != NULL) {
-    mDOMStringRef value = mdom_node_get_attribute(node, DOM_CONST_STRING(NameOfAttributeId(id)));
-    if (value != NULL) {
-      sValue = allocString(value);
-      mdom_string_free(value);
+  if (node != 0)
+    {
+      mDOMStringRef value = mdom_node_get_attribute(node, DOM_CONST_STRING(NameOfAttributeId(id)));
+      if (value != 0)
+	{
+	  sValue = allocString(value);
+	  mdom_string_free(value);
+	}
     }
-  }
 #elif defined(HAVE_GMETADOM)
-  if (node) {
-    GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
-    if (!value.empty()) sValue = allocString(value);
-  }
+  if (node)
+    {
+      GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
+      if (!value.empty()) sValue = allocString(value);
+    }
 #endif // HAVE_GMETADOM
 
-  if (sValue == NULL && env != NULL) {
-    const MathMLAttribute* attr = env->GetAttribute(id);
-    if (attr != NULL) sValue = attr->GetValue();
-  }
+  if (sValue == 0 && searchDefault) sValue = GetDefaultAttribute(id);
 
-  if (sValue == NULL && searchDefault) sValue = GetDefaultAttribute(id);
+  return sValue;
+}
+
+const String*
+MathMLElement::GetAttribute(AttributeId id,
+			    const RenderingEnvironment& env,
+			    bool searchDefault) const
+{
+  const String* sValue = GetAttribute(id, false);
+
+  if (sValue == 0)
+    {
+      const MathMLAttribute* attr = env.GetAttribute(id);
+      if (attr != 0) sValue = attr->GetValue();
+    }
+
+  if (sValue == 0 && searchDefault) sValue = GetDefaultAttribute(id);
 
   return sValue;
 }
 
 const Value*
-MathMLElement::GetAttributeValue(AttributeId id,
-				 const RenderingEnvironment* env,
-				 bool searchDefault) const
+MathMLElement::GetAttributeValue(AttributeId id, bool searchDefault) const
 {
   const Value* value = NULL;
 
@@ -172,70 +184,88 @@ MathMLElement::GetAttributeValue(AttributeId id,
   const String* sValue = NULL;
 
 #if defined(HAVE_MINIDOM)
-  if (node != NULL) {
-    mDOMStringRef value = mdom_node_get_attribute(node,
-						  DOM_CONST_STRING(NameOfAttributeId(id)));
-    if (value != NULL) {
-      sValue = allocString(value);
-      mdom_string_free(value);
+  if (node != 0)
+    {
+      mDOMStringRef value = mdom_node_get_attribute(node,
+						    DOM_CONST_STRING(NameOfAttributeId(id)));
+      if (value != 0) {
+	sValue = allocString(value);
+	mdom_string_free(value);
+      }
     }
-  }
 #elif defined(HAVE_GMETADOM)
-  if (node) {
-    GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
-    if (!value.empty()) sValue = allocString(value);
-  }
+  if (node)
+    {
+      GMetaDOM::GdomeString value = node.getAttribute(NameOfAttributeId(id));
+      if (!value.empty()) sValue = allocString(value);
+    }
 #endif // HAVE_GMETADOM
 
-  if (sValue != NULL) {
-    AttributeParser parser = aSignature->GetParser();
-    assert(parser != NULL);
+  if (sValue != 0)
+    {
+      AttributeParser parser = aSignature->GetParser();
+      assert(parser != 0);
 
-    StringTokenizer st(*sValue);
-    value = parser(st);
+      StringTokenizer st(*sValue);
+      value = parser(st);
 
-    if (value == NULL) {
-      Globals::logger(LOG_WARNING, "in element `%s' parsing error in attribute `%s'",
-			 NameOfTagId(IsA()), NameOfAttributeId(id));
+      if (value == 0)
+	Globals::logger(LOG_WARNING, "in element `%s' parsing error in attribute `%s'",
+			NameOfTagId(IsA()), NameOfAttributeId(id));
+
+      delete sValue;
+      sValue = 0;
+    } 
+
+  if (value == 0 && searchDefault) value = GetDefaultAttributeValue(id);
+
+  return value;
+}
+
+const Value*
+MathMLElement::GetAttributeValue(AttributeId id, 
+				 const RenderingEnvironment& env,
+				 bool searchDefault) const
+{
+  const Value* value = GetAttributeValue(id, false);
+
+  if (value == 0)
+    {
+      const AttributeSignature* aSignature = GetAttributeSignature(id);
+      assert(aSignature != 0);
+      const MathMLAttribute* attr = env.GetAttribute(id);    
+      if (attr != 0) value = attr->GetParsedValue(aSignature);
     }
 
-    delete sValue;
-    sValue = NULL;
-  } else if (env != NULL) {
-    const MathMLAttribute* attr = env->GetAttribute(id);    
-    if (attr != NULL) value = attr->GetParsedValue(aSignature);
-  }
-
-  if (value == NULL && searchDefault) value = GetDefaultAttributeValue(id);
+  if (value == 0 && searchDefault) value = GetDefaultAttributeValue(id);
 
   return value;
 }
 
 const Value*
 MathMLElement::Resolve(const Value* value,
-		       const RenderingEnvironment* env,
+		       const RenderingEnvironment& env,
 		       int i, int j)
 {
   assert(value != NULL);
-  assert(env != NULL);
 
   const Value* realValue = value->Get(i, j);
   assert(realValue != NULL);
 
   if      (realValue->IsKeyword(KW_VERYVERYTHINMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_VERYVERYTHIN));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_VERYVERYTHIN));
   else if (realValue->IsKeyword(KW_VERYTHINMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_VERYTHIN));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_VERYTHIN));
   else if (realValue->IsKeyword(KW_THINMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_THIN));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_THIN));
   else if (realValue->IsKeyword(KW_MEDIUMMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_MEDIUM));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_MEDIUM));
   else if (realValue->IsKeyword(KW_THICKMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_THICK));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_THICK));
   else if (realValue->IsKeyword(KW_VERYTHICKMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_VERYTHICK));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_VERYTHICK));
   else if (realValue->IsKeyword(KW_VERYVERYTHICKMATHSPACE))
-    realValue = new Value(env->GetMathSpace(MATH_SPACE_VERYVERYTHICK));
+    realValue = new Value(env.GetMathSpace(MATH_SPACE_VERYVERYTHICK));
   else
     // the following cloning is necessary because values returned by
     // the resolving function must always be deleted (never cached)
@@ -265,11 +295,11 @@ MathMLElement::IsSet(AttributeId id) const
 }
 
 void
-MathMLElement::Setup(RenderingEnvironment* env)
+MathMLElement::Setup(RenderingEnvironment& env)
 {
   if (DirtyAttribute() || DirtyAttributeP())
     {
-      background = env->GetBackgroundColor();
+      background = env.GetBackgroundColor();
       ResetDirtyAttribute();
     }
 }

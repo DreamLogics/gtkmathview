@@ -56,14 +56,12 @@ MathMLGlyphNode::~MathMLGlyphNode()
 }
 
 void
-MathMLGlyphNode::Setup(RenderingEnvironment* env)
+MathMLGlyphNode::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
-  FontAttributes glyphAttributes = env->GetFontAttributes();
+  FontAttributes glyphAttributes = env.GetFontAttributes();
   glyphAttributes.family = fontFamily;
   glyphAttributes.mode = FONT_MODE_ANY;
-  font = env->charMapper.GetFont(glyphAttributes);
+  font = env.charMapper.GetFont(glyphAttributes);
 }
 
 void

@@ -75,28 +75,33 @@ MathMLEncloseElement::NormalizeRadicalElement(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLEncloseElement::Setup(RenderingEnvironment* env)
+MathMLEncloseElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
+  if (DirtyAttribute())
+    {
+      const Value* value = GetAttributeValue(ATTR_NOTATION, env);
+      assert(value != NULL);
+      if (value->IsKeyword(KW_LONGDIV)) notation = NOTATION_LONGDIV;
+      else if (value->IsKeyword(KW_ACTUARIAL)) notation = NOTATION_ACTUARIAL;
+      else if (value->IsKeyword(KW_RADICAL)) notation = NOTATION_RADICAL;
+      else assert(IMPOSSIBLE);
+      delete value;
+      
+      spacing = env.ToScaledPoints(env.GetMathSpace(MATH_SPACE_MEDIUM));
+      lineThickness = env.GetRuleThickness();
+      color = env.GetColor();
+      
+      if (!normalized)
+	{
+	  if (notation == NOTATION_RADICAL) NormalizeRadicalElement(env.GetDocument());
+	  normalized = true;
+	}
+    }
+  
+  if (DirtyAttributeP())
+    MathMLNormalizingContainerElement::Setup(env);
 
-  const Value* value = GetAttributeValue(ATTR_NOTATION, env);
-  assert(value != NULL);
-  if (value->IsKeyword(KW_LONGDIV)) notation = NOTATION_LONGDIV;
-  else if (value->IsKeyword(KW_ACTUARIAL)) notation = NOTATION_ACTUARIAL;
-  else if (value->IsKeyword(KW_RADICAL)) notation = NOTATION_RADICAL;
-  else assert(IMPOSSIBLE);
-  delete value;
-
-  spacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_MEDIUM));
-  lineThickness = env->GetRuleThickness();
-  color = env->GetColor();
-
-  if (!normalized) {
-    if (notation == NOTATION_RADICAL) NormalizeRadicalElement(env->GetDocument());
-    normalized = true;
-  }
-
-  MathMLNormalizingContainerElement::Setup(env);
+  ResetDirtyAttribute();
 }
 
 void

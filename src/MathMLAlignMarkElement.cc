@@ -66,16 +66,19 @@ MathMLAlignMarkElement::Normalize(const Ptr<class MathMLDocument>&)
 }
 
 void
-MathMLAlignMarkElement::Setup(RenderingEnvironment* env)
+MathMLAlignMarkElement::Setup(RenderingEnvironment& env)
 {
-  const Value* value = GetAttributeValue(ATTR_EDGE, env);
-  assert(value != NULL);
-  assert(value->IsKeyword());
-  if   (value->IsKeyword(KW_RIGHT)) edge = MARK_ALIGN_RIGHT;
-  else edge = MARK_ALIGN_LEFT;
-  delete value;
-
-  box.Null();
+  if (DirtyAttribute())
+    {
+      const Value* value = GetAttributeValue(ATTR_EDGE, env);
+      assert(value != NULL);
+      assert(value->IsKeyword());
+      if   (value->IsKeyword(KW_RIGHT)) edge = MARK_ALIGN_RIGHT;
+      else edge = MARK_ALIGN_LEFT;
+      delete value;
+      box.Null();
+      ResetDirtyAttribute();
+    }
 }
 
 void

@@ -55,7 +55,7 @@ public:
 #endif
 
   virtual void Normalize(void);
-  virtual void Setup(class RenderingEnvironment*);
+  virtual void Setup(class RenderingEnvironment&);
   virtual void SetDirtyAttribute(void);
 
   Ptr<MathMLElement> GetRoot(void) const { return GetChild(); }

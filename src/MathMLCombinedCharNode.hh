@@ -35,7 +35,7 @@ public:
   static Ptr<MathMLCombinedCharNode> create(Char c, Char cc)
   { return Ptr<MathMLCombinedCharNode>(new MathMLCombinedCharNode(c, cc)); }
 
-  virtual void    Setup(RenderingEnvironment*);
+  virtual void    Setup(class RenderingEnvironment&);
   virtual void    DoLayout(const class FormattingContext&);
   virtual void    SetPosition(scaled, scaled);
   virtual void    Render(const DrawingArea&);

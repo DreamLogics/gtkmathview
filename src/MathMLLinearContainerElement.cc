@@ -90,13 +90,12 @@ MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLLinearContainerElement::Setup(RenderingEnvironment* env)
+MathMLLinearContainerElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
   if (DirtyAttributeP())
     {
-      background = env->GetBackgroundColor();
-      std::for_each(content.begin(), content.end(), std::bind2nd(SetupAdaptor(), env));
+      background = env.GetBackgroundColor();
+      std::for_each(content.begin(), content.end(), std::bind2nd(SetupAdaptor(), &env));
       ResetDirtyAttribute();
     }
 }

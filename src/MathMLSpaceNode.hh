@@ -35,7 +35,7 @@ public:
   static Ptr<MathMLSpaceNode> create(int s = 0)
   { return Ptr<MathMLSpaceNode>(new MathMLSpaceNode(s)); }
 
-  virtual void     Setup(class RenderingEnvironment*);
+  virtual void     Setup(class RenderingEnvironment&);
   virtual void     DoLayout(const class FormattingContext&);
   virtual void     Render(const DrawingArea&);
 

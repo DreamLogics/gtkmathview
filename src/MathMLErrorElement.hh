@@ -46,7 +46,7 @@ public:
   { return Ptr<MathMLElement>(new MathMLErrorElement(el)); }
 #endif
 
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
 };
 
 #endif // MathMLErrorElement_hh

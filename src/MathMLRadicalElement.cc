@@ -148,16 +148,14 @@ MathMLRadicalElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLRadicalElement::Setup(RenderingEnvironment* env)
+MathMLRadicalElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   if (DirtyAttribute())
     {
-      spacing       = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_MEDIUM));
-      color         = env->GetColor();
-      background    = env->GetBackgroundColor();
-      lineThickness = env->GetRuleThickness();
+      spacing       = env.ToScaledPoints(env.GetMathSpace(MATH_SPACE_MEDIUM));
+      color         = env.GetColor();
+      background    = env.GetBackgroundColor();
+      lineThickness = env.GetRuleThickness();
     }
 
   if (DirtyAttributeP())
@@ -166,11 +164,11 @@ MathMLRadicalElement::Setup(RenderingEnvironment* env)
       if (radicand) radicand->Setup(env);
       if (index)
 	{
-	  env->Push();
-	  env->SetDisplayStyle(false);
-	  env->AddScriptLevel(2);
+	  env.Push();
+	  env.SetDisplayStyle(false);
+	  env.AddScriptLevel(2);
 	  index->Setup(env);
-	  env->Drop();
+	  env.Drop();
 	}
     }
 

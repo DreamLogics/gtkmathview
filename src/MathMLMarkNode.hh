@@ -36,7 +36,7 @@ public:
   static Ptr<MathMLMarkNode> create(MarkAlignType t)
   { return Ptr<MathMLMarkNode>(new MathMLMarkNode(t)); }
   
-  virtual void     Setup(class RenderingEnvironment*);
+  virtual void     Setup(class RenderingEnvironment&);
   virtual void     DoLayout(const class FormattingContext&);
   virtual void     Render(const DrawingArea&);
 

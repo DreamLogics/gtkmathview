@@ -49,7 +49,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void    Normalize(const Ptr<class MathMLDocument>&);
-  virtual void    Setup(class RenderingEnvironment*);
+  virtual void    Setup(class RenderingEnvironment&);
   virtual void    DoLayout(const class FormattingContext&);
 
   virtual bool    IsSpace(void) const;

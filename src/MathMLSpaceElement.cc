@@ -71,29 +71,27 @@ MathMLSpaceElement::Normalize(const Ptr<class MathMLDocument>&)
 }
 
 void
-MathMLSpaceElement::Setup(RenderingEnvironment* env)
+MathMLSpaceElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   if (DirtyAttribute())
     {
-      background = env->GetBackgroundColor();
+      background = env.GetBackgroundColor();
 
       const Value* value = NULL;
 
       value = GetAttributeValue(ATTR_WIDTH);
       assert(value != NULL && value->IsNumberUnit());
-      scaled width = env->ToScaledPoints(value->ToNumberUnit());
+      scaled width = env.ToScaledPoints(value->ToNumberUnit());
       delete value;
 
       value = GetAttributeValue(ATTR_HEIGHT);
       assert(value != NULL && value->IsNumberUnit());
-      scaled height = env->ToScaledPoints(value->ToNumberUnit());
+      scaled height = env.ToScaledPoints(value->ToNumberUnit());
       delete value;
 
       value = GetAttributeValue(ATTR_DEPTH);
       assert(value != NULL && value->IsNumberUnit());
-      scaled depth = env->ToScaledPoints(value->ToNumberUnit());
+      scaled depth = env.ToScaledPoints(value->ToNumberUnit());
       delete value;
 
       box.Set(width, height, depth);

@@ -48,7 +48,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
 
 private:
   void DelayedNormalize(const Ptr<class MathMLDocument>&);

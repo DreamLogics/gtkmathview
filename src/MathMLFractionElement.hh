@@ -48,7 +48,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void   Normalize(const Ptr<class MathMLDocument>&);
-  virtual void   Setup(RenderingEnvironment*);
+  virtual void   Setup(RenderingEnvironment&);
   virtual void   DoLayout(const class FormattingContext&);
   virtual void   SetPosition(scaled, scaled);
 #if 0

@@ -182,7 +182,7 @@ MathMLRenderingEngine::Setup()
       env.SetFontSize(size);
       Clock perf;
       perf.Start();
-      document->Setup(&env);
+      document->Setup(env);
       perf.Stop();
       Globals::logger(LOG_INFO, "setup time: %dms", perf());
       // ?????? root->SetDirtyLayout(true);

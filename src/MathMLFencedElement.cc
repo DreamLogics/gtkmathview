@@ -90,28 +90,29 @@ MathMLFencedElement::Normalize(const Ptr<MathMLDocument>&)
 }
 
 void
-MathMLFencedElement::Setup(RenderingEnvironment* env)
+MathMLFencedElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
+  if (DirtyAttribute())
+    {
+      const Value* value = NULL;
 
-  const Value* value = NULL;
+      value = GetAttributeValue(ATTR_OPEN, env);
+      if (value != NULL && value->ToString() != NULL) openFence = value->ToString()->Clone();
+      else openFence = NULL;
+      delete value;
 
-  value = GetAttributeValue(ATTR_OPEN, env);
-  if (value != NULL && value->ToString() != NULL) openFence = value->ToString()->Clone();
-  else openFence = NULL;
-  delete value;
+      value = GetAttributeValue(ATTR_CLOSE, env);
+      if (value != NULL && value->ToString() != NULL) closeFence = value->ToString()->Clone();
+      else closeFence = NULL;
+      delete value;
 
-  value = GetAttributeValue(ATTR_CLOSE, env);
-  if (value != NULL && value->ToString() != NULL) closeFence = value->ToString()->Clone();
-  else closeFence = NULL;
-  delete value;
+      value = GetAttributeValue(ATTR_SEPARATORS, env, false);
+      if (value != NULL && value->ToString() != NULL) separators = value->ToString()->Clone();
+      else separators = NULL;
+      delete value;
 
-  value = GetAttributeValue(ATTR_SEPARATORS, env, false);
-  if (value != NULL && value->ToString() != NULL) separators = value->ToString()->Clone();
-  else separators = NULL;
-  delete value;
-
-  DelayedNormalize(env->GetDocument());
+      DelayedNormalize(env.GetDocument());
+    }
 
   MathMLBinContainerElement::Setup(env);
 }

@@ -189,14 +189,11 @@ MathMLScriptElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLScriptElement::Setup(RenderingEnvironment* env)
+MathMLScriptElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   if (DirtyAttribute())
     {
       MathMLElement::Setup(env);
-
       ScriptSetup(env);
     }
 
@@ -204,9 +201,9 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
     {
       if (base) base->Setup(env);
 
-      env->Push();
-      env->AddScriptLevel(1);
-      env->SetDisplayStyle(false);
+      env.Push();
+      env.AddScriptLevel(1);
+      env.SetDisplayStyle(false);
 
       const Value* value = NULL;
 
@@ -222,7 +219,7 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 	      UnitValue unitValue = value->ToNumberUnit();
 	      assert(!unitValue.IsPercentage());
 
-	      subMinShift = env->ToScaledPoints(unitValue);
+	      subMinShift = env.ToScaledPoints(unitValue);
 
 	      delete value;
 	    }
@@ -240,13 +237,13 @@ MathMLScriptElement::Setup(RenderingEnvironment* env)
 	      UnitValue unitValue = value->ToNumberUnit();
 	      assert(!unitValue.IsPercentage());
 
-	      superMinShift = env->ToScaledPoints(unitValue);
+	      superMinShift = env.ToScaledPoints(unitValue);
 
 	      delete value;
 	    }
 	}
 
-      env->Drop();
+      env.Drop();
     }
 
   ResetDirtyAttribute();

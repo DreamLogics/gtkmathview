@@ -44,10 +44,9 @@ MathMLInvisibleTimesNode::~MathMLInvisibleTimesNode()
 }
 
 void
-MathMLInvisibleTimesNode::Setup(class RenderingEnvironment* env)
+MathMLInvisibleTimesNode::Setup(class RenderingEnvironment& env)
 {
-  assert(env != NULL);  
-  sppm = env->GetScaledPointsPerEm();
+  sppm = env.GetScaledPointsPerEm();
 }
 
 void

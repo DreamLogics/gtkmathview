@@ -35,7 +35,7 @@ public:
   static Ptr<MathMLInvisibleTimesNode> create(void)
   { return Ptr<MathMLInvisibleTimesNode>(new MathMLInvisibleTimesNode()); }
 
-  virtual void     Setup(class RenderingEnvironment*);
+  virtual void     Setup(class RenderingEnvironment&);
   virtual void     DoLayout(void);
 
   virtual unsigned GetLogicalContentLength(void) const;

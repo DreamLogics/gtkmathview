@@ -151,7 +151,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-  virtual void Setup(class RenderingEnvironment*);
+  virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const class DrawingArea&);
@@ -172,18 +172,18 @@ protected:
 
   // table setup
   void 	       CalcTableSize(void);
-  void 	       SetupCellSpanning(class RenderingEnvironment*);
+  void 	       SetupCellSpanning(class RenderingEnvironment&);
   void 	       SetupCells(void);
-  void 	       SetupColumns(class RenderingEnvironment*);
-  void 	       SetupAlignmentScopes(class RenderingEnvironment*);
-  void 	       SetupColumnAlign(class RenderingEnvironment*);
-  void 	       SetupRows(class RenderingEnvironment*);
-  void 	       SetupRowAlign(class RenderingEnvironment*);
+  void 	       SetupColumns(class RenderingEnvironment&);
+  void 	       SetupAlignmentScopes(class RenderingEnvironment&);
+  void 	       SetupColumnAlign(class RenderingEnvironment&);
+  void 	       SetupRows(class RenderingEnvironment&);
+  void 	       SetupRowAlign(class RenderingEnvironment&);
   void         SetupLabels(void);
   void 	       SetupGroups(void);
-  void 	       SetupGroupAlign(class RenderingEnvironment*);
+  void 	       SetupGroupAlign(class RenderingEnvironment&);
   void 	       SetupAlignMarks(void);
-  void 	       SetupTableAttributes(class RenderingEnvironment*);
+  void 	       SetupTableAttributes(class RenderingEnvironment&);
   void 	       AlignTable(scaled, BoundingBox&);
   void         ReleaseAuxStructures(void);
 

@@ -39,7 +39,7 @@ struct SetupAdaptor
   : public std::binary_function<Ptr<MathMLElement>,class RenderingEnvironment*,void>
 {
   void operator()(const Ptr<MathMLElement>& elem, class RenderingEnvironment* env) const
-  { elem->Setup(env); }
+  { elem->Setup(*env); }
 };
 
 struct DoLayoutAdaptor

@@ -52,14 +52,12 @@ MathMLCharNode::~MathMLCharNode()
 }
 
 void
-MathMLCharNode::Setup(RenderingEnvironment* env)
+MathMLCharNode::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   delete layout;
   layout = NULL;
 
-  if (env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), ch)) {
+  if (env.charMapper.FontifyChar(fChar, env.GetFontAttributes(), ch)) {
     assert(fChar.font != NULL);
     assert(fChar.charMap != NULL);
 
@@ -70,7 +68,7 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
 
   FontifiedChar sChar;
 
-  if (env->charMapper.FontifyStretchyChar(sChar, env->GetFontAttributes(), ch)) {
+  if (env.charMapper.FontifyStretchyChar(sChar, env.GetFontAttributes(), ch)) {
     assert(sChar.font != NULL);
     assert(sChar.charMap != NULL);
     
@@ -86,7 +84,7 @@ MathMLCharNode::Setup(RenderingEnvironment* env)
   
   if (fChar.font == NULL && layout == NULL) {
     // no glyph found
-    scaled sppex = env->GetScaledPointsPerEx();
+    scaled sppex = env.GetScaledPointsPerEx();
     box.Set(sppex, (2 * sppex) / 3, sppex / 3);
   }
 }

@@ -41,18 +41,18 @@ MathMLErrorElement::~MathMLErrorElement()
 {
 }
 
-void MathMLErrorElement::Setup(RenderingEnvironment* env)
+void MathMLErrorElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      env.Push();
+      RGBValue color = env.GetColor();
 
-  env->Push();
+      if (color == RED_COLOR) env.SetColor(BLUE_COLOR);
+      else env.SetColor(RED_COLOR);
 
-  RGBValue color = env->GetColor();
-
-  if (color == RED_COLOR) env->SetColor(BLUE_COLOR);
-  else env->SetColor(RED_COLOR);
-
-  MathMLNormalizingContainerElement::Setup(env);
-
-  env->Drop();
+      MathMLNormalizingContainerElement::Setup(env);
+      env.Drop();
+      ResetDirtyAttribute();
+    }
 }

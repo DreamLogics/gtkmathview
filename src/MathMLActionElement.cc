@@ -64,10 +64,8 @@ MathMLActionElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLActionElement::Setup(RenderingEnvironment* env)
+MathMLActionElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   const String* sValue = GetAttribute(ATTR_ACTIONTYPE, env, false);
   if (sValue != NULL) {
     if (!sValue->Equal("toggle"))

@@ -109,7 +109,7 @@ MathMLTableRowElement::SetupRowIndex(unsigned i)
 }
 
 void
-MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
+MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment& env)
 {
   for (std::vector< Ptr<MathMLElement> >::iterator p = content.begin();
        p != content.end();
@@ -123,7 +123,7 @@ MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment* env)
 }
 
 void
-MathMLTableRowElement::Setup(RenderingEnvironment* env)
+MathMLTableRowElement::Setup(RenderingEnvironment& env)
 {
   if (DirtyAttribute())
     {
@@ -133,14 +133,14 @@ MathMLTableRowElement::Setup(RenderingEnvironment* env)
 
       const Value* value;
 
-      value = GetAttributeValue(ATTR_COLUMNALIGN, NULL, false);
-      if (value != NULL) mtable->SetupColumnAlignAux(value, rowIndex, 1, IsA() == TAG_MLABELEDTR);
+      value = GetAttributeValue(ATTR_COLUMNALIGN, false);
+      if (value != 0) mtable->SetupColumnAlignAux(value, rowIndex, 1, IsA() == TAG_MLABELEDTR);
 
-      value = GetAttributeValue(ATTR_ROWALIGN, NULL, false);
-      if (value != NULL) mtable->SetupRowAlignAux(value, rowIndex, IsA() == TAG_MLABELEDTR);
+      value = GetAttributeValue(ATTR_ROWALIGN, false);
+      if (value != 0) mtable->SetupRowAlignAux(value, rowIndex, IsA() == TAG_MLABELEDTR);
 
-      value = GetAttributeValue(ATTR_GROUPALIGN, NULL, false);
-      if (value != NULL) mtable->SetupGroupAlignAux(value, rowIndex, 1);
+      value = GetAttributeValue(ATTR_GROUPALIGN, false);
+      if (value != 0) mtable->SetupGroupAlignAux(value, rowIndex, 1);
     }
 
   MathMLLinearContainerElement::Setup(env);

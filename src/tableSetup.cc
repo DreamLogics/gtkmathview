@@ -34,14 +34,12 @@
 #include "MathMLLabeledTableRowElement.hh"
 
 void
-MathMLTableElement::Setup(RenderingEnvironment* env)
+MathMLTableElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-  
   if (DirtyAttribute() || DirtyAttributeP())
     {
-      color = env->GetColor();
-      lineThickness = env->GetRuleThickness();
+      color = env.GetColor();
+      lineThickness = env.GetRuleThickness();
 
       ReleaseAuxStructures();
 
@@ -75,7 +73,7 @@ MathMLTableElement::Setup(RenderingEnvironment* env)
 }
 
 void
-MathMLTableElement::SetupCellSpanning(RenderingEnvironment* env)
+MathMLTableElement::SetupCellSpanning(RenderingEnvironment& env)
 {
   for (std::vector< Ptr<MathMLElement> >::const_iterator i = GetContent().begin();
        i != GetContent().end();
@@ -262,7 +260,7 @@ MathMLTableElement::SetupCells()
 }
 
 void
-MathMLTableElement::SetupColumns(RenderingEnvironment* env)
+MathMLTableElement::SetupColumns(RenderingEnvironment& env)
 {
   if (nColumns == 0) return;
   unsigned i = 0;
@@ -296,7 +294,7 @@ MathMLTableElement::SetupColumns(RenderingEnvironment* env)
 	column[i].scaleWidth = unitValue.GetValue();
       } else {
 	column[i].widthType  = COLUMN_WIDTH_FIXED;
-	column[i].fixedWidth = env->ToScaledPoints(unitValue);
+	column[i].fixedWidth = env.ToScaledPoints(unitValue);
       }
     }
 
@@ -318,7 +316,7 @@ MathMLTableElement::SetupColumns(RenderingEnvironment* env)
       column[i].scaleSpacing = unitValue.GetValue();
     } else {
       column[i].spacingType  = SPACING_FIXED;
-      column[i].fixedSpacing = env->ToScaledPoints(unitValue);
+      column[i].fixedSpacing = env.ToScaledPoints(unitValue);
     }
 
     delete v;
@@ -328,7 +326,7 @@ MathMLTableElement::SetupColumns(RenderingEnvironment* env)
 }
 
 void
-MathMLTableElement::SetupAlignmentScopes(RenderingEnvironment* env)
+MathMLTableElement::SetupAlignmentScopes(RenderingEnvironment& env)
 {
   const Value* value = GetAttributeValue(ATTR_ALIGNMENTSCOPE, env);
   assert(value != NULL);
@@ -345,7 +343,7 @@ MathMLTableElement::SetupAlignmentScopes(RenderingEnvironment* env)
 }
 
 void
-MathMLTableElement::SetupColumnAlign(RenderingEnvironment* env)
+MathMLTableElement::SetupColumnAlign(RenderingEnvironment& env)
 {
   const Value* value = GetAttributeValue(ATTR_COLUMNALIGN, env);
   SetupColumnAlignAux(value, 0, nRows);
@@ -389,7 +387,7 @@ MathMLTableElement::SetupColumnAlignAux(const Value* value,
 }
 
 void
-MathMLTableElement::SetupRows(RenderingEnvironment* env)
+MathMLTableElement::SetupRows(RenderingEnvironment& env)
 {
   if (nRows == 0) return;
   unsigned i = 0;
@@ -433,7 +431,7 @@ MathMLTableElement::SetupRows(RenderingEnvironment* env)
       row[i].scaleSpacing = unitValue.GetValue();
     } else {
       row[i].spacingType  = SPACING_FIXED;
-      row[i].fixedSpacing = env->ToScaledPoints(unitValue);
+      row[i].fixedSpacing = env.ToScaledPoints(unitValue);
     }
   }
 
@@ -441,7 +439,7 @@ MathMLTableElement::SetupRows(RenderingEnvironment* env)
 }
 
 void
-MathMLTableElement::SetupRowAlign(RenderingEnvironment* env)
+MathMLTableElement::SetupRowAlign(RenderingEnvironment& env)
 {
   const Value* value = GetAttributeValue(ATTR_ROWALIGN, env);
   assert(value != NULL);
@@ -543,7 +541,7 @@ MathMLTableElement::SetupGroups()
 }
 
 void
-MathMLTableElement::SetupGroupAlign(RenderingEnvironment* env)
+MathMLTableElement::SetupGroupAlign(RenderingEnvironment& env)
 {
   const Value* value = GetAttributeValue(ATTR_GROUPALIGN, env);
   SetupGroupAlignAux(value, 0, nRows);
@@ -591,7 +589,7 @@ MathMLTableElement::SetupAlignMarks()
 // finally, setup any attribute relative to the table itself and not
 // any sub-element
 void
-MathMLTableElement::SetupTableAttributes(RenderingEnvironment* env)
+MathMLTableElement::SetupTableAttributes(RenderingEnvironment& env)
 {
   const Value* value = NULL;
   const Value* p = NULL;
@@ -611,7 +609,7 @@ MathMLTableElement::SetupTableAttributes(RenderingEnvironment* env)
   else if (p->IsKeyword(KW_BASELINE)) align = TABLE_ALIGN_BASELINE;
   else if (p->IsKeyword(KW_AXIS)) {
     align = TABLE_ALIGN_AXIS;
-    environmentAxis = env->GetAxis();
+    environmentAxis = env.GetAxis();
   } else assert(IMPOSSIBLE);
 
   p = value->Get(1);
@@ -672,7 +670,7 @@ MathMLTableElement::SetupTableAttributes(RenderingEnvironment* env)
       scaleWidth = unitValue.GetValue();
     } else {
       widthType = WIDTH_FIXED;
-      fixedWidth = env->ToScaledPoints(unitValue);
+      fixedWidth = env.ToScaledPoints(unitValue);
     }
   }
 
@@ -692,7 +690,7 @@ MathMLTableElement::SetupTableAttributes(RenderingEnvironment* env)
     frameHorizontalScaleSpacing = unitValue.GetValue();
   } else {
     frameHorizontalSpacingType  = SPACING_FIXED;
-    frameHorizontalFixedSpacing = env->ToScaledPoints(unitValue);
+    frameHorizontalFixedSpacing = env.ToScaledPoints(unitValue);
   }
 
   delete p;
@@ -706,7 +704,7 @@ MathMLTableElement::SetupTableAttributes(RenderingEnvironment* env)
     frameVerticalScaleSpacing = unitValue.GetValue();
   } else {
     frameVerticalSpacingType  = SPACING_FIXED;
-    frameVerticalFixedSpacing = env->ToScaledPoints(unitValue);
+    frameVerticalFixedSpacing = env.ToScaledPoints(unitValue);
   }
 
   delete p;
@@ -763,7 +761,7 @@ MathMLTableElement::SetupTableAttributes(RenderingEnvironment* env)
     minLabelScaleSpacing = unitValue.GetValue();
   } else {
     minLabelSpacingType  = SPACING_FIXED;
-    minLabelFixedSpacing = env->ToScaledPoints(unitValue);
+    minLabelFixedSpacing = env.ToScaledPoints(unitValue);
   }
 
   delete value;

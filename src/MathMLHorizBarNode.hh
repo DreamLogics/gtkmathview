@@ -36,7 +36,7 @@ public:
   static Ptr<MathMLHorizBarNode> create(Char c)
   { return Ptr<MathMLHorizBarNode>(new MathMLHorizBarNode(c)); }
 
-  virtual void 	 Setup(class RenderingEnvironment*);
+  virtual void 	 Setup(class RenderingEnvironment&);
   virtual void 	 DoLayout(void);
   virtual void 	 Render(const DrawingArea&);
 

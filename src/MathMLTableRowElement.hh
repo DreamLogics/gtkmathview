@@ -49,7 +49,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
   
   //virtual void SetDirty(const Rectangle*);
   virtual bool IsInside(scaled, scaled) const;
@@ -59,8 +59,8 @@ public:
   friend class MathMLTableElement;
 
 protected:
-  void SetupCellSpanning(RenderingEnvironment*);
-  void SetupGroupAlign(RenderingEnvironment*);
+  void SetupCellSpanning(RenderingEnvironment&);
+  void SetupGroupAlign(RenderingEnvironment&);
   void SetupRowIndex(unsigned);
 
 private:

@@ -52,7 +52,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-  virtual void Setup(class RenderingEnvironment*);
+  virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
 
   bool         IsStretchy(void) const { return stretchy != 0; }
@@ -85,8 +85,8 @@ public:
 private:
   OperatorFormId InferOperatorForm(void) const;
   const Value* GetOperatorAttributeValue(AttributeId,
-					 const class RenderingEnvironment*) const;
-  void ParseLimitValue(const Value*, const class RenderingEnvironment*, float&, scaled&);
+					 const class RenderingEnvironment&) const;
+  void ParseLimitValue(const Value*, const class RenderingEnvironment&, float&, scaled&);
 
   Ptr<class MathMLEmbellishedOperatorElement> eOp; // ptr to the root of the embellished operator
 

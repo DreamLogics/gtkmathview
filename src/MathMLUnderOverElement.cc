@@ -179,15 +179,13 @@ MathMLUnderOverElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLUnderOverElement::Setup(RenderingEnvironment* env)
+MathMLUnderOverElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   if (DirtyAttribute())
     {
       assert(base);
 
-      bool displayStyle = env->GetDisplayStyle();
+      bool displayStyle = env.GetDisplayStyle();
 
       ScriptSetup(env);
 
@@ -202,8 +200,8 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
       else
 	scriptize = false;
 
-      env->Push();
-      env->SetDisplayStyle(false);
+      env.Push();
+      env.SetDisplayStyle(false);
 
       accentUnder = false;
       underSpacing = 0;
@@ -227,15 +225,15 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 	  if (accentUnder) underSpacing = smallSpacing;
 	  else
 	    {
-	      env->AddScriptLevel(1);
+	      env.AddScriptLevel(1);
 	      underSpacing = displayStyle ? bigSpacing : smallSpacing;
 	    }
 	  underScript->Setup(env);
 	}
 
-      env->Drop();
-      env->Push();
-      env->SetDisplayStyle(false);
+      env.Drop();
+      env.Push();
+      env.SetDisplayStyle(false);
 
       accent = false;
       overSpacing = 0;
@@ -262,13 +260,13 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
 	    } 
 	  else
 	    {
-	      env->AddScriptLevel(1);
+	      env.AddScriptLevel(1);
 	      overSpacing = displayStyle ? bigSpacing : smallSpacing;
 	    }
 	  overScript->Setup(env);
 	}
   
-      env->Drop();
+      env.Drop();
 
       ResetDirtyAttribute();
     }

@@ -47,7 +47,7 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
+  virtual void Setup(class RenderingEnvironment&);
   virtual void Render(const DrawingArea&);
 
   virtual bool IsSpaceLike(void) const;

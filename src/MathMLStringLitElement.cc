@@ -63,10 +63,8 @@ MathMLStringLitElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLStringLitElement::Setup(RenderingEnvironment* env)
+MathMLStringLitElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   const String* s = NULL;
 
   if (setupDone)

@@ -50,7 +50,7 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
   virtual void SetPosition(scaled, scaled);
   virtual void DoLayout(const class FormattingContext&);
 
@@ -75,7 +75,7 @@ protected:
   void CalcGroupsExtent(void);
 
   void SetupCellPosition(unsigned, unsigned, unsigned);
-  void SetupCellSpanning(RenderingEnvironment*);
+  void SetupCellSpanning(RenderingEnvironment&);
   void SetupCell(class TableCell*);
 
 private:

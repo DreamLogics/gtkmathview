@@ -64,38 +64,38 @@ MathMLPaddedElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLPaddedElement::Setup(RenderingEnvironment* env)
+MathMLPaddedElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
+  if (DirtyAttribute())
+    {
+      width.valid = lSpace.valid = height.valid = depth.valid = false;
 
-  width.valid = lSpace.valid = height.valid = depth.valid = false;
+      const Value* value = GetAttributeValue(ATTR_WIDTH, false);
+      if (value != NULL) ParseLengthDimension(env, value, width, KW_WIDTH);
+      delete value;
 
-  const Value* value = GetAttributeValue(ATTR_WIDTH, NULL, false);
-  if (value != NULL) ParseLengthDimension(env, value, width, KW_WIDTH);
-  delete value;
+      value = GetAttributeValue(ATTR_LSPACE);
+      if (value != NULL) ParseLengthDimension(env, value, lSpace, KW_LSPACE);
+      delete value;
 
-  value = GetAttributeValue(ATTR_LSPACE, NULL, true);
-  if (value != NULL) ParseLengthDimension(env, value, lSpace, KW_LSPACE);
-  delete value;
+      value = GetAttributeValue(ATTR_HEIGHT, false);
+      if (value != NULL) ParseLengthDimension(env, value, height, KW_HEIGHT);
+      delete value;
 
-  value = GetAttributeValue(ATTR_HEIGHT, NULL, false);
-  if (value != NULL) ParseLengthDimension(env, value, height, KW_HEIGHT);
-  delete value;
-
-  value = GetAttributeValue(ATTR_DEPTH, NULL, false);
-  if (value != NULL) ParseLengthDimension(env, value, depth, KW_DEPTH);
-  delete value;
+      value = GetAttributeValue(ATTR_DEPTH, false);
+      if (value != NULL) ParseLengthDimension(env, value, depth, KW_DEPTH);
+      delete value;
+    }
 
   MathMLNormalizingContainerElement::Setup(env);
 }
 
 void
-MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
+MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment& env,
 					  const Value* value,
 					  LengthDimension& dim,
 					  KeywordId pseudoUnitId)
 {
-  assert(env != NULL);
   assert(value != NULL);
 
   assert(value->IsSequence());
@@ -149,10 +149,10 @@ MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
       if (unitId != UNIT_NOTVALID) {
 	UnitValue unitValue;
 	unitValue.Set(1.0, unitId);
-	dim.unit = env->ToScaledPoints(unitValue);
+	dim.unit = env.ToScaledPoints(unitValue);
       } else {
 	MathSpaceId spaceId = ToNamedSpaceId(v);
-	dim.unit = env->ToScaledPoints(env->GetMathSpace(spaceId));
+	dim.unit = env.ToScaledPoints(env.GetMathSpace(spaceId));
       }
     }
   }

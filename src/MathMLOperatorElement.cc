@@ -127,16 +127,14 @@ MathMLOperatorElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLOperatorElement::Setup(RenderingEnvironment* env)
+MathMLOperatorElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   if (DirtyAttribute())
     {
       const Value* value = NULL;
       const Value* resValue = NULL;
 
-      axis = env->GetAxis();
+      axis = env.GetAxis();
 
       value = GetAttributeValue(ATTR_FORM, env, false);
       if (value != NULL) form = ToFormId(value);
@@ -176,7 +174,7 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
       assert(value != NULL);
       resValue = Resolve(value, env);
       assert(resValue != NULL && resValue->IsNumberUnit());
-      lSpace = env->ToScaledPoints(resValue->ToNumberUnit());
+      lSpace = env.ToScaledPoints(resValue->ToNumberUnit());
       delete resValue;
       delete value;
 
@@ -184,19 +182,19 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
       assert(value != NULL);
       resValue = Resolve(value, env);
       assert(resValue != NULL && resValue->IsNumberUnit());
-      rSpace = env->ToScaledPoints(resValue->ToNumberUnit());
+      rSpace = env.ToScaledPoints(resValue->ToNumberUnit());
       delete resValue;
       delete value;
 
 #ifdef ENABLE_EXTENSIONS
       value = GetOperatorAttributeValue(ATTR_TSPACE, env);
       assert(value != NULL && value->IsNumberUnit());
-      tSpace = env->ToScaledPoints(value->ToNumberUnit());
+      tSpace = env.ToScaledPoints(value->ToNumberUnit());
       delete value;
 
       value = GetOperatorAttributeValue(ATTR_BSPACE, env);
       assert(value != NULL && value->IsNumberUnit());
-      bSpace = env->ToScaledPoints(value->ToNumberUnit());
+      bSpace = env.ToScaledPoints(value->ToNumberUnit());
       delete value;
 #endif // ENABLE_EXTENSIONS
 
@@ -241,7 +239,7 @@ MathMLOperatorElement::Setup(RenderingEnvironment* env)
 
       MathMLTokenElement::Setup(env);
 
-      if (GetSize() == 1 && largeOp && env->GetDisplayStyle())
+      if (GetSize() == 1 && largeOp && env.GetDisplayStyle())
 	{
 	  if (Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0)))
 	    if (sNode->IsStretchyChar()) sNode->SetDefaultLargeGlyph(true);
@@ -394,19 +392,18 @@ MathMLOperatorElement::HorizontalStretchTo(scaled width, bool strict)
 
 void
 MathMLOperatorElement::ParseLimitValue(const Value* value,
-				       const RenderingEnvironment* env,
+				       const RenderingEnvironment& env,
 				       float& multiplier,
 				       scaled& size)
 {
   assert(value != NULL);
-  assert(env != NULL);
 
   if (value->IsKeyword())
     { // it must be a named math space
       const Value* resValue = Resolve(value, env);
       assert(resValue->IsNumberUnit());
       multiplier = -1;
-      size = env->ToScaledPoints(resValue->ToNumberUnit());
+      size = env.ToScaledPoints(resValue->ToNumberUnit());
       delete resValue;
     }
   else
@@ -439,7 +436,7 @@ MathMLOperatorElement::ParseLimitValue(const Value* value,
 	  else
 	    {
 	      multiplier = -1;
-	      size = env->ToScaledPoints(siz);
+	      size = env.ToScaledPoints(siz);
 	    }
 	}
     }
@@ -447,10 +444,8 @@ MathMLOperatorElement::ParseLimitValue(const Value* value,
 
 const Value*
 MathMLOperatorElement::GetOperatorAttributeValue(AttributeId id,
-						 const RenderingEnvironment* env) const
+						 const RenderingEnvironment& env) const
 {
-  assert(env != NULL);
-
   //printf("`%s': searching for attribute `%s'\n", NameOfTagId(IsA()), NameOfAttributeId(id));
 
   // 1st attempt, the attribute may be set for the current operator
@@ -474,7 +469,7 @@ MathMLOperatorElement::GetOperatorAttributeValue(AttributeId id,
 
   // if the attribute hasn't still a value, then take its default
   // for the mo element
-  if (value == NULL) value = GetAttributeValue(id, NULL);
+  if (value == NULL) value = GetAttributeValue(id);
   assert(value != NULL);
 
   return value;

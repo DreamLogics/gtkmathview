@@ -103,15 +103,14 @@ MathMLDocument::Normalize()
 }
 
 void
-MathMLDocument::Setup(RenderingEnvironment* env)
+MathMLDocument::Setup(RenderingEnvironment& env)
 {
-  assert(env != 0);
   if (DirtyAttributeP())
     {
-      env->Push();
-      env->SetDocument(this);
+      env.Push();
+      env.SetDocument(this);
       MathMLBinContainerElement::Setup(env);
-      env->Drop();
+      env.Drop();
       ResetDirtyAttribute();
     }
 }

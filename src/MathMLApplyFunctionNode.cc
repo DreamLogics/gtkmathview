@@ -44,10 +44,9 @@ MathMLApplyFunctionNode::~MathMLApplyFunctionNode()
 }
 
 void
-MathMLApplyFunctionNode::Setup(class RenderingEnvironment* env)
+MathMLApplyFunctionNode::Setup(class RenderingEnvironment& env)
 {
-  assert(env != NULL);  
-  sppm = env->GetScaledPointsPerEm();
+  sppm = env.GetScaledPointsPerEm();
 }
 
 void

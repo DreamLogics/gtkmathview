@@ -130,21 +130,19 @@ MathMLFractionElement::Normalize(const Ptr<MathMLDocument>& doc)
 }
 
 void
-MathMLFractionElement::Setup(RenderingEnvironment* env)
+MathMLFractionElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
   if (DirtyAttribute())
     {
-      color = env->GetColor();
-      background = env->GetBackgroundColor();
+      color = env.GetColor();
+      background = env.GetBackgroundColor();
 
       const Value* value = NULL;
 
 #ifdef TEXISH_MATHML
-      defaultRuleThickness = env->GetRuleThickness();
+      defaultRuleThickness = env.GetRuleThickness();
 #else
-      scaled defaultRuleThickness = env->GetRuleThickness();
+      scaled defaultRuleThickness = env.GetRuleThickness();
 #endif // TEXISH_MATHML
 
       value = GetAttributeValue(ATTR_LINETHICKNESS, env, true);
@@ -182,7 +180,7 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 	    } else {
 	      UnitValue unitValue;
 	      unitValue.Set(number->ToNumber(), unitId);
-	      lineThickness = env->ToScaledPoints(unitValue);
+	      lineThickness = env.ToScaledPoints(unitValue);
 	    }
 	  }
 	}
@@ -210,35 +208,35 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 	delete value;
       }
 
-      color = env->GetColor();
+      color = env.GetColor();
 
-      axis = env->GetAxis();
+      axis = env.GetAxis();
 
-      displayStyle = env->GetDisplayStyle();
+      displayStyle = env.GetDisplayStyle();
 
 #ifdef TEXISH_MATHML
       if (displayStyle) {
-	numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.676508);
-	denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.685951);
+	numMinShift = float2sp(sp2float(env.GetFontAttributes().size.ToScaledPoints()) * 0.676508);
+	denomMinShift = float2sp(sp2float(env.GetFontAttributes().size.ToScaledPoints()) * 0.685951);
       } else {
-	numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * (lineThickness > 0 ? 0.393732 : 0.443731));
-	denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.344841);
+	numMinShift = float2sp(sp2float(env.GetFontAttributes().size.ToScaledPoints()) * (lineThickness > 0 ? 0.393732 : 0.443731));
+	denomMinShift = float2sp(sp2float(env.GetFontAttributes().size.ToScaledPoints()) * 0.344841);
       }
 #else
-      minShift = env->GetScaledPointsPerEx();
+      minShift = env.GetScaledPointsPerEx();
 #endif // TEXISH_MATHML
     }
 
   if (DirtyAttributeP())
     {
-      env->Push();
-      if (!displayStyle) env->AddScriptLevel(1);
-      else env->SetDisplayStyle(false);
+      env.Push();
+      if (!displayStyle) env.AddScriptLevel(1);
+      else env.SetDisplayStyle(false);
 
       if (numerator) numerator->Setup(env);
       if (denominator) denominator->Setup(env);
 
-      env->Drop();
+      env.Drop();
     }
 
   ResetDirtyAttribute();

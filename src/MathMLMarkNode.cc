@@ -38,7 +38,7 @@ MathMLMarkNode::~MathMLMarkNode()
 }
 
 void
-MathMLMarkNode::Setup(RenderingEnvironment* env)
+MathMLMarkNode::Setup(RenderingEnvironment& env)
 {
   // next a tricky operation. A token can contain a <malignmark>
   // element which has an attribute (edge) possibily inherited from
@@ -47,9 +47,7 @@ MathMLMarkNode::Setup(RenderingEnvironment* env)
   // text nodes as content... otherwise we would have frames.
   static AttributeSignature sig = { ATTR_EDGE, alignMarkEdgeParser, new StringC("left"), NULL };
 
-  assert(env != NULL);
-
-  const MathMLAttribute* attribute = env->GetAttribute(ATTR_EDGE);
+  const MathMLAttribute* attribute = env.GetAttribute(ATTR_EDGE);
   // ok, we have to do something only in case the attribute edge
   // wasn't explicitly set inside the mark (see Parser.cc)
   if (edge == MARK_ALIGN_NOTVALID && attribute != NULL) {

@@ -41,7 +41,7 @@ protected:
 
 public:
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);

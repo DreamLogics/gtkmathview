@@ -47,7 +47,7 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
 
 protected:
   Ptr<class MathMLTextNode> lQuote;

@@ -85,203 +85,206 @@ MathMLStyleElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLStyleElement::Setup(RenderingEnvironment* env)
+MathMLStyleElement::Setup(RenderingEnvironment& env)
 {
-  assert(env != NULL);
-
-  MathMLAttributeList attributes;
+  // can be optimized here
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      MathMLAttributeList attributes;
 
 #if defined(HAVE_MINIDOM)
-  for (mDOMAttrRef attribute = mdom_node_get_first_attribute(GetDOMElement());
-       attribute != NULL;
-       attribute = mdom_attr_get_next_sibling(attribute)) {
-    AttributeId id = AttributeIdOfName(C_CONST_STRING(mdom_attr_get_name(attribute)));
-    if (id != ATTR_NOTVALID) {
-      mDOMStringRef value = mdom_attr_get_value(attribute);
-      String* sValue = allocString(value);
-      attributes.Append(new MathMLAttribute(id, sValue));
-      mdom_string_free(value);
-    }
-  }
+      for (mDOMAttrRef attribute = mdom_node_get_first_attribute(GetDOMElement());
+	   attribute != NULL;
+	   attribute = mdom_attr_get_next_sibling(attribute)) {
+	AttributeId id = AttributeIdOfName(C_CONST_STRING(mdom_attr_get_name(attribute)));
+	if (id != ATTR_NOTVALID) {
+	  mDOMStringRef value = mdom_attr_get_value(attribute);
+	  String* sValue = allocString(value);
+	  attributes.Append(new MathMLAttribute(id, sValue));
+	  mdom_string_free(value);
+	}
+      }
 #elif defined(HAVE_GMETADOM)
-  GMetaDOM::NamedNodeMap nnm = GetDOMElement().get_attributes();
+      GMetaDOM::NamedNodeMap nnm = GetDOMElement().get_attributes();
 
-  for (unsigned i = 0; i < nnm.get_length(); i++) {
-    GMetaDOM::Node attribute = nnm.item(i);
+      for (unsigned i = 0; i < nnm.get_length(); i++) {
+	GMetaDOM::Node attribute = nnm.item(i);
 
-    std::string s_name = attribute.get_nodeName();
-    AttributeId id = AttributeIdOfName(s_name.c_str());
+	std::string s_name = attribute.get_nodeName();
+	AttributeId id = AttributeIdOfName(s_name.c_str());
 
-    if (id != ATTR_NOTVALID) {
-      GMetaDOM::GdomeString value = attribute.get_nodeValue();
-      String* sValue = allocString(value);
-      attributes.Append(new MathMLAttribute(id, sValue));
-    }
-  }
+	if (id != ATTR_NOTVALID) {
+	  GMetaDOM::GdomeString value = attribute.get_nodeValue();
+	  String* sValue = allocString(value);
+	  attributes.Append(new MathMLAttribute(id, sValue));
+	}
+      }
 #endif // HAVE_GMETADOM
 
-  env->Push(&attributes);
+      env.Push(&attributes);
 
-  const Value* value = NULL;
+      const Value* value = NULL;
 
-  value = GetAttributeValue(ATTR_DISPLAYSTYLE, NULL, false);
-  if (value != NULL) env->SetDisplayStyle(value->ToBoolean());
-  delete value;
+      value = GetAttributeValue(ATTR_DISPLAYSTYLE, false);
+      if (value != NULL) env.SetDisplayStyle(value->ToBoolean());
+      delete value;
 
-  value = GetAttributeValue(ATTR_SCRIPTSIZEMULTIPLIER, NULL, false);
-  if (value != NULL) env->SetScriptSizeMultiplier(value->ToNumber());
-  delete value;
+      value = GetAttributeValue(ATTR_SCRIPTSIZEMULTIPLIER, false);
+      if (value != NULL) env.SetScriptSizeMultiplier(value->ToNumber());
+      delete value;
 
-  value = GetAttributeValue(ATTR_SCRIPTMINSIZE, NULL, false);
-  if (value != NULL) env->SetScriptMinSize(value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_SCRIPTMINSIZE, false);
+      if (value != NULL) env.SetScriptMinSize(value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_SCRIPTLEVEL, NULL, false);
-  if (value != NULL) {
-    const Value* p = value->Get(0);
-    assert(p != NULL);
+      value = GetAttributeValue(ATTR_SCRIPTLEVEL, false);
+      if (value != NULL) {
+	const Value* p = value->Get(0);
+	assert(p != NULL);
 
-    if (p->IsEmpty()) {
-      p = value->Get(1);
-      assert(p != NULL);
+	if (p->IsEmpty()) {
+	  p = value->Get(1);
+	  assert(p != NULL);
       
-      int scriptLevel = p->ToInteger();
-      if (scriptLevel < 0) scriptLevel = 0;
-      env->SetScriptLevel(scriptLevel);
-    } else {
-      int sign = 1;
-      if (p->IsKeyword(KW_PLUS)) sign = 1;
-      else sign = -1;
-      p = value->Get(1);
-      assert(p != NULL);
+	  int scriptLevel = p->ToInteger();
+	  if (scriptLevel < 0) scriptLevel = 0;
+	  env.SetScriptLevel(scriptLevel);
+	} else {
+	  int sign = 1;
+	  if (p->IsKeyword(KW_PLUS)) sign = 1;
+	  else sign = -1;
+	  p = value->Get(1);
+	  assert(p != NULL);
       
-      int scriptLevel = p->ToInteger();
-      if (scriptLevel < 0) scriptLevel = 0;
-      env->AddScriptLevel(sign * scriptLevel);
-    }
-  }
-  delete value;
+	  int scriptLevel = p->ToInteger();
+	  if (scriptLevel < 0) scriptLevel = 0;
+	  env.AddScriptLevel(sign * scriptLevel);
+	}
+      }
+      delete value;
 
-  value = GetAttributeValue(ATTR_MATHCOLOR, NULL, false);
-  if (value != NULL) {
-    if (IsSet(ATTR_COLOR))
-      Globals::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
-    env->SetColor(ToRGB(value));
-  } else {
-    value = GetAttributeValue(ATTR_COLOR, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
-      env->SetColor(ToRGB(value));
-    }
-  }
-  delete value;
+      value = GetAttributeValue(ATTR_MATHCOLOR, false);
+      if (value != NULL) {
+	if (IsSet(ATTR_COLOR))
+	  Globals::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
+	env.SetColor(ToRGB(value));
+      } else {
+	value = GetAttributeValue(ATTR_COLOR, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
+	  env.SetColor(ToRGB(value));
+	}
+      }
+      delete value;
 
-  RGBValue oldBackground = env->GetBackgroundColor();
-  value = GetAttributeValue(ATTR_MATHBACKGROUND, NULL, false);
-  if (value != NULL) {
-    if (IsSet(ATTR_BACKGROUND))
-      Globals::logger(LOG_WARNING, "attribute `mathbackground' overrides deprecated attribute `background'");
-    if (!value->IsKeyword(KW_TRANSPARENT)) env->SetBackgroundColor(ToRGB(value));
-  } else {
-    value = GetAttributeValue(ATTR_BACKGROUND, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "attribute `background' is deprecated in MathML 2");
-      if (!value->IsKeyword(KW_TRANSPARENT)) env->SetBackgroundColor(ToRGB(value));
-    }
-  }
-  delete value;
-  background = env->GetBackgroundColor();
-  differentBackground = background != oldBackground;
+      RGBValue oldBackground = env.GetBackgroundColor();
+      value = GetAttributeValue(ATTR_MATHBACKGROUND, false);
+      if (value != NULL) {
+	if (IsSet(ATTR_BACKGROUND))
+	  Globals::logger(LOG_WARNING, "attribute `mathbackground' overrides deprecated attribute `background'");
+	if (!value->IsKeyword(KW_TRANSPARENT)) env.SetBackgroundColor(ToRGB(value));
+      } else {
+	value = GetAttributeValue(ATTR_BACKGROUND, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "attribute `background' is deprecated in MathML 2");
+	  if (!value->IsKeyword(KW_TRANSPARENT)) env.SetBackgroundColor(ToRGB(value));
+	}
+      }
+      delete value;
+      background = env.GetBackgroundColor();
+      differentBackground = background != oldBackground;
 
-  value = GetAttributeValue(ATTR_VERYVERYTHINMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_VERYVERYTHIN, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_VERYVERYTHINMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_VERYVERYTHIN, value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_VERYTHINMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_VERYTHIN, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_VERYTHINMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_VERYTHIN, value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_THINMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_THIN, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_THINMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_THIN, value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_MEDIUMMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_MEDIUM, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_MEDIUMMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_MEDIUM, value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_THICKMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_THICK, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_THICKMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_THICK, value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_VERYTHINMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_VERYTHICK, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_VERYTHINMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_VERYTHICK, value->ToNumberUnit());
+      delete value;
 
-  value = GetAttributeValue(ATTR_VERYVERYTHICKMATHSPACE, NULL, false);
-  if (value != NULL) env->SetMathSpace(MATH_SPACE_VERYVERYTHICK, value->ToNumberUnit());
-  delete value;
+      value = GetAttributeValue(ATTR_VERYVERYTHICKMATHSPACE, false);
+      if (value != NULL) env.SetMathSpace(MATH_SPACE_VERYVERYTHICK, value->ToNumberUnit());
+      delete value;
 
-  // the following attributes, thought not directly supported by <mstyle>
-  // must be parsed here since they are always inherited by other elements
+      // the following attributes, thought not directly supported by <mstyle>
+      // must be parsed here since they are always inherited by other elements
 
-  value = GetAttributeValue(ATTR_MATHSIZE, NULL, false);
-  if (value != NULL) {
-    if (IsSet(ATTR_FONTSIZE))
-      Globals::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
+      value = GetAttributeValue(ATTR_MATHSIZE, false);
+      if (value != NULL) {
+	if (IsSet(ATTR_FONTSIZE))
+	  Globals::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
     
-    if (value->IsKeyword(KW_SMALL)) env->AddScriptLevel(1);
-    else if (value->IsKeyword(KW_BIG)) env->AddScriptLevel(-1);
-    else if (value->IsKeyword(KW_NORMAL)) ; // noop
-    else env->SetFontSize(value->ToNumberUnit());
-  } else {
-    value = GetAttributeValue(ATTR_FONTSIZE, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
-      env->SetFontSize(value->ToNumberUnit());
+	if (value->IsKeyword(KW_SMALL)) env.AddScriptLevel(1);
+	else if (value->IsKeyword(KW_BIG)) env.AddScriptLevel(-1);
+	else if (value->IsKeyword(KW_NORMAL)) ; // noop
+	else env.SetFontSize(value->ToNumberUnit());
+      } else {
+	value = GetAttributeValue(ATTR_FONTSIZE, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
+	  env.SetFontSize(value->ToNumberUnit());
+	}
+      }
+      delete value;
+
+      value = GetAttributeValue(ATTR_MATHVARIANT, false);
+      if (value != NULL) {
+	assert(value->IsKeyword());
+
+	const MathVariantAttributes& attr = attributesOfVariant(value->ToKeyword());
+	assert(attr.kw != KW_NOTVALID);
+	env.SetFontFamily(attr.family);
+	env.SetFontWeight(attr.weight);
+	env.SetFontStyle(attr.style);
+
+	if (IsSet(ATTR_FONTFAMILY) || IsSet(ATTR_FONTWEIGHT) || IsSet(ATTR_FONTSTYLE))
+	  Globals::logger(LOG_WARNING, "attribute `mathvariant' overrides deprecated font-related attributes");
+
+	delete value;
+      } else {
+	value = GetAttributeValue(ATTR_FONTFAMILY, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontfamily` is deprecated in MathML 2");
+	  env.SetFontFamily(value->ToString());
+	}
+	delete value;
+
+	value = GetAttributeValue(ATTR_FONTWEIGHT, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontweight` is deprecated in MathML 2");
+	  env.SetFontWeight(ToFontWeightId(value));
+	}
+	delete value;
+
+	value = GetAttributeValue(ATTR_FONTSTYLE, false);
+	if (value != NULL) {
+	  Globals::logger(LOG_WARNING, "the attribute `fontstyle` is deprecated in MathML 2");
+	  env.SetFontStyle(ToFontStyleId(value));
+	}
+	delete value;
+      }
+
+      MathMLNormalizingContainerElement::Setup(env);
+
+      env.Drop();
+      ResetDirtyAttribute();
     }
-  }
-  delete value;
-
-  value = GetAttributeValue(ATTR_MATHVARIANT, NULL, false);
-  if (value != NULL) {
-    assert(value->IsKeyword());
-
-    const MathVariantAttributes& attr = attributesOfVariant(value->ToKeyword());
-    assert(attr.kw != KW_NOTVALID);
-    env->SetFontFamily(attr.family);
-    env->SetFontWeight(attr.weight);
-    env->SetFontStyle(attr.style);
-
-    if (IsSet(ATTR_FONTFAMILY) || IsSet(ATTR_FONTWEIGHT) || IsSet(ATTR_FONTSTYLE))
-      Globals::logger(LOG_WARNING, "attribute `mathvariant' overrides deprecated font-related attributes");
-
-    delete value;
-  } else {
-    value = GetAttributeValue(ATTR_FONTFAMILY, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontfamily` is deprecated in MathML 2");
-      env->SetFontFamily(value->ToString());
-    }
-    delete value;
-
-    value = GetAttributeValue(ATTR_FONTWEIGHT, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontweight` is deprecated in MathML 2");
-      env->SetFontWeight(ToFontWeightId(value));
-    }
-    delete value;
-
-    value = GetAttributeValue(ATTR_FONTSTYLE, NULL, false);
-    if (value != NULL) {
-      Globals::logger(LOG_WARNING, "the attribute `fontstyle` is deprecated in MathML 2");
-      env->SetFontStyle(ToFontStyleId(value));
-    }
-    delete value;
-  }
-
-  MathMLNormalizingContainerElement::Setup(env);
-
-  env->Drop();
 }
 
 void

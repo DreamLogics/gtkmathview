@@ -216,7 +216,7 @@ MathMLTableCellElement::SetupGroups(const Ptr<MathMLElement>& elem,
 }
 
 void
-MathMLTableCellElement::SetupCellSpanning(RenderingEnvironment* env)
+MathMLTableCellElement::SetupCellSpanning(RenderingEnvironment& env)
 {
   const Value* value;
 
@@ -230,21 +230,21 @@ MathMLTableCellElement::SetupCellSpanning(RenderingEnvironment* env)
 }
 
 void
-MathMLTableCellElement::Setup(RenderingEnvironment* env)
+MathMLTableCellElement::Setup(RenderingEnvironment& env)
 {
   assert(cell != NULL);
 
   const Value* value;
 
-  value = GetAttributeValue(ATTR_ROWALIGN, NULL, false);
+  value = GetAttributeValue(ATTR_ROWALIGN, false);
   if (value != NULL) cell->rowAlign = ToRowAlignId(value);
   delete value;
 
-  value = GetAttributeValue(ATTR_COLUMNALIGN, NULL, false);
+  value = GetAttributeValue(ATTR_COLUMNALIGN, false);
   if (value != NULL) cell->columnAlign = ToColumnAlignId(value);
   delete value;
 
-  value = GetAttributeValue(ATTR_GROUPALIGN, NULL, false);
+  value = GetAttributeValue(ATTR_GROUPALIGN, false);
   if (value != NULL) {
     for (unsigned k = 0; k < cell->nAlignGroup; k++) {
       const Value* p = value->Get(k);

@@ -35,7 +35,6 @@
 #include "traverseAux.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLSpaceElement.hh"
-#include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"

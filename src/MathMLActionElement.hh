@@ -47,7 +47,7 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(class RenderingEnvironment*);
+  virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);

@@ -50,14 +50,13 @@ MathMLDummyElement::Normalize(const Ptr<class MathMLDocument>&)
 }
 
 void
-MathMLDummyElement::Setup(RenderingEnvironment* env)
+MathMLDummyElement::Setup(RenderingEnvironment& env)
 {
-  assert(env);
   if (DirtyAttribute())
     {
       FontifiedChar fChar;
       
-      env->charMapper.FontifyChar(fChar, env->GetFontAttributes(), 'a');
+      env.charMapper.FontifyChar(fChar, env.GetFontAttributes(), 'a');
       assert(fChar.font);
       
       fChar.font->GetBoundingBox(box);

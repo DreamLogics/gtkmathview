@@ -35,7 +35,7 @@ public:
   static Ptr<MathMLGlyphNode> create(const char* alt, const char* family, char ch)
   { return Ptr<MathMLGlyphNode>(new MathMLGlyphNode(alt, family, ch)); }
 
-  virtual void 	   Setup(class RenderingEnvironment*);
+  virtual void 	   Setup(class RenderingEnvironment&);
   virtual void 	   DoLayout(const class FormattingContext&);
   virtual void 	   Render(const DrawingArea&);
 

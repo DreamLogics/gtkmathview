@@ -53,7 +53,7 @@ public:
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(const Ptr<class MathMLDocument>&) = 0;
-  virtual void Setup(class RenderingEnvironment*); // setup attributes
+  virtual void Setup(class RenderingEnvironment&); // setup attributes
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void RenderBackground(const DrawingArea&);
@@ -67,16 +67,12 @@ public:
   // attributes
   const String* GetDefaultAttribute(AttributeId) const;
   const Value*  GetDefaultAttributeValue(AttributeId) const;
-  const String* GetAttribute(AttributeId,
-			     const RenderingEnvironment* = NULL,
-			     bool = true) const;
-  const Value*  GetAttributeValue(AttributeId,
-				  const RenderingEnvironment* = NULL,
-				  bool = true) const;
+  const String* GetAttribute(AttributeId, bool = true) const;
+  const String* GetAttribute(AttributeId, const RenderingEnvironment&, bool = true) const;
+  const Value*  GetAttributeValue(AttributeId, bool = true) const;
+  const Value*  GetAttributeValue(AttributeId, const RenderingEnvironment&, bool = true) const;
   const Value*  ParseAttribute(AttributeId, const String*) const;
-  static const Value* Resolve(const Value*,
-			      const RenderingEnvironment*,
-			      int = -1, int = -1);
+  static const Value* Resolve(const Value*, const RenderingEnvironment&, int = -1, int = -1);
   bool IsSet(AttributeId) const;
 
   // some queries

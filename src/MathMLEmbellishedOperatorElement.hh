@@ -36,7 +36,7 @@ public:
   { return Ptr<MathMLEmbellishedOperatorElement>(new MathMLEmbellishedOperatorElement(elem)); }
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
 

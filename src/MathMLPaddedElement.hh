@@ -47,7 +47,7 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Setup(RenderingEnvironment*);
+  virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
   //virtual void SetDirty(const Rectangle* = NULL);
@@ -63,7 +63,7 @@ private:
     scaled    unit;         // standard unit (valid if pseudo == false)
   };
 
-  void   ParseLengthDimension(RenderingEnvironment*, const Value*, LengthDimension&, KeywordId);
+  void   ParseLengthDimension(RenderingEnvironment&, const Value*, LengthDimension&, KeywordId);
   scaled EvalLengthDimension(scaled, const LengthDimension&, const BoundingBox&) const;
 
   LengthDimension width;

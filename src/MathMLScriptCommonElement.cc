@@ -43,17 +43,17 @@ MathMLScriptCommonElement::SetBase(const Ptr<MathMLElement>& elem)
 }
 
 void
-MathMLScriptCommonElement::ScriptSetup(RenderingEnvironment* env)
+MathMLScriptCommonElement::ScriptSetup(RenderingEnvironment& env)
 {
-  ruleThickness = env->GetRuleThickness();
+  ruleThickness = env.GetRuleThickness();
 #ifdef TEXISH_MATHML
-  sppex = env->GetScaledPointsPerEx();
-  subMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.247217);
-  superMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.362892);
+  sppex = env.GetScaledPointsPerEx();
+  subMinShift = float2sp(sp2float(env.GetFontAttributes().size.ToScaledPoints()) * 0.247217);
+  superMinShift = float2sp(sp2float(env.GetFontAttributes().size.ToScaledPoints()) * 0.362892);
 #else
-  sppex = subMinShift = superMinShift = env->GetAxis();
+  sppex = subMinShift = superMinShift = env.GetAxis();
 #endif // TEXISH_MATHML
-  scriptAxis    = env->GetAxis();
+  scriptAxis    = env.GetAxis();
 }
 
 void

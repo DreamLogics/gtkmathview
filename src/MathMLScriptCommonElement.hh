@@ -29,7 +29,7 @@ class MathMLScriptCommonElement
 {
 public:
   MathMLScriptCommonElement(void);
-  void ScriptSetup(class RenderingEnvironment*);
+  void ScriptSetup(class RenderingEnvironment&);
 
   Ptr<class MathMLElement> GetBase(void) const { return base; }
   void SetBase(const Ptr<class MathMLElement>&);

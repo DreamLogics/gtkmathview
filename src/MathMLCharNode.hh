@@ -36,7 +36,7 @@ public:
   static Ptr<MathMLCharNode> create(Char c)
   { return Ptr<MathMLCharNode>(new MathMLCharNode(c)); }
 
-  virtual void 	   Setup(class RenderingEnvironment*);
+  virtual void 	   Setup(class RenderingEnvironment&);
   virtual void 	   DoLayout(const class FormattingContext&);
   virtual void 	   Render(const DrawingArea&);
 
