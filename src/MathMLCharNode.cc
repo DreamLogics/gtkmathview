@@ -115,7 +115,7 @@ MathMLCharNode::DoLayout(const FormattingContext&)
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
-#if 1
+#if 0
   Globals::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
 #endif // DEBUG
 
@@ -174,8 +174,11 @@ MathMLCharNode::DoVerticalStretchyLayoutAux(scaled desiredSize, bool)
   layout->simple = NULLCHAR;
 
   // first of all let's see if the small, unstretchable char is enough
-  fChar.GetBoundingBox(charBox);
-  if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
+  if (fChar.font != NULL)
+    {
+      fChar.GetBoundingBox(charBox);
+      if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
+    }
 
   // next let's see if there is some single large char large enough
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS && nch[i] != NULLCHAR; i++) {
