@@ -427,14 +427,15 @@ gtk_math_view_init(GtkMathView* math_view)
   math_view->font_manager_id = FONT_MANAGER_UNKNOWN;
   math_view->font_manager    = NULL;
   math_view->drawing_area    = NULL;
-  math_view->interface       = NULL;
   math_view->freeze_counter  = 0;
   math_view->select_state    = SELECT_STATE_NO;
   math_view->button_pressed  = FALSE;
   math_view->current_elem    = NULL;
   math_view->hadjustment = NULL;
   math_view->vadjustment = NULL;
-
+  math_view->top_x = math_view->top_y = 0;
+  math_view->old_top_x = math_view->old_top_y = 0;
+  math_view->interface = new MathMLRenderingEngine();
   math_view->area = gtk_drawing_area_new();
   GTK_WIDGET_SET_FLAGS(GTK_WIDGET(math_view->area), GTK_CAN_FOCUS);
   gtk_container_add(GTK_CONTAINER(math_view), math_view->area);
@@ -472,6 +473,8 @@ gtk_math_view_init(GtkMathView* math_view)
 
   gtk_widget_add_events(GTK_WIDGET(math_view->area),
 			GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
+
+  gtk_math_view_set_font_manager_type(math_view, FONT_MANAGER_GTK);
 }
 
 extern "C" GtkWidget*
@@ -480,12 +483,6 @@ gtk_math_view_new(GtkAdjustment*, GtkAdjustment*)
   GtkMathView* math_view = (GtkMathView*) gtk_type_new(gtk_math_view_get_type());
   
   g_return_val_if_fail(math_view != NULL, NULL);
-
-  math_view->top_x = math_view->top_y = 0;
-  math_view->old_top_x = math_view->old_top_y = 0;
-  math_view->interface = new MathMLRenderingEngine();
-
-  gtk_math_view_set_font_manager_type(math_view, FONT_MANAGER_GTK);
 
   return GTK_WIDGET(math_view);
 }
