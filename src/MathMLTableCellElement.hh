@@ -68,6 +68,8 @@ public:
   friend class MathMLTableRowElement;
 
   virtual void SetDirtyAttribute(void);
+  virtual void SetDirtyStructure(void);
+  virtual void SetDirtyLayout(void);
 
 protected:
   // the following method is declared static for efficiency reasons. In fact,

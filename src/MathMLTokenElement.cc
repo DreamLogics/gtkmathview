@@ -336,7 +336,7 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
 
       const Value* value = NULL;
 
-      value = GetAttributeValue(ATTR_MATHSIZE, false);
+      value = GetAttributeValue(ATTR_MATHSIZE, env, false);
       if (value != NULL) {
 	if (IsSet(ATTR_FONTSIZE))
 	  Globals::logger(LOG_WARNING, "attribute `mathsize' overrides deprecated attribute `fontsize'");
@@ -346,7 +346,7 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
 	else if (value->IsKeyword(KW_NORMAL)) ; // noop
 	else env.SetFontSize(value->ToNumberUnit());
       } else {
-	value = GetAttributeValue(ATTR_FONTSIZE, false);
+	value = GetAttributeValue(ATTR_FONTSIZE, env, false);
 	if (value != NULL) {
 	  Globals::logger(LOG_WARNING, "the attribute `fontsize' is deprecated in MathML 2");
 	  env.SetFontSize(value->ToNumberUnit());
@@ -354,7 +354,7 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
       }
       delete value;
   
-      value = GetAttributeValue(ATTR_MATHVARIANT, false);
+      value = GetAttributeValue(ATTR_MATHVARIANT, env, false);
       if (value != NULL) {
 	assert(value->IsKeyword());
 
@@ -369,21 +369,21 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
 
 	delete value;
       } else {
-	value = GetAttributeValue(ATTR_FONTFAMILY, false);
+	value = GetAttributeValue(ATTR_FONTFAMILY, env, false);
 	if (value != NULL) {
 	  Globals::logger(LOG_WARNING, "the attribute `fontfamily' is deprecated in MathML 2");
 	  env.SetFontFamily(value->ToString());
 	}
 	delete value;
 
-	value = GetAttributeValue(ATTR_FONTWEIGHT, false);
+	value = GetAttributeValue(ATTR_FONTWEIGHT, env, false);
 	if (value != NULL) {
 	  Globals::logger(LOG_WARNING, "the attribute `fontweight' is deprecated in MathML 2");
 	  env.SetFontWeight(ToFontWeightId(value));
 	}
 	delete value;
 
-	value = GetAttributeValue(ATTR_FONTSTYLE, false);
+	value = GetAttributeValue(ATTR_FONTSTYLE, env, false);
 	if (value != NULL) {
 	  Globals::logger(LOG_WARNING, "the attribute `fontstyle' is deprecated in MathML 2");
 	  env.SetFontStyle(ToFontStyleId(value));
@@ -408,13 +408,13 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
 	delete value;
       }
 
-      value = GetAttributeValue(ATTR_MATHCOLOR, false);
+      value = GetAttributeValue(ATTR_MATHCOLOR, env, false);
       if (value != NULL) {
 	if (IsSet(ATTR_COLOR))
 	  Globals::logger(LOG_WARNING, "attribute `mathcolor' overrides deprecated attribute `color'");
 	env.SetColor(ToRGB(value));
       } else {
-	value = GetAttributeValue(ATTR_COLOR, false);
+	value = GetAttributeValue(ATTR_COLOR, env, false);
 	if (value != NULL) {
 	  Globals::logger(LOG_WARNING, "attribute `color' is deprecated in MathML 2");
 	  env.SetColor(ToRGB(value));
@@ -423,7 +423,7 @@ MathMLTokenElement::Setup(RenderingEnvironment& env)
       }
       delete value;
 
-      value = GetAttributeValue(ATTR_MATHBACKGROUND, false);
+      value = GetAttributeValue(ATTR_MATHBACKGROUND, env, false);
       if (value != NULL) env.SetBackgroundColor(ToRGB(value));
       else if (HasLink()) env.SetBackgroundColor(Globals::configuration.GetLinkBackground());
       delete value;

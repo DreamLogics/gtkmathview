@@ -259,5 +259,5 @@ INCLUDES = \
   $(T1_CFLAGS) \
   $(GTK_CFLAGS) \
   -I$(top_srcdir) \
-  -I$(srcdir)/../auto/
+  -I$(top_srcdir)/auto/
 

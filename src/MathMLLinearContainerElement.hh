@@ -65,7 +65,6 @@ public:
   // memory-management issues
   const std::vector< Ptr<MathMLElement> >& GetContent(void) const { return content; }
 
-protected:
   virtual void SetFlagDown(Flags);
   virtual void ResetFlagDown(Flags);
 

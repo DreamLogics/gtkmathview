@@ -60,6 +60,7 @@ public:
 
   virtual void SetDirtyStructure(void);
   virtual void SetDirtyAttribute(void);
+  virtual void SetDirtyLayout(void);
 
 protected:
   void SetupAux(RenderingEnvironment&, bool);

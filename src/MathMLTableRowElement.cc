@@ -136,8 +136,10 @@ MathMLTableRowElement::Setup(RenderingEnvironment& env)
 void
 MathMLTableRowElement::SetupAux(RenderingEnvironment& env, bool labeledRow)
 {
+#if 0
   if (DirtyAttribute() || DirtyAttributeP())
     {
+#endif
       assert(GetParent());
       Ptr<MathMLTableElement> mtable = smart_cast<MathMLTableElement>(GetParent());
       assert(mtable);
@@ -155,7 +157,9 @@ MathMLTableRowElement::SetupAux(RenderingEnvironment& env, bool labeledRow)
 
       MathMLLinearContainerElement::Setup(env);
       ResetDirtyAttribute();
+#if 0
     }
+#endif
 }
 
 #if 0
@@ -197,9 +201,7 @@ MathMLTableRowElement::SetDirtyStructure()
   assert(is_a<MathMLTableElement>(GetParent()));
   Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent());
   assert(table);
-  cout << "propagating dirty up" << endl;
   table->SetDirtyStructure();
-  table->SetDirtyAttribute();
   MathMLLinearContainerElement::SetDirtyStructure();
 }
 
@@ -210,7 +212,17 @@ MathMLTableRowElement::SetDirtyAttribute()
   assert(is_a<MathMLTableElement>(GetParent()));
   Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent());
   assert(table);
-  table->SetDirtyStructure();
   table->SetDirtyAttribute();
-  MathMLLinearContainerElement::SetDirtyStructure();
+  MathMLLinearContainerElement::SetDirtyAttribute();
+}
+
+void
+MathMLTableRowElement::SetDirtyLayout()
+{
+  assert(GetParent());
+  assert(is_a<MathMLTableElement>(GetParent()));
+  Ptr<MathMLTableElement> table = smart_cast<MathMLTableElement>(GetParent());
+  assert(table);
+  table->SetDirtyLayout();
+  MathMLLinearContainerElement::SetDirtyLayout();
 }

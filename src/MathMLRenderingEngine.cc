@@ -269,8 +269,10 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 void
 MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 {
+  /*
   if (elem) elem->SetSelected();
-  else if (document) document->SetSelected();
+  else */
+  if (document) document->SetSelected();
 }
 
 void
@@ -295,10 +297,14 @@ void
 MathMLRenderingEngine::SetDefaultFontSize(unsigned size)
 {
   assert(size > 0);
-  if (document && defaultFontSize != size)
+  if (defaultFontSize != size)
     {
       defaultFontSize = size;
-      printf("changing default font size to %d %d\n", size, document->DirtyAttribute() + document->DirtyAttributeD());
+      printf("changing default font size to %d\n", size);
+    }
+
+  if (document)
+    {
       document->SetDirtyAttributeD();
       document->SetDirtyLayout();
       document->SetDirty();

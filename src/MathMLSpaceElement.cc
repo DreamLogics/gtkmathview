@@ -80,8 +80,17 @@ MathMLSpaceElement::Setup(RenderingEnvironment& env)
       const Value* value = NULL;
 
       value = GetAttributeValue(ATTR_WIDTH);
-      assert(value != NULL && value->IsNumberUnit());
-      scaled width = env.ToScaledPoints(value->ToNumberUnit());
+      assert(value != NULL);
+      scaled width;
+      if (value->IsKeyword())
+	{
+	  const Value* resValue = Resolve(value, env);
+	  assert(resValue->IsNumberUnit());
+	  width = env.ToScaledPoints(resValue->ToNumberUnit());
+	  delete resValue;
+	}
+      else
+	width = env.ToScaledPoints(value->ToNumberUnit());
       delete value;
 
       value = GetAttributeValue(ATTR_HEIGHT);

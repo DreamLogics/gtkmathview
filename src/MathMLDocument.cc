@@ -32,7 +32,7 @@
 
 MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
-  : DOMdoc(0), DOMroot(0)
+  : DOMdoc(0)
 #endif
 {
   Init();
@@ -41,16 +41,7 @@ MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
 MathMLDocument::MathMLDocument(const DOM::Document& doc)
   : MathMLBinContainerElement()
-  , DOMdoc(doc), DOMroot(0)
-{
-  DOMroot = DOMdoc.get_documentElement();
-  Init();
-}
-
-MathMLDocument::MathMLDocument(const DOM::Element& root)
-  : MathMLBinContainerElement()
-  , DOMdoc(0)
-  , DOMroot(root)
+  , DOMdoc(doc)
 {
   Init();
 }
@@ -58,15 +49,17 @@ MathMLDocument::MathMLDocument(const DOM::Element& root)
 void
 MathMLDocument::Init()
 {
-  if (DOMroot)
+  if (DOMdoc)
     {
-      DOM::EventTarget et(DOMroot);
+      setFormattingNode(DOMdoc, this);
+
+      DOM::EventTarget et(DOMdoc);
       assert(et);
 
       subtreeModifiedListener = new DOMSubtreeModifiedListener(this);
       attrModifiedListener = new DOMAttrModifiedListener(this);
 
-      et.addEventListener("DOMNodeRemoved", *subtreeModifiedListener, false);
+      et.addEventListener("DOMSubtreeModified", *subtreeModifiedListener, false);
       et.addEventListener("DOMAttrModified", *attrModifiedListener, false);
     }
 }
@@ -75,9 +68,9 @@ MathMLDocument::Init()
 MathMLDocument::~MathMLDocument()
 {
 #if defined(HAVE_GMETADOM)
-  if (DOMroot)
+  if (DOMdoc)
     {
-      DOM::EventTarget et(DOMroot);
+      DOM::EventTarget et(DOMdoc);
       assert(et);
 
       et.removeEventListener("DOMSubtreeModified", *subtreeModifiedListener, false);
@@ -143,16 +136,21 @@ MathMLDocument::DOMSubtreeModifiedListener::handleEvent(const DOM::Event& ev)
   const DOM::MutationEvent& me(ev);
   assert(me);
   assert(doc);
-  doc->notifySubtreeModified(me.get_relatedNode());
+  const DOM::Node node(me.get_target());
+  assert(node);
+
+  //cout << "GTKMATHVIEW RECEIVED EVENT: " << ev.get_type() << " target = " << node.get_nodeName() << endl;
+  doc->notifySubtreeModified(node);
 }
 
 void
-MathMLDocument::notifySubtreeModified(const DOM::Element& el) const
+MathMLDocument::notifySubtreeModified(const DOM::Node& node) const
 {
-  assert(el);
-  if (Ptr<MathMLElement> elem = findFormattingNode(el))
+  assert(node);
+  //cout << "have to notify " << static_cast<GdomeNode*>(node) << "(" << node.get_nodeName() << ")" << " formatting node? " << static_cast<MathMLElement*>(findFormattingNode(node)) << endl;
+  if (Ptr<MathMLElement> elem = findFormattingNode(node))
     {
-      cout << "notifying subtree modified event" << endl;
+      //cout << "notifying subtree modified event" << endl;
       elem->SetDirtyStructure();
       elem->SetDirtyAttributeD();
     }
@@ -168,52 +166,30 @@ MathMLDocument::DOMAttrModifiedListener::handleEvent(const DOM::Event& ev)
 }
 
 void
-MathMLDocument::notifyAttributeModified(const DOM::Element& el) const
+MathMLDocument::notifyAttributeModified(const DOM::Node& node) const
 {
-  assert(el);
-  if (Ptr<MathMLElement> elem = findFormattingNode(el))
+  assert(node);
+  if (Ptr<MathMLElement> elem = findFormattingNode(node))
     {
-      cout << "notifying attribute modified event" << endl;
+      //cout << "notifying attribute modified event" << endl;
       elem->SetDirtyAttribute();
     }
 }
 
-#if 0
-void
-MathMLDocument::RegisterElement(const Ptr<MathMLElement>& elem)
-{
-  assert(elem);
-  assert(elem->GetDOMElement());
-  std::pair<std::hash_map< void*, Ptr<MathMLElement> >::iterator, bool> res =
-    nodeMap.insert(elem->GetDOMElement().id());
-  assert(!res.second);
-  *(res.first) = elem;
-}
-
-void
-MathMLDocument::UnregisterElement(const Ptr<MathMLElement>& elem)
-{
-  assert(elem);
-  assert(elem->GetDOMElement());
-  unsigned res = nodeMap.erase(elem->GetDOMElement().id());
-  assert(res == 1);
-}
-#endif
-
 Ptr<MathMLElement>
-MathMLDocument::getFormattingNodeNoCreate(const DOM::Element& el) const
+MathMLDocument::getFormattingNodeNoCreate(const DOM::Node& node) const
 {
-  assert(el);
+  assert(node);
 
-  DOMNodeMap::iterator p = nodeMap.find(el);
+  DOMNodeMap::iterator p = nodeMap.find(node);
   if (p != nodeMap.end()) return (*p).second;
   else return 0;
 }
 
 Ptr<MathMLElement>
-MathMLDocument::findFormattingNode(const DOM::Element& el) const
+MathMLDocument::findFormattingNode(const DOM::Node& node) const
 {
-  for (DOM::Element p = el; p; p = p.get_parentNode())
+  for (DOM::Node p = node; p; p = p.get_parentNode())
     if (Ptr<MathMLElement> fNode = getFormattingNodeNoCreate(p))
       return fNode;
   
@@ -221,12 +197,15 @@ MathMLDocument::findFormattingNode(const DOM::Element& el) const
 }
 
 Ptr<MathMLElement>
-MathMLDocument::getFormattingNode(const DOM::Element& el) const
+MathMLDocument::getFormattingNode(const DOM::Node& node) const
 {
-  if (!el) return 0;
+  if (!node) return 0;
 
-  DOMNodeMap::iterator p = nodeMap.find(el);
+  DOMNodeMap::iterator p = nodeMap.find(node);
   if (p != nodeMap.end()) return (*p).second;
+
+  DOM::Element el(node);
+  assert(el);
 
   static struct
   {
@@ -291,10 +270,10 @@ MathMLDocument::getFormattingNode(const DOM::Element& el) const
 }
 
 void
-MathMLDocument::setFormattingNode(const DOM::Element& el, const Ptr<MathMLElement>& elem) const
+MathMLDocument::setFormattingNode(const DOM::Node& node, const Ptr<MathMLElement>& elem) const
 {
-  assert(el);
-  nodeMap[el] = elem;
+  assert(node);
+  nodeMap[node] = elem;
 }
 
 #endif // HAVE_GMETADOM
