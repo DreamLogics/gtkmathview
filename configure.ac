@@ -1,9 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/MathMLObject.cc)
+AC_INIT
+AC_CONFIG_SRCDIR([src/MathMLObject.cc])
 
 MATHVIEW_MAJOR_VERSION=0
 MATHVIEW_MINOR_VERSION=3
-MATHVIEW_MICRO_VERSION=0
+MATHVIEW_MICRO_VERSION=1
 MATHVIEW_VERSION=$MATHVIEW_MAJOR_VERSION.$MATHVIEW_MINOR_VERSION.$MATHVIEW_MICRO_VERSION
 MATHVIEW_VERSION_INFO=`expr $MATHVIEW_MAJOR_VERSION + $MATHVIEW_MINOR_VERSION`:$MATHVIEW_MICRO_VERSION:$MATHVIEW_MINOR_VERSION
 
@@ -24,13 +25,13 @@ AC_ARG_ENABLE(
 AC_ARG_ENABLE(
 	debug,
 	[  --enable-debug[=ARG]    include debugging debug [default=yes]],
-	[
-		if test $enableval = yes; then
-			AC_DEFINE(ENABLE_DEBUG)
-		fi
-	],
-	AC_DEFINE(ENABLE_DEBUG)
+	enable_debug=$enableval,
+	enable_debug=yes
 )
+
+if test "x$enable_debug" = "xyes"; then
+   AC_DEFINE(ENABLE_DEBUG,,[Define to 1 if you want to enable validity checks while running])
+fi
 
 AC_ARG_WITH(
 	scaled-type,
@@ -43,23 +44,24 @@ AC_SUBST(SCALED_TYPE)
 AC_ARG_ENABLE(
 	texish,
 	[  --enable-texish[=ARG]   enable TeX like layout when possible [default=no]],
-	[
-		if test $enableval = yes; then
-			AC_DEFINE(TEXISH_MATHML)
-		fi
-	],
+	texish_mathml=$enableval,
+	texish_mathml=no
 )
+
+if test "x$texish_mathml" = "xyes"; then
+   AC_DEFINE(TEXISH_MATHML,,[Define to 1 if you want some formatting to be done using TeX layout algorithm])
+fi
 
 AC_ARG_ENABLE(
 	extensions,
 	[  --enable-extensions[=ARG] enable MathML extensions [default=yes]],
-	[
-		if test $enableval = yes; then
-			AC_DEFINE(ENABLE_EXTENSIONS)
-		fi
-	],
-	AC_DEFINE(ENABLE_EXTENSIONS)
+	enable_extensions=$enableval,
+	enable_extensions=no
 )
+
+if test "x$enable_extension" = "xyes"; then
+   AC_DEFINE(ENABLE_EXTENSIONS,,[Define to 1 to allow some extensions to MathML (new attributes)])
+fi
 
 AC_ARG_WITH(
 	gmetadom,
@@ -68,6 +70,13 @@ AC_ARG_WITH(
 	gmetadom=auto
 )
 
+AC_ARG_WITH(
+	minidom,
+	[  --with-minidom[=ARG]    compile with minidom library [default=auto]],
+	minidom=$withval,
+	minidom=auto
+)
+	
 AC_ARG_WITH(
 	t1lib,
 	[  --with-t1lib[=ARG]      compile with t1lib 1.x library [default=auto]],
@@ -101,18 +110,44 @@ AC_ARG_ENABLE(
 	export_PS=auto
 )
 
-AC_ARG_WITH(
-	colorgcc,
-	[  --with-colorgcc[=ARG]    use colorgcc if available [default=no]],
-	with_colorgcc=$withval,
-	with_colorgcc=no
-)
-
 dnl Automake configuration
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE(gtkmathview, $MATHVIEW_VERSION)
 dnl AC_DISABLE_SHARED
 AM_PROG_LIBTOOL
+
+dnl config.h top and bottom
+AH_TOP([
+/* Copyright (C) 2000-2001, Luca Padovani <luca.padovani@cs.unibo.it>.
+ *
+ * This file is part of GtkMathView, a Gtk widget for MathML.
+ * 
+ * GtkMathView is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * GtkMathView is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GtkMathView; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * 
+ * For details, see the GtkMathView World-Wide-Web page,
+ * http://www.cs.unibo.it/helm/mml-widget, or send a mail to
+ * <luca.padovani@cs.unibo.it>
+ */
+
+#ifndef config_h
+#define config_h
+])
+
+AH_BOTTOM([
+#endif /* config_h */
+])
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -126,9 +161,21 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(wctype.h,,AC_MSG_WARN(could not find required header file wctype.h))
 AC_CHECK_HEADERS(wchar.h,,AC_MSG_WARN(could not find required header file wchar.h))
-AC_CHECK_HEADERS(getopt.h)
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADER(iconv.h,,AC_MSG_ERROR(could not find required header file iconv.h))
+AC_CHECK_HEADERS(getopt.h)
+AC_MSG_CHECKING(for hidden getopt.h)
+AC_TRY_COMPILE(
+	[#include <getopt.h>],
+	[],
+	[
+		AC_DEFINE(HAVE_HIDDEN_GETOPT,,[Define to 1 if #include <getopt.h> works even when HAVE_GETOPT_H is false])
+		AC_MSG_RESULT(yes)
+	],
+	[
+		AC_MSG_RESULT(no)
+	]
+)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -136,9 +183,8 @@ AC_C_CHAR_UNSIGNED
 AC_C_BIGENDIAN
 
 dnl Check for iconv with const pointer as second argument
-AC_LANG_C
-AC_LANG_CPLUSPLUS
 AC_MSG_CHECKING(whether iconv has a const argument)
+AC_LANG_PUSH(C++)
 AC_TRY_COMPILE(
 	[#include <iconv.h>],
 	[
@@ -147,16 +193,14 @@ AC_TRY_COMPILE(
 		iconv(cd, &inbuf, 0, 0, 0);
 	],
 	[
-		AC_DEFINE(ICONV_CONST)
+		AC_DEFINE(ICONV_CONST,,[Define to 1 if iconv has a const second argument])
 		AC_MSG_RESULT(yes)
 	],
 	[
 		AC_MSG_RESULT(no)
 	]
 )
-AC_LANG_RESTORE
-
-AC_CHECK_PROG(HAVE_COLORGCC, colorgcc, yes, no)
+AC_LANG_POP(C++)
 
 AC_CHECK_PROG(HAVE_ICONV, iconv, yes, no)
 if test $HAVE_ICONV = "yes"; then
@@ -200,9 +244,9 @@ AC_CHECK_LIB(iberty, getopt_long,
 	,
 	-liberty
 )
-AC_CHECK_FUNC(getopt_long, AC_DEFINE(HAVE_GETOPT_LONG))
+AC_CHECK_FUNC(getopt_long, AC_DEFINE(HAVE_GETOPT_LONG,,[Define to 1 if you have getopt_long]))
 
-AC_LANG_C
+AC_LANG([C])
 if test $with_glib_config = "no"; then
 	AM_PATH_GLIB(1.2.0,,AC_MSG_ERROR(could not find glib))
 else
@@ -217,7 +261,23 @@ fi
 AM_PATH_GTK(1.2.0, gtklib="yes", gtklib="no")
 
 if test $gtklib = "no"; then
-	AC_MSG_WARN(GTK is needed in order to use the widget),
+	AC_MSG_WARN(GTK is needed in order to use the widget)
+fi
+
+if test $gmetadom = "no" -a $minidom = "no"; then
+	AC_MSG_ERROR(you must specify at least one DOM library to be used)
+fi
+
+if test $gmetadom = "yes" -a $minidom = "yes"; then
+	AC_MSG_ERROR(you must specify at most one DOM library to be used)
+fi
+
+if test $minidom = "yes"; then
+	gmetadom="no"
+fi
+
+if test $gmetadom = "yes"; then
+	minidom="no"
 fi
 
 AC_CHECK_PROG(HAVE_GMETADOM_CONFIG, gmetadom-config, yes, no)
@@ -244,11 +304,49 @@ if test $gmetadom = "auto"; then
 	fi
 fi
 
+AC_CHECK_PROG(HAVE_MINIDOM_CONFIG, minidom-config, yes, no)
+if test $HAVE_MINIDOM_CONFIG = "no"; then
+	minidom="no"
+fi
+
+if test $minidom = "auto"; then
+	MINIDOM_MIN_VERSION=0.1.3
+	AC_MSG_CHECKING(for minidom >= $MINIDOM_MIN_VERSION)
+	vers=`minidom-config --version | awk -F. '{ printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+	minvers=`echo $MINIDOM_MIN_VERSION | awk -F. '{ printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+
+	if test "$vers" -lt "$minvers"; then
+		minidom="no"
+	else
+		minidom="yes"
+	fi
+
+	if test $minidom = "yes"; then
+		AC_MSG_RESULT(found)
+	else
+		AC_MSG_RESULT(not found)
+	fi
+fi
+
+if test $gmetadom = "no" -a $minidom = "no"; then
+	AC_MSG_ERROR(no DOM library was found, this is a fatal error)
+fi
+
+if test $gmetadom = "yes" -a $minidom = "yes"; then
+	AC_MSG_WARN(both gmetadom and minidom were found, using gmetadom)
+	minidom="no"
+fi
+
 if test $gmetadom = "yes"; then
 	DOM_CFLAGS=`gmetadom-config --module=gdome_cpp_smart --cflags`
 	DOM_LIBS=`gmetadom-config --module=gdome_cpp_smart --libs`
 	DOM_IMPLEMENTATION="GMETADOM"
-	AC_DEFINE(HAVE_GMETADOM)
+	AC_DEFINE(HAVE_GMETADOM,,[Define to 1 to compile with GMetaDOM (recommended)])
+else
+	DOM_CFLAGS="$GLIB_CFLAGS `minidom-config --cflags`"
+	DOM_LIBS="$GLIB_LIBS `minidom-config --libs`"
+	DOM_IMPLEMENTATION="MINIDOM"
+	AC_DEFINE(HAVE_MINIDOM,,[Define to 1 to compile with minidom (deprecated)])
 fi
 AC_SUBST(DOM_CFLAGS)
 AC_SUBST(DOM_LIBS)
@@ -260,7 +358,7 @@ if test $t1lib = "auto"; then
 fi
 
 if test $t1lib = "yes"; then
-	AC_DEFINE(HAVE_LIBT1)
+	AC_DEFINE(HAVE_LIBT1,,[Define to 1 to compile with t1lib for Type 1 fonts])
 
         if test $with_t1lib_prefix = "yes"; then
                 T1_CFLAGS="-I$T1LIB_PREFIX/include"
@@ -285,21 +383,16 @@ if test $export_PS = "auto"; then
 	export_PS=yes
 fi
 
-if test $with_colorgcc = "yes" -a $HAVE_COLORGCC = "yes"; then
-	CC=colorgcc
-	CXX=colorgcc
-fi
-
 CFLAGS="$CFLAGS -W -Wall -O0"
 CXXFLAGS="$CXXFLAGS -W -Wall -O0"
 
 if test $profile = yes; then
 	CFLAFS="$CFLAGS -p"
 	CXXFLAGS="$CXXFLAGS -p"
-	AC_DEFINE(ENABLE_PROFILE)
+	AC_DEFINE(ENABLE_PROFILE,,[Define to 1 to let the widget collect some information for profiling purposes])
 fi
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 gtkmathview.spec
 config/Makefile
@@ -313,4 +406,6 @@ doc/Makefile
 viewer/Makefile
 randomath/Makefile
 mathml2ps/Makefile
+getopt/Makefile
 ])
+AC_OUTPUT
