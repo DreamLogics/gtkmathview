@@ -85,9 +85,7 @@ struct _GtkMathView {
   gfloat         button_press_y;
   guint32        button_press_time;
 
-#if defined(HAVE_GMETADOM)
   GdomeElement*  current_elem;
-#endif
 
   FontManagerId  font_manager_id;
 
@@ -148,6 +146,7 @@ static void gtk_math_view_element_over(GtkMathView*, GdomeElement*, int);
 static void setup_adjustment(GtkAdjustment*, gfloat, gfloat);
 static void setup_adjustments(GtkMathView*);
 static void reset_adjustments(GtkMathView*);
+static void draw_cursor(GtkMathView*);
 
 /* Local data */
 
