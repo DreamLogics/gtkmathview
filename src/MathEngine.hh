@@ -50,8 +50,6 @@ public:
   void  Render(const struct Rectangle*);
   void  Update(const struct Rectangle* = NULL);
 
-  bool  IsOnLink(scaled, scaled) const;
-
   class MathMLElement* GetRoot(void) const { return root; }
   class MathMLElement* GetElementAt(scaled, scaled) const;
 

@@ -225,6 +225,12 @@ AC_CHECK_LIB(minidom, mdom_node_get_type,
 	`minidom-config --libs` `glib-config --libs`
 )
 
+vers=`minidom-config --version | awk -F. '{ printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+minvers=`echo 0.1.3 | awk -F. '{ printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+if test "$vers" -lt "$minvers"; then
+        AC_MSG_ERROR(you need at least minidom 0.1.3)
+fi
+
 if test $t1lib = "auto"; then
 	AC_CHECK_LIB(t1, T1_InitLib, t1lib="yes", t1lib="no")
 fi

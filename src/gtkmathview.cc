@@ -85,15 +85,11 @@ struct _GtkMathView {
 struct _GtkMathViewClass {
   GtkEventBoxClass parent_class;
 
-  GdkCursor* normal_cursor;
-  GdkCursor* link_cursor;
-  
   void (*set_scroll_adjustments) (GtkMathView *math_view,
 				  GtkAdjustment *hadjustment,
 				  GtkAdjustment *vadjustment);
   
   void (*clicked)           (GtkMathView*, mDOMNodeRef);
-  void (*jump)              (GtkMathView*, mDOMNodeRef);
   void (*selection_changed) (GtkMathView*, mDOMNodeRef);
   void (*element_changed)   (GtkMathView*, mDOMNodeRef);
   void (*action_changed)    (GtkMathView*, mDOMNodeRef);
@@ -121,7 +117,6 @@ static void     gtk_math_view_realize(GtkWidget*, GtkMathView*);
 /* GtkMathView signals */
 
 static void gtk_math_view_clicked(GtkMathView*, mDOMNodeRef);
-static void gtk_math_view_jump(GtkMathView*, mDOMNodeRef);
 static void gtk_math_view_selection_changed(GtkMathView*, mDOMNodeRef);
 static void gtk_math_view_element_changed(GtkMathView*, mDOMNodeRef);
 
@@ -135,7 +130,6 @@ static void reset_adjustments(GtkMathView*);
 
 static GtkEventBoxClass* parent_class = NULL;
 static guint clicked_signal = 0;
-static guint jump_signal = 0;
 static guint selection_changed_signal = 0;
 static guint element_changed_signal = 0;
 static guint action_changed_signal = 0;
@@ -309,11 +303,7 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
   GtkObjectClass* object_class = (GtkObjectClass*) klass;
   GtkWidgetClass* widget_class = (GtkWidgetClass*) klass;
 
-  klass->normal_cursor = gdk_cursor_new(GDK_TOP_LEFT_ARROW);
-  klass->link_cursor = gdk_cursor_new(GDK_HAND2);
-
   klass->clicked            = gtk_math_view_clicked;
-  klass->jump               = gtk_math_view_jump;
   klass->selection_changed  = gtk_math_view_selection_changed;
   klass->element_changed    = gtk_math_view_element_changed;
 
@@ -340,16 +330,6 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
 		   GTK_TYPE_NONE, 1, GTK_TYPE_POINTER);
 
   gtk_object_class_add_signals(object_class, &clicked_signal, 1);
-
-  jump_signal =
-    gtk_signal_new("jump",
-		   GTK_RUN_FIRST,
-		   object_class->type,
-		   GTK_SIGNAL_OFFSET (GtkMathViewClass, jump),
-		   gtk_marshal_NONE__POINTER,
-		   GTK_TYPE_NONE, 1, GTK_TYPE_POINTER);
-
-  gtk_object_class_add_signals(object_class, &jump_signal, 1);
 
   selection_changed_signal =
     gtk_signal_new("selection_changed",
@@ -610,12 +590,8 @@ gtk_math_view_button_release_event(GtkWidget* widget,
       if (elem != NULL) {
 	mDOMNodeRef node = (elem != NULL) ? findDOMNode(elem) : NULL;
 
-	if (node != NULL) {
+	if (node != NULL)
 	  gtk_signal_emit(GTK_OBJECT(math_view), clicked_signal, node);
-	
-	  if (mdom_node_has_attribute(node, DOM_CONST_STRING("href")))
-	    gtk_signal_emit(GTK_OBJECT(math_view), jump_signal, node);
-	}
       }
     }
     
@@ -917,13 +893,6 @@ gtk_math_view_clicked(GtkMathView* math_view, mDOMNodeRef node)
 }
 
 static void
-gtk_math_view_jump(GtkMathView* math_view, mDOMNodeRef node)
-{
-  g_return_if_fail(math_view != NULL);
-  // noop
-}
-
-static void
 gtk_math_view_selection_changed(GtkMathView* math_view, mDOMNodeRef node)
 {
   g_return_if_fail(math_view != NULL);
@@ -934,14 +903,7 @@ static void
 gtk_math_view_element_changed(GtkMathView* math_view, mDOMNodeRef node)
 {
   g_return_if_fail(math_view != NULL);
-
-  GtkMathViewClass* klass = (GtkMathViewClass*) gtk_type_class(gtk_math_view_get_type());
-  g_return_if_fail(klass != NULL);
-
-  if (node != NULL && mdom_node_has_attribute(node, DOM_CONST_STRING("href")))
-    gdk_window_set_cursor(GTK_WIDGET(math_view)->window, klass->link_cursor);
-  else
-    gdk_window_set_cursor(GTK_WIDGET(math_view)->window, klass->normal_cursor);
+  // noop
 }
 
 extern "C" GtkAdjustment*
@@ -1260,7 +1222,7 @@ gtk_math_view_export_to_postscript(GtkMathView* math_view,
 /* experimental APIs */
 
 extern "C" mDOMNodeRef
-gtk_math_view_get_node(GtkMathView* math_view)
+gtk_math_view_get_element(GtkMathView* math_view)
 {
   g_return_val_if_fail(math_view != NULL, NULL);
   return math_view->node;
