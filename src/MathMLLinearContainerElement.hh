@@ -41,6 +41,11 @@ protected:
   virtual ~MathMLLinearContainerElement();
 
 public:
+  unsigned GetSize(void) const { return content.size(); }
+  void     SetSize(unsigned);
+  Ptr<MathMLElement> GetChild(unsigned) const;
+  void     SetChild(unsigned, const Ptr<MathMLElement>&);
+
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
@@ -62,11 +67,6 @@ public:
   // way, because other operation involves SetParent and other
   // memory-management issues
   const std::vector< Ptr<MathMLElement> >& GetContent(void) const { return content; }
-
-  unsigned GetSize(void) const { return content.size(); }
-  void     SetSize(unsigned);
-  Ptr<MathMLElement> GetChild(unsigned) const;
-  void     SetChild(unsigned, const Ptr<MathMLElement>&);
 
   virtual void Append(const Ptr<MathMLElement>&);
   virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);

@@ -27,42 +27,24 @@ template <class P>
 class Ptr
 {
 public:
-  Ptr(void) : ptr(0) { }
-  Ptr(P* p) : ptr(p) { if (ptr != 0) ptr->ref(); }
+  Ptr(P* p = 0) : ptr(p) { if (ptr != 0) ptr->ref(); }
   Ptr(const Ptr& p) : ptr(p.ptr) { if (ptr != 0) ptr->ref(); }
   ~Ptr() { if (ptr != 0) ptr->unref(); }
 
   P* operator->() const { assert(ptr != 0); return ptr; }
   Ptr& operator=(const Ptr& p)
   { 
+    if (ptr == p.ptr) return *this;
     if (p.ptr != 0) p.ptr->ref();
     if (ptr != 0) ptr->unref();
     ptr = p.ptr;
     return *this;
   }
 
-  friend bool operator==(const Ptr& p, const Ptr& q) { return p.ptr == q.ptr; }
-  friend bool operator!=(const Ptr& p, const Ptr& q) { return p.ptr != q.ptr; }
-              operator bool() const { return ptr != 0; }
-
+  operator P*() const { return ptr; }
   template <class Q> friend Ptr<Q> smart_cast(const Ptr& p) { return Ptr<Q>(dynamic_cast<Q*>(p.ptr)); }  
   template <class Q> friend bool is_a(const Ptr& p) { return dynamic_cast<Q*>(p.ptr) != 0; }
-
-  // NOTE: due to the following conversion operator there can be many
-  // ambiguities when comparing different smart pointers
   template <class Q> operator Ptr<Q>() const { return Ptr<Q>(ptr); }
-
-  void* get(void) const
-  {
-    if (ptr != 0) ptr->ref();
-    return static_cast<void*>(ptr);
-  }
-
-  void set(void* p)
-  {
-    if (ptr != 0) ptr->unref();
-    ptr = static_cast<P*>(p);
-  }
 
 private:
   P* ptr;

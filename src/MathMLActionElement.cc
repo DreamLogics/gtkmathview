@@ -192,7 +192,7 @@ MathMLActionElement::Inside(scaled x, scaled y)
   if (!IsInside(x, y)) return 0;
 
   Ptr<MathMLElement> elem = GetSelectedElement();
-  return elem ? elem->Inside(x, y) : this;
+  return elem ? elem->Inside(x, y) : Ptr<MathMLElement>(this);
 }
 
 void

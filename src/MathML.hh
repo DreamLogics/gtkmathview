@@ -23,7 +23,6 @@
 #ifndef MathML_hh
 #define MathML_hh
 
-#include "DocumentElement.hh"
 #include "MathMLActionElement.hh"
 #include "MathMLAlignGroupElement.hh"
 #include "MathMLAlignMarkElement.hh"

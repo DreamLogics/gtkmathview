@@ -48,6 +48,118 @@ MathMLMultiScriptsElement::~MathMLMultiScriptsElement()
 }
 
 void
+MathMLMultiScriptsElement::SetBase(const Ptr<MathMLElement>& elem)
+{
+  if (elem != base)
+    {
+      if (elem) elem->SetParent(this);
+      if (base) base->SetParent(0);
+      base = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::SetScriptsSize(unsigned size)
+{
+  assert(size <= scripts.size());
+  if (size != scripts.size())
+    {
+      for (unsigned i = size; i < scripts.size(); i++)
+	{
+	  SetSubScript(i, 0);
+	  SetSuperScript(i, 0);
+	}
+      scripts.resize(size);
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::SetPreScriptsSize(unsigned size)
+{
+  assert(size <= preScripts.size());
+  if (size != preScripts.size())
+    {
+      for (unsigned i = size; i < preScripts.size(); i++)
+	{
+	  SetPreSubScript(i, 0);
+	  SetPreSuperScript(i, 0);
+	}
+      preScripts.resize(size);
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::SetSubScript(unsigned i, const Ptr<MathMLElement>& elem)
+{
+  assert(i <= script.size());
+  if (i == script.size()) AppendScripts(elem, 0);
+  else if (elem != script[i].first)
+    {
+      if (script[i].first) script[i].first->SetParent(0);
+      elem->SetParent(this);
+      script[i].first = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::SetSuperScript(unsigned i, const Ptr<MathMLElement>& elem)
+{
+  assert(i <= script.size());
+  if (i == script.size()) AppendScripts(0, elem);
+  else if (elem != script[i].second)
+    {
+      if (script[i].second) script[i].second->SetParent(0);
+      elem->SetParent(this);
+      script[i].second = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::AppendScripts(const Ptr<MathMLElement>& sub, const Ptr<MathMLElement>& sup)
+{
+  script.push_back(std::pair< Ptr<MathMLElement>,Ptr<MathMLElement> >(sub, sup));
+}
+
+void
+MathMLMultiScriptsElement::SetPreSubScript(unsigned i, const Ptr<MathMLElement>& elem)
+{
+  assert(i <= preScript.size());
+  if (i == preScript.size()) AppendPreScripts(elem, 0);
+  else if (elem != preScript[i].first)
+    {
+      if (preScript[i].first) preScript[i].first->SetParent(0);
+      elem->SetParent(this);
+      preScript[i].first = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::SetPreSuperScript(unsigned i, const Ptr<MathMLElement>& elem)
+{
+  assert(i <= preScript.size());
+  if (i == preScript.size()) AppendPreScripts(0, elem);
+  else if (elem != preScript[i].second)
+    {
+      if (preScript[i].second) preScript[i].second->SetParent(0);
+      elem->SetParent(this);
+      preScript[i].second = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLMultiScriptsElement::AppendPreScripts(const Ptr<MathMLElement>& sub, const Ptr<MathMLElement>& sup)
+{
+  preScript.push_back(std::pair< Ptr<MathMLElement>,Ptr<MathMLElement> >(sub, sup));
+}
+
+void
 MathMLMultiScriptsElement::Normalize()
 {
   if (HasDirtyStructure() || HasChildWithDirtyStructure())

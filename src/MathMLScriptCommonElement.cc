@@ -34,6 +34,15 @@ MathMLScriptCommonElement::MathMLScriptCommonElement()
 }
 
 void
+MathMLScriptCommonElement::SetBase(const Ptr<MathMLElement>& elem)
+{
+  if (elem != base)
+    {
+      
+    }
+}
+
+void
 MathMLScriptCommonElement::ScriptSetup(RenderingEnvironment* env)
 {
   ruleThickness = env->GetRuleThickness();

@@ -27,10 +27,10 @@
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLScriptElement: public MathMLLinearContainerElement, public MathMLScriptCommonElement
+class MathMLScriptElement: public MathMLContainerElement, public MathMLScriptCommonElement
 {
 protected:
   MathMLScriptElement(void);
@@ -47,12 +47,24 @@ public:
   { return Ptr<MathMLElement>(new MathMLScriptElement(el)); }
 #endif
 
+  void SetBase(const Ptr<MathMLElement>&);
+  void SetSubScript(const Ptr<MathMLElement>&);
+  void SetSuperScript(const Ptr<MathMLElement>&);
+  Ptr<MathMLElement> GetBase(void) const { return base; }
+  Ptr<MathMLElement> GetSubScript(void) const { return subScript; }
+  Ptr<MathMLElement> GetSuperScript(void) const { return superScript; }
+
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Normalize(void);
   virtual void Setup(class RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
+  virtual void Render(const class DrawingArea&);
 
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
+  virtual void   ReleaseGCs(void);
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 
 private:

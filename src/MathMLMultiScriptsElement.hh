@@ -23,14 +23,17 @@
 #ifndef MathMLMultiScriptsElement_hh
 #define MathMLMultiScriptsElement_hh
 
+#include <vector>
+#include <utility>
+
 #if defined(HAVE_GMETADOM)
 #include "gmetadom.hh"
 #endif
 
-#include "MathMLLinearContainerElement.hh"
+#include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLMultiScriptsElement : public MathMLLinearContainerElement, public MathMLScriptCommonElement
+class MathMLMultiScriptsElement : public MathMLContainerElement, public MathMLScriptCommonElement
 {
 protected:
   MathMLMultiScriptsElement(void);
@@ -40,6 +43,23 @@ protected:
   virtual ~MathMLMultiScriptsElement();
 
 public:
+  unsigned GetScriptsSize(void) const { return script.size(); }
+  void     SetScriptsSize(unsigned);
+  unsigned GetPreScriptsSize(void) const { return preScript.size(); }
+  void     SetPreScriptsSize(unsigned);
+  void     SetBase(const Ptr<MathMLElement>&);
+  void     SetSubScript(unsigned, const Ptr<MathMLElement>&);
+  void     SetSupertScript(unsigned, const Ptr<MathMLElement>&);
+  void     AppendScripts(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
+  void     SetPreSubScript(unsigned, const Ptr<MathMLElement>&);
+  void     SetPreSuperScript(unsigned, const Ptr<MathMLElement>&);
+  void     AppendPreScripts(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
+  Ptr<MathMLElement> GetBase(void) const { return base; }
+  Ptr<MathMLElement> GetSubScript(unsigned) const;
+  Ptr<MathMLElement> GetSuperScript(unsigned) const;
+  Ptr<MathMLElement> GetPreSubScript(unsigned) const;
+  Ptr<MathMLElement> GetPreSuperScript(unsigned) const;
+
   static Ptr<MathMLElement> create(void)
   { return Ptr<MathMLElement>(new MathMLMultiScriptsElement()); }
 #if defined(HAVE_GMETADOM)
@@ -51,12 +71,19 @@ public:
   virtual void Setup(class RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
+  virtual void Render(const class DrawingArea&);
+  virtual void ReleaseGCs(void);
 
+  virtual bool IsExpanding(void) const;
+  virtual scaled GetLeftEdge(void) const;
+  virtual scaled GetRightEdge(void) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
+  virtual Ptr<MathMLElement> Inside(scaled, scaled);
+  virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
 
 private:
-  unsigned nPre;
-  unsigned nPost;
+  std::vector< std::pair< Ptr<MathMLElement>, Ptr<MathMLElement> > > script;
+  std::vector< std::pair< Ptr<MathMLElement>, Ptr<MathMLElement> > > preScript;
 
   scaled subShiftX;
   scaled subShiftY;

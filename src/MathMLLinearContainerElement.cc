@@ -275,16 +275,13 @@ MathMLLinearContainerElement::ReleaseGCs()
 void
 MathMLLinearContainerElement::SetSize(unsigned size)
 {
-  assert(size <= GetSize());
-  if (size == GetSize()) return;
-
-  for (std::vector< Ptr<MathMLElement> >::iterator elem = content.begin() + size;
-       elem < content.end();
-       elem++)
-    (*elem)->SetParent(0);
-
-  content.resize(size);
-  SetDirtyStructure();
+  assert(size <= content.size());
+  if (size != content.size())
+    {
+      for (unsigned i = size; i < content.size(); i++) SetChild(i, 0);
+      content.resize(size);
+      SetDirtyLayout();
+    }
 }
 
 Ptr<MathMLElement>
@@ -300,15 +297,12 @@ MathMLLinearContainerElement::SetChild(unsigned i, const Ptr<MathMLElement>& ele
   assert(i <= GetSize());
 
   if (i == GetSize()) Append(elem);
-  else
+  else if (content[i] != elem)
     {
-      if (content[i] != elem)
-	{
-	  content[i]->SetParent(0);
-	  elem->SetParent(this);
-	  content[i] = elem;
-	  SetDirtyStructure();
-	}
+      content[i]->SetParent(0);
+      elem->SetParent(this);
+      content[i] = elem;
+      SetDirtyLayout();
     }
 }
 
@@ -317,7 +311,7 @@ MathMLLinearContainerElement::Append(const Ptr<MathMLElement>& elem)
 {
   elem->SetParent(this);
   content.push_back(elem);
-  SetDirtyStructure();
+  SetDirtyLayout();
 }
 
 void

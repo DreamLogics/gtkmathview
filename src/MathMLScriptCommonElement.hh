@@ -23,13 +23,16 @@
 #ifndef MathMLScriptCommonElement_hh
 #define MathMLScriptCommonElement_hh
 
-#include "MathMLElement.hh"
+#include "Ptr.hh"
 
 class MathMLScriptCommonElement
 {
 public:
   MathMLScriptCommonElement(void);
   void ScriptSetup(class RenderingEnvironment*);
+
+  Ptr<class MathMLElement> GetBase(void) const { return base; }
+  void SetBase(const Ptr<class MathMLElement>&);
 
   virtual bool IsExpanding(void) const;
 
@@ -39,7 +42,7 @@ protected:
 		      scaled&, scaled&,
 		      scaled&, scaled&);
 
-  Ptr<MathMLElement> base;
+  Ptr<class MathMLElement> base;
 
   scaled sppex;
   scaled ruleThickness;

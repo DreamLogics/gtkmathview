@@ -46,6 +46,8 @@ MathMLFractionElement::MathMLFractionElement(const GMetaDOM::Element& node)
 
 MathMLFractionElement::~MathMLFractionElement()
 {
+  SetNumerator(0);
+  SetDenominator(0);
 }
 
 const AttributeSignature*
@@ -63,6 +65,30 @@ MathMLFractionElement::GetAttributeSignature(AttributeId id) const
   if (signature == NULL) signature = MathMLContainerElement::GetAttributeSignature(id);
 
   return signature;
+}
+
+void
+MathMLFractionElement::SetNumerator(const Ptr<MathMLElement>& elem)
+{
+  if (elem != numerator)
+    {
+      if (elem) elem->SetParent(this);
+      if (numerator) numerator->SetParent(0);
+      numerator = elem;
+      SetDirtyLayout();
+    }
+}
+
+void
+MathMLFractionElement::SetDenominator(const Ptr<MathMLElement>& elem)
+{
+  if (elem != denominator)
+    {
+      if (elem) elem->SetParent(this);
+      if (denominator) denominator->SetParent(0);
+      denominator = elem;
+      SetDirtyLayout();
+    }
 }
 
 void
@@ -369,6 +395,38 @@ MathMLFractionElement::IsExpanding() const
   if (denominator->IsExpanding()) return true;
 
   return false;
+}
+
+scaled
+MathMLFractionElement::GetLeftEdge() const
+{
+  return 0;
+}
+
+scaled
+MathMLFractionElement::GetRightEdge() const
+{
+  return box.width;
+}
+
+void
+MathMLFractionElement::ReleaseGCs()
+{
+  MathMLElement::ReleaseGCs();
+  if (numerator) numerator->ReleaseGCs();
+  if (denominator) denominator->ReleaseGCs();
+}
+
+Ptr<MathMLElement>
+MathMLFractionElement::Inside(scaled x, scaled y)
+{
+  if (!IsInside(x, y)) return 0;
+
+  Ptr<MathMLElement> inside = 0;
+  if (numerator && (inside = numerator->Inside(x, y))) return inside;
+  if (denominator && (inside = denominator->Inside(x, y))) return inside;
+
+  return this;
 }
 
 Ptr<class MathMLOperatorElement>
