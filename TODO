@@ -4,7 +4,7 @@ EDIT branch TODO list and BUGS
 * use STL containers for font configuration
 * change font configuration and implement new mathvariant
 * match characters with variants
-* segfaults when deselect first selection
+* remove Array.?? from repository
 
 MathML Implementation
 

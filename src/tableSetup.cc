@@ -26,7 +26,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "Array.hh"
+#include <vector>
+
 #include "ValueConversion.hh"
 #include "MathMLTableElement.hh"
 #include "RenderingEnvironment.hh"
@@ -89,6 +90,51 @@ MathMLTableElement::SetupCellSpanning(RenderingEnvironment& env)
     }
 }
 
+// BEGIN OF PRIVATE CLASS
+class TempRow {
+public:
+  TempRow(void)
+  {
+    first = 0;
+  }
+
+  void AddSpanningCell(unsigned j, unsigned n = 1)
+  {
+    assert(n >= 1);
+
+    if (j + n > content.size()) content.resize(j + n, false);
+    for (unsigned k = 0; k < n; k++) content[j + k] = true;
+  }
+
+  unsigned AddCell(unsigned n)
+  {
+    assert(n >= 1);
+
+    unsigned j = first;
+    unsigned k = 0;
+    while (k < n && j < content.size()) {
+      for (k = 0; k < n && j + k < content.size() && !content[j + k]; k++) ;
+      if (k < n) j += k + 1;
+    }
+
+    if (j >= content.size()) content.resize(j + n, false);
+    for (k = 0; k < n; k++) content[j + k] = true;
+    first = j + n;
+
+    return j;
+  }
+
+  unsigned GetColumns(void) const
+  {
+    return (first > content.size()) ? first : content.size();
+  }
+
+private:
+  unsigned first;
+  std::vector<bool> content;
+};
+// END OF PRIVATE CLASS
+
 // CalcTableSize: requires normalization and spanning attributes
 // compute total number of rows and columns within this table
 void
@@ -101,50 +147,7 @@ MathMLTableElement::CalcTableSize()
 
   if (nRows == 0) return;
 
-  class TempRow {
-  public:
-    TempRow(void)
-    {
-      first = 0;
-    }
-
-    void AddSpanningCell(unsigned j, unsigned n = 1)
-    {
-      assert(n >= 1);
-
-      if (j + n > content.GetSize()) content.SetSize(j + n, false);
-      for (unsigned k = 0; k < n; k++) content.Set(j + k, true);
-    }
-
-    unsigned AddCell(unsigned n)
-    {
-      assert(n >= 1);
-
-      unsigned j = first;
-      unsigned k = 0;
-      while (k < n && j < content.GetSize()) {
-	for (k = 0; k < n && j + k < content.GetSize() && !content.Get(j + k); k++) ;
-	if (k < n) j += k + 1;
-      }
-
-      if (j >= content.GetSize()) content.SetSize(j + n, false);
-      for (k = 0; k < n; k++) content.Set(j + k, true);
-      first = j + n;
-
-      return j;
-    }
-
-    unsigned GetColumns(void) const
-    {
-      return (first > content.GetSize()) ? first : content.GetSize();
-    }
-
-  private:
-    unsigned    first;
-    Array<bool> content;
-  };
-
-  TempRow* r = new TempRow[nRows];
+  std::vector<TempRow> r(nRows);
 
   i = 0;
   for (std::vector< Ptr<MathMLElement> >::const_iterator p = GetContent().begin();
@@ -188,8 +191,6 @@ MathMLTableElement::CalcTableSize()
     }
 
   for (i = 0; i < nRows; i++) if (r[i].GetColumns() > nColumns) nColumns = r[i].GetColumns();
-
-  delete [] r;
 }
 
 // create a matrix of TableCells for easy access to the table's elements

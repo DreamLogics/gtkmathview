@@ -152,8 +152,6 @@ pkginclude_HEADERS = \
 noinst_HEADERS = \
   Ptr.hh \
   AFont.hh \
-  Array.hh \
-  Array.icc \
   Adaptors.hh \
   AttributeParser.hh \
   AttributeSignature.hh \

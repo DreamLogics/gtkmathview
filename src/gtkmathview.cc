@@ -47,6 +47,7 @@
 
 #define CLICK_SPACE_RANGE 1
 #define CLICK_TIME_RANGE  250
+#define MARGIN            1
 
 enum SelectState 
   {
@@ -173,6 +174,7 @@ paint_widget_area(GtkMathView* math_view, gint x, gint y, gint width, gint heigh
 
   widget = math_view->area;
 
+  //printf("sto per cancellare: %d %d %d %d\n", x, y,width, height);
   gdk_draw_rectangle(math_view->pixmap, widget->style->white_gc, TRUE, x, y, width, height);
 
   Rectangle rect;
@@ -204,6 +206,8 @@ hadjustment_value_changed(GtkAdjustment* adj, GtkMathView* math_view)
   g_return_if_fail(adj != NULL);
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(math_view->drawing_area != NULL);
+
+  //  printf("val: %f upper: %f lower: %f ps: %f upper-ps: %f\n", adj->value, adj->upper, adj->lower, adj->page_size, adj->upper - adj->page_size);
 
   if (adj->value > adj->upper - adj->page_size) adj->value = adj->upper - adj->page_size;
   if (adj->value < adj->lower) adj->value = adj->lower;
@@ -746,6 +750,8 @@ gtk_math_view_expose_event(GtkWidget* widget,
   g_return_val_if_fail(event != NULL, FALSE);
   g_return_val_if_fail(math_view != NULL, FALSE);
 
+  //printf("widget expose %f %f %f %f\n", (double) event->area.x, (double) event->area.y, (double) event->area.width, (double) event->area.height);
+
   gdk_draw_pixmap(widget->window,
 		  widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
 		  math_view->pixmap,
@@ -805,9 +811,9 @@ setup_adjustment(GtkAdjustment* adj, gfloat size, gfloat page_size)
 
   adj->lower = 0.0;
   adj->page_size = page_size;
-  adj->step_increment = 10 * SCALED_POINTS_PER_PX;
+  adj->step_increment = px2sp(10);
   adj->page_increment = page_size;
-  adj->upper = size + 10 * SCALED_POINTS_PER_PX;
+  adj->upper = size;
   if (adj->upper < 0) adj->upper = 0.0;
 
   if (adj->value > adj->upper - page_size) {
@@ -843,7 +849,7 @@ setup_adjustments(GtkMathView* math_view)
   math_view->interface->GetDocumentBoundingBox(box);
 
   if (math_view->hadjustment != NULL) {
-    gfloat width = sp2float(box.width);
+    gfloat width = sp2float(box.width) + px2sp(2 * MARGIN);
     gfloat page_width = sp2float(math_view->drawing_area->GetWidth());
     
     if (math_view->top_x > width - page_width)
@@ -853,7 +859,7 @@ setup_adjustments(GtkMathView* math_view)
   }
 
   if (math_view->vadjustment != NULL) {
-    gfloat height = sp2float(box.GetHeight());
+    gfloat height = sp2float(box.GetHeight()) + px2sp(2 * MARGIN);
     gfloat page_height = sp2float(math_view->drawing_area->GetHeight());
 
     if (math_view->top_y > height - page_height)
@@ -1192,8 +1198,8 @@ gtk_math_view_get_top(GtkMathView* math_view, gint* x, gint* y)
   g_return_if_fail(math_view->vadjustment != NULL);
   g_return_if_fail(math_view->hadjustment != NULL);
 
-  if (x != NULL) *x = (gint) (math_view->hadjustment->value / SCALED_POINTS_PER_PX);
-  if (y != NULL) *y = (gint) (math_view->vadjustment->value / SCALED_POINTS_PER_PX);
+  if (x != NULL) *x = sp2ipx(math_view->hadjustment->value);
+  if (y != NULL) *y = sp2ipx(math_view->vadjustment->value);
 }
 
 extern "C" void
@@ -1257,7 +1263,7 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
   case FONT_MANAGER_T1:
 #ifdef HAVE_LIBT1
     math_view->font_manager = new PS_T1_FontManager;
-    math_view->drawing_area = new T1_Gtk_DrawingArea(values, px2sp(5), px2sp(5),
+    math_view->drawing_area = new T1_Gtk_DrawingArea(values, px2sp(MARGIN), px2sp(MARGIN),
 						     GTK_WIDGET(math_view->area),
 						     Globals::configuration.GetSelectForeground(),
 						     Globals::configuration.GetSelectBackground());
@@ -1268,7 +1274,7 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
 #endif // HAVE_LIBT1
   case FONT_MANAGER_GTK:
     math_view->font_manager = new Gtk_FontManager;
-    math_view->drawing_area = new Gtk_DrawingArea(values, px2sp(5), px2sp(5),
+    math_view->drawing_area = new Gtk_DrawingArea(values, px2sp(MARGIN), px2sp(MARGIN),
 						  GTK_WIDGET(math_view->area),
 						  Globals::configuration.GetSelectForeground(),
 						  Globals::configuration.GetSelectBackground());

@@ -1,4 +1,4 @@
-// Copyright (C) 2000-2002, Luca Padovani <luca.padovani@cs.unibo.it>.
+// Copyright (C) 2000-2003, Luca Padovani <luca.padovani@cs.unibo.it>.
 //
 // This file is part of GtkMathView, a Gtk widget for MathML.
 // 
@@ -27,16 +27,16 @@ template <class P>
 class Ptr
 {
 public:
-  Ptr(P* p = 0) : ptr(p) { if (ptr != 0) ptr->ref(); }
-  Ptr(const Ptr& p) : ptr(p.ptr) { if (ptr != 0) ptr->ref(); }
-  ~Ptr() { if (ptr != 0) ptr->unref(); }
+  Ptr(P* p = 0) : ptr(p) { if (ptr) ptr->ref(); }
+  Ptr(const Ptr& p) : ptr(p.ptr) { if (ptr) ptr->ref(); }
+  ~Ptr() { if (ptr) ptr->unref(); }
 
-  P* operator->() const { assert(ptr != 0); return ptr; }
+  P* operator->() const { assert(ptr); return ptr; }
   Ptr& operator=(const Ptr& p)
   { 
     if (ptr == p.ptr) return *this;
-    if (p.ptr != 0) p.ptr->ref();
-    if (ptr != 0) ptr->unref();
+    if (p.ptr) p.ptr->ref();
+    if (ptr) ptr->unref();
     ptr = p.ptr;
     return *this;
   }
