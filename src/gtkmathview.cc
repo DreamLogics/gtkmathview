@@ -77,7 +77,7 @@ struct _GtkMathView {
   gfloat 	 old_top_x;
   gfloat 	 old_top_y;
 
-  gboolean       frozen;
+  guint          freeze_counter;
 
   SelectState    select_state;
   gboolean       button_pressed;
@@ -170,7 +170,7 @@ paint_widget_area(GtkMathView* math_view, gint x, gint y, gint width, gint heigh
   g_return_if_fail(math_view->area != NULL);
   g_return_if_fail(math_view->interface != NULL);
 
-  if (!GTK_WIDGET_MAPPED(GTK_WIDGET(math_view)) || math_view->frozen) return;
+  if (!GTK_WIDGET_MAPPED(GTK_WIDGET(math_view)) || math_view->freeze_counter > 0) return;
 
   widget = math_view->area;
 
@@ -422,7 +422,7 @@ gtk_math_view_init(GtkMathView* math_view)
   math_view->font_manager    = NULL;
   math_view->drawing_area    = NULL;
   math_view->interface       = NULL;
-  math_view->frozen          = FALSE;
+  math_view->freeze_counter  = 0;
   math_view->select_state    = SELECT_STATE_NO;
   math_view->button_pressed  = FALSE;
   math_view->current_elem    = NULL;
@@ -526,29 +526,21 @@ gtk_math_view_destroy(GtkObject* object)
 extern "C" gboolean
 gtk_math_view_freeze(GtkMathView* math_view)
 {
-  gboolean old_frozen;
-
   g_return_val_if_fail(math_view != NULL, FALSE);
-
-  old_frozen = math_view->frozen;
-  math_view->frozen = TRUE;
-
-  return old_frozen;
+  return (math_view->freeze_counter++ > 0);
 }
 
 extern "C" gboolean
 gtk_math_view_thaw(GtkMathView* math_view)
 {
-  gboolean old_frozen;
-
   g_return_val_if_fail(math_view != NULL, FALSE);
-
-  old_frozen = math_view->frozen;
-  math_view->frozen = FALSE;
-  
-  if (old_frozen) paint_widget(math_view);
-
-  return old_frozen;
+  if (math_view->freeze_counter > 0)
+    {
+      math_view->freeze_counter--;
+      return TRUE;
+    }
+  else
+    return FALSE;
 }
 
 static void
@@ -1205,8 +1197,6 @@ gtk_math_view_get_top(GtkMathView* math_view, gint* x, gint* y)
 extern "C" void
 gtk_math_view_set_top(GtkMathView* math_view, gint x, gint y)
 {
-  gboolean old_frozen;
-
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(math_view->vadjustment != NULL);
   g_return_if_fail(math_view->hadjustment != NULL);
@@ -1214,10 +1204,7 @@ gtk_math_view_set_top(GtkMathView* math_view, gint x, gint y)
   math_view->hadjustment->value = px2sp(x);
   math_view->vadjustment->value = px2sp(y);
 
-  old_frozen = math_view->frozen;
-  math_view->frozen = TRUE;
   gtk_adjustment_value_changed(math_view->hadjustment);
-  math_view->frozen = old_frozen;
   gtk_adjustment_value_changed(math_view->vadjustment);
 }
 
