@@ -129,6 +129,7 @@ static void gtk_math_view_element_changed(GtkMathView*, mDOMNodeRef);
 
 static void setup_adjustment(GtkAdjustment*, gfloat, gfloat);
 static void setup_adjustments(GtkMathView*);
+static void reset_adjustments(GtkMathView*);
 
 /* Local data */
 
@@ -240,7 +241,7 @@ vadjustment_value_changed(GtkAdjustment* adj, GtkMathView* math_view)
   math_view->old_top_y = math_view->top_y;
   math_view->top_y = adj->value;
   math_view->drawing_area->SetTopY(float2sp(adj->value));
-
+  
   if (math_view->old_top_y != math_view->top_y) {
 #if 0
     gint change = sp2ipx(float2sp(fabs(math_view->old_top_y - math_view->top_y)));
@@ -744,13 +745,26 @@ setup_adjustment(GtkAdjustment* adj, gfloat size, gfloat page_size)
   adj->upper = size + 10 * SCALED_POINTS_PER_PX;
   if (adj->upper < 0) adj->upper = 0.0;
 
-  if (page_size < adj->upper && adj->value + page_size > adj->upper) {
-    adj->value = adj->upper - page_size;
+  if (adj->value > adj->upper - page_size) {
+    adj->value = floatMax(0, adj->upper - page_size);
     gtk_adjustment_value_changed(adj);
   }
 
   gtk_adjustment_changed(adj);
-  gtk_adjustment_set_value(adj, 0.0);
+}
+
+static void
+reset_adjustments(GtkMathView* math_view)
+{
+  g_return_if_fail(math_view != NULL);
+
+  math_view->old_top_x = math_view->old_top_y = math_view->top_x = math_view->top_y = 0;
+
+  if (math_view->hadjustment != NULL)
+    gtk_adjustment_set_value(math_view->hadjustment, 0.0);
+
+  if (math_view->vadjustment != NULL)
+    gtk_adjustment_set_value(math_view->vadjustment, 0.0);
 }
 
 static void
@@ -760,20 +774,28 @@ setup_adjustments(GtkMathView* math_view)
   g_return_if_fail(math_view->area != NULL);
   g_return_if_fail(math_view->interface != NULL);
 
-  math_view->old_top_x = math_view->old_top_y = math_view->top_x = math_view->top_y = 0;
-
   BoundingBox box;
   math_view->interface->GetDocumentBoundingBox(box);
 
-  if (math_view->hadjustment != NULL)
-    setup_adjustment(math_view->hadjustment,
-		     sp2float(box.width),
-		     sp2float(math_view->drawing_area->GetWidth()));
+  if (math_view->hadjustment != NULL) {
+    gfloat width = sp2float(box.width);
+    gfloat page_width = sp2float(math_view->drawing_area->GetWidth());
+    
+    if (math_view->top_x > width - page_width)
+      math_view->top_x = floatMax(0, width - page_width);
 
-  if (math_view->vadjustment != NULL)
-    setup_adjustment(math_view->vadjustment,
-		     sp2float(box.GetHeight()),
-		     sp2float(math_view->drawing_area->GetHeight()));
+    setup_adjustment(math_view->hadjustment, width, page_width);
+  }
+
+  if (math_view->vadjustment != NULL) {
+    gfloat height = sp2float(box.GetHeight());
+    gfloat page_height = sp2float(math_view->drawing_area->GetHeight());
+
+    if (math_view->top_y > height - page_height)
+      math_view->old_top_y = math_view->top_y = floatMax(0, height - page_height);
+
+    setup_adjustment(math_view->vadjustment, height, page_height);
+  }
 }
 
 extern "C" gboolean
@@ -789,6 +811,7 @@ gtk_math_view_load(GtkMathView* math_view, const gchar* name)
   math_view->interface->Layout();
 
   setup_adjustments(math_view);
+  reset_adjustments(math_view);
   paint_widget(math_view);
 
   return TRUE;
@@ -807,6 +830,7 @@ gtk_math_view_load_tree(GtkMathView* math_view, mDOMDocRef doc)
   math_view->interface->Layout();
 
   setup_adjustments(math_view);
+  reset_adjustments(math_view);
   paint_widget(math_view);
 
   return TRUE;
@@ -822,6 +846,7 @@ gtk_math_view_unload(GtkMathView* math_view)
   math_view->interface->Update();
 
   setup_adjustments(math_view);
+  reset_adjustments(math_view);
   paint_widget(math_view);
 }
 
@@ -1153,7 +1178,7 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
     break;
 #else
     MathEngine::logger(LOG_WARNING, "the widget was compiled without support for T1 fonts, falling back to GTK fonts");
-#endif
+#endif // HAVE_LIBT1
   case FONT_MANAGER_GTK:
     math_view->font_manager = new Gtk_FontManager;
     math_view->drawing_area = new Gtk_DrawingArea(values, px2sp(5), px2sp(5),
@@ -1273,6 +1298,7 @@ gtk_math_view_action_set_selected(GtkMathView* math_view, guint idx)
 
   math_view->interface->MinMaxLayout();
   math_view->interface->Layout();
+  setup_adjustments(math_view);
 
   paint_widget(math_view);
 }
