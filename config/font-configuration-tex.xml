@@ -327,7 +327,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x0152" index="0xc1"/>
     <single code="0x0153" index="0xbe"/>
     <multi first="0x0300" last="0x03ff" index="
-	     -1 0xb5 0xb6 0x7e 0xb9   -1 0xb8 0x5f 0xc4   -1 0xba   -1 0xb7   -1   -1   -1 
+	   0x12 0x13 0x5e 0x7e 0xb9   -1 0x15 0x5f 0x7f   -1 0x17   -1 0x14   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1 0xbb   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
