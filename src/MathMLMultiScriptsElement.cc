@@ -35,6 +35,7 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLMultiScriptsElement.hh"
 #include "FormattingContext.hh"
 
@@ -322,6 +323,8 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
       for_each_if(preSuperScript.begin(), preSuperScript.end(),
 		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
+
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -617,11 +620,10 @@ MathMLMultiScriptsElement::GetRightEdge() const
     }
 }
 
-Ptr<class MathMLOperatorElement>
-MathMLMultiScriptsElement::GetCoreOperator()
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLMultiScriptsElement::GetEmbellishment() const
 {
-  assert(base);
-  return base->GetCoreOperator();
+  return smart_cast<MathMLEmbellishedOperatorElement>(base);
 }
 
 #if 0

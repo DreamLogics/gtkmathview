@@ -31,7 +31,7 @@
 
 // base class for MathML elements that infer an mrow when the number of
 // children is not 1
-class MathMLNormalizingContainerElement: public MathMLBinContainerElement
+class MathMLNormalizingContainerElement : public MathMLBinContainerElement
 {
 protected:
   MathMLNormalizingContainerElement(void);
@@ -44,8 +44,6 @@ public:
   virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void Render(const DrawingArea&);
-
-  virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
 };
 
 #endif // MathMLNormalizingContainerElement_hh

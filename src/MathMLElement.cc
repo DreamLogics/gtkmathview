@@ -33,7 +33,7 @@
 #include "ValueConversion.hh"
 #include "MathMLStyleElement.hh"
 #include "MathMLAttributeList.hh"
-#include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "RenderingEnvironment.hh"
 #include "FormattingContext.hh"
 
@@ -410,11 +410,9 @@ MathMLElement::HasLink() const
 #endif // HAVE_GMETADOM
 }
 
-Ptr<MathMLOperatorElement>
-MathMLElement::GetCoreOperator()
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLElement::GetEmbellishment() const
 {
-  // it's not clear whether this should be an abstract method, since
-  // many elements share this trivial implementation
   return 0;
 }
 

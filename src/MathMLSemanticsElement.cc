@@ -26,7 +26,7 @@
 #include "ChildList.hh"
 #include "MathMLDocument.hh"
 #include "MathMLDummyElement.hh"
-#include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLSemanticsElement.hh"
 
 MathMLSemanticsElement::MathMLSemanticsElement()
@@ -81,6 +81,7 @@ MathMLSemanticsElement::Normalize(const Ptr<MathMLDocument>& doc)
 #endif
 
       if (GetChild()) GetChild()->Normalize(doc);
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -95,10 +96,3 @@ MathMLSemanticsElement::IsExpanding() const
   return content.GetFirst()->IsExpanding();
 }
 #endif
-
-Ptr<class MathMLOperatorElement>
-MathMLSemanticsElement::GetCoreOperator()
-{
-  return GetChild() ? GetChild()->GetCoreOperator() : Ptr<MathMLOperatorElement>(0);
-}
-

@@ -31,6 +31,7 @@
 #include "MathMLAttribute.hh"
 #include "MathMLStyleElement.hh"
 #include "MathMLAttributeList.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "RenderingEnvironment.hh"
 
 MathMLStyleElement::MathMLStyleElement()
@@ -328,3 +329,8 @@ MathMLStyleElement::SetDirtyAttribute()
   SetDirtyAttributeD();
 }
 
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLStyleElement::GetEmbellishment() const
+{
+  return smart_cast<MathMLEmbellishedOperatorElement>(GetChild());
+}

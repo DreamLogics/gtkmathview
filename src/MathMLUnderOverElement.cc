@@ -31,7 +31,6 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLUnderOverElement.hh"
-#include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
@@ -173,6 +172,7 @@ MathMLUnderOverElement::Normalize(const Ptr<MathMLDocument>& doc)
       base->Normalize(doc);
       if (underScript) underScript->Normalize(doc);
       if (overScript) overScript->Normalize(doc);
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -183,8 +183,6 @@ MathMLUnderOverElement::Setup(RenderingEnvironment& env)
 {
   if (DirtyAttribute() || DirtyAttributeP())
     {
-      assert(base);
-
       bool displayStyle = env.GetDisplayStyle();
       background = env.GetBackgroundColor();
 
@@ -193,8 +191,8 @@ MathMLUnderOverElement::Setup(RenderingEnvironment& env)
       scaled smallSpacing = ruleThickness;
       scaled bigSpacing   = 3 * ruleThickness;
 
-      base->Setup(env);
-      Ptr<MathMLOperatorElement> op = base->GetCoreOperator();
+      if (base) base->Setup(env);
+      Ptr<MathMLOperatorElement> op = base ? base->GetCoreOperator() : Ptr<MathMLOperatorElement>(0);
 
       if (op)
 	scriptize = !displayStyle && op->HasMovableLimits();
@@ -278,7 +276,6 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 {
   if (DirtyLayout(ctxt))
     {
-
       assert(base);
 
       scaled overClearance = 0;
@@ -490,7 +487,7 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 	  box.descent  = scaledMax(box.descent, scriptBox.descent - overShiftY);
 	  box.ascent += overClearance;
 	}
-  
+
       ResetDirtyLayout(ctxt);
     }
 }
@@ -498,12 +495,10 @@ MathMLUnderOverElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLUnderOverElement::SetPosition(scaled x, scaled y)
 {
-  assert(base);
-
   position.x = x;
   position.y = y;
 
-  base->SetPosition(x + baseShiftX, y);
+  if (base) base->SetPosition(x + baseShiftX, y);
 
   if (underScript)
     underScript->SetPosition(x + underShiftX, y + underShiftY);
@@ -568,11 +563,10 @@ MathMLUnderOverElement::GetRightEdge() const
   return m;
 }
 
-Ptr<class MathMLOperatorElement>
-MathMLUnderOverElement::GetCoreOperator()
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLUnderOverElement::GetEmbellishment() const
 {
-  assert(base);
-  return base->GetCoreOperator();
+  return smart_cast<MathMLEmbellishedOperatorElement>(base);
 }
 
 #if 0

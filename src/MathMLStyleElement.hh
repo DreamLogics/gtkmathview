@@ -52,6 +52,7 @@ public:
 
   virtual bool IsSpaceLike(void) const;
   virtual void SetDirtyAttribute(void);
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 
   bool HasDifferentBackground(void) const { return differentBackground; }
   

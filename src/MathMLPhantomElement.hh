@@ -29,7 +29,7 @@
 
 #include "MathMLNormalizingContainerElement.hh"
 
-class MathMLPhantomElement: public MathMLNormalizingContainerElement
+class MathMLPhantomElement : public MathMLNormalizingContainerElement
 {
 public:
   MathMLPhantomElement(void);
@@ -49,6 +49,7 @@ public:
   virtual void Render(const DrawingArea&);
 
   virtual bool IsSpaceLike(void) const;
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 };
 
 #endif // MathMLPhantomElement_hh

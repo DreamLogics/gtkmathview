@@ -29,7 +29,7 @@
 
 #include "MathMLNormalizingContainerElement.hh"
 
-class MathMLPaddedElement: public MathMLNormalizingContainerElement
+class MathMLPaddedElement : public MathMLNormalizingContainerElement
 {
 protected:
   MathMLPaddedElement(void);
@@ -51,6 +51,7 @@ public:
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
   //virtual void SetDirty(const Rectangle* = NULL);
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 
 private:
   struct LengthDimension {

@@ -30,7 +30,7 @@
 #include "MathMLDummyElement.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLFractionElement.hh"
-#include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLFractionElement::MathMLFractionElement()
@@ -124,6 +124,7 @@ MathMLFractionElement::Normalize(const Ptr<MathMLDocument>& doc)
 
       if (numerator) numerator->Normalize(doc);
       if (denominator) denominator->Normalize(doc);
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -486,9 +487,8 @@ MathMLFractionElement::Inside(scaled x, scaled y)
   return this;
 }
 
-Ptr<class MathMLOperatorElement>
-MathMLFractionElement::GetCoreOperator()
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLFractionElement::GetEmbellishment() const
 {
-  assert(numerator);
-  return numerator->GetCoreOperator();
+  return smart_cast<MathMLEmbellishedOperatorElement>(numerator);
 }

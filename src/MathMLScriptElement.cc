@@ -29,7 +29,7 @@
 #include "MathMLDummyElement.hh"
 #include "MathMLScriptElement.hh"
 #include "RenderingEnvironment.hh"
-#include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLScriptElement::MathMLScriptElement()
@@ -183,6 +183,7 @@ MathMLScriptElement::Normalize(const Ptr<MathMLDocument>& doc)
       if (base) base->Normalize(doc);
       if (subScript) subScript->Normalize(doc);
       if (superScript) superScript->Normalize(doc);
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
 
       ResetDirtyStructure();
     }
@@ -302,12 +303,10 @@ MathMLScriptElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLScriptElement::SetPosition(scaled x, scaled y)
 {
-  assert(base);
-
   position.x = x;
   position.y = y;
 
-  base->SetPosition(x, y);
+  if (base) base->SetPosition(x, y);
 
   if (subScript)
     subScript->SetPosition(x + subShiftX, y + subShiftY);
@@ -360,11 +359,10 @@ MathMLScriptElement::GetRightEdge() const
   return m;
 }
 
-Ptr<class MathMLOperatorElement>
-MathMLScriptElement::GetCoreOperator()
+Ptr<class MathMLEmbellishedOperatorElement>
+MathMLScriptElement::GetEmbellishment() const
 {
-  assert(base);
-  return base->GetCoreOperator();
+  return smart_cast<MathMLEmbellishedOperatorElement>(base);
 }
 
 #if 0

@@ -100,12 +100,6 @@ MathMLOperatorElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
-      Ptr<MathMLElement> root = findEmbellishedOperatorRoot(this);
-      assert(root);
-
-      Ptr<MathMLElement> p = root->GetParent();
-      assert(p);
-
       if (!eOp)
 	{
 	  Ptr<MathMLElement> op = MathMLEmbellishedOperatorElement::create(this);
@@ -116,11 +110,11 @@ MathMLOperatorElement::Normalize(const Ptr<MathMLDocument>& doc)
 
       // now we have to substitute the root of the embellished operator
       // with the embellished operator object just created
-      assert(is_a<MathMLContainerElement>(p));
-      Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
+      assert(is_a<MathMLContainerElement>(GetParent()));
+      Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(GetParent());
       assert(pContainer);
-      pContainer->Replace(root, eOp);
-      eOp->SetChild(root);
+      pContainer->Replace(this, eOp);
+      eOp->SetChild(this);
 
       MathMLTokenElement::Normalize(doc);
     }
@@ -515,3 +509,4 @@ MathMLOperatorElement::GetCoreOperator()
 {
   return this;
 }
+

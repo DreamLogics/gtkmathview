@@ -69,10 +69,9 @@ MathMLApplyFunctionNode::DoLayout()
 
   if (is_a<MathMLFencedElement>(next)) return;
   
-  if (is_a<MathMLEmbellishedOperatorElement>(next) ||
-      is_a<MathMLOperatorElement>(next))
+  if (Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(next))
     {
-      Ptr<MathMLOperatorElement> coreOp = next->GetCoreOperator();
+      Ptr<MathMLOperatorElement> coreOp = eOp->GetCoreOperator();
       assert(coreOp);
       if (coreOp->IsFence()) return;
     }

@@ -23,16 +23,17 @@
 #ifndef MathMLEmbellishedOperatorElement_hh
 #define MathMLEmbellishedOperatorElement_hh
 
+#include "MathMLOperatorElement.hh"
 #include "MathMLBinContainerElement.hh"
 
-class MathMLEmbellishedOperatorElement: public MathMLBinContainerElement
+class MathMLEmbellishedOperatorElement : public MathMLBinContainerElement
 {
 protected:
-  MathMLEmbellishedOperatorElement(const Ptr<class MathMLOperatorElement>&);
+  MathMLEmbellishedOperatorElement(const Ptr<MathMLOperatorElement>&);
   virtual ~MathMLEmbellishedOperatorElement();
 
 public:
-  static Ptr<MathMLEmbellishedOperatorElement> create(const Ptr<class MathMLOperatorElement>& elem)
+  static Ptr<MathMLEmbellishedOperatorElement> create(const Ptr<MathMLOperatorElement>& elem)
   { return Ptr<MathMLEmbellishedOperatorElement>(new MathMLEmbellishedOperatorElement(elem)); }
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
@@ -41,12 +42,14 @@ public:
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsEmbellishedOperator(void) const;
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void) { return coreOp; }
+  virtual Ptr<MathMLOperatorElement> GetCoreOperator(void) { return coreOp; }
   virtual Ptr<class MathMLCharNode> GetCharNode(void) const;
 
+  void Lift(void);
+
 private:
-  Ptr<class MathMLOperatorElement> coreOp;
-  bool  script; // ???? what's this for?
+  Ptr<MathMLOperatorElement> coreOp;
+  bool  script;
 };
 
 #endif // MathMLEmbellishedOperatorElement_hh

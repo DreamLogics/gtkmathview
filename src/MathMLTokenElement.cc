@@ -609,11 +609,12 @@ MathMLTokenElement::AddItalicCorrection()
   assert(lastNode);
 
   Ptr<MathMLElement> next = findRightSibling(this);
-  if (!next ||
-      !is_a<MathMLOperatorElement>(next) ||
-      !is_a<MathMLEmbellishedOperatorElement>(next)) return;
+  if (!next || !is_a<MathMLEmbellishedOperatorElement>(next)) return;
 
-  Ptr<MathMLOperatorElement> op = next->GetCoreOperator();
+  Ptr<MathMLEmbellishedOperatorElement> eOp = smart_cast<MathMLEmbellishedOperatorElement>(next);
+  assert(eOp);
+
+  Ptr<MathMLOperatorElement> op = eOp->GetCoreOperator();
   if (!op) return;
   bool isFence = op->IsFence();
   if (!isFence) return;

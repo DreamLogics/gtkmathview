@@ -68,7 +68,7 @@ public:
   virtual scaled GetRightEdge(void) const;
   virtual void   ReleaseGCs(void);
   virtual Ptr<class MathMLElement> Inside(scaled, scaled);
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 
   Ptr<MathMLElement> GetNumerator(void) const { return numerator; }
   Ptr<MathMLElement> GetDenominator(void) const { return denominator; }

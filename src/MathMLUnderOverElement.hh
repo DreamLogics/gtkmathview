@@ -30,8 +30,7 @@
 #include "MathMLContainerElement.hh"
 #include "MathMLScriptCommonElement.hh"
 
-class MathMLUnderOverElement
-  : public MathMLContainerElement, public MathMLScriptCommonElement
+class MathMLUnderOverElement : public MathMLContainerElement, private MathMLScriptCommonElement
 {
 protected:
   MathMLUnderOverElement(void);
@@ -74,7 +73,7 @@ public:
   virtual scaled GetRightEdge(void) const;
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
 
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 
 protected:
   bool   scriptize;

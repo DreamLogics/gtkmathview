@@ -29,6 +29,7 @@
 #include "ChildList.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLBinContainerElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
 MathMLBinContainerElement::MathMLBinContainerElement()

@@ -29,7 +29,7 @@
 
 #include "MathMLLinearContainerElement.hh"
 
-class MathMLRowElement: public MathMLLinearContainerElement
+class MathMLRowElement : public MathMLLinearContainerElement
 {
 protected:
   MathMLRowElement(void);
@@ -47,6 +47,7 @@ public:
 #endif
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
+  virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);
@@ -54,7 +55,7 @@ public:
   virtual bool IsSpaceLike(void) const;
 
   OperatorFormId GetOperatorForm(const Ptr<MathMLElement>&) const;
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator();
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment() const;
 };
 
 #endif // MathMLRowElement_hh

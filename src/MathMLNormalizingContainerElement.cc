@@ -28,7 +28,7 @@
 #include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLDummyElement.hh"
-#include "MathMLOperatorElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "MathMLNormalizingContainerElement.hh"
 #include "FormattingContext.hh"
 
@@ -78,6 +78,7 @@ MathMLNormalizingContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 #endif
 
       if (child) child->Normalize(doc);
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
       ResetDirtyStructure();
     }
 }
@@ -106,21 +107,5 @@ MathMLNormalizingContainerElement::Render(const DrawingArea& area)
       RenderBackground(area);
       if (child) child->Render(area);
       ResetDirty();
-    }
-}
-
-Ptr<class MathMLOperatorElement>
-MathMLNormalizingContainerElement::GetCoreOperator()
-{
-  assert(child);
-
-  switch (IsA())
-    {
-    case TAG_MSTYLE:
-    case TAG_MPHANTOM:
-    case TAG_MPADDED:
-      return child->GetCoreOperator();
-    default:
-      return 0;
     }
 }

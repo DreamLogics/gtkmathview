@@ -79,7 +79,7 @@ public:
   virtual void ResetFlagDown(Flags);
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
   virtual Ptr<MathMLElement> Inside(scaled, scaled);
   virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
 

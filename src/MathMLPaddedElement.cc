@@ -27,6 +27,7 @@
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
 #include "MathMLPaddedElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 #include "RenderingEnvironment.hh"
 #include "FormattingContext.hh"
 
@@ -225,3 +226,9 @@ MathMLPaddedElement::SetDirty(const Rectangle* rect)
   child->SetDirty(rect);
 }
 #endif
+
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLPaddedElement::GetEmbellishment() const
+{
+  return smart_cast<MathMLEmbellishedOperatorElement>(GetChild());
+}

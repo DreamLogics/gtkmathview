@@ -47,8 +47,6 @@ public:
 #endif
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
-
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
 };
 
 #endif // MathMLSemanticsElement_hh

@@ -36,7 +36,6 @@
 #include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLSpaceElement.hh"
-#include "MathMLOperatorElement.hh"
 #include "MathMLEmbellishedOperatorElement.hh"
 #include "FormattingContext.hh"
 
@@ -89,13 +88,27 @@ MathMLRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 	    }
 	  SwapChildren(newContent);
 	}
+
+      assert(GetDOMElement() || (GetParent() && (!GetParent()->GetDOMElement() || GetSize() != 1)));
 #endif // HAVE_GMETADOM
 
       // it is better to normalize elements only after all the rendering
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
       std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
+      if (Ptr<MathMLEmbellishedOperatorElement> top = GetEmbellishment()) top->Lift();
+
       ResetDirtyStructure();
+    }
+}
+
+void
+MathMLRowElement::Setup(RenderingEnvironment& env)
+{
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      MathMLLinearContainerElement::Setup(env);
+      ResetDirtyAttribute();
     }
 }
 
@@ -114,7 +127,6 @@ MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 	}
 
       DoStretchyLayout();
-
       ResetDirtyLayout(ctxt);
     }
 }
@@ -225,6 +237,7 @@ MathMLRowElement::GetOperatorForm(const Ptr<MathMLElement>& eOp) const
   return res;
 }
 
+#if 0
 Ptr<class MathMLOperatorElement>
 MathMLRowElement::GetCoreOperator()
 {
@@ -242,4 +255,24 @@ MathMLRowElement::GetCoreOperator()
     }
 
   return core ? core->GetCoreOperator() : Ptr<class MathMLOperatorElement>(0);
+}
+#endif
+
+Ptr<class MathMLEmbellishedOperatorElement>
+MathMLRowElement::GetEmbellishment() const
+{
+  Ptr<MathMLElement> candidate = 0;
+
+  for (std::vector< Ptr<MathMLElement> >::const_iterator elem = content.begin();
+       elem != content.end();
+       elem++)
+    {
+      if (!(*elem)->IsSpaceLike())
+	{
+	  if (!candidate) candidate = *elem;
+	  else return 0;
+	}
+    }
+
+  return smart_cast<MathMLEmbellishedOperatorElement>(candidate);
 }

@@ -82,6 +82,9 @@ public:
 
   virtual Ptr<MathMLOperatorElement> GetCoreOperator(void);
 
+  static void SetEmbellishmentPosition(const Ptr<MathMLElement>&, scaled&, scaled&);
+  static void DoEmbellishmentLayout(const Ptr<MathMLElement>&, BoundingBox&);
+
 private:
   OperatorFormId InferOperatorForm(void) const;
   const Value* GetOperatorAttributeValue(AttributeId,

@@ -26,6 +26,7 @@
 #include <stddef.h>
 
 #include "MathMLPhantomElement.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLPhantomElement::MathMLPhantomElement()
 {
@@ -53,4 +54,10 @@ void
 MathMLPhantomElement::Render(const DrawingArea&)
 {
   if (Dirty()) ResetDirty();
+}
+
+Ptr<MathMLEmbellishedOperatorElement>
+MathMLPhantomElement::GetEmbellishment() const
+{
+  return smart_cast<MathMLEmbellishedOperatorElement>(GetChild());
 }

@@ -88,7 +88,7 @@ public:
   unsigned     	 GetDepth(void) const;
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;
-  virtual Ptr<class MathMLOperatorElement> GetCoreOperator(void);
+  virtual Ptr<class MathMLEmbellishedOperatorElement> GetEmbellishment(void) const;
 
   bool DirtyBackground(void) const
   {
