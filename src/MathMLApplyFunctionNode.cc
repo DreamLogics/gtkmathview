@@ -31,6 +31,7 @@
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLApplyFunctionNode.hh"
+#include "MathMLEmbellishedOperatorElement.hh"
 
 MathMLApplyFunctionNode::MathMLApplyFunctionNode() : MathMLSpaceNode(0, BREAK_NO)
 {
@@ -69,21 +70,20 @@ MathMLApplyFunctionNode::DoLayout()
   case TAG_MFENCED:
     return;
 
-  case TAG_MROW:
+  case TAG_MO:
     {
-      assert(TO_ROW(next) != NULL);
-      MathMLElement* firstChild = TO_ROW(next)->content.GetFirst();
-      // BEWARE: here we are making the implicit assumption that mrows have been
-      // normalized (that is, an mrow will always have zero or more than one
-      // children
-      if (firstChild == NULL) return;
+      MathMLOperatorElement* coreOp;
 
-      if (firstChild->IsEmbellishedOperator()) {
-	MathMLOperatorElement* coreOp = findCoreOperator(firstChild);
-	assert(coreOp != NULL);
-
-	if (coreOp->IsFence()) return;
+      if (next->IsEmbellishedOperator()) {
+	MathMLEmbellishedOperatorElement* op = TO_EMBELLISHED_OPERATOR(next);
+	assert(op != NULL);
+	coreOp = op->GetCoreOperator();
+      } else {
+	coreOp = TO_OPERATOR(next);
       }
+      assert(coreOp != NULL);
+
+      if (coreOp->IsFence()) return;
     }
 
     // OK fallback
