@@ -64,7 +64,7 @@ MathMLmathElement::Setup(RenderingEnvironment* env)
 
   env->SetFontMode(FONT_MODE_MATH);
 
-  if (IsSet(ATTR_DISPLAY)) {
+  if (!IsSet(ATTR_MODE) || IsSet(ATTR_DISPLAY)) {
     value = GetAttributeValue(ATTR_DISPLAY, env, true);
     assert(value != NULL);
     if (value->IsKeyword(KW_BLOCK)) env->SetDisplayStyle(true);

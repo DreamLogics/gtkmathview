@@ -67,20 +67,28 @@ MathMLCombinedCharNode::DoLayout()
     BoundingBox cBox;
     cChar.GetBoundingBox(cBox);
 
-#if 0
-    if (cChar.font == fChar.font)
-      shiftX = cChar.font->GetKerning(cChar.nch, fChar.nch);
-    else
-#endif
+    if (isCombiningOverlay(cch)) {
+      shiftX = shiftY = 0;
+    } else if (isCombiningBelow(cch)) {
       shiftX = 0;
+      shiftY = -box.descent - cBox.ascent;
+    } else {
+#if 0
+      if (cChar.font == fChar.font)
+	shiftX = cChar.font->GetKerning(cChar.nch, fChar.nch);
+      else
+	shiftX = 0;
+#endif
 
-    if (scaledEq(shiftX, 0))
-      shiftX = fChar.font->GetKerning(fChar.nch, 127);
+      shiftX = (box.width - cBox.width) / 2;
 
-    if (isCombiningOverlay(cch))
-      shiftY = 0;
-    else
+#if 0
+      if (scaledEq(shiftX, 0))
+	shiftX = fChar.font->GetKerning(fChar.nch, 127);
+#endif
+
       shiftY = box.ascent + cBox.descent + cChar.font->GetLineThickness();
+    }
 
     charBox.ascent = scaledMax(box.ascent, cBox.ascent + shiftY);
     charBox.descent = scaledMax(box.descent, cBox.descent - shiftY);
