@@ -27,9 +27,7 @@
 
 #include "defs.h"
 
-#if defined(HAVE_MINIDOM)
-#include <minidom.h>
-#elif defined(HAVE_GMETADOM)
+#if defined(HAVE_GMETADOM)
 #include <gdome.h>
 #endif
 
@@ -60,19 +58,18 @@ extern "C" {
 
   GtkType    	 gtk_math_view_get_type(void);
   GtkWidget* 	 gtk_math_view_new(GtkAdjustment*, GtkAdjustment*);
-  gboolean     	 gtk_math_view_load(GtkMathView*, const gchar*);
-#if defined(HAVE_MINIDOM)
-  gboolean       gtk_math_view_load_tree(GtkMathView*, mDOMDocRef);
-#elif defined(HAVE_GMETADOM)
-  gboolean       gtk_math_view_load_tree(GtkMathView*, GdomeDocument*);
+  gboolean       gtk_math_view_freeze(GtkMathView*);
+  gboolean       gtk_math_view_thaw(GtkMathView*);
+  gboolean     	 gtk_math_view_load_uri(GtkMathView*, const gchar*);
+#if defined(HAVE_GMETADOM)
+  gboolean       gtk_math_view_load_doc(GtkMathView*, GdomeDocument*);
+  gboolean       gtk_math_view_load_tree(GtkMathView*, GdomeElement*);
 #endif
   void           gtk_math_view_unload(GtkMathView*);
-#if defined(HAVE_MINIDOM)
-  mDOMNodeRef    gtk_math_view_get_selection(GtkMathView*);
-  void           gtk_math_view_set_selection(GtkMathView*, mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
-  GdomeElement*  gtk_math_view_get_selection(GtkMathView*);
+#if defined(HAVE_GMETADOM)
   void           gtk_math_view_set_selection(GtkMathView*, GdomeElement*);
+  void           gtk_math_view_reset_selection(GtkMathView*, GdomeElement*);
+  GdomeElement*  gtk_math_view_get_element_at(GtkMathView*, gint, gint);
 #endif
   gint      	 gtk_math_view_get_width(GtkMathView*);
   gint      	 gtk_math_view_get_height(GtkMathView*);
@@ -97,17 +94,11 @@ extern "C" {
   void           gtk_math_view_set_font_manager_type(GtkMathView*, FontManagerId);
   FontManagerId  gtk_math_view_get_font_manager_type(GtkMathView*);
 
-  /* the following are *unstable*, *experimental* APIs */
-#if defined(HAVE_MINIDOM)
-  mDOMNodeRef    gtk_math_view_get_element(GtkMathView*);
-  mDOMNodeRef    gtk_math_view_get_action(GtkMathView*);
-#elif defined(HAVE_GMETADOM)
-  GdomeElement*  gtk_math_view_get_element(GtkMathView*);
-  GdomeElement*  gtk_math_view_get_action(GtkMathView*);
+#if defined(HAVE_GMETADOM)
+  guint          gtk_math_view_action_get_selected(GtkMathView*, GdomeElement*);
+  void           gtk_math_view_action_set_selected(GtkMathView*, GdomeElement*, guint);
+  void           gtk_math_view_action_toggle(GtkMathView*, GdomeElement*);
 #endif
-  guint          gtk_math_view_action_get_selected(GtkMathView*);
-  void           gtk_math_view_action_set_selected(GtkMathView*, guint);
-  void           gtk_math_view_action_toggle(GtkMathView*);
 
 #ifdef __cplusplus
 }

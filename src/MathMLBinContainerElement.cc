@@ -78,12 +78,9 @@ MathMLBinContainerElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  if (HasDirtyAttribute() || HasChildWithDirtyAttribute())
-    {
-      background = env->GetBackgroundColor();
-      if (child != 0) child->Setup(env);
-      ResetDirtyAttribute();
-    }
+  background = env->GetBackgroundColor();
+  if (child != 0) child->Setup(env);
+  ResetDirtyAttribute();
 }
 
 void

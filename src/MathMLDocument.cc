@@ -29,7 +29,7 @@
 
 MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
-  : DOMdoc(0)
+  : DOMdoc(0), DOMroot(0)
 #endif
 {
 }
@@ -37,11 +37,26 @@ MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
 MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
   : MathMLBinContainerElement()
-  , DOMdoc(doc)
+  , DOMdoc(doc), DOMroot(0)
 {
-  if (DOMdoc != 0)
+  DOMroot = DOMdoc.get_documentElement();
+  Init();
+}
+
+MathMLDocument::MathMLDocument(const GMetaDOM::Element& root)
+  : MathMLBinContainerElement()
+  , DOMdoc(0)
+  , DOMroot(root)
+{
+  Init();
+}
+
+void
+MathMLDocument::Init()
+{
+  if (DOMroot != 0)
     {
-      GMetaDOM::EventTarget et(DOMdoc);
+      GMetaDOM::EventTarget et(DOMroot);
       assert(et != 0);
 
       et.addEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);
@@ -55,9 +70,9 @@ MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
 MathMLDocument::~MathMLDocument()
 {
 #if defined(HAVE_GMETADOM)
-  if (DOMdoc != 0)
+  if (DOMroot != 0)
     {
-      GMetaDOM::EventTarget et(DOMdoc);
+      GMetaDOM::EventTarget et(DOMroot);
       assert(et != 0);
 
       et.removeEventListener("DOMCharacterDataModified", characterDataModifiedListener, false);

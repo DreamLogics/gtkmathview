@@ -35,6 +35,8 @@ protected:
   MathMLDocument(void);
 #if defined(HAVE_GMETADOM)
   MathMLDocument(const GMetaDOM::Document&);
+  MathMLDocument(const GMetaDOM::Element&);
+  void Init(void);
 #endif
   virtual ~MathMLDocument();
 
@@ -44,6 +46,8 @@ public:
 #if defined(HAVE_GMETADOM)
   static Ptr<MathMLDocument> create(const GMetaDOM::Document& doc)
   { return Ptr<MathMLDocument>(new MathMLDocument(doc)); }
+  static Ptr<MathMLDocument> create(const GMetaDOM::Element& elem)
+  { return Ptr<MathMLDocument>(new MathMLDocument(elem)); }
 #endif
 
   virtual void Normalize(void);
@@ -53,6 +57,7 @@ public:
 
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
+  const GMetaDOM::Element& GetDOMRoot(void) const { return DOMroot; }
 protected:
   class DOMCharacterDataModifiedListener : public GMetaDOM::EventListener
   {
@@ -83,7 +88,8 @@ protected:
   DOMNodeRemovedListener nodeRemovedListener;
   DOMAttrModifiedListener attrModifiedListener;
 
-  GMetaDOM::Document DOMdoc;
+  GMetaDOM::Document DOMdoc;  // can be 0
+  GMetaDOM::Element  DOMroot; // can be 0
 #endif
 };
 

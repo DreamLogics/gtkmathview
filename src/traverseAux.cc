@@ -114,8 +114,7 @@ findStretchyOperator(const Ptr<MathMLElement>& elem, StretchId id)
 }
 
 Ptr<MathMLElement>
-findCommonAncestor(const Ptr<MathMLElement>& first, const Ptr<MathMLElement>& last,
-		   Ptr<MathMLElement> firstL, Ptr<MathMLElement> lastL)
+findCommonAncestor(const Ptr<MathMLElement>& first, const Ptr<MathMLElement>& last)
 {
   assert(first != 0);
   assert(last != 0);
@@ -144,17 +143,8 @@ findCommonAncestor(const Ptr<MathMLElement>& first, const Ptr<MathMLElement>& la
 
       while (firstP != 0 && lastP != 0 && firstP != lastP)
 	{
-	  Ptr<MathMLElement> firstParent = firstP->GetParent();
-	  Ptr<MathMLElement> lastParent = lastP->GetParent();
-
-	  if (firstParent == lastParent)
-	    {
-	      firstL = firstP;
-	      lastL = lastP;
-	    }
-
-	  firstP = firstParent;
-	  lastP = lastParent;
+	  firstP = firstP->GetParent();
+	  lastP = lastP->GetParent();
 	}
     }
   

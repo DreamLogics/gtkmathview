@@ -7,14 +7,14 @@ noinst_PROGRAMS = mathmlviewer.debug
 
 noinst_HEADERS = guiGTK.h
 
-mathmlviewer_SOURCES = main.cc guiGTK.c
+mathmlviewer_SOURCES = main.cc aux.cc guiGTK.c
 
 mathmlviewer_LDADD = \
   $(DOM_LIBS) \
   $(GTK_LIBS) \
   $(top_builddir)/src/libgtkmathview.la
 
-mathmlviewer_debug_SOURCES = main.cc guiGTK.c
+mathmlviewer_debug_SOURCES = main.cc aux.cc guiGTK.c
 
 mathmlviewer_debug_LDADD = \
   $(DOM_LIBS) \

@@ -38,39 +38,28 @@ public:
   MathMLRenderingEngine(void);
   ~MathMLRenderingEngine();
 
-  void  Init(class DrawingArea*, class FontManager*);
+  void Init(class DrawingArea*, class FontManager*);
 
 #if defined(HAVE_GMETADOM)
-  bool  Load(const char*);
-  bool  Load(const GMetaDOM::Document&);
+  bool Load(const char*);
+  bool Load(const GMetaDOM::Document&);
+  bool Load(const GMetaDOM::Element&);
 #endif
-  void  Unload(void);
+  void Unload(void);
 
-  void  Setup(void);
-
-  void  MinMaxLayout(void);
-  void  Layout(void);
-  void  SetDirty(const struct Rectangle* = NULL);
-  void  Render(void);
-  void  Render(const struct Rectangle*);
-  void  Update(const struct Rectangle* = NULL);
+  void Setup(void);
+  void MinMaxLayout(void);
+  void Layout(void);
+  void SetDirty(const struct Rectangle* = NULL);
+  void Render(void);
+  void Render(const struct Rectangle*);
+  void Update(const struct Rectangle* = NULL);
 
   Ptr<MathMLElement> GetRoot(void) const { return root; }
   Ptr<MathMLElement> GetElementAt(scaled, scaled) const;
 
-  enum SelectionMode
-  {
-    STRUCTURED,
-    LINEAR
-  };
-
-#if 0
-  void                 SetSelectionMode(SelectionMode);
-  SelectionMode        GetSelectionMode(void) const { return selectionMode; }
-  void                 AddSelected(const Ptr<MathMLElement>&);
-#endif
-  void                 SetSelected(const Ptr<MathMLElement>&);
-  const Ptr<MathMLElement>& GetSelected(void) const { return selected; }
+  void SetSelected(const Ptr<MathMLElement>&);
+  void ResetSelected(const Ptr<MathMLElement>&);
 
   // BoundingBox, and Rectangle are structs, not classes, 
   void GetDocumentBoundingBox(struct BoundingBox&) const;
@@ -89,22 +78,14 @@ public:
   bool GetTransparency(void) const;
 
 private:
-  SelectionMode         selectionMode;
-  unsigned              defaultFontSize;
+  unsigned defaultFontSize;
 
   Ptr<class MathMLDocument> document;
   Ptr<class MathMLElement>  root;
-  Ptr<class MathMLElement>  selected;
-#if 0
-  Ptr<class MathMLElement>  firstSelected;
-  Ptr<class MathMLElement>  lastSelected;
-  Ptr<class MathMLElement>  rootSelected;
-#endif
 
-  class DrawingArea*    area;
-  class FontManager*    fontManager;
-  class CharMapper*     charMapper;
+  class DrawingArea* area;
+  class FontManager* fontManager;
+  class CharMapper*  charMapper;
 };
 
 #endif // MathMLRenderingEngine_hh
-

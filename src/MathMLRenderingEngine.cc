@@ -42,13 +42,12 @@
 #endif
 
 MathMLRenderingEngine::MathMLRenderingEngine()
-  : document(0), root(0), selected(0)
+  : document(0), root(0)
 {
   area = NULL;
   fontManager = NULL;
   charMapper = NULL;
 
-  selectionMode = STRUCTURED;
   defaultFontSize = Globals::configuration.GetFontSize();
 }
 
@@ -117,12 +116,9 @@ MathMLRenderingEngine::Load(const char* fileName)
   return Load(doc);
 }
 
+#if defined(HAVE_GMETADOM)
 bool
-#if defined(HAVE_MINIDOM)
-MathMLRenderingEngine::Load(mDOMDocRef doc)
-#elif defined(HAVE_GMETADOM)
 MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
-#endif
 {
   assert(doc != 0);
 
@@ -145,12 +141,36 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
   return true;
 }
 
+bool
+MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
+{
+  assert(elem != 0);
+
+  Unload();
+
+  Ptr<MathMLDocument> document = MathMLDocument::create(elem);
+  assert(document != 0);
+
+  Clock perf;
+  perf.Start();
+  document->Normalize();
+  perf.Stop();
+  Globals::logger(LOG_INFO, "normalization time: %dms", perf());
+    
+  root = document->GetRoot();
+  assert(root != 0);
+
+  Setup();
+
+  return true;
+}
+#endif
+
 void
 MathMLRenderingEngine::Unload()
 {
   document = 0;
   root = 0;
-  selected = 0;
 }
 
 void
@@ -264,126 +284,20 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
     rect.Zero();
 }
 
-#if 0
-void
-MathMLRenderingEngine::SetSelectionFirst(const Ptr<MathMLElement>& elem)
-{
-  selectionFirst = elem;
-}
-
-void
-MathMLRenderingEngine::SetSelectionLast(const Ptr<MathMLElement>& selectionLast)
-{
-  if (selectionFirst == 0) return;
-  if (selectionLast == 0) return;
-
-  selectionRoot = SelectMinimumTree(selectionFirst, selectionLast);
-  while (selectionRoot != 0 && selectionRoot->GetDOMElement() == 0)
-    selectionRoot = selectionRoot->GetParent();
-}
-
-void
-MathMLRenderingEngine::ResetSelectionRoot()
-{
-  selectionFirst = 0;
-  selectionRoot = 0;
-}
-
-void
-MathMLRenderingEngine::SetSelectionMode(SelectionMode sm)
-{
-  SetSelected(NULL);
-  selectionMode = sm;
-}
-
 void
 MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 {
-  if (elem == rootSelected) return;
-
-  if (rootSelected != 0) rootSelected->ResetSelected();
-  rootSelected = firstSelected = lastSelected = elem;
-  if (rootSelected != 0) rootSelected->SetSelected();
-
+  if (elem != 0) elem->SetSelected();
+  else if (root != 0) root->SetSelected();
+    
   Update();
 }
 
 void
-MathMLRenderingEngine::AddSelected(const Ptr<MathMLElement>& elem)
+MathMLRenderingEngine::ResetSelected(const Ptr<MathMLElement>& elem)
 {
-  if (elem == 0 || elem == lastSelected) return;
-
-  if (rootSelected != 0) rootSelected->ResetSelected();
-  if (firstSelected == 0) firstSelected = elem;
-  lastSelected = elem;
-  rootSelected = findCommonAncestor(firstSelected, lastSelected);
-  SetSelection();
-
-  Update();
-}
-
-void
-MathMLRenderingEngine::SetSelection()
-{
-  assert(firstSelected != 0 && lastSelected != 0 && rootSelected != 0);
-
-  switch (selectionMode)
-    {
-    case STRUCTURED:
-      rootSelected->SetSelected();
-      break;
-
-    case LINEAR:
-      Ptr<MathMLElement> firstParent = firstSelected->GetParent();
-      Ptr<MathMLElement> lastParent = lastSelected->GetParent();
-      assert(firstParent != 0 && lastParent != 0);
-      if (firstParent == lastParent) 
-	{
-	  assert(rootSelected == firstParent);
-	  SetLinearSelection(rootSelected);
-	}
-      else
-	firstParent->SetSelected();
-      break;
-
-    default:
-      assert(IMPOSSIBLE);
-      break;
-    }
-}
-
-unsigned
-MathMLRenderingEngine::SetLinearSelection(const Ptr<MathMLElement>& p, unsigned count)
-{
-  assert(p != 0);
-  assert(count < 2);
-
-  if (p == firstSelected) 
-    {
-      count++;
-      p->SetSelected();
-    }
-  if (p == lastSelected)
-    {
-      count++;
-      p->SetSelected();
-    }
-
-  if (p == 2) return 2;
-  assert(p < 2);
-
-  ...
-}
-#endif
-
-void
-MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
-{
-  if (selected == elem) return;
-
-  if (selected != 0) selected->ResetSelected();
-  selected = elem;
-  if (selected != 0) selected->SetSelected();
+  if (elem != 0) elem->ResetSelected();
+  else if (root != 0) root->ResetSelected();
 
   Update();
 }

@@ -36,9 +36,7 @@ Ptr<class MathMLElement>         findEmbellishedOperatorRoot(const Ptr<class Mat
 Ptr<class MathMLOperatorElement> findStretchyOperator(const Ptr<class MathMLElement>&);
 Ptr<class MathMLOperatorElement> findStretchyOperator(const Ptr<class MathMLElement>&, StretchId);
 Ptr<class MathMLElement>         findCommonAncestor(const Ptr<class MathMLElement>&,
-						    const Ptr<class MathMLElement>&,
-						    Ptr<class MathMLElement> = 0,
-						    Ptr<class MathMLElement> = 0);
+						    const Ptr<class MathMLElement>&);
 Ptr<class MathMLActionElement>   findActionElement(const Ptr<class MathMLElement>&);
 #if defined(HAVE_GMETADOM)
 GMetaDOM::Element                findDOMNode(const Ptr<class MathMLElement>&);
