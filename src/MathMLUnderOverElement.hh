@@ -53,6 +53,7 @@ protected:
     scaled overShift;   // if scriptize == true
   };
 
+  scaled ruleThickness;
   scaled scriptSpacing; // script spacing from base (if scriptize == true)
 
   MathMLElement* base;

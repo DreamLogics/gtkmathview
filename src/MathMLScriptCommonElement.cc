@@ -69,7 +69,7 @@ MathMLScriptCommonElement::Setup(RenderingEnvironment* env)
   subMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.247217);
   superMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.362892);
   scriptAxis    = env->GetAxis();
-  scriptSpacing = pt2sp(1); // taken from the TeXbook
+  scriptSpacing = pt2sp(0); //pt2sp(1); // taken from the TeXbook
   background    = env->GetBackgroundColor();
 }
 

@@ -103,8 +103,11 @@ MathMLUnderOverElement::Setup(RenderingEnvironment* env)
   assert(env != NULL);
   assert(base != NULL);
 
-  scaled smallSpacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_VERYVERYTHIN));
-  scaled bigSpacing   = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_MEDIUM));
+  ruleThickness       = env->GetRuleThickness();
+  scaled smallSpacing = ruleThickness;
+  scaled bigSpacing   = 3 * ruleThickness;
+  // the following should be kept consistent with the similar parameter
+  // in MathMLScriptCommonElement.cc
   scriptSpacing       = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_THIN));
   background          = env->GetBackgroundColor();
 
@@ -280,16 +283,16 @@ MathMLUnderOverElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
       const BoundingBox& scriptBox = underScript->GetBoundingBox();
 
       box.width = scaledMax(box.width, scriptBox.width);
-      box.tDescent = box.descent + underSpacing + scriptBox.ascent + scriptBox.tDescent;
-      box.descent  = box.descent + underSpacing + scriptBox.GetHeight();
+      box.tDescent = box.descent + underSpacing + scriptBox.ascent + scriptBox.tDescent + ruleThickness;
+      box.descent  = box.descent + underSpacing + scriptBox.GetHeight() + ruleThickness;
     }
 
     if (overScript != NULL) {
       const BoundingBox& scriptBox = overScript->GetBoundingBox();
 
       box.width = scaledMax(box.width, scriptBox.width);
-      box.tAscent = box.ascent + overSpacing + scriptBox.descent + scriptBox.tAscent;
-      box.ascent  = box.ascent + overSpacing + scriptBox.GetHeight();
+      box.tAscent = box.ascent + overSpacing + scriptBox.descent + scriptBox.tAscent + ruleThickness;
+      box.ascent  = box.ascent + overSpacing + scriptBox.GetHeight() + ruleThickness;
     }
   }
 

@@ -437,6 +437,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x0338" index="0x36"/>
     <single code="0x2020" index="0x79"/>
     <single code="0x2021" index="0x7a"/>
+    <single code="0x2022" index="0x0f"/>
     <single code="0x2032" index="0x30"/>
     <multi first="0x2100" last="0x21ff" index="
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 0x48   -1   -1   -1   -1 
