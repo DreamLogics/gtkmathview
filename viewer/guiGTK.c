@@ -58,6 +58,7 @@ static void options_verbosity(GtkWidget*, guint);
 static void options_kerning(GtkWidget*, gpointer);
 static void options_anti_aliasing(GtkWidget*, gpointer);
 static void options_transparency(GtkWidget*, gpointer);
+static void edit_delete_selection(GtkWidget*, gpointer);
 static void help_about(GtkWidget*, gpointer);
 static void export_to_ps(GtkWidget*);
 
@@ -69,6 +70,9 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/File/_Close",                   "<control>W", file_close,    0, NULL },
   { "/File/sep1",                     NULL,         NULL,          0, "<Separator>" },
   { "/File/_Quit",                    "<control>Q", gtk_main_quit, 0, NULL },
+
+  { "/_Edit",                          NULL, NULL,                  0,  "<Branch>" },
+  { "/Edit/Delete Selection",          NULL, edit_delete_selection, 0,  NULL },
 
   { "/_Options",                       NULL, NULL,                  0,  "<Branch>" },
   { "/Options/Default _Font Size",     NULL, NULL,                  0,  "<Branch>" },
@@ -328,6 +332,39 @@ static void
 options_verbosity(GtkWidget* widget, guint level)
 {
   gtk_math_view_set_log_verbosity(GTK_MATH_VIEW(main_area), level);
+}
+
+static void
+edit_delete_selection(GtkWidget* widget, gpointer data)
+{
+  GdomeElement* elem = gtk_math_view_get_selection(GTK_MATH_VIEW(main_area));
+
+  if (elem != NULL)
+    {
+      GdomeException exc;
+      GdomeNode* parent;
+      GdomeNode* node;
+
+      GdomeDOMString* attrName = gdome_str_mkref("hello");
+      GdomeDOMString* attrValue = gdome_str_mkref("luca");
+
+      gdome_el_setAttribute(elem, attrName, attrValue, &exc);
+      g_assert(exc == 0);
+
+      gtk_math_view_set_selection(GTK_MATH_VIEW(main_area), NULL);
+
+      parent = gdome_n_parentNode((GdomeNode*) elem, &exc);
+      g_assert(exc == 0);
+      g_assert(parent != NULL);
+
+      node = gdome_n_removeChild(parent, (GdomeNode*) elem, &exc);
+      g_assert(exc == 0);
+      g_assert(node == (GdomeNode*) elem);
+
+      gdome_n_unref(parent, &exc);
+      gdome_n_unref(node, &exc);
+      gdome_el_unref(elem, &exc);
+    }
 }
 
 static void
