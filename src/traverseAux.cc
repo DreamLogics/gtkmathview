@@ -186,13 +186,13 @@ Ptr<MathMLElement>
 findMathMLElement(const Ptr<MathMLDocument>& doc, const DOM::Element& node)
 {
   Ptr<MathMLElement> elem = doc->getFormattingNodeNoCreate(node);
-  assert(elem);
-
-  while (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))
-    {
-      if (row->GetSize() != 1) break;
-      elem = row->GetChild(0);
-    }
+  
+  if (elem)
+    while (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))
+      {
+	if (row->GetSize() != 1) break;
+	elem = row->GetChild(0);
+      }
 
   return elem;
 }

@@ -100,12 +100,6 @@ MathMLBinContainerElement::DoLayout(const class FormattingContext& ctxt)
 }
 
 void
-MathMLBinContainerElement::DoStretchyLayout()
-{
-  if (child) child->DoStretchyLayout();
-}
-
-void
 MathMLBinContainerElement::SetPosition(scaled x, scaled y)
 {
   MathMLContainerElement::SetPosition(x, y);

@@ -105,12 +105,6 @@ MathMLActionElement::DoLayout(const class FormattingContext& ctxt)
 }
 
 void
-MathMLActionElement::DoStretchyLayout()
-{
-  if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->DoStretchyLayout();
-}
-
-void
 MathMLActionElement::SetPosition(scaled x, scaled y)
 {
   position.x = x;
@@ -157,7 +151,11 @@ MathMLActionElement::SetSelectedIndex(unsigned i)
   if (content.size() > 0 && selection != (i - 1) % content.size())
     {
       selection = (i - 1) % content.size();
-      if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->SetDirtyLayout();
+      if (Ptr<MathMLElement> elem = GetSelectedElement())
+	{
+	  elem->SetDirtyLayout();
+	  if (elem->DirtyAttribute() || elem->DirtyAttributeP()) this->SetDirtyAttribute();
+	}
       // has to set DirtyLayout itself because if the children hasn't been visited yet
       // then its Dirtylayout flag is still set and it won't be propagated up
       SetDirtyLayout();
@@ -240,6 +238,7 @@ MathMLActionElement::SetDirtyLayout(bool children)
 }
 #endif
 
+#if 0
 void
 MathMLActionElement::SetFlagDown(Flags f)
 {
@@ -253,6 +252,7 @@ MathMLActionElement::ResetFlagDown(Flags f)
   MathMLElement::ResetFlag(f);
   if (Ptr<MathMLElement> elem = GetSelectedElement()) elem->ResetFlagDown(f);
 }
+#endif
 
 Ptr<MathMLOperatorElement>
 MathMLActionElement::GetCoreOperator()

@@ -267,20 +267,6 @@ MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
     rect.Zero();
 }
 
-void
-MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
-{
-  if (elem) elem->SetSelected();
-  else if (document) document->SetSelected();
-}
-
-void
-MathMLRenderingEngine::ResetSelected(const Ptr<MathMLElement>& elem)
-{
-  if (elem) elem->ResetSelected();
-  else if (document) document->ResetSelected();
-}
-
 Ptr<MathMLElement>
 MathMLRenderingEngine::GetElementAt(scaled x, scaled y) const
 {

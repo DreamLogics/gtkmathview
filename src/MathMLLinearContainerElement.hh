@@ -52,7 +52,6 @@ public:
   virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
-  virtual void DoStretchyLayout(void);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
   virtual Ptr<MathMLElement> Inside(scaled, scaled);

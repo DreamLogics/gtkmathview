@@ -111,12 +111,6 @@ MathMLLinearContainerElement::DoLayout(const FormattingContext& ctxt)
 }
 
 void
-MathMLLinearContainerElement::DoStretchyLayout()
-{
-  std::for_each(content.begin(), content.end(), DoStretchyLayoutAdaptor());
-}
-
-void
 MathMLLinearContainerElement::Render(const DrawingArea& area)
 {
   if (Dirty())

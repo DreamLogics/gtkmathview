@@ -49,13 +49,6 @@ struct DoLayoutAdaptor
   { elem->DoLayout(*ctxt); }
 };
 
-struct DoStretchyLayoutAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
-{
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->DoStretchyLayout(); }
-};
-
 struct SetFlagDownAdaptor
   : public std::binary_function<Ptr<MathMLElement>,MathMLElement::Flags,void>
 {

@@ -127,8 +127,6 @@ MathMLRowElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLRowElement::DoStretchyLayout()
 {
-  MathMLLinearContainerElement::DoStretchyLayout();
-
   unsigned nStretchy = 0; // # of stretchy operators in this line
   unsigned nOther    = 0; // # of non-stretchy elements in this line
 

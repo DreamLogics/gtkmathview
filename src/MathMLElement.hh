@@ -55,7 +55,6 @@ public:
   virtual void Normalize(const Ptr<class MathMLDocument>&) = 0;
   virtual void Setup(class RenderingEnvironment&); // setup attributes
   virtual void DoLayout(const class FormattingContext&);
-  virtual void DoStretchyLayout(void);
   virtual void RenderBackground(const DrawingArea&);
   virtual void Render(const DrawingArea&);
   virtual void ReleaseGCs(void);
@@ -140,7 +139,7 @@ public:
     FUnusedFlag       // Just to know how many flags we use without having to count them
   };
 
-  void SetFlag(Flags f) { flags.set(f); }
+  void SetFlag(Flags f);// { flags.set(f); }
   void ResetFlag(Flags f) { flags.reset(f); }
   void SetFlagUp(Flags);
   void ResetFlagUp(Flags);

@@ -51,7 +51,6 @@ public:
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void Setup(class RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
-  virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);
   virtual void Render(const DrawingArea&);
 
@@ -62,8 +61,8 @@ public:
   virtual void ResetSelected(void);
 #endif
 
-  virtual void SetFlagDown(Flags);
-  virtual void ResetFlagDown(Flags);
+  //virtual void SetFlagDown(Flags);
+  //virtual void ResetFlagDown(Flags);
 
   virtual scaled GetLeftEdge(void) const;
   virtual scaled GetRightEdge(void) const;

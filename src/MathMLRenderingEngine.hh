@@ -58,9 +58,6 @@ public:
   Ptr<MathMLDocument> GetDocument(void) const { return document; }
   Ptr<MathMLElement> GetElementAt(scaled, scaled) const;
 
-  void SetSelected(const Ptr<MathMLElement>&);
-  void ResetSelected(const Ptr<MathMLElement>&);
-
   // BoundingBox, and Rectangle are structs, not classes, 
   void GetDocumentBoundingBox(struct BoundingBox&) const;
   void GetDocumentRectangle(struct Rectangle&) const;

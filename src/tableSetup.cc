@@ -199,18 +199,7 @@ MathMLTableElement::SetupCells()
   if (nRows == 0 || nColumns == 0) return;
 
   cell = new TableCellPtr[nRows];
-  for (unsigned i = 0; i < nRows; i++) {
-    cell[i] = new TableCell[nColumns];
-
-    for (unsigned j = 0; j < nColumns; j++) {
-      cell[i][j].mtd = NULL;
-      cell[i][j].rowSpan = 0;
-      cell[i][j].colSpan = 0;
-      cell[i][j].spanned = false;
-      // following init is necessary (see SetupColumnAlign)
-      cell[i][j].columnAlign = COLUMN_ALIGN_NOTVALID;
-    }
-  }
+  for (unsigned i = 0; i < nRows; i++) cell[i] = new TableCell[nColumns];
 
   for (std::vector< Ptr<MathMLElement> >::const_iterator p = GetContent().begin();
        p != GetContent().end();
@@ -266,13 +255,6 @@ MathMLTableElement::SetupColumns(RenderingEnvironment& env)
   unsigned i = 0;
 
   column = new TableColumn[nColumns];
-  for (unsigned j = 0; j < nColumns; j++) {
-    column[j].widthType = COLUMN_WIDTH_NOTVALID;
-    column[j].fixedWidth = 0;
-    column[j].spacingType = SPACING_NOTVALID;
-    column[j].fixedSpacing = 0;
-    column[j].lineType = TABLE_LINE_NOTVALID;
-  }
 
   const Value* value = NULL;
 
@@ -393,12 +375,6 @@ MathMLTableElement::SetupRows(RenderingEnvironment& env)
   unsigned i = 0;
 
   row = new TableRow[nRows];
-  for (i = 0; i < nRows; i++) {
-    row[i].mtr = NULL;
-    row[i].spacingType = SPACING_NOTVALID;
-    row[i].fixedSpacing = 0;
-    row[i].lineType = TABLE_LINE_NOTVALID;
-  }
 
   i = 0;
   for (std::vector< Ptr<MathMLElement> >::const_iterator rowElem = GetContent().begin();
@@ -527,13 +503,6 @@ MathMLTableElement::SetupGroups()
 
 	if (cell[i][j].nAlignGroup > 0) {
 	  AlignmentGroup* aGroup = new AlignmentGroup[cell[i][j].nAlignGroup];
-
-	  for (unsigned k = 0; k < cell[i][j].nAlignGroup; k++) {
-	    aGroup[k].group = NULL;
-	    aGroup[k].alignment = GROUP_ALIGN_NOTVALID;
-	    aGroup[k].extent.left = aGroup[k].extent.right = 0;
-	  }
-
 	  cell[i][j].aGroup = aGroup;
 	}
       }

@@ -48,6 +48,13 @@
 #define CLICK_SPACE_RANGE 1
 #define CLICK_TIME_RANGE  250
 
+enum SelectState 
+  {
+    SELECT_STATE_NO,
+    SELECT_STATE_YES,
+    SELECT_STATE_ABORT
+  };
+
 /* structures */
 
 struct _GtkMathView {
@@ -71,7 +78,7 @@ struct _GtkMathView {
 
   gboolean       frozen;
 
-  gboolean       selecting;
+  SelectState    select_state;
   gboolean       button_pressed;
   gfloat         button_press_x;
   gfloat         button_press_y;
@@ -79,7 +86,6 @@ struct _GtkMathView {
 
 #if defined(HAVE_GMETADOM)
   GdomeElement*  current_elem;
-  GdomeElement*  first_elem;
 #endif
 
   FontManagerId  font_manager_id;
@@ -96,14 +102,13 @@ struct _GtkMathViewClass {
 				  GtkAdjustment *hadjustment,
 				  GtkAdjustment *vadjustment);
 
-#if defined(HAVE_MINIDOM)
-  void (*clicked)           (GtkMathView*, mDOMNodeRef);
-  void (*press_move)        (GtkMathView*, mDOMNodeRef, mDOMNodeRef);
-  void (*element_changed)   (GtkMathView*, mDOMNodeRef);
-#elif defined(HAVE_GMETADOM)
-  void (*clicked)           (GtkMathView*, GdomeElement*);
-  void (*press_move)        (GtkMathView*, GdomeElement*, GdomeElement*);
-  void (*element_changed)   (GtkMathView*, GdomeElement*);
+#if defined(HAVE_GMETADOM)
+  void (*click)         (GtkMathView*, GdomeElement*, int);
+  void (*select_begin)  (GtkMathView*, GdomeElement*, int);
+  void (*select_over)   (GtkMathView*, GdomeElement*, int);
+  void (*select_end)    (GtkMathView*, GdomeElement*, int);
+  void (*select_abort)  (GtkMathView*);
+  void (*element_over)  (GtkMathView*, GdomeElement*, int);
 #endif
 };
 
@@ -129,9 +134,12 @@ static void     gtk_math_view_size_request(GtkWidget*, GtkRequisition*);
 /* GtkMathView Signals */
 
 #if defined(HAVE_GMETADOM)
-static void gtk_math_view_clicked(GtkMathView*, GdomeElement*);
-static void gtk_math_view_press_move(GtkMathView*, GdomeElement*, GdomeElement*);
-static void gtk_math_view_element_changed(GtkMathView*, GdomeElement*);
+static void gtk_math_view_click(GtkMathView*, GdomeElement*, int);
+static void gtk_math_view_select_begin(GtkMathView*, GdomeElement*, int);
+static void gtk_math_view_select_over(GtkMathView*, GdomeElement*, int);
+static void gtk_math_view_select_end(GtkMathView*, GdomeElement*, int);
+static void gtk_math_view_select_abort(GtkMathView*);
+static void gtk_math_view_element_over(GtkMathView*, GdomeElement*, int);
 #endif
 
 /* auxiliary functions */
@@ -143,9 +151,12 @@ static void reset_adjustments(GtkMathView*);
 /* Local data */
 
 static GtkEventBoxClass* parent_class = NULL;
-static guint clicked_signal = 0;
-static guint press_move_signal = 0;
-static guint element_changed_signal = 0;
+static guint click_signal = 0;
+static guint select_begin_signal = 0;
+static guint select_over_signal = 0;
+static guint select_end_signal = 0;
+static guint select_abort_signal = 0;
+static guint element_over_signal = 0;
 
 /* widget implementation */
 
@@ -319,9 +330,12 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
   GtkObjectClass* object_class = (GtkObjectClass*) klass;
   GtkWidgetClass* widget_class = (GtkWidgetClass*) klass;
 
-  klass->clicked = gtk_math_view_clicked;
-  klass->press_move = gtk_math_view_press_move;
-  klass->element_changed = gtk_math_view_element_changed;
+  klass->click = gtk_math_view_click;
+  klass->select_begin = gtk_math_view_select_begin;
+  klass->select_over = gtk_math_view_select_over;
+  klass->select_end = gtk_math_view_select_end;
+  klass->select_abort = gtk_math_view_select_abort;
+  klass->element_over = gtk_math_view_element_over;
   klass->set_scroll_adjustments = gtk_math_view_set_adjustments;
 
   parent_class = (GtkEventBoxClass*) gtk_type_class(gtk_event_box_get_type());
@@ -337,32 +351,59 @@ gtk_math_view_class_init(GtkMathViewClass* klass)
 		   gtk_marshal_NONE__POINTER_POINTER,
 		   GTK_TYPE_NONE, 2, GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
 
-  clicked_signal = 
-    gtk_signal_new("clicked",
+  click_signal = 
+    gtk_signal_new("click",
 		   GTK_RUN_FIRST,
 		   object_class->type,
-		   GTK_SIGNAL_OFFSET(GtkMathViewClass, clicked),
-		   gtk_marshal_NONE__POINTER,
-		   GTK_TYPE_NONE, 1, GTK_TYPE_POINTER);
-  gtk_object_class_add_signals(object_class, &clicked_signal, 1);
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, click),
+		   gtk_marshal_NONE__POINTER_INT,
+		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_INT);
+  gtk_object_class_add_signals(object_class, &click_signal, 1);
 
-  press_move_signal = 
-    gtk_signal_new("press_move",
+  select_begin_signal = 
+    gtk_signal_new("select_begin",
 		   GTK_RUN_FIRST,
 		   object_class->type,
-		   GTK_SIGNAL_OFFSET(GtkMathViewClass, press_move),
-		   gtk_marshal_NONE__POINTER_POINTER,
-		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_POINTER);
-  gtk_object_class_add_signals(object_class, &press_move_signal, 1);
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, select_begin),
+		   gtk_marshal_NONE__POINTER_INT,
+		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_INT);
+  gtk_object_class_add_signals(object_class, &select_begin_signal, 1);
 
-  element_changed_signal = 
-    gtk_signal_new("element_changed",
+  select_over_signal = 
+    gtk_signal_new("select_over",
 		   GTK_RUN_FIRST,
 		   object_class->type,
-		   GTK_SIGNAL_OFFSET(GtkMathViewClass, element_changed),
-		   gtk_marshal_NONE__POINTER,
-		   GTK_TYPE_NONE, 1, GTK_TYPE_POINTER);
-  gtk_object_class_add_signals(object_class, &element_changed_signal, 1);
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, select_over),
+		   gtk_marshal_NONE__POINTER_INT,
+		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_INT);
+  gtk_object_class_add_signals(object_class, &select_over_signal, 1);
+
+  select_end_signal = 
+    gtk_signal_new("select_end",
+		   GTK_RUN_FIRST,
+		   object_class->type,
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, select_end),
+		   gtk_marshal_NONE__POINTER_INT,
+		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_INT);
+  gtk_object_class_add_signals(object_class, &select_end_signal, 1);
+
+  select_abort_signal = 
+    gtk_signal_new("select_abort",
+		   GTK_RUN_FIRST,
+		   object_class->type,
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, select_abort),
+		   gtk_marshal_NONE__NONE,
+		   GTK_TYPE_NONE, 0);
+  gtk_object_class_add_signals(object_class, &select_abort_signal, 1);
+
+  element_over_signal = 
+    gtk_signal_new("element_over",
+		   GTK_RUN_FIRST,
+		   object_class->type,
+		   GTK_SIGNAL_OFFSET(GtkMathViewClass, element_over),
+		   gtk_marshal_NONE__POINTER_INT,
+		   GTK_TYPE_NONE, 2, GTK_TYPE_POINTER, GTK_TYPE_INT);
+  gtk_object_class_add_signals(object_class, &element_over_signal, 1);
 
   Globals::InitGlobalData(getenv("MATHENGINECONF"));
 }
@@ -378,10 +419,9 @@ gtk_math_view_init(GtkMathView* math_view)
   math_view->drawing_area    = NULL;
   math_view->interface       = NULL;
   math_view->frozen          = FALSE;
-  math_view->selecting       = FALSE;
+  math_view->select_state    = SELECT_STATE_NO;
   math_view->button_pressed  = FALSE;
   math_view->current_elem    = NULL;
-  math_view->first_elem      = NULL;
   math_view->hadjustment = NULL;
   math_view->vadjustment = NULL;
 
@@ -460,14 +500,6 @@ gtk_math_view_destroy(GtkObject* object)
       gdome_el_unref(math_view->current_elem, &exc);
       g_assert(exc == 0);
       math_view->current_elem = NULL;
-    }
-
-  if (math_view->first_elem != NULL)
-    {
-      GdomeException exc = 0;
-      gdome_el_unref(math_view->first_elem, &exc);
-      g_assert(exc == 0);
-      math_view->first_elem = NULL;
     }
 
   /* FIXME: sometimes the frame has been destroyed already
@@ -554,26 +586,20 @@ gtk_math_view_button_press_event(GtkWidget* widget,
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(math_view->drawing_area != NULL, FALSE);
 
-  if (event->button == 1) {
-    math_view->selecting = FALSE;
-    math_view->button_pressed = TRUE;
-    math_view->button_press_x = event->x;
-    math_view->button_press_y = event->y;
-    math_view->button_press_time = event->time;
-
-    if (math_view->first_elem != NULL)
-      {
-	// this should not happen, but occasionally it does!
-	GdomeException exc = 0;
-	gdome_el_unref(math_view->first_elem, &exc);
-	g_assert(exc == 0);
-	math_view->first_elem = NULL;
-      }
-
-    g_assert(math_view->first_elem == NULL);
-    math_view->first_elem = gtk_math_view_get_element_at(math_view, (gint) event->x, (gint) event->y);
-  }
-
+  if (event->button == 1)
+    {
+      math_view->select_state = SELECT_STATE_NO;
+      math_view->button_pressed = TRUE;
+      math_view->button_press_x = event->x;
+      math_view->button_press_y = event->y;
+      math_view->button_press_time = event->time;
+    }
+  else if (math_view->select_state == SELECT_STATE_YES)
+    {
+      math_view->select_state = SELECT_STATE_ABORT;
+      gtk_signal_emit(GTK_OBJECT(math_view), select_abort_signal);
+    }
+  
   return FALSE;
 }
 
@@ -587,34 +613,36 @@ gtk_math_view_button_release_event(GtkWidget* widget,
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(math_view->drawing_area != NULL, FALSE);
 
-  GdomeException exc = 0;
+  if (event->button == 1)
+    {
+      GdomeException exc = 0;
+      GdomeElement* elem = gtk_math_view_get_element_at(math_view, (gint) event->x, (gint) event->y);
 
-  if (event->button == 1) {
-    if (math_view->button_pressed == TRUE &&
-	math_view->selecting == FALSE &&
-	fabs(math_view->button_press_x - event->x) <= CLICK_SPACE_RANGE &&
-	fabs(math_view->button_press_y - event->y) <= CLICK_SPACE_RANGE &&
-	abs(math_view->button_press_time - event->time) <= CLICK_TIME_RANGE)
-      {
-	// the mouse should have not moved more than one pixel in each direction
-	// and the time elapsed from the press event should be no more than 250ms
-	if (GdomeElement* elem = gtk_math_view_get_element_at(math_view, (gint) event->x, (gint) event->y))
-	  {
-	    gtk_signal_emit(GTK_OBJECT(math_view), clicked_signal, elem);
-	    gdome_el_unref(elem, &exc);
-	    g_assert(exc == 0);
-	  }
-      }
+      if (elem != NULL &&
+	  math_view->button_pressed == TRUE &&
+	  math_view->select_state == SELECT_STATE_NO &&
+	  fabs(math_view->button_press_x - event->x) <= CLICK_SPACE_RANGE &&
+	  fabs(math_view->button_press_y - event->y) <= CLICK_SPACE_RANGE &&
+	  abs(math_view->button_press_time - event->time) <= CLICK_TIME_RANGE)
+	{
+	  // the mouse should have not moved more than one pixel in each direction
+	  // and the time elapsed from the press event should be no more than 250ms
+	  gtk_signal_emit(GTK_OBJECT(math_view), click_signal, elem, event->state);
+	}
 
-    math_view->button_pressed = math_view->selecting = FALSE;
-    if (math_view->first_elem != NULL)
-      {
-	gdome_el_unref(math_view->first_elem, &exc);
-	g_assert(exc == 0);
-	math_view->first_elem = NULL;
-      }
-  }
+      if (math_view->select_state == SELECT_STATE_YES)
+	gtk_signal_emit(GTK_OBJECT(math_view), select_end_signal, elem, event->state);
 
+      if (elem != NULL)
+	{
+	  gdome_el_unref(elem, &exc);
+	  g_assert(exc == 0);
+	}
+
+      math_view->button_pressed = FALSE;
+      math_view->select_state = SELECT_STATE_NO;
+    }
+  
   return FALSE;
 }
 
@@ -648,15 +676,18 @@ gtk_math_view_motion_notify_event(GtkWidget* widget,
   GdomeElement* elem = gtk_math_view_get_element_at(math_view, (gint) event->x, (gint) event->y);
 
   if (math_view->button_pressed == TRUE &&
-      (math_view->selecting == TRUE ||
-       math_view->first_elem != elem ||
+      (math_view->select_state == SELECT_STATE_YES ||
        fabs(math_view->button_press_x - event->x) > CLICK_SPACE_RANGE ||
        fabs(math_view->button_press_y - event->y) > CLICK_SPACE_RANGE ||
        abs(math_view->button_press_time - event->time) > CLICK_TIME_RANGE))
     {
-      if (math_view->selecting == FALSE || math_view->current_elem != elem)
-	gtk_signal_emit(GTK_OBJECT(math_view), press_move_signal, math_view->first_elem, elem);
-      math_view->selecting = TRUE;
+      if (math_view->select_state == SELECT_STATE_NO)
+	{
+	  gtk_signal_emit(GTK_OBJECT(math_view), select_begin_signal, elem, event->state);
+	  math_view->select_state = SELECT_STATE_YES;
+	}
+      else if (math_view->select_state == SELECT_STATE_YES && math_view->current_elem != elem)
+	gtk_signal_emit(GTK_OBJECT(math_view), select_over_signal, elem, event->state);
     }
 
   if (math_view->current_elem != elem)
@@ -674,7 +705,7 @@ gtk_math_view_motion_notify_event(GtkWidget* widget,
 	}
 
       math_view->current_elem = elem;
-      gtk_signal_emit(GTK_OBJECT(math_view), element_changed_signal, elem);
+      gtk_signal_emit(GTK_OBJECT(math_view), element_over_signal, elem, event->state);
     }
 
   if (elem != NULL)
@@ -726,21 +757,42 @@ gtk_math_view_expose_event(GtkWidget* widget,
 }
 
 static void
-gtk_math_view_clicked(GtkMathView* math_view, GdomeElement*)
+gtk_math_view_click(GtkMathView* math_view, GdomeElement*, gint)
 {
   g_return_if_fail(math_view != NULL);
   // noop
 }
 
 static void
-gtk_math_view_press_move(GtkMathView* math_view, GdomeElement*, GdomeElement*)
+gtk_math_view_select_begin(GtkMathView* math_view, GdomeElement*, gint)
 {
   g_return_if_fail(math_view != NULL);
   // noop
 }
 
 static void
-gtk_math_view_element_changed(GtkMathView* math_view, GdomeElement*)
+gtk_math_view_select_over(GtkMathView* math_view, GdomeElement*, gint)
+{
+  g_return_if_fail(math_view != NULL);
+  // noop
+}
+
+static void
+gtk_math_view_select_end(GtkMathView* math_view, GdomeElement*, gint)
+{
+  g_return_if_fail(math_view != NULL);
+  // noop
+}
+
+static void
+gtk_math_view_select_abort(GtkMathView* math_view)
+{
+  g_return_if_fail(math_view != NULL);
+  // noop
+}
+
+static void
+gtk_math_view_element_over(GtkMathView* math_view, GdomeElement*, gint)
 {
   g_return_if_fail(math_view != NULL);
   // noop
@@ -991,9 +1043,11 @@ gtk_math_view_select(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
 
-  math_view->interface->SetSelected(findMathMLElement(math_view->interface->GetDocument(),
-						      DOM::Element(elem)));
-  paint_widget(math_view);
+  if (Ptr<MathMLElement> el = findMathMLElement(math_view->interface->GetDocument(), DOM::Element(elem)))
+    {
+      el->SetSelected();
+      paint_widget(math_view);
+    }
 }
 
 extern "C" void
@@ -1003,9 +1057,11 @@ gtk_math_view_unselect(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
 
-  math_view->interface->ResetSelected(findMathMLElement(math_view->interface->GetDocument(),
-							DOM::Element(elem)));
-  paint_widget(math_view);
+  if (Ptr<MathMLElement> el = findMathMLElement(math_view->interface->GetDocument(), DOM::Element(elem)))
+    {
+      el->ResetSelected();
+      paint_widget(math_view);
+    }
 }
 
 extern "C" gboolean

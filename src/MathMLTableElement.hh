@@ -48,6 +48,15 @@ struct GroupExtent {
 };
 
 struct AlignmentGroup {
+  AlignmentGroup(void) { Reset(); }
+
+  void Reset(void)
+  {
+    group = 0;
+    alignment = GROUP_ALIGN_NOTVALID;
+    leftEdge = rightEdge = extent.left = extent.right = 0;
+  }
+
   MathMLAlignGroupElement* group; // ptr to the element
   GroupAlignId alignment;         // alignment for this group
   scaled leftEdge;                // left edge (different from left width)
@@ -56,6 +65,19 @@ struct AlignmentGroup {
 };
 
 struct TableCell {
+  TableCell(void) { Reset(); }
+
+  void Reset(void)
+  {
+    spanned = false;
+    rowSpan = colSpan = 0;
+    nAlignGroup = 0;
+    aGroup = 0;
+    rowAlign = ROW_ALIGN_NOTVALID;
+    columnAlign = COLUMN_ALIGN_NOTVALID;
+    iGroup = 0;
+  }
+
   // phase 1: MathMLTableElement::SetupTable
   Ptr<MathMLTableCellElement> mtd;  // ptr to <mtd> element
   bool     spanned;             // true if mtd is a pointer to the spanning cell
@@ -82,6 +104,19 @@ typedef TableCell* TableCellPtr;
 typedef TableCellPtr* TableCellMatrix;
 
 struct TableColumn {
+  TableColumn(void) { Reset(); }
+
+  void Reset(void)
+  {
+    nAlignGroup = 0;
+    widthType = COLUMN_WIDTH_NOTVALID;
+    fixedWidth = 0;
+    spacingType = SPACING_NOTVALID;
+    fixedSpacing = 0;
+    lineType = TABLE_LINE_NOTVALID;
+    contentWidth = minimumWidth = width = spacing = 0;
+  }
+
   // phase 3: MathMLTableElement::arrangeGroupsAlignment
   unsigned nAlignGroup;         // number of alignment groups within this column
 
@@ -106,6 +141,16 @@ struct TableColumn {
 };
 
 struct TableRow {
+  TableRow(void) { Reset(); }
+
+  void Reset(void)
+  {
+    spacingType = SPACING_NOTVALID;
+    fixedSpacing = 0;
+    lineType = TABLE_LINE_NOTVALID;
+    ascent = descent = spacing = 0;
+  }
+
   Ptr<MathMLTableRowElement> mtr;   // Table Row element
 
   SpacingId   spacingType;      // type of spacing (absolute or %)
@@ -123,6 +168,14 @@ struct TableRow {
 };
 
 struct RowLabel {
+  RowLabel(void) { Reset(); }
+
+  void Reset(void)
+  {
+    rowAlign = ROW_ALIGN_NOTVALID;
+    columnAlign = COLUMN_ALIGN_NOTVALID;
+  }
+
   Ptr<MathMLElement> labelElement;
   RowAlignId     rowAlign;
   ColumnAlignId  columnAlign;

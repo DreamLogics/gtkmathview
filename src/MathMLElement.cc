@@ -309,11 +309,6 @@ MathMLElement::DoLayout(const FormattingContext& ctxt)
 }
 
 void
-MathMLElement::DoStretchyLayout()
-{
-}
-
-void
 MathMLElement::RenderBackground(const DrawingArea& area)
 {
   if (bGC[Selected()] == NULL)
@@ -540,6 +535,12 @@ MathMLElement::SetDirtyLayout()
       SetFlagDown(FDirtyLayout);
       SetFlagUp(FDirtyLayout);
     }
+}
+
+void
+MathMLElement::SetFlag(Flags f)
+{
+  flags.set(f);
 }
 
 void

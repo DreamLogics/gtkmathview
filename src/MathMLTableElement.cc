@@ -57,6 +57,7 @@ MathMLTableElement::Init()
   column   = NULL;
   row      = NULL;
   rowLabel = NULL;
+  width    = 0;
 
   dGC[0] = dGC[1] = NULL;
 }

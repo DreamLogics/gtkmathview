@@ -51,13 +51,15 @@ public:
   //virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(RenderingEnvironment&);
   virtual void DoLayout(const class FormattingContext&);
-  virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);
 
   virtual bool IsSpaceLike(void) const;
 
   OperatorFormId GetOperatorForm(const Ptr<MathMLElement>&) const;
   virtual Ptr<class MathMLOperatorElement> GetCoreOperator();
+
+protected:
+  void DoStretchyLayout(void);
 };
 
 #endif // MathMLRowElement_hh

@@ -42,6 +42,7 @@ static GdkCursor* normal_cursor;
 static GdkCursor* link_cursor;  
 
 static gchar* doc_name = NULL;
+static GdomeElement* first_selected = NULL;
 static GdomeElement* root_selected = NULL;
 
 static guint statusbar_context;
@@ -436,14 +437,14 @@ options_set_font_size(GtkWidget* widget, gpointer data)
 
 #if defined(HAVE_GMETADOM)
 static void
-element_changed(GtkMathView* math_view, GdomeElement* elem)
+element_over(GtkMathView* math_view, GdomeElement* elem, gint state)
 {
   GdomeDOMString* link = NULL;
 
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
 
-/*   printf("pointer is on %p\n", elem); */
+  printf("*** element_over signal: %p %x\n", elem, state);
 
   link = find_hyperlink(elem, XLINK_NS_URI, "href");
   if (link != NULL)
@@ -454,37 +455,114 @@ element_changed(GtkMathView* math_view, GdomeElement* elem)
   if (link != NULL)
     gdome_str_unref(link);
 }
-#endif
 
 static void
-press_move(GtkMathView* math_view, GdomeElement* first, GdomeElement* last)
+select_begin(GtkMathView* math_view, GdomeElement* elem, gint state)
 {
   g_return_if_fail(math_view != NULL);
   g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
-  g_return_if_fail(first != NULL);
 
-/*   printf("selection changed %p %p\n", first, last); */
-
-  if (last != NULL)
+  printf("*** select_begin signal: %p %x\n", elem, state);
+  
+  if (elem != NULL)
     {
       GdomeException exc = 0;
 
+      g_assert(first_selected == NULL);
+      gdome_el_ref(elem, &exc);
+      g_assert(exc == 0);
+
+      gtk_math_view_freeze(math_view);
+
       if (root_selected != NULL)
 	{
+	  gtk_math_view_unselect(math_view, elem);
 	  gdome_el_unref(root_selected, &exc);
 	  g_assert(exc == 0);
 	}
 
-      root_selected = find_common_ancestor(first, last);
-/*       printf("selecting root %p\n", first, last, root_selected); */
-      gtk_math_view_select(math_view, root_selected);
-      g_assert(exc == 0);
+      gtk_math_view_select(math_view, elem);
+      first_selected = elem;
+
+      gtk_math_view_thaw(math_view);
     }
 }
 
-#if defined(HAVE_GMETADOM)
 static void
-clicked(GtkMathView* math_view, GdomeElement* elem)
+select_over(GtkMathView* math_view, GdomeElement* elem, gint state)
+{
+  g_return_if_fail(math_view != NULL);
+  g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
+
+  printf("*** select_over signal: %p %x\n", elem, state);
+
+  if (first_selected != NULL && elem != NULL)
+    {
+      GdomeException exc = 0;
+
+      gtk_math_view_freeze(math_view);
+
+      if (root_selected != NULL)
+	{
+	  gtk_math_view_unselect(math_view, root_selected);
+	  gdome_el_unref(root_selected, &exc);
+	  g_assert(exc == 0);
+	}
+
+      root_selected = find_common_ancestor(first_selected, elem);
+/*       printf("selecting root %p\n", first, last, root_selected); */
+      gtk_math_view_select(math_view, root_selected);
+      g_assert(exc == 0);
+
+      gtk_math_view_thaw(math_view);
+    }
+}
+
+static void
+select_end(GtkMathView* math_view, GdomeElement* elem, gint state)
+{
+  g_return_if_fail(math_view != NULL);
+  g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
+
+  printf("*** select_end signal: %p %x\n", elem, state);
+
+  if (first_selected != NULL)
+    {
+      GdomeException exc = 0;
+      gdome_el_unref(first_selected, &exc);
+      g_assert(exc == 0);
+      first_selected = NULL;
+    }
+}
+
+static void
+select_abort(GtkMathView* math_view)
+{
+  GdomeException exc = 0;
+
+  g_return_if_fail(math_view != NULL);
+  g_return_if_fail(GTK_IS_MATH_VIEW(math_view));
+
+  printf("*** select_abort signal\n");
+
+  if (first_selected != NULL)
+    {
+      gdome_el_unref(first_selected, &exc);
+      g_assert(exc == 0);
+      first_selected = NULL;
+    }
+
+  if (root_selected != NULL)
+    {
+      gtk_math_view_unselect(math_view, root_selected);
+      gdome_el_unref(root_selected, &exc);
+      g_assert(exc == 0);
+      root_selected = NULL;
+    }
+}
+
+static void
+click(GtkMathView* math_view, GdomeElement* elem, gint state)
 {
   GdomeException exc;
   GdomeDOMString* name;
@@ -493,7 +571,7 @@ clicked(GtkMathView* math_view, GdomeElement* elem)
 
   g_return_if_fail(math_view != NULL);
 
-  /* printf("clicked on %p\n", elem); */
+  printf("*** click signal: %p %x\n", elem, state);
 
   if (elem != NULL)
     {
@@ -538,15 +616,27 @@ create_widget_set()
   gtk_widget_show(main_area);
 
   gtk_signal_connect_object (GTK_OBJECT (main_area),
-			     "press_move", GTK_SIGNAL_FUNC (press_move),
+			     "select_begin", GTK_SIGNAL_FUNC (select_begin),
 			     (gpointer) main_area);
 
   gtk_signal_connect_object (GTK_OBJECT (main_area),
-			     "element_changed", GTK_SIGNAL_FUNC (element_changed),
+			     "select_over", GTK_SIGNAL_FUNC (select_over),
+			     (gpointer) main_area);
+
+  gtk_signal_connect_object (GTK_OBJECT (main_area),
+			     "select_end", GTK_SIGNAL_FUNC (select_end),
+			     (gpointer) main_area);
+
+  gtk_signal_connect_object (GTK_OBJECT (main_area),
+			     "select_abort", GTK_SIGNAL_FUNC (select_abort),
+			     (gpointer) main_area);
+
+  gtk_signal_connect_object (GTK_OBJECT (main_area),
+			     "element_over", GTK_SIGNAL_FUNC (element_over),
 			     (gpointer) main_area);
 
   gtk_signal_connect_object (GTK_OBJECT (main_area), 
-			     "clicked", GTK_SIGNAL_FUNC(clicked),
+			     "click", GTK_SIGNAL_FUNC(click),
 			     (gpointer) main_area);
 
   gtk_widget_add_events(GTK_WIDGET(main_area),
