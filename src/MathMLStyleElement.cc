@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "Iterator.hh"
 #include "stringAux.hh"
 #include "MathEngine.hh"
 #include "StringUnicode.hh"
@@ -319,12 +320,12 @@ MathMLStyleElement::Render(const DrawingArea& area)
 bool
 MathMLStyleElement::IsSpaceLike() const
 {
-  assert(content.GetSize() == 1);
+  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
+    assert(elem() != NULL);
+    if (!elem()->IsSpaceLike()) return false;
+  }
 
-  MathMLElement* elem = content.GetFirst();
-  assert(elem != NULL);
-
-  return elem->IsSpaceLike();
+  return true;
 }
 
 bool

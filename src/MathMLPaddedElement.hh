@@ -45,6 +45,8 @@ public:
   virtual void SetPosition(scaled, scaled);
   virtual ~MathMLPaddedElement();
 
+  virtual bool IsSpaceLike(void) const;
+
 private:
   struct LengthDimension {
     bool      valid;        // true if this attribute was set

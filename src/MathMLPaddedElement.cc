@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "Iterator.hh"
 #include "ValueSequence.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
@@ -213,4 +214,15 @@ MathMLPaddedElement::EvalLengthDimension(scaled orig,
   if      (dim.sign == -1) return orig - float2sp(res);
   else if (dim.sign == +1) return orig + float2sp(res);
   else return float2sp(res);
+}
+
+bool
+MathMLPaddedElement::IsSpaceLike() const
+{
+  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
+    assert(elem() != NULL);
+    if (!elem()->IsSpaceLike()) return false;
+  }
+
+  return true;
 }

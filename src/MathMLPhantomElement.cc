@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "Iterator.hh"
 #include "MathMLPhantomElement.hh"
 
 #if defined(HAVE_MINIDOM)
@@ -42,12 +43,12 @@ MathMLPhantomElement::~MathMLPhantomElement()
 bool
 MathMLPhantomElement::IsSpaceLike() const
 {
-  assert(content.GetSize() == 1);
+  for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next()) {
+    assert(elem() != NULL);
+    if (!elem()->IsSpaceLike()) return false;
+  }
 
-  MathMLElement* elem = content.GetFirst();
-  assert(elem != NULL);
-
-  return elem->IsSpaceLike();
+  return true;
 }
 
 bool
