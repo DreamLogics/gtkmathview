@@ -29,6 +29,16 @@
 #include "MathMLRowElement.hh"
 #include "MathMLActionElement.hh"
 #include "MathMLOperatorElement.hh"
+// the following are needed for the dynamic casts
+#include "MathMLScriptElement.hh"
+#include "MathMLUnderOverElement.hh"
+#include "MathMLFractionElement.hh"
+#include "MathMLMultiScriptsElement.hh"
+#include "MathMLSemanticsElement.hh"
+#include "MathMLStyleElement.hh"
+#include "MathMLPhantomElement.hh"
+#include "MathMLPaddedElement.hh"
+// ...
 #include "MathMLEmbellishedOperatorElement.hh"
 
 Ptr<MathMLElement>
@@ -41,8 +51,7 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
   Ptr<MathMLContainerElement> rootParent = smart_cast<MathMLContainerElement>(root->GetParent());
   assert(rootParent != 0);
 
-  switch (rootParent->IsA()) {
-  case TAG_MROW:
+  if (is_a<MathMLRowElement>(rootParent))
     {
       Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(rootParent);
       assert(row != 0);
@@ -56,15 +65,11 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 
       return findEmbellishedOperatorRoot(rootParent);
     }
-  case TAG_MSUP:
-  case TAG_MSUB:
-  case TAG_MSUBSUP:
-  case TAG_MUNDER:
-  case TAG_MOVER:
-  case TAG_MUNDEROVER:
-  case TAG_MMULTISCRIPTS:
-  case TAG_MFRAC:
-  case TAG_SEMANTICS:
+  else if (is_a<MathMLScriptElement>(rootParent) ||
+	   is_a<MathMLUnderOverElement>(rootParent) ||
+	   is_a<MathMLMultiScriptsElement>(rootParent) ||
+	   is_a<MathMLFractionElement>(rootParent) ||
+	   is_a<MathMLSemanticsElement>(rootParent))
     {
       Ptr<MathMLLinearContainerElement> cont = smart_cast<MathMLLinearContainerElement>(rootParent);
       assert(cont != 0);
@@ -73,13 +78,12 @@ findEmbellishedOperatorRoot(const Ptr<MathMLElement>& root)
 	  cont->GetContent().GetFirst() != root) return root;
       else return findEmbellishedOperatorRoot(rootParent);
     }
-  case TAG_MSTYLE:
-  case TAG_MPHANTOM:
-  case TAG_MPADDED:
+  else if (is_a<MathMLStyleElement>(rootParent) ||
+	   is_a<MathMLPhantomElement>(rootParent) ||
+	   is_a<MathMLPaddedElement>(rootParent))
     return findEmbellishedOperatorRoot(rootParent);
-  default:
+  else
     return root;
-  }
 }
 
 Ptr<MathMLOperatorElement>

@@ -296,7 +296,7 @@ MathMLStyleElement::Render(const DrawingArea& area)
   if (!HasDirtyChildren()) return;
  
   if (IsDirty()) {
-    if (differentBackground) {
+    if (differentBackground && !IsSelected()) {
       if (bGC[0] == NULL) {
 	GraphicsContextValues values;
 	values.foreground = values.background = background;

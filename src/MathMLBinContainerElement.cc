@@ -151,11 +151,11 @@ MathMLBinContainerElement::SetDirty(const Rectangle* rect)
   dirtyBackground =
     (GetParent() != NULL && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
 
-  if (IsDirty()) return;
-  if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
+  if (IsDirty() || HasDirtyChildren()) return;
+  //if (rect != NULL && !GetRectangle().Overlaps(*rect)) return;
 
-  dirty = 1;
-  SetDirtyChildren();
+  //dirty = 1;
+  //SetDirtyChildren();
 
   if (child != 0) child->SetDirty(rect);
 }

@@ -50,6 +50,7 @@ public:
   virtual void Setup(RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
+  virtual void SetDirty(const Rectangle* = NULL);
 
 private:
   struct LengthDimension {

@@ -32,14 +32,12 @@
 
 MathMLPaddedElement::MathMLPaddedElement()
 {
-  width.valid = lSpace.valid = height.valid = depth.valid = false;
 }
 
 #if defined(HAVE_GMETADOM)
 MathMLPaddedElement::MathMLPaddedElement(const GMetaDOM::Element& node)
   : MathMLNormalizingContainerElement(node)
 {
-  width.valid = lSpace.valid = height.valid = depth.valid = false;
 }
 #endif
 
@@ -70,9 +68,9 @@ MathMLPaddedElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);
 
-  const Value* value = NULL;
+  width.valid = lSpace.valid = height.valid = depth.valid = false;
 
-  value = GetAttributeValue(ATTR_WIDTH, NULL, false);
+  const Value* value = GetAttributeValue(ATTR_WIDTH, NULL, false);
   if (value != NULL) ParseLengthDimension(env, value, width, KW_WIDTH);
   delete value;
 
@@ -109,7 +107,7 @@ MathMLPaddedElement::ParseLengthDimension(RenderingEnvironment* env,
 
   v = seq->GetFirstValue();
   assert(v != NULL);
-  if      (v->IsKeyword(KW_PLUS)) dim.sign = 1;
+  if      (v->IsKeyword(KW_PLUS)) dim.sign = +1;
   else if (v->IsKeyword(KW_MINUS)) dim.sign = -1;
   else dim.sign = 0;
 
@@ -172,10 +170,10 @@ MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
   child->DoLayout(ctxt);
   const BoundingBox& elemBox = child->GetBoundingBox();
 
-  box.Set(EvalLengthDimension(elemBox.width, width, elemBox),
+  lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
+  box.Set(lSpaceE + EvalLengthDimension(elemBox.width, width, elemBox),
 	  EvalLengthDimension(elemBox.ascent, height, elemBox),
 	  EvalLengthDimension(elemBox.descent, depth, elemBox));
-  lSpaceE = EvalLengthDimension(0, lSpace, elemBox);
 
   ResetDirtyLayout(ctxt.GetLayoutType());
 }
@@ -183,7 +181,9 @@ MathMLPaddedElement::DoLayout(const class FormattingContext& ctxt)
 void
 MathMLPaddedElement::SetPosition(scaled x, scaled y)
 {
-  MathMLNormalizingContainerElement::SetPosition(x + lSpaceE, y);
+  MathMLNormalizingContainerElement::SetPosition(x, y);
+  assert(child != NULL);
+  child->SetPosition(x + lSpaceE, y);
 }
 
 scaled
@@ -214,4 +214,11 @@ MathMLPaddedElement::EvalLengthDimension(scaled orig,
   if      (dim.sign == -1) return orig - float2sp(res);
   else if (dim.sign == +1) return orig + float2sp(res);
   else return float2sp(res);
+}
+
+void
+MathMLPaddedElement::SetDirty(const Rectangle* rect)
+{
+  assert(child != NULL);
+  child->SetDirty(rect);
 }

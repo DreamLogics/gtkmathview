@@ -27,6 +27,8 @@
 #include "unidefs.h"
 #include "stringAux.hh"
 #include "Globals.hh"
+#include "Iterator.hh"
+#include "ChildList.hh"
 #include "StringUnicode.hh"
 #include "EntitiesTable.hh"
 #include "MathMLCharNode.hh"
@@ -39,12 +41,14 @@
 
 MathMLRadicalElement::MathMLRadicalElement()
 {
+  radical = 0;
 }
 
 #if defined(HAVE_GMETADOM)
 MathMLRadicalElement::MathMLRadicalElement(const GMetaDOM::Element& node)
   : MathMLLinearContainerElement(node)
 {
+  radical = 0;
 }
 #endif
 
@@ -55,28 +59,49 @@ MathMLRadicalElement::~MathMLRadicalElement()
 void
 MathMLRadicalElement::Normalize()
 {
-  if (IsA() == TAG_MSQRT)
-    MathMLLinearContainerElement::Normalize();
-  else
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
     {
-      assert(IsA() == TAG_MROOT);
-
-      while (content.GetSize() < 2)
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement() != 0)
 	{
-	  Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
-	  assert(mdummy != 0);
-	  Append(mdummy);
+	  if (IsA() == TAG_MSQRT)
+	    // should do normalizing containter::Layout but now
+	    // it's a bin, so radical cannot derive from it any more
+	    MathMLNormalizingContainerElement::Normalize();
+	  else
+	    {
+	      assert(IsA() == TAG_MROOT);	      
+	      ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
+	      for (unsigned i = 0; i < 2; i++)
+		if (i < children.get_length())
+		  {
+		    GMetaDOM::Node node = children.item(i);
+		    assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+		    Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+		    assert(elem != 0);
+		    SetChild(i, elem);
+		  }
+		else
+		  {
+		    Ptr<MathMLElement> mdummy = MathMLDummyElement::create();
+		    assert(mdummy != 0);
+		    SetChild(i, mdummy);
+		  }
+	    }
 	}
-    
-      while (content.GetSize() > 2)
-	content.RemoveLast();
+#endif
+      for (Iterator< Ptr<MathMLElement> > elem(content); elem.More(); elem.Next())
+	{
+	  assert(elem() != 0);
+	  elem()->Normalize();
+	}
+  
+      if (radical == 0) radical = MathMLCharNode::create(U_SQRT);
+      assert(radical != 0);
+      radical->SetParent(this);
 
-      MathMLLinearContainerElement::Normalize();
+      ResetDirtyStructure();
     }
-
-  radical = MathMLCharNode::create(U_SQRT);
-  assert(radical != 0);
-  radical->SetParent(this);
 }
 
 void

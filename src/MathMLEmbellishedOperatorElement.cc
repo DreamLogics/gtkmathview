@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "Layout.hh"
+#include "Globals.hh"
 #include "MathMLCharNode.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLOperatorElement.hh"
@@ -79,6 +80,8 @@ MathMLEmbellishedOperatorElement::DoLayout(const class FormattingContext& ctxt)
   assert(coreOp != 0);
 
   scaled totalPadding = script ? 0 : coreOp->GetLeftPadding() + coreOp->GetRightPadding();
+
+  Globals::logger(LOG_DEBUG, "layout of embellishment %p script %d padding %d", this, script, sp2ipx(totalPadding));
 
   child->DoLayout(ctxt);
   box = child->GetBoundingBox();
