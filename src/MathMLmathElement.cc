@@ -70,6 +70,7 @@ MathMLmathElement::Setup(RenderingEnvironment* env)
     if (value->IsKeyword(KW_BLOCK)) env->SetDisplayStyle(true);
     else env->SetDisplayStyle(false);
   } else {
+    MathEngine::logger(LOG_WARNING, "attribute `mode' is deprecated in MathML 2");
     value = GetAttributeValue(ATTR_MODE, env, true);
     assert(value != NULL);
     if (value->IsKeyword(KW_DISPLAY)) env->SetDisplayStyle(true);
