@@ -326,6 +326,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <single code="0x0131" index="0xb3"/>
     <single code="0x0152" index="0xc1"/>
     <single code="0x0153" index="0xbe"/>
+    <single code="0x02dc" index="0x7e"/>
     <multi first="0x0300" last="0x03ff" index="
 	   0x12 0x13 0x5e 0x7e 0xb9   -1 0x15 0x5f 0x7f   -1 0x17   -1 0x14   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
@@ -461,7 +462,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <multi first="0x2200" last="0x22ff" index="
 	   0x38   -1   -1 0x39   -1 0x3b   -1 0x72 0x32   -1   -1 0x33   -1   -1   -1   -1 
 	   0x71   -1 0xa1 0xa8   -1   -1   -1 0xa4 0xb1 0xb2 0x70   -1   -1 0x2f 0x31   -1 
-	     -1   -1   -1 0x6a   -1 0x6b   -1 0x5e 0x5f 0x5c 0x5b 0x73   -1   -1   -1   -1 
+	     -1   -1   -1 0x6a   -1 0x6b   -1 0x5e 0x5f 0x5c 0x5b   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 0xbb   -1   -1   -1 
 	   0x6f   -1   -1 0x27   -1   -1   -1   -1 0xbc   -1   -1   -1   -1 0xb3   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
@@ -675,7 +676,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <stretchy name="Hat" direction="horizontal">
       <simple index="0142 0143 0144"/>
     </stretchy>
-    <stretchy name="Tilde" direction="horizontal">
+    <stretchy code="0x223c" direction="horizontal">
       <simple index="0145 0146 0147"/>
     </stretchy>
     <stretchy name="Sqrt" direction="vertical">

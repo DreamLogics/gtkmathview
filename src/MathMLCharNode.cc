@@ -80,8 +80,9 @@ MathMLCharNode::SetDefaultLargeGlyph(bool large)
   assert(layout != NULL);
   assert(layout->sChar.font != NULL);
   assert(layout->sChar.charMap != NULL);
+  MathEngine::logger(LOG_DEBUG, "before setting large was %x", layout->sChar.nch);
   fChar.nch = layout->sChar.nch = layout->sChar.charMap->Map(ch, large);
-  MathEngine::logger(LOG_DEBUG, "char %x with large %d set to %x\n", ch, large, layout->sChar.nch);
+  MathEngine::logger(LOG_DEBUG, "char %x with large %d set to %x", ch, large, layout->sChar.nch);
 }
 
 void
@@ -92,7 +93,10 @@ MathMLCharNode::DoLayout()
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
+  MathEngine::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
+
   if (box.descent > box.ascent && fChar.charMap->GetStretch() != STRETCH_NO) {
+    MathEngine::logger(LOG_DEBUG, "WARNING Texish code here");
     // BEWARE!
     // vertical stretchy char may have a meaningless bounding box. For example,
     // stretchy chars inside cmex font (for TeX) all have a (quasi) zero ascent.
@@ -149,6 +153,7 @@ MathMLCharNode::DoVerticalStretchyLayoutAux(scaled desiredSize, bool)
   // first of all let's see if there is some single char large enough
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS && nch[i] != NULLCHAR; i++) {
     layout->simple = nch[i];
+    MathEngine::logger(LOG_DEBUG, "trying simple char %x for desire %d", layout->simple, sp2ipx(desiredSize));
     font->CharBox(layout->simple, charBox);
     if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
   }
@@ -344,6 +349,7 @@ MathMLCharNode::RenderVerticalStretchyChar(const DrawingArea& area,
 
   if (layout->simple != NULLCHAR) {
     y -= charBox.descent;
+    MathEngine::logger(LOG_DEBUG, "rendering vertical stretchy char %x", layout->simple);
     area.DrawChar(gc, font, x, y, layout->simple);
     return;
   }

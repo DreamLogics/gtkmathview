@@ -665,8 +665,8 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	     -1   -1   -1   -1   -1 0x21   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	   "/>
-    <single code="0x22ee" index="181"/>
-    <single code="0x22ef" index="180"/>
+    <single code="0x22ee" index="0xb6"/>
+    <single code="0x22ef" index="0xb5"/>
     <single code="0x22f0" index="0xb7"/>
     <single code="0x22f1" index="0xb8"/>
     <multi first="0xeb00" last="0xebff" index="

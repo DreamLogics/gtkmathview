@@ -262,6 +262,7 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
   // ...however, there may be some contraints over the size of the stretchable
   // operator. adjustedSize will be the final allowed size for the operator
   scaled minHeight = GetMinBoundingBox().GetHeight();
+  MathEngine::logger(LOG_DEBUG, "the minimum height is %d", sp2ipx(minHeight));
 
   scaled adjustedSize = desiredSize;
 
@@ -299,6 +300,8 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
     adjustedHeight = scaledProp(height, adjustedSize, desiredSize);
     adjustedDepth = scaledProp(depth, adjustedSize, desiredSize);
   }
+
+  MathEngine::logger(LOG_DEBUG, "adjusted stretchy size %d", sp2ipx(adjustedSize));
 
   sNode->DoVerticalStretchyLayout(adjustedHeight, adjustedDepth, axis, strict);
 
