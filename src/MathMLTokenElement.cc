@@ -117,7 +117,7 @@ MathMLTokenElement::SetChild(unsigned i, const Ptr<MathMLTextNode>& child)
   if (content[i] != child)
     {
       assert(!child->GetParent());
-      content[i]->SetParent(0);
+      content[i]->Unlink();
       child->SetParent(this);
       content[i] = child;
       SetDirtyLayout();
@@ -200,7 +200,7 @@ void
 MathMLTokenElement::RemoveChild(unsigned i)
 {
   assert(i < content.size());
-  content[i]->SetParent(0);
+  content[i]->Unlink();
   content.erase(content.begin() + i);
   SetDirtyLayout();
 }
@@ -226,7 +226,7 @@ MathMLTokenElement::SwapChildren(std::vector< Ptr<MathMLTextNode> >& newContent)
       for (std::vector< Ptr<MathMLTextNode> >::iterator p = content.begin();
 	   p != content.end();
 	   p++)
-	(*p)->SetParent(0);
+	(*p)->Unlink();
 
       for (std::vector< Ptr<MathMLTextNode> >::iterator p = newContent.begin();
 	   p != newContent.end();

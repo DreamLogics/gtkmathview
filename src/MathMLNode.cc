@@ -49,6 +49,12 @@ MathMLNode::GetParent() const
 }
 
 void
+MathMLNode::Unlink()
+{
+  parent = 0;
+}
+
+void
 MathMLNode::SetParent(const Ptr<MathMLElement>& p)
 {
   parent = p;
