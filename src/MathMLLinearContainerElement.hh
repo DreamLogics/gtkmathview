@@ -47,9 +47,7 @@ public:
   void         SetChild(unsigned, const Ptr<MathMLElement>&);
   virtual void Append(const Ptr<MathMLElement>&);
   virtual void Replace(const Ptr<MathMLElement>&, const Ptr<MathMLElement>&);
-  void         Prepend(const Ptr<MathMLElement>&);
-  void         RemoveFirst(void);
-  void         RemoveLast(void);
+  void         SwapChildren(std::vector< Ptr<MathMLElement> >&);
 
   virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(class RenderingEnvironment&);

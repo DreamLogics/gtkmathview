@@ -219,10 +219,39 @@ MathMLTokenElement::InsertChild(unsigned i, const Ptr<MathMLTextNode>& node)
 }
 
 void
+MathMLTokenElement::SwapChildren(std::vector< Ptr<MathMLTextNode> >& newContent)
+{
+  if (newContent != content)
+    {
+      // reset parent should be done first because the same elements
+      // may be present in the following loop as well
+      for (std::vector< Ptr<MathMLTextNode> >::iterator p = content.begin();
+	   p != content.end();
+	   p++)
+	(*p)->SetParent(0);
+
+      for (std::vector< Ptr<MathMLTextNode> >::iterator p = newContent.begin();
+	   p != newContent.end();
+	   p++)
+	{
+	  assert(*p);
+	  (*p)->SetParent(this);
+	}
+
+      content.swap(newContent);
+
+      SetDirtyLayout();
+    }
+}
+
+void
 MathMLTokenElement::Normalize(const Ptr<class MathMLDocument>&)
 {
   if (DirtyStructure() && GetDOMElement())
     {
+#if defined(HAVE_GMETADOM)
+      content.clear();
+
       String* sContent = NULL;
       for (GMetaDOM::Node p = GetDOMElement().get_firstChild(); 
 	   p;
@@ -289,6 +318,7 @@ MathMLTokenElement::Normalize(const Ptr<class MathMLDocument>&)
 	      break;
 	    }
 	}
+#endif // HAVE_GMETADOM
 
       ResetDirtyStructure();
     }

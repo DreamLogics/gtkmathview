@@ -60,6 +60,7 @@ public:
   void           InsertChild(unsigned, const Ptr<MathMLTextNode>&);
   void           AppendChild(const Ptr<class MathMLTextNode>&);
   void           Append(const String*);
+  void           SwapChildren(std::vector< Ptr<MathMLTextNode> >&);
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
   virtual void   Normalize(const Ptr<class MathMLDocument>&);

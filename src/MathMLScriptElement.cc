@@ -191,14 +191,11 @@ MathMLScriptElement::Normalize(const Ptr<MathMLDocument>& doc)
 void
 MathMLScriptElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       MathMLElement::Setup(env);
       ScriptSetup(env);
-    }
 
-  if (DirtyAttributeP())
-    {
       if (base) base->Setup(env);
 
       env.Push();
@@ -244,9 +241,9 @@ MathMLScriptElement::Setup(RenderingEnvironment& env)
 	}
 
       env.Drop();
-    }
 
-  ResetDirtyAttribute();
+      ResetDirtyAttribute();
+    }
 }
 
 void

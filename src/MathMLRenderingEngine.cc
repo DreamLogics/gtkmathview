@@ -127,13 +127,6 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
   document = MathMLDocument::create(doc);
   assert(document);
 
-  Clock perf;
-  perf.Start();
-  document->Normalize();
-  perf.Stop();
-  Globals::logger(LOG_INFO, "normalization time: %dms", perf());
-  Setup();
-
   return true;
 }
 
@@ -148,16 +141,8 @@ MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
   Ptr<MathMLDocument> document = MathMLDocument::create(elem);
   assert(document);
 
-  Clock perf;
-  perf.Start();
-  document->Normalize();
-  perf.Stop();
-  Globals::logger(LOG_INFO, "normalization time: %dms", perf());
-    
   root = document->GetRoot();
   assert(root);
-
-  Setup();
 
   return true;
 }
@@ -171,85 +156,80 @@ MathMLRenderingEngine::Unload()
 }
 
 void
-MathMLRenderingEngine::Setup()
-{
-  if (document)
-    {
-      UnitValue size;
-      size.Set(defaultFontSize, UNIT_PT);
-      assert(charMapper != NULL);
-      RenderingEnvironment env(*charMapper);
-      env.SetFontSize(size);
-      Clock perf;
-      perf.Start();
-      document->Setup(env);
-      perf.Stop();
-      Globals::logger(LOG_INFO, "setup time: %dms", perf());
-      // ?????? root->SetDirtyLayout(true);
-      MinMaxLayout();
-    }
-}
-
-void
-MathMLRenderingEngine::MinMaxLayout()
-{
-  if (document)
-    {
-      Clock perf;
-
-      perf.Start();
-      document->DoLayout(FormattingContext(LAYOUT_MIN,0));
-      perf.Stop();
-      Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
-
-#if 0
-      perf.Start();
-      document->DoLayout(FormattingContext(LAYOUT_MAX,0));
-      perf.Stop();
-      Globals::logger(LOG_INFO, "maximum layout time: %dms", perf());
-#endif
-    }
-}
-
-void
-MathMLRenderingEngine::Layout()
+MathMLRenderingEngine::Layout() const
 {
   assert(area != NULL);
 
   if (document)
     {
-      Clock perf;
-      perf.Start();
-      document->DoLayout(FormattingContext(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin())));
-      document->SetPosition(area->GetXMargin(), area->GetYMargin() + document->GetBoundingBox().ascent);
-      perf.Stop();
-      Globals::logger(LOG_INFO, "layout time: %dms", perf());
+      Clock formatTime;
+      formatTime.Start();
+
+      if (document->DirtyStructure())
+	{
+	  Clock perf;
+	  perf.Start();
+	  document->Normalize();
+	  perf.Stop();
+	  Globals::logger(LOG_INFO, "normalization time: %dms", perf());
+	}
+
+      if (document->DirtyAttribute() || document->DirtyAttributeP())
+	{
+	  UnitValue size;
+	  size.Set(defaultFontSize, UNIT_PT);
+	  assert(charMapper != NULL);
+	  RenderingEnvironment env(*charMapper);
+	  env.SetFontSize(size);
+	  Clock perf;
+	  perf.Start();
+	  document->Setup(env);
+	  perf.Stop();
+	  Globals::logger(LOG_INFO, "setup time: %dms", perf());
+	}
+
+      if (document->DirtyLayout())
+	{
+	  Clock perf;
+	  perf.Start();
+	  document->DoLayout(FormattingContext(LAYOUT_MIN,0));
+	  perf.Stop();
+	  Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
+
+	  perf.Start();
+	  document->DoLayout(FormattingContext(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin())));
+	  document->SetPosition(area->GetXMargin(), area->GetYMargin() + document->GetBoundingBox().ascent);
+	  perf.Stop();
+	  Globals::logger(LOG_INFO, "layout time: %dms", perf());
+	}
+
+      formatTime.Stop();
+      Globals::logger(LOG_INFO, "FORMATTING TIME: %dms", formatTime());
     }
 }
 
 void
-MathMLRenderingEngine::SetDirty(const Rectangle* rect)
+MathMLRenderingEngine::SetDirty(const Rectangle* rect) const
 {
-  if (document)
-    {
-      if (rect) document->SetDirty(*rect);
-      else document->SetDirty();
-    }
+  if (document) document->SetDirty(rect);
 }
 
 void
-MathMLRenderingEngine::Render(const Rectangle* rect)
-{
-  SetDirty(rect);
-  Update(rect);
-}
-
-void
-MathMLRenderingEngine::Update(const Rectangle* rect)
+MathMLRenderingEngine::Render(const Rectangle* rect) const
 {
   assert(area);
 
-  if (document)
+  Layout();
+  if (rect)
+    {
+      rect->Dump();
+      printf("\n");
+    }
+  else
+    printf("(null) rect\n");
+  SetDirty(rect);
+
+  if (document && document->Dirty())
     {
       Clock perf;
       perf.Start();
@@ -265,6 +245,7 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 void
 MathMLRenderingEngine::GetDocumentBoundingBox(BoundingBox& box) const
 {
+  Layout();
   if (document)
     box = document->GetBoundingBox();
   else
@@ -274,6 +255,7 @@ MathMLRenderingEngine::GetDocumentBoundingBox(BoundingBox& box) const
 void
 MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 {
+  Layout();
   if (document)
     {
       BoundingBox box;
@@ -289,7 +271,6 @@ MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 {
   if (elem) elem->SetSelected();
   else if (document) document->SetSelected();
-  Update();
 }
 
 void
@@ -297,7 +278,6 @@ MathMLRenderingEngine::ResetSelected(const Ptr<MathMLElement>& elem)
 {
   if (elem) elem->ResetSelected();
   else if (document) document->ResetSelected();
-  Update();
 }
 
 Ptr<MathMLElement>
@@ -315,12 +295,14 @@ void
 MathMLRenderingEngine::SetDefaultFontSize(unsigned size)
 {
   assert(size > 0);
-  defaultFontSize = size;
-  if (document)
+  if (document && defaultFontSize != size)
     {
+      defaultFontSize = size;
+      printf("changing default font size to %d %d\n", size, document->DirtyAttribute() + document->DirtyAttributeD());
       document->SetDirtyAttributeD();
       document->SetDirtyLayout();
       document->SetDirty();
+      printf("changing default font size to %d %d\n", size, document->DirtyAttribute() + document->DirtyAttributeD());
     }
 }
 

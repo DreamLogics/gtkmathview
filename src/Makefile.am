@@ -163,15 +163,12 @@ noinst_HEADERS = \
   CharMapper.hh \
   Clock.hh \
   Configuration.hh \
-  Container.hh \
-  Container.icc \
   Coords.hh \
   DrawingArea.hh \
   EntitiesTable.hh \
   FontAttributes.hh \
   FontManager.hh \
   GraphicsContext.hh \
-  Iterator.hh \
   Logger.hh \
   Globals.hh \
   MathML.hh \

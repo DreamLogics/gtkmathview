@@ -77,7 +77,7 @@ MathMLEncloseElement::NormalizeRadicalElement(const Ptr<MathMLDocument>& doc)
 void
 MathMLEncloseElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       const Value* value = GetAttributeValue(ATTR_NOTATION, env);
       assert(value != NULL);
@@ -96,12 +96,11 @@ MathMLEncloseElement::Setup(RenderingEnvironment& env)
 	  if (notation == NOTATION_RADICAL) NormalizeRadicalElement(env.GetDocument());
 	  normalized = true;
 	}
-    }
-  
-  if (DirtyAttributeP())
-    MathMLNormalizingContainerElement::Setup(env);
 
-  ResetDirtyAttribute();
+      MathMLNormalizingContainerElement::Setup(env);
+
+      ResetDirtyAttribute();
+    }
 }
 
 void

@@ -63,7 +63,6 @@ struct _GtkMathView {
 
   gfloat 	 old_top_x;
   gfloat 	 old_top_y;
-  gint           old_width;
 
   gboolean       frozen;
 
@@ -445,24 +444,16 @@ gtk_math_view_configure_event(GtkWidget* widget,
 			      GdkEventConfigure* event,
 			      GtkMathView* math_view)
 {
-  gboolean do_layout;
-
   g_return_val_if_fail(widget != NULL, FALSE);
   g_return_val_if_fail(event != NULL, FALSE);
   g_return_val_if_fail(math_view != NULL, FALSE);
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(math_view->drawing_area != NULL, FALSE);
 
-  do_layout = math_view->old_width != event->width;
-  math_view->old_width = event->width;
-
   if (math_view->pixmap != NULL) gdk_pixmap_unref(math_view->pixmap);
   math_view->pixmap = gdk_pixmap_new(widget->window, event->width, event->height, -1);
   math_view->drawing_area->SetSize(px2sp(event->width), px2sp(event->height));
   math_view->drawing_area->SetPixmap(math_view->pixmap);
-
-  if (do_layout) math_view->interface->Layout();
-
   setup_adjustments(math_view);
   paint_widget(math_view);
 
@@ -563,8 +554,6 @@ gtk_math_view_load_uri(GtkMathView* math_view, const gchar* name)
   bool res = math_view->interface->Load(name);
   if (!res) return FALSE;
 
-  math_view->interface->Layout();
-
   setup_adjustments(math_view);
   reset_adjustments(math_view);
   paint_widget(math_view);
@@ -581,8 +570,6 @@ gtk_math_view_load_doc(GtkMathView* math_view, GdomeDocument* doc)
 
   bool res = math_view->interface->Load(GMetaDOM::Document(doc));
   if (!res) return FALSE;
-
-  math_view->interface->Layout();
 
   setup_adjustments(math_view);
   reset_adjustments(math_view);
@@ -602,8 +589,6 @@ gtk_math_view_load_tree(GtkMathView* math_view, GdomeElement* elem)
   bool res = math_view->interface->Load(GMetaDOM::Element(elem));
   if (!res) return FALSE;
 
-  math_view->interface->Layout();
-
   setup_adjustments(math_view);
   reset_adjustments(math_view);
   paint_widget(math_view);
@@ -619,8 +604,6 @@ gtk_math_view_unload(GtkMathView* math_view)
   g_return_if_fail(math_view->interface != NULL);
 
   math_view->interface->Unload();
-  math_view->interface->Update();
-
   setup_adjustments(math_view);
   reset_adjustments(math_view);
   paint_widget(math_view);
@@ -726,8 +709,6 @@ gtk_math_view_set_font_size(GtkMathView* math_view, guint size)
   if (size == math_view->interface->GetDefaultFontSize()) return;
 
   math_view->interface->SetDefaultFontSize(size);
-  math_view->interface->Setup();
-  math_view->interface->Layout();
   setup_adjustments(math_view);
   paint_widget(math_view);
 }
@@ -988,9 +969,6 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
 
   math_view->interface->Init(math_view->drawing_area, math_view->font_manager);
   if (GTK_WIDGET_REALIZED(GTK_WIDGET(math_view))) math_view->drawing_area->Realize();
-
-  math_view->interface->Setup();
-  math_view->interface->Layout();
   setup_adjustments(math_view);
   paint_widget(math_view);
 }
@@ -1078,8 +1056,6 @@ gtk_math_view_action_set_selected(GtkMathView* math_view, GdomeElement* elem, gu
   if (!action_element) return;
 
   action_element->SetSelectedIndex(idx);
-  math_view->interface->MinMaxLayout();
-  math_view->interface->Layout();
   setup_adjustments(math_view);
   paint_widget(math_view);
 }

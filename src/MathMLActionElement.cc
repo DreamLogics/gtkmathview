@@ -65,20 +65,25 @@ MathMLActionElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLActionElement::Setup(RenderingEnvironment& env)
 {
-  const String* sValue = GetAttribute(ATTR_ACTIONTYPE, env, false);
-  if (sValue != NULL) {
-    if (!sValue->Equal("toggle"))
-      Globals::logger(LOG_WARNING, "action `%s' is not supported (ignored)", sValue->ToStaticC());
-  } else
-    Globals::logger(LOG_WARNING, "no action specified for `maction' element");
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      const String* sValue = GetAttribute(ATTR_ACTIONTYPE, env, false);
+      if (sValue != NULL) {
+	if (!sValue->Equal("toggle"))
+	  Globals::logger(LOG_WARNING, "action `%s' is not supported (ignored)", sValue->ToStaticC());
+      } else
+	Globals::logger(LOG_WARNING, "no action specified for `maction' element");
 
-  const Value* value = GetAttributeValue(ATTR_SELECTION, env);
-  if (value != NULL) {
-    selection = value->ToInteger() - 1;
-    if (selection >= content.size()) selection = content.size() - 1;
-  }
+      const Value* value = GetAttributeValue(ATTR_SELECTION, env);
+      if (value != NULL) {
+	selection = value->ToInteger() - 1;
+	if (selection >= content.size()) selection = content.size() - 1;
+      }
 
-  MathMLLinearContainerElement::Setup(env);
+      MathMLLinearContainerElement::Setup(env);
+
+      ResetDirtyAttribute();
+    }
 }
 
 void

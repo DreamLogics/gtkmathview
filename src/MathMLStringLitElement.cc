@@ -64,28 +64,33 @@ MathMLStringLitElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLStringLitElement::Setup(RenderingEnvironment& env)
 {
-  const String* s = NULL;
-
-  if (setupDone)
+  if (DirtyAttribute())
     {
-      assert(GetSize() >= 2);
-      RemoveChild(GetSize() - 1);
-      RemoveChild(0);
+      const String* s = NULL;
+
+      if (setupDone)
+	{
+	  assert(GetSize() >= 2);
+	  RemoveChild(GetSize() - 1);
+	  RemoveChild(0);
+	}
+
+      s = GetAttribute(ATTR_LQUOTE, env);
+      assert(s != NULL);
+      if (s->GetLength() >= 1) lQuote = MathMLCharNode::create(s->GetChar(0));
+      assert(lQuote);
+      InsertChild(0, lQuote);
+
+      s = GetAttribute(ATTR_RQUOTE, env);
+      assert(s != NULL);
+      if (s->GetLength() >= 1) rQuote = MathMLCharNode::create(s->GetChar(0));
+      assert(rQuote);
+      InsertChild(GetSize(), rQuote);
+
+      MathMLTokenElement::Setup(env);
+
+      setupDone = true;
+
+      ResetDirtyAttribute();
     }
-
-  s = GetAttribute(ATTR_LQUOTE, env);
-  assert(s != NULL);
-  if (s->GetLength() >= 1) lQuote = MathMLCharNode::create(s->GetChar(0));
-  assert(lQuote);
-  InsertChild(0, lQuote);
-
-  s = GetAttribute(ATTR_RQUOTE, env);
-  assert(s != NULL);
-  if (s->GetLength() >= 1) rQuote = MathMLCharNode::create(s->GetChar(0));
-  assert(rQuote);
-  InsertChild(GetSize(), rQuote);
-
-  MathMLTokenElement::Setup(env);
-
-  setupDone = true;
 }

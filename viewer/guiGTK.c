@@ -346,11 +346,13 @@ edit_delete_selection(GtkWidget* widget, gpointer data)
   if (root_selected != NULL)
     {
       GdomeException exc;
+      gtk_math_view_freeze(GTK_MATH_VIEW(main_area));
       printf("about to remove element %p\n", root_selected);
       delete_element(root_selected);
       gdome_el_unref(root_selected, &exc);
       g_assert(exc == 0);
       root_selected = NULL;
+      gtk_math_view_thaw(GTK_MATH_VIEW(main_area));
     }
 }
 

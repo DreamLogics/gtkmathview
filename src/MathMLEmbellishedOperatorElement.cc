@@ -65,8 +65,11 @@ MathMLEmbellishedOperatorElement::Normalize(const Ptr<class MathMLDocument>& doc
 void
 MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute()) script = env.GetScriptLevel() > 0;
-  MathMLBinContainerElement::Setup(env);
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      script = env.GetScriptLevel() > 0;
+      MathMLBinContainerElement::Setup(env);
+    }
 }
 
 void

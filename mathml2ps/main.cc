@@ -431,8 +431,6 @@ main(int argc, char *argv[])
 
     fm.ResetUsedFonts();
     if (engine.Load(argv[optind])) {
-      engine.Layout();
-
       Rectangle rect;
       engine.GetDocumentRectangle(rect);
 

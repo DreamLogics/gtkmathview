@@ -92,7 +92,7 @@ MathMLFencedElement::Normalize(const Ptr<MathMLDocument>&)
 void
 MathMLFencedElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       const Value* value = NULL;
 
@@ -112,9 +112,10 @@ MathMLFencedElement::Setup(RenderingEnvironment& env)
       delete value;
 
       DelayedNormalize(env.GetDocument());
-    }
+      MathMLBinContainerElement::Setup(env);
 
-  MathMLBinContainerElement::Setup(env);
+      ResetDirtyAttribute();
+    }
 }
 
 void

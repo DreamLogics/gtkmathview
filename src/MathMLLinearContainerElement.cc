@@ -60,23 +60,24 @@ MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 	{
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  unsigned n = children.get_length();
-	  content.reserve(n);
+
+	  std::vector< Ptr<MathMLElement> > newContent;
+	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
 	      GMetaDOM::Node node = children.item(i);
 	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-	      Ptr<MathMLElement> elem = doc->getFormattingNode(node);
-	      // it might be that we get a NULL. In that case it would probably make
-	      // sense to create a dummy element, because we filtered MathML
-	      // elements only
-	      assert(elem);
-	      SetChild(i, elem);
+	      if (Ptr<MathMLElement> elem = doc->getFormattingNode(node))
+		newContent.push_back(elem);
+	      else
+		{
+		  // it might be that we get a NULL. In that case it would probably make
+		  // sense to create a dummy element, because we filtered MathML
+		  // elements only
+		}
 	    }
-
-	  // the following is to be sure that no spurious elements remain at the
-	  // end of the container
-	  SetSize(n);
+	  SwapChildren(newContent);
 	}
 #endif // HAVE_GMETADOM
 
@@ -91,7 +92,7 @@ MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 void
 MathMLLinearContainerElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttributeP())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       background = env.GetBackgroundColor();
       std::for_each(content.begin(), content.end(), std::bind2nd(SetupAdaptor(), &env));
@@ -249,6 +250,32 @@ MathMLLinearContainerElement::Replace(const Ptr<MathMLElement>& oldElem,
   std::vector< Ptr<MathMLElement> >::iterator old = find(content.begin(), content.end(), oldElem);
   assert(old != content.end());
   SetChild(old - content.begin(), newElem);
+}
+
+void
+MathMLLinearContainerElement::SwapChildren(std::vector< Ptr<MathMLElement> >& newContent)
+{
+  if (newContent != content)
+    {
+      // reset parent should be done first because the same elements
+      // may be present in the following loop as well
+      for (std::vector< Ptr<MathMLElement> >::iterator p = content.begin();
+	   p != content.end();
+	   p++)
+	(*p)->SetParent(0);
+
+      for (std::vector< Ptr<MathMLElement> >::iterator p = newContent.begin();
+	   p != newContent.end();
+	   p++)
+	{
+	  assert(*p);
+	  (*p)->SetParent(this);
+	}
+
+      content.swap(newContent);
+
+      SetDirtyLayout();
+    }
 }
 
 scaled

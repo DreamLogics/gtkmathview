@@ -110,15 +110,15 @@ public:
   bool DirtyStructure(void) const { return GetFlag(FDirtyStructure); }
   virtual void SetDirtyAttribute(void);
   virtual void SetDirtyAttributeD(void);
-  void ResetDirtyAttribute(void) { ResetFlag(FDirtyAttribute); ResetFlag(FDirtyAttributeD); }
+  void ResetDirtyAttribute(void)
+  { ResetFlag(FDirtyAttribute); ResetFlag(FDirtyAttributeP); ResetFlag(FDirtyAttributeD); }
   bool DirtyAttribute(void) const { return GetFlag(FDirtyAttribute) || GetFlag(FDirtyAttributeD); }
   bool DirtyAttributeP(void) const { return GetFlag(FDirtyAttributeP); }
   bool DirtyAttributeD(void) const { return GetFlag(FDirtyAttributeD); }
   virtual void SetDirtyLayout(void);
   void ResetDirtyLayout(void) { ResetFlag(FDirtyLayout); }
   bool DirtyLayout(void) const { return GetFlag(FDirtyLayout); }
-  virtual void SetDirty(void);
-  virtual void SetDirty(const Rectangle&);
+  virtual void SetDirty(const Rectangle* = 0);
   void ResetDirty(void) { ResetFlag(FDirty); }
   bool Dirty(void) const { return GetFlag(FDirty); }
   virtual void SetSelected(void);
@@ -133,6 +133,7 @@ public:
     FDirtyAttributeD, // an attribute was modified and must set DirtyAttribute on all descendants
     FDirtyLayout,     // need to layout
     FDirty,           // need to render
+    FDirtyP,          // need to render a descendant
     FSelected,        // selected subtree
 
     FUnusedFlag       // Just to know how many flags we use without having to count them

@@ -66,7 +66,7 @@ MathMLPaddedElement::GetAttributeSignature(AttributeId id) const
 void
 MathMLPaddedElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       width.valid = lSpace.valid = height.valid = depth.valid = false;
 
@@ -85,9 +85,10 @@ MathMLPaddedElement::Setup(RenderingEnvironment& env)
       value = GetAttributeValue(ATTR_DEPTH, false);
       if (value != NULL) ParseLengthDimension(env, value, depth, KW_DEPTH);
       delete value;
-    }
 
-  MathMLNormalizingContainerElement::Setup(env);
+      MathMLNormalizingContainerElement::Setup(env);
+      ResetDirtyAttribute();
+    }
 }
 
 void

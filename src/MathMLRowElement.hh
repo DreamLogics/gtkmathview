@@ -46,7 +46,7 @@ public:
   { return Ptr<MathMLElement>(new MathMLRowElement(el)); }
 #endif
 
-  // virtual void Normalize(const Ptr<class MathMLDocument>&);
+  virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);
   virtual void SetPosition(scaled, scaled);

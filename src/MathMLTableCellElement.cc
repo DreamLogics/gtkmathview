@@ -232,28 +232,32 @@ MathMLTableCellElement::SetupCellSpanning(RenderingEnvironment& env)
 void
 MathMLTableCellElement::Setup(RenderingEnvironment& env)
 {
-  assert(cell != NULL);
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      assert(cell != NULL);
 
-  const Value* value;
+      const Value* value;
 
-  value = GetAttributeValue(ATTR_ROWALIGN, false);
-  if (value != NULL) cell->rowAlign = ToRowAlignId(value);
-  delete value;
+      value = GetAttributeValue(ATTR_ROWALIGN, false);
+      if (value != NULL) cell->rowAlign = ToRowAlignId(value);
+      delete value;
 
-  value = GetAttributeValue(ATTR_COLUMNALIGN, false);
-  if (value != NULL) cell->columnAlign = ToColumnAlignId(value);
-  delete value;
+      value = GetAttributeValue(ATTR_COLUMNALIGN, false);
+      if (value != NULL) cell->columnAlign = ToColumnAlignId(value);
+      delete value;
 
-  value = GetAttributeValue(ATTR_GROUPALIGN, false);
-  if (value != NULL) {
-    for (unsigned k = 0; k < cell->nAlignGroup; k++) {
-      const Value* p = value->Get(k);
-      cell->aGroup[k].alignment = ToGroupAlignId(p);
+      value = GetAttributeValue(ATTR_GROUPALIGN, false);
+      if (value != NULL) {
+	for (unsigned k = 0; k < cell->nAlignGroup; k++) {
+	  const Value* p = value->Get(k);
+	  cell->aGroup[k].alignment = ToGroupAlignId(p);
+	}
+      }
+      delete value;
+
+      MathMLNormalizingContainerElement::Setup(env);
+      ResetDirtyAttribute();
     }
-  }
-  delete value;
-
-  MathMLNormalizingContainerElement::Setup(env);
 }
 
 void

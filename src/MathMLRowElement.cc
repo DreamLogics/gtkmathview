@@ -30,8 +30,10 @@
 
 #include "Adaptors.hh"
 #include "CharMap.hh"
+#include "ChildList.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
+#include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLSpaceElement.hh"
 #include "MathMLOperatorElement.hh"
@@ -51,6 +53,50 @@ MathMLRowElement::MathMLRowElement(const GMetaDOM::Element& node)
 
 MathMLRowElement::~MathMLRowElement()
 {
+}
+
+// Row must redefine Normalize because it can be inferred
+// when a Row is inferred, it has no DOm node attached, hence
+// the LinearContainer::Normalize would stop normalizing
+void
+MathMLRowElement::Normalize(const Ptr<MathMLDocument>& doc)
+{
+  if (DirtyStructure())
+    {
+      // editing is supported with GMetaDOM only
+#if defined(HAVE_GMETADOM)
+      if (GetDOMElement() || (GetParent() && GetParent()->GetDOMElement()))
+	{
+	  ChildList children(GetDOMElement() ? GetDOMElement() : GetParent()->GetDOMElement(),
+			     MATHML_NS_URI, "*");
+	  unsigned n = children.get_length();
+
+	  std::vector< Ptr<MathMLElement> > newContent;
+	  newContent.reserve(n);
+	  for (unsigned i = 0; i < n; i++)
+	    {
+	      GMetaDOM::Node node = children.item(i);
+	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
+
+	      if (Ptr<MathMLElement> elem = doc->getFormattingNode(node))
+		newContent.push_back(elem);
+	      else
+		{
+		  // it might be that we get a NULL. In that case it would probably make
+		  // sense to create a dummy element, because we filtered MathML
+		  // elements only
+		}
+	    }
+	  SwapChildren(newContent);
+	}
+#endif // HAVE_GMETADOM
+
+      // it is better to normalize elements only after all the rendering
+      // interfaces have been collected, because the structure might change
+      // depending on the actual number of children
+      std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
+      ResetDirtyStructure();
+    }
 }
 
 void

@@ -330,23 +330,27 @@ MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 void
 MathMLMultiScriptsElement::Setup(RenderingEnvironment& env)
 {
-  background = env.GetBackgroundColor();
+  if (DirtyAttribute() || DirtyAttributeP())
+    {
+      background = env.GetBackgroundColor();
 
-  assert(base);
-  base->Setup(env);
+      assert(base);
+      base->Setup(env);
 
-  env.Push();
-  env.AddScriptLevel(1);
-  env.SetDisplayStyle(false);
+      env.Push();
+      env.AddScriptLevel(1);
+      env.SetDisplayStyle(false);
 
-  for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
-  for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
-  for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
-  for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
+      for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
+      for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
+      for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
+      for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), std::bind2nd(SetupAdaptor(), &env));
 
-  ScriptSetup(env);
+      ScriptSetup(env);
+      env.Drop();
 
-  env.Drop();
+      ResetDirtyAttribute();
+    }
 }
 
 void

@@ -132,7 +132,7 @@ MathMLFractionElement::Normalize(const Ptr<MathMLDocument>& doc)
 void
 MathMLFractionElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       color = env.GetColor();
       background = env.GetBackgroundColor();
@@ -225,10 +225,7 @@ MathMLFractionElement::Setup(RenderingEnvironment& env)
 #else
       minShift = env.GetScaledPointsPerEx();
 #endif // TEXISH_MATHML
-    }
 
-  if (DirtyAttributeP())
-    {
       env.Push();
       if (!displayStyle) env.AddScriptLevel(1);
       else env.SetDisplayStyle(false);
@@ -237,9 +234,8 @@ MathMLFractionElement::Setup(RenderingEnvironment& env)
       if (denominator) denominator->Setup(env);
 
       env.Drop();
+      ResetDirtyAttribute();
     }
-
-  ResetDirtyAttribute();
 }
 
 void

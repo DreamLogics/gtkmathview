@@ -84,15 +84,17 @@ MathMLTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 	{
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "mtd");
 	  unsigned n = children.get_length();
-	  content.reserve(n);
+
+	  std::vector< Ptr<MathMLElement> > newContent;
+	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
 	      GMetaDOM::Node node = children.item(i);
 	      Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	      assert(elem);
-	      SetChild(i, elem);
+	      newContent.push_back(elem);
 	    }
-	  SetSize(n); // this should be noop
+	  SwapChildren(newContent);
 	}
 #endif
       
@@ -125,7 +127,7 @@ MathMLTableRowElement::SetupCellSpanning(RenderingEnvironment& env)
 void
 MathMLTableRowElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       assert(GetParent());
       Ptr<MathMLTableElement> mtable = smart_cast<MathMLTableElement>(GetParent());
@@ -141,11 +143,10 @@ MathMLTableRowElement::Setup(RenderingEnvironment& env)
 
       value = GetAttributeValue(ATTR_GROUPALIGN, false);
       if (value != 0) mtable->SetupGroupAlignAux(value, rowIndex, 1);
+
+      MathMLLinearContainerElement::Setup(env);
+      ResetDirtyAttribute();
     }
-
-  MathMLLinearContainerElement::Setup(env);
-
-  ResetDirtyAttribute();
 }
 
 #if 0

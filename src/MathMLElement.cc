@@ -536,19 +536,16 @@ MathMLElement::SetDirtyLayout()
 }
 
 void
-MathMLElement::SetDirty()
+MathMLElement::SetDirty(const Rectangle* rect)
 {
   if (!Dirty())
     {
-      SetFlagDown(FDirty);
-      SetFlagUp(FDirty);
+      if (!rect || GetRectangle().Overlaps(*rect))
+	{
+	  SetFlagDown(FDirty);
+	  SetFlagUp(FDirtyP);
+	}
     }
-}
-
-void
-MathMLElement::SetDirty(const Rectangle& rect)
-{
-  if (!Dirty() && GetRectangle().Overlaps(rect)) SetDirty();
 }
 
 void

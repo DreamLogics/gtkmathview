@@ -62,6 +62,7 @@ MathMLCharNode::Setup(RenderingEnvironment& env)
     assert(fChar.charMap != NULL);
 
 #if 0
+    env.GetFontAttributes().Dump();
     Globals::logger(LOG_DEBUG, "successful layout for U+%04x simple index %02x", ch, fChar.nch);
 #endif // DEBUG
   }

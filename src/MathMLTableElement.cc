@@ -107,8 +107,9 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 	{
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  unsigned n = children.get_length();
-	  unsigned idx = 0;
-	  content.reserve(n);
+
+	  std::vector< Ptr<MathMLElement> > newContent;
+	  newContent.reserve(n);
 	  for (unsigned i = 0; i < n; i++)
 	    {
 	      GMetaDOM::Element node = children.item(i);
@@ -117,15 +118,14 @@ MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 		{
 		  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 		  assert(elem);
-		  SetChild(idx++, elem);
+		  newContent.push_back(elem);
 		}
 	      else
 		{
 		  // ISSUE WARNING
 		}
 	    }
-
-	  SetSize(idx);
+	  SwapChildren(newContent);
 	}
 #endif // HAVE_GMETADOM
 

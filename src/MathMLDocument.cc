@@ -114,7 +114,7 @@ MathMLDocument::Normalize()
 void
 MathMLDocument::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttributeP())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       env.Push();
       env.SetDocument(this);

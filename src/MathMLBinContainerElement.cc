@@ -74,7 +74,7 @@ MathMLBinContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 void
 MathMLBinContainerElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttributeP())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       background = env.GetBackgroundColor();
       if (child) child->Setup(env);

@@ -181,7 +181,7 @@ MathMLUnderOverElement::Normalize(const Ptr<MathMLDocument>& doc)
 void
 MathMLUnderOverElement::Setup(RenderingEnvironment& env)
 {
-  if (DirtyAttribute())
+  if (DirtyAttribute() || DirtyAttributeP())
     {
       assert(base);
 

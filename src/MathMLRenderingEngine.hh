@@ -48,13 +48,12 @@ public:
 #endif
   void Unload(void);
 
-  void Setup(void);
-  void MinMaxLayout(void);
-  void Layout(void);
-  void SetDirty(const struct Rectangle* = NULL);
-  void Render(void);
-  void Render(const struct Rectangle*);
-  void Update(const struct Rectangle* = NULL);
+protected:
+  void Layout(void) const;
+
+public:
+  void SetDirty(const struct Rectangle* = 0) const;
+  void Render(const struct Rectangle* = 0) const;
 
   Ptr<MathMLDocument> GetDocument(void) const { return document; }
   Ptr<MathMLElement> GetElementAt(scaled, scaled) const;
