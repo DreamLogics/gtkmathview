@@ -381,7 +381,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	   "/>
     <single code="0x0131" index="0x7b"/>
-    <single code="0x025b" index="0x22"/>
+    <!--<single code="0x025b" index="0x22"/>-->
     <single code="0x02be" index="0x2d"/>
     <single code="0x02bf" index="0x2c"/>
     <multi first="0x0300" last="0x03ff" index="
