@@ -186,7 +186,7 @@ getRenderingInterface(const GMetaDOM::Element& node)
   // of the assumption that the user will NEVER modify the user data field
   // in the DOM tree elements!!!
   Ptr<MathMLElement> elem((MathMLElement*) node.get_userData());
-  assert(elem || elem->GetDOMElement() == node);
+  assert(!elem || elem->GetDOMElement() == node);
   return elem;
 }
 

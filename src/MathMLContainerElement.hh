@@ -47,6 +47,8 @@ public:
   virtual bool IsExpanding(void) const = 0;
   virtual scaled GetLeftEdge(void) const = 0;
   virtual scaled GetRightEdge(void) const = 0;
+
+  virtual void Replace(const Ptr<class MathMLElement>&, const Ptr<class MathMLElement>&) = 0;
 };
 
 #endif // MathMLContainerElement_hh

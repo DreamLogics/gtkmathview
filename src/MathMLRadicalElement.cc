@@ -79,7 +79,7 @@ void
 MathMLRadicalElement::SetIndex(const Ptr<MathMLElement>& elem)
 {
   if (elem) elem->SetParent(this);
-  if (index) elem->SetParent(0);
+  if (index) index->SetParent(0);
   index = elem;
 }
 
@@ -128,9 +128,11 @@ MathMLRadicalElement::Normalize()
 	    }
 	}
 #endif
+
       if (!radical) radical = MathMLCharNode::create(U_SQRT);
       assert(radical);
       radical->SetParent(this);
+
       if (radicand) radicand->Normalize();
       if (index) index->Normalize();			 
 
@@ -228,11 +230,36 @@ MathMLRadicalElement::SetPosition(scaled x, scaled y)
 }
 
 void
+MathMLRadicalElement::SetDirty(const Rectangle* rect)
+{
+  dirtyBackground =
+    (GetParent() && (GetParent()->IsSelected() != IsSelected())) ? 1 : 0;
+
+  if (IsDirty() || HasDirtyChildren()) return;
+
+  MathMLElement::SetDirty();
+
+  if (radical) radical->SetDirty(rect);
+  if (radicand) radicand->SetDirty(rect);
+  if (index) index->SetDirty(rect);  
+}
+
+void
+MathMLRadicalElement::SetDirtyLayout(bool children)
+{
+  MathMLElement::SetDirtyLayout(children);
+  if (children)
+    {
+      if (radical) radical->SetDirtyLayout(children);
+      if (radicand) radicand->SetDirtyLayout(children);
+      if (index) index->SetDirtyLayout(children);
+    }
+}
+
+void
 MathMLRadicalElement::Render(const DrawingArea& area)
 {
   if (!HasDirtyChildren()) return;
-
-  MathMLElement::Render(area);
 
   if (fGC[IsSelected()] == NULL) {
     GraphicsContextValues values;
@@ -242,12 +269,16 @@ MathMLRadicalElement::Render(const DrawingArea& area)
     fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_BACKGROUND | GC_MASK_LINE_WIDTH);
   }
 
+  MathMLElement::Render(area);
+
+  assert(radicand);
+  radicand->Render(area);
+  if (index) index->Render(area);
+
   assert(radical);
   radical->SetDirty();
   radical->Render(area);
-
   const BoundingBox& radBox = radical->GetBoundingBox();
-
   area.MoveTo(radical->GetX() + radBox.width, radical->GetY() - radBox.ascent + lineThickness / 2);
   area.DrawLineToDelta(fGC[IsSelected()], radicand->GetBoundingBox().width, 0);
 

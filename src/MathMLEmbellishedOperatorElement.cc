@@ -55,8 +55,7 @@ MathMLEmbellishedOperatorElement::Normalize()
 
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
       assert(pContainer);
-      //FIXME: THIS IS IMPORTANT
-      //pContainer->Replace(this, child);
+      pContainer->Replace(this, child);
 
       child->Normalize();
 

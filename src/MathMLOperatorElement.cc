@@ -122,8 +122,7 @@ MathMLOperatorElement::Normalize()
       assert(is_a<MathMLContainerElement>(p));
       Ptr<MathMLContainerElement> pContainer = smart_cast<MathMLContainerElement>(p);
       assert(pContainer);
-      //FIXME: THIS IS IMPORTANT
-      //pContainer->Replace(root, eOp);
+      pContainer->Replace(root, eOp);
 
       MathMLTokenElement::Normalize();
     }

@@ -28,8 +28,8 @@
 
 MathMLFrame::MathMLFrame()
 {
-  selected = dirty = dirtyChildren = dirtyBackground = 0;
-  dirtyLayout = 0;
+  selected = 0;
+  dirty = dirtyChildren = dirtyBackground = dirtyLayout = 0;
 }
 
 MathMLFrame::~MathMLFrame()

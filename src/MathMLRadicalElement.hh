@@ -50,6 +50,8 @@ public:
   virtual void Setup(RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void SetPosition(scaled, scaled);
+  virtual void SetDirtyLayout(bool = false);
+  virtual void SetDirty(const Rectangle* = 0);
   virtual void Render(const DrawingArea&);
 
   virtual void Remove(const Ptr<class MathMLElement>&);
