@@ -45,6 +45,13 @@ MathMLRowElement::~MathMLRowElement()
 {
 }
 
+#if 0
+void
+MathMLRowElement::Normalize()
+{
+}
+#endif
+
 void
 MathMLRowElement::Setup(RenderingEnvironment* env)
 {

@@ -79,20 +79,20 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 
   const Value* value = NULL;
 
-  scaled ruleThickness = env->GetRuleThickness();
+  defaultRuleThickness = env->GetRuleThickness();
 
   value = GetAttributeValue(ATTR_LINETHICKNESS, env, true);
   if (value != NULL) {
     if (value->IsKeyword()) {
       switch (value->ToKeyword()) {
       case KW_THIN:
-	lineThickness = ruleThickness / 2;
+	lineThickness = defaultRuleThickness / 2;
 	break;
       case KW_MEDIUM:
-	lineThickness = ruleThickness;
+	lineThickness = defaultRuleThickness;
 	break;
       case KW_THICK:
-	lineThickness = ruleThickness * 2;
+	lineThickness = defaultRuleThickness * 2;
 	break;
       default:
 	assert(IMPOSSIBLE);
@@ -106,13 +106,13 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
       assert(number != NULL);
       assert(unit != NULL);
 
-      if (unit->IsEmpty()) lineThickness = ruleThickness * roundFloat(number->ToNumber());
+      if (unit->IsEmpty()) lineThickness = defaultRuleThickness * roundFloat(number->ToNumber());
       else {
 	assert(unit->IsKeyword());
 	UnitId unitId = ToUnitId(unit);
 	if (unitId == UNIT_PERCENTAGE) {
 	  MathEngine::logger(LOG_WARNING, "line thickness given as percentage in `mfrac' element (taking default)");
-	  lineThickness = ruleThickness;
+	  lineThickness = defaultRuleThickness;
 	} else {
 	  UnitValue unitValue;
 	  unitValue.Set(number->ToNumber(), unitId);
@@ -147,9 +147,16 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
   color = env->GetColor();
 
   axis = env->GetAxis();
-  minShift = env->GetScaledPointsPerEx();
 
   displayStyle = env->GetDisplayStyle();
+
+  if (displayStyle) {
+    numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.676508);
+    denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.685951);
+  } else {
+    numMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * (lineThickness > 0 ? 0.393732 : 0.443731));
+    denomMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.344841);
+  }
 
   env->Push();
   if (!displayStyle) env->AddScriptLevel(1);
@@ -188,20 +195,30 @@ MathMLFractionElement::DoBoxedLayout(LayoutId id, BreakId, scaled maxWidth)
     const BoundingBox& numBox   = num->GetBoundingBox();
     const BoundingBox& denomBox = denom->GetBoundingBox();
 
-    scaled u = minShift;
-    scaled v = minShift;
+    scaled u = numMinShift;
+    scaled v = denomMinShift;
 
-    scaled psi = displayStyle ? 3 * lineThickness : lineThickness;
+    if (lineThickness < EPSILON) {
+      scaled psi = (displayStyle ? 7 : 3) * defaultRuleThickness;
+      scaled phi = (u - numBox.descent) - (denomBox.ascent - v);
 
-    scaled diff = psi - ((u - numBox.descent) - (axis + lineThickness / 2));
-    if (diff > 0) u += diff;
+      if (psi < phi) {
+	u += (phi - psi) / 2;
+	v += (phi - psi) / 2;
+      }
+    } else {
+      scaled phi = displayStyle ? 3 * lineThickness : lineThickness;
 
-    diff = psi - ((axis - lineThickness / 2) - (denomBox.ascent - v));
-    if (diff > 0) v += diff;
+      scaled diff = phi - ((u - numBox.descent) - (axis + lineThickness / 2));
+      if (diff > 0) u += diff;
+
+      diff = phi - ((axis - lineThickness / 2) - (denomBox.ascent - v));
+      if (diff > 0) v += diff;
+    }
 
     numShift   = u;
     denomShift = v;
-
+    
     box.Set(scaledMax(numBox.width, denomBox.width),
 	    numShift + numBox.ascent,
 	    denomShift + denomBox.descent);

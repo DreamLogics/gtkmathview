@@ -25,6 +25,7 @@
 
 #define U_OVERLINE       0x0305
 #define U_UNDERLINE      0x0332
+#define U_HORIZBAR       0x2015
 
 #define U_APPLYFUNCTION  0x2061
 #define U_INVISIBLETIMES 0x2062

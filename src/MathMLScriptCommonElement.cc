@@ -65,9 +65,11 @@ void
 MathMLScriptCommonElement::Setup(RenderingEnvironment* env)
 {
   ruleThickness = env->GetRuleThickness();
-  sppex = subMinShift = superMinShift = env->GetAxis();
+  sppex = env->GetScaledPointsPerEx();
+  subMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.247217);
+  superMinShift = float2sp(sp2float(env->GetFontAttributes().size.ToScaledPoints()) * 0.362892);
   scriptAxis    = env->GetAxis();
-  scriptSpacing = env->ToScaledPoints(env->GetMathSpace(MATH_SPACE_VERYTHIN));
+  scriptSpacing = pt2sp(1); // taken from the TeXbook
   background    = env->GetBackgroundColor();
 }
 
@@ -85,19 +87,20 @@ MathMLScriptCommonElement::DoLayoutAux(const BoundingBox& baseBox,
     u = v = 0;
   } else {
     u = baseBox.ascent - scriptAxis;
-    v = baseBox.descent + scriptAxis;
+    v = baseBox.descent + scriptAxis / 2;
   }
 
   if (superScriptBox.IsNull()) {
-    subShift = scaledMax(v, scaledMax(subMinShift, subScriptBox.ascent - (4 * sppex) / 5));
-    superShift = 0;
+    u = 0;
+    v = scaledMax(v, scaledMax(subMinShift, subScriptBox.ascent - (4 * sppex) / 5));
   } else {
-    u = scaledMax(u, scaledMax(superMinShift, sppex / 4));
+    u = scaledMax(u, scaledMax(superMinShift, superScriptBox.descent + sppex / 4));
 
     if (subScriptBox.IsNull()) {
-      subShift = 0;
-      superShift = u;
+      v = 0;
     } else {
+      v = scaledMax(v, subMinShift);
+
       if ((u - superScriptBox.descent) - (subScriptBox.ascent - v) < 4 * ruleThickness) {
 	v = 4 * ruleThickness - u + superScriptBox.descent + subScriptBox.ascent;
 
@@ -107,11 +110,11 @@ MathMLScriptCommonElement::DoLayoutAux(const BoundingBox& baseBox,
 	  v -= psi;
 	}
       }
-
-      subShift = v;
-      superShift = u;
     }
   }
+
+  superShift = u;
+  subShift = v;
 }
 
 bool

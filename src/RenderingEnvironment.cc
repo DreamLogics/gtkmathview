@@ -425,7 +425,7 @@ RenderingEnvironment::GetRuleThickness() const
   assert(top != NULL);
 
   // don't know if this is the correct heuristics
-  scaled s = float2sp(sp2pt(top->fontAttributes.size.ToScaledPoints()) * 2500);
+  scaled s = float2sp(sp2float(top->fontAttributes.size.ToScaledPoints()) * 0.04);
   return s;
 
 #if 0

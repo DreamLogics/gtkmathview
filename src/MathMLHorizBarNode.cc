@@ -54,14 +54,14 @@ MathMLHorizBarNode::DoLayout()
 }
 
 void
-MathMLHorizBarNode::DoVerticalStretchyLayout(scaled height, scaled depth, scaled axis, bool strict)
+MathMLHorizBarNode::DoVerticalStretchyLayout(scaled, scaled, scaled, bool)
 {
   // this character cannot be stretched vertically
   return;
 }
 
 void
-MathMLHorizBarNode::DoHorizontalStretchyLayout(scaled desiredSize, bool strict)
+MathMLHorizBarNode::DoHorizontalStretchyLayout(scaled desiredSize, bool)
 {
   box.width = desiredSize;
 }
