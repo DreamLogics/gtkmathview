@@ -60,6 +60,10 @@
  */
 #undef TEXISH_MATHML
 
+/* If defined allows some extensions to MathML (new attributes)
+ */
+#undef ENABLE_EXTENSIONS
+
 /* Define to compile with libxml 2.x (recommended) */
 #undef HAVE_LIBXML2
 
