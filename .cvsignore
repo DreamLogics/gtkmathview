@@ -9,12 +9,14 @@ configure.scan
 *.log
 libtool
 stamp-h
+stamp-h1
 stamp-h.in
 Makefile
 Makefile.in
 *.gz
 aclocal.m4
 gtkmathview.spec
+gtkmathview.pc
 gmon.out
 *.eps
 ltconfig
