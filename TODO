@@ -72,3 +72,5 @@ Bugs
   lowercase letters are not mapped, see mono.xml)
 * cannot make the full documentation because texinfo.tex is not updated
   (think it is in the automake package)
+* check if two font maps are defined with the same name, because otherwise
+  only the first will be used and updates to the second one will not be seen!

@@ -1,6 +1,6 @@
 <math display="block">
   <mrow>
-    <mo>&int;</mo>
+    <mo largeop="true">&int;</mo>
     <mrow>
       <mi>W</mi>
       <mo>&it;</mo>

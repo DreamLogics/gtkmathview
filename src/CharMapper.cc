@@ -162,12 +162,13 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
   FontDescriptor* bestDesc = NULL;
 
   FontAttributes myfa(fa);
-#if 1
-  MathEngine::logger(LOG_DEBUG, "requested font attributes:");
-  myfa.Dump();
-#endif
 
   do {
+#if 0
+    MathEngine::logger(LOG_DEBUG, "char: %x stretchy: %d trying attributes:", ch, stretchy);
+    myfa.Dump();
+#endif
+
     for (Iterator<FontDescriptor*> i(fonts); i.More() && bestEval > 0; i.Next()) {
       assert(i() != NULL);
 
@@ -188,6 +189,13 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
 	const CharMap* charMap = i()->fontMap->GetCharMap(ch, stretchy);
 	if (charMap != NULL) {
 	  unsigned eval = i()->attributes.Compare(myfa);
+
+#if 0
+	  MathEngine::logger(LOG_DEBUG, "comparing with: ");
+	  i()->attributes.Dump();
+	  MathEngine::logger(LOG_DEBUG, "comparison = %d", eval);
+#endif
+
 	  if (eval < bestEval && fontManager.IsAvailable(myfa, &i()->extraAttributes)) {
 	    bestEval = eval;
 	    bestCharMap = charMap;
@@ -200,8 +208,11 @@ CharMapper::FontifyCharAux(FontifiedChar& fMap, const FontAttributes& fa, Char c
     if (bestDesc != NULL) bestFont = fontManager.GetFont(myfa, &bestDesc->extraAttributes);
   } while (bestFont == NULL && myfa.DownGrade());
 
-  MathEngine::logger(LOG_DEBUG, "attributes:");
+#if 0
+  MathEngine::logger(LOG_DEBUG, "resulting attributes:");
   myfa.Dump();
+  MathEngine::logger(LOG_DEBUG, "\n");
+#endif
 
   if (bestFont == NULL || bestCharMap == NULL) {
     fMap.charMap = NULL;
