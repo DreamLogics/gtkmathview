@@ -21,6 +21,7 @@ EXTRA_DIST = \
   math-engine-configuration.xml.in \
   math-engine-configuration.dtd \
   math-engine-configuration.xml \
+  math-engine-configuration.xml.debug \
   t1.config
 
 pkgdata_DATA = \
@@ -37,6 +38,7 @@ pkgdata_DATA = \
   font-configuration-wri.xml \
   math-engine-configuration.dtd \
   math-engine-configuration.xml \
+  math-engine-configuration.xml.debug \
   t1.config
 
 noinst_PROGRAMS = makeDictionary

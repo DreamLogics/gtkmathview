@@ -1,0 +1,11 @@
+<math>
+  <mover accent="true">
+    <mi>a</mi>
+    <mo>^</mo>
+  </mover>
+  <mo>+</mo>
+  <mover>
+    <mi>hello</mi>
+    <mo>&Hat;</mo>
+  </mover>  
+</math>
