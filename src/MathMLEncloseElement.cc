@@ -152,7 +152,8 @@ MathMLEncloseElement::Render(const DrawingArea& area)
   if (fGC[IsSelected()] == NULL) {
     GraphicsContextValues values;
     values.foreground = IsSelected() ? area.GetSelectionForeground() : color;
-    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND);
+    values.lineWidth = lineThickness;
+    fGC[IsSelected()] = area.GetGC(values, GC_MASK_FOREGROUND | GC_MASK_LINE_WIDTH);
   }
 
   if (notation->Equal("longdiv")) {
