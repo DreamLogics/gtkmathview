@@ -35,6 +35,7 @@ public:
   static MathMLEmbellishedOperatorElement* create(class MathMLOperatorElement* elem)
   { return new MathMLEmbellishedOperatorElement(elem); }
 
+  virtual void Normalize(void);
   virtual void Setup(RenderingEnvironment*);
   virtual void DoBoxedLayout(LayoutId, BreakId, scaled);
   virtual void SetPosition(scaled, scaled);

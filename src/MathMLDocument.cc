@@ -28,7 +28,9 @@
 #include "MathMLDocument.hh"
 
 MathMLDocument::MathMLDocument()
+#if defined(HAVE_GMETADOM)
   : DOMdoc(0)
+#endif
 {
 }
 
@@ -38,12 +40,16 @@ MathMLDocument::MathMLDocument(const GMetaDOM::Document& doc)
   , DOMdoc(doc)
 {
   assert(doc != 0);
+  
+  GMetaDOM::EventTarget et(doc);
+  assert(et != 0);
+
+  et.addEventListener("DOMSubtreeModified", *this, false);
 }
 #endif
 
 MathMLDocument::~MathMLDocument()
 {
-  DOMdoc = 0;
 }
 
 void
@@ -72,3 +78,11 @@ MathMLDocument::IsDocument() const
 {
   return true;
 }
+
+#if defined(HAVE_GMETADOM)
+void
+MathMLDocument::handleEvent(const GMetaDOM::Event& ev)
+{
+  // do something
+}
+#endif // HAVE_GMETADOM

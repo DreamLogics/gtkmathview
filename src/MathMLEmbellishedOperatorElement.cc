@@ -42,6 +42,27 @@ MathMLEmbellishedOperatorElement::~MathMLEmbellishedOperatorElement()
 }
 
 void
+MathMLEmbellishedOperatorElement::Normalize()
+{
+  if (HasDirtyStructure() || HasChildWithDirtyStructure())
+    {
+      assert(child != NULL);
+
+      MathMLElement* p = GetParent();
+      assert(p != NULL);
+
+      MathMLContainerElement* pContainer = TO_CONTAINER(p);
+      assert(pContainer != NULL);
+      pContainer->Replace(this, child);
+      p->Release();
+
+      child->Normalize();
+
+      ResetDirtyStructure();
+    }
+}
+
+void
 MathMLEmbellishedOperatorElement::Setup(RenderingEnvironment* env)
 {
   assert(env != NULL);

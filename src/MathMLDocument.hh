@@ -30,6 +30,9 @@
 #include "MathMLBinContainerElement.hh"
 
 class MathMLDocument: public MathMLBinContainerElement
+#if defined(HAVE_GMETADOM)
+, GMetaDOM::EventListener
+#endif
 {
 protected:
   MathMLDocument(void);
@@ -52,6 +55,8 @@ public:
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
 protected:
+  virtual void handleEvent(const GMetaDOM::Event&);
+
   GMetaDOM::Document DOMdoc;
 #endif
 };

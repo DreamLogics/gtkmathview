@@ -44,6 +44,8 @@ MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 {
 }
 
+#include <stdio.h>
+
 void
 MathMLNormalizingContainerElement::Normalize()
 {

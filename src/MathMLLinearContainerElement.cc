@@ -84,7 +84,7 @@ MathMLLinearContainerElement::Normalize()
       for (Iterator<MathMLElement*> elem(content); elem.More(); elem.Next())
 	{
 	  assert(elem() != 0);
-	  printf("normalize %p\n", elem());
+	  printf("this: %p normalize: %p\n", this, elem());
 	  elem()->Normalize();
 	}
 
