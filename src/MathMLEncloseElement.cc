@@ -23,6 +23,7 @@
 #include <config.h>
 #include <assert.h>
 
+#include "MathEngine.hh"
 #include "StringUnicode.hh"
 #include "RenderingEnvironment.hh"
 #include "MathMLEncloseElement.hh"
@@ -164,16 +165,20 @@ MathMLEncloseElement::Render(const DrawingArea& area)
     area.MoveTo(GetX(), GetY() - box.ascent + lineThickness / 2);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width - lineThickness / 2, GetY() - box.ascent + lineThickness / 2);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width - lineThickness / 2, GetY() + box.descent);
-  } else if (notation->Equal("overstrike")) {
+  } else if (notation->Equal("horizontalstrike")) {
     area.MoveTo(GetX(), GetY() - box.ascent / 2);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() - box.ascent / 2);
-  } else if (notation->Equal("NESWslash")) {
+  } else if (notation->Equal("verticalstrike")) {
+    area.MoveTo(GetX() + box.width / 2, GetY() - box.ascent);
+    area.DrawLineTo(fGC[IsSelected()], GetX() + box.width / 2, GetY() + box.descent);
+  } else if (notation->Equal("updiagonalstrike")) {
     area.MoveTo(GetX(), GetY() + box.descent);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() - box.ascent);
-  } else if (notation->Equal("NWSEslash")) {
+  } else if (notation->Equal("downdiagonalstrike")) {
     area.MoveTo(GetX(), GetY() - box.ascent);
     area.DrawLineTo(fGC[IsSelected()], GetX() + box.width, GetY() + box.descent);
-  }
+  } else
+    MathEngine::logger(LOG_WARNING, "notation `%s' not supported for menclose element (ignored)", notation->ToStaticC());
 
   ResetDirty();
 }
