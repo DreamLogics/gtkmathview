@@ -26,6 +26,7 @@
 #include "Iterator.hh"
 #include "traverseAux.hh"
 #include "MathMLElement.hh"
+#include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLActionElement.hh"
 #include "MathMLOperatorElement.hh"
@@ -199,28 +200,9 @@ findDOMNode(const Ptr<MathMLElement>& elem)
 }
 
 Ptr<MathMLElement>
-getRenderingInterface(const GMetaDOM::Element& node)
+findMathMLElement(const Ptr<MathMLDocument>& doc, const GMetaDOM::Element& node)
 {
-  // WARNING: the following is a very dangerous operation. It relies
-  // of the assumption that the user will NEVER modify the user data field
-  // in the DOM tree elements!!!
-  Ptr<MathMLElement> elem((MathMLElement*) node.get_userData());
-  assert(!elem || elem->GetDOMElement() == node);
-  return elem;
-}
-
-void
-setRenderingInterface(const GMetaDOM::Element& node, const Ptr<MathMLElement>& elem)
-{
-  assert(node);
-  assert(elem);
-  node.set_userData(elem);
-}
-
-Ptr<MathMLElement>
-findMathMLElement(const GMetaDOM::Element& node)
-{
-  Ptr<MathMLElement> elem = ::getRenderingInterface(node);
+  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
   assert(elem);
 
   while (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))
@@ -237,85 +219,57 @@ findMathMLElement(const GMetaDOM::Element& node)
 Ptr<MathMLElement>
 findRightmostChild(const Ptr<MathMLElement>& elem)
 {
-  if (!elem || elem->IsA() != TAG_MROW) return elem;
-
-  Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-  assert(row);
-  if (row->GetSize() == 0) return elem;
-
-  return findRightmostChild(row->GetChild(row->GetSize() - 1));
+  if (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))
+    {
+      if (row->GetSize() == 0) return elem;
+      else return findRightmostChild(row->GetChild(row->GetSize() - 1));
+    }
+  else
+    return elem;
 }
 
 Ptr<MathMLElement>
 findLeftmostChild(const Ptr<MathMLElement>& elem)
 {
-  if (!elem || elem->IsA() != TAG_MROW) return elem;
-
-  Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem);
-  assert(row);
-  if (row->GetSize() == 0) return elem;
-
-  return findLeftmostChild(row->GetChild(0));
+  if (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem))
+    {
+      if (row->GetSize() == 0) return elem;
+      else return findLeftmostChild(row->GetChild(0));
+    }
+  else
+    return elem;
 }
-
-#if defined(HAVE_MINIDOM)
-
-MathMLElement*
-findRightSibling(MathMLElement* elem)
-{
-  mDOMNodeRef p = findDOMNode(elem);
-  if (p == NULL) return NULL;
-
-  for (p = mdom_node_get_next_sibling(p);
-       p != NULL && mdom_node_get_user_data(p) == NULL;
-       p = mdom_node_get_next_sibling(p)) ;
-
-  if (p != NULL) return findLeftmostChild(findMathMLElement(p));
-  else return findRightmostChild(findRightSibling(elem->GetParent()));
-}
-
-MathMLElement*
-findLeftSibling(MathMLElement* elem)
-{
-  mDOMNodeRef p = findDOMNode(elem);
-  if (p == NULL) return NULL;
-
-  for (p = mdom_node_get_prev_sibling(p);
-       p != NULL && mdom_node_get_user_data(p) == NULL;
-       p = mdom_node_get_prev_sibling(p)) ;
-
-  if (p != NULL) return findRightmostChild(findMathMLElement(p));
-  else return findLeftmostChild(findLeftSibling(elem->GetParent()));
-}
-
-#elif defined(HAVE_GMETADOM)
 
 Ptr<MathMLElement>
 findRightSibling(const Ptr<MathMLElement>& elem)
 {
-  GMetaDOM::Node p = findDOMNode(elem);
-  if (!p) return 0;
-
-  for (p = p.get_nextSibling();
-       p && p.get_userData() == NULL;
-       p = p.get_nextSibling()) ;
-  
-  if (p) return findLeftmostChild(findMathMLElement(p));
-  else return findRightmostChild(findRightSibling(elem->GetParent()));
+  if (!elem)
+    return 0;
+  else if (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem->GetParent()))
+    {
+      std::vector< Ptr<MathMLElement> >::const_iterator p =
+	std::find(row->GetContent().begin(), row->GetContent().end(), elem);
+      assert(p != row->GetContent().end());
+      if (p + 1 != row->GetContent().end()) return findLeftmostChild(*(p + 1));
+      else return findRightSibling(row);
+    }
+  else
+    return findRightSibling(elem->GetParent());
 }
 
 Ptr<MathMLElement>
 findLeftSibling(const Ptr<MathMLElement>& elem)
 {
-  GMetaDOM::Node p = findDOMNode(elem);
-  if (!p) return 0;
-
-  for (p = p.get_previousSibling();
-       p && p.get_userData() == NULL;
-       p = p.get_previousSibling()) ;
-
-  if (p) return findRightmostChild(findMathMLElement(p));
-  else return findLeftmostChild(findLeftSibling(elem->GetParent()));
+  if (!elem)
+    return 0;
+  else if (Ptr<MathMLRowElement> row = smart_cast<MathMLRowElement>(elem->GetParent()))
+    {
+      std::vector< Ptr<MathMLElement> >::const_iterator p =
+	std::find(row->GetContent().begin(), row->GetContent().end(), elem);
+      assert(p != row->GetContent().end());
+      if (p != row->GetContent().begin()) return findRightmostChild(*(p - 1));
+      else return findLeftSibling(row);
+    }
+  else
+    return findLeftSibling(elem->GetParent());
 }
-
-#endif // HAVE_GMETADOM

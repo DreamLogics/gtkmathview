@@ -187,7 +187,15 @@ find_common_ancestor(GdomeElement* first, GdomeElement* last)
 {
   GMetaDOM::Element p(first);
   GMetaDOM::Element q(last);
-  return gdome_cast_el(findCommonAncestor(p, q).gdome_object());
+  if (GdomeElement* res = gdome_cast_el(findCommonAncestor(p, q).gdome_object()))
+    {
+      GdomeException exc = 0;
+      gdome_el_ref(res, &exc);
+      assert(exc == 0);
+      return res;
+    }
+  else
+    return 0;
 }
 
 extern "C" void

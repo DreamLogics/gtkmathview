@@ -31,6 +31,7 @@
 #include "scaled.hh"
 #include "RGBValue.hh"
 #include "MathMLElement.hh"
+#include "MathMLDocument.hh"
 
 class MathMLRenderingEngine
 {
@@ -55,7 +56,7 @@ public:
   void Render(const struct Rectangle*);
   void Update(const struct Rectangle* = NULL);
 
-  Ptr<MathMLElement> GetRoot(void) const { return root; }
+  Ptr<MathMLDocument> GetDocument(void) const { return document; }
   Ptr<MathMLElement> GetElementAt(scaled, scaled) const;
 
   void SetSelected(const Ptr<MathMLElement>&);
@@ -81,7 +82,6 @@ private:
   unsigned defaultFontSize;
 
   Ptr<class MathMLDocument> document;
-  Ptr<class MathMLElement>  root;
 
   class DrawingArea* area;
   class FontManager* fontManager;

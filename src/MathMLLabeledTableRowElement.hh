@@ -49,7 +49,7 @@ public:
   void SetLabel(const Ptr<MathMLElement>&);
   virtual Ptr<MathMLElement> GetLabel(void) const;
 
-  virtual void Normalize(void);
+  virtual void Normalize(const Ptr<class MathMLDocument>&);
   //virtual void SetDirty(const Rectangle*);
   virtual void SetFlagDown(Flags);
   virtual void ResetFlagDown(Flags);

@@ -35,7 +35,6 @@
 #include "AFont.hh"
 #include "Layout.hh"
 #include "frameAux.hh"
-#include "Iterator.hh"
 #include "stringAux.hh"
 #include "Globals.hh"
 #include "traverseAux.hh"
@@ -222,7 +221,7 @@ MathMLTokenElement::InsertChild(unsigned i, const Ptr<MathMLTextNode>& node)
 }
 
 void
-MathMLTokenElement::Normalize()
+MathMLTokenElement::Normalize(const Ptr<class MathMLDocument>&)
 {
   if (DirtyStructure() && GetDOMElement())
     {

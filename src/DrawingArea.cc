@@ -124,18 +124,6 @@ DrawingArea::DrawRectangle(const GraphicsContext* gc, const Rectangle& rect) con
 }
 
 void
-DrawingArea::DrawRectangle(const GraphicsContext* gc, const Shape& shape) const
-{
-  assert(0);
-#if 0
-  for (Iterator<Rectangle*> rect(shape.content); rect.More(); rect.Next()) {
-    assert(rect() != NULL);
-    DrawRectangle(gc, *(rect()));
-  }
-#endif
-}
-
-void
 DrawingArea::DrawBoundingBox(const GraphicsContext* gc,
 			     scaled x, scaled y,
 			     const BoundingBox& box,
@@ -175,18 +163,6 @@ DrawingArea::Clear(const GraphicsContext* gc, const Rectangle& rect) const
   Clear(gc, rect.x, rect.y, rect.width, rect.height);
 }
 
-void
-DrawingArea::Clear(const GraphicsContext* gc, const Shape& shape) const
-{
-  assert(0);
-#if 0
-  for (Iterator<Rectangle*> rect(shape.content); rect.More(); rect.Next()) {
-    assert(rect() != NULL);
-    Clear(gc, *rect());
-  }
-#endif
-}
-		   
 void
 DrawingArea::Update(const Rectangle& rect) const
 {

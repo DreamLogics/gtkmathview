@@ -60,7 +60,7 @@ MathMLAlignMarkElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLAlignMarkElement::Normalize()
+MathMLAlignMarkElement::Normalize(const Ptr<class MathMLDocument>&)
 {
   if (DirtyStructure()) ResetDirtyStructure();
 }

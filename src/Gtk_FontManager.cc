@@ -28,7 +28,6 @@
 #include <gdk/gdk.h>
 
 #include "Gtk_Font.hh"
-#include "Iterator.hh"
 #include "Globals.hh"
 #include "Gtk_FontManager.hh"
 

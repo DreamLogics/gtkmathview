@@ -52,6 +52,8 @@ RenderingEnvironment::RenderingEnvironment(CharMapper& cm) : charMapper(cm)
   top->background = Globals::configuration.GetBackground();
   top->transparentBackground = true;
 
+  top->doc = 0;
+
   for (unsigned i = 1; i <= 7; i++)
     top->mathSpace[i - 1].Set(i / 18.0, UNIT_EM);
 
@@ -345,8 +347,8 @@ RenderingEnvironment::SetMathSpace(MathSpaceId id,
   top->mathSpace[id] = value;
 }
 
-const
-UnitValue& RenderingEnvironment::GetMathSpace(MathSpaceId id) const
+const UnitValue&
+RenderingEnvironment::GetMathSpace(MathSpaceId id) const
 {
   assert(!level.IsEmpty());
 
@@ -357,6 +359,28 @@ UnitValue& RenderingEnvironment::GetMathSpace(MathSpaceId id) const
   assert(id != MATH_SPACE_LAST);
 
   return top->mathSpace[id];
+}
+
+void
+RenderingEnvironment::SetDocument(const Ptr<MathMLDocument>& doc)
+{
+  assert(!level.IsEmpty());
+
+  AttributeLevel* top = level.Top();
+  assert(top != NULL);
+
+  top->doc = doc;
+}
+
+Ptr<MathMLDocument>
+RenderingEnvironment::GetDocument() const
+{
+  assert(!level.IsEmpty());
+
+  AttributeLevel* top = level.Top();
+  assert(top != NULL);
+
+  return top->doc;
 }
 
 scaled

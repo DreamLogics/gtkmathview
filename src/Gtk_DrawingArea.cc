@@ -26,7 +26,6 @@
 #include <gtk/gtk.h>
 
 #include "Gtk_Font.hh"
-#include "Iterator.hh"
 #include "UnitValue.hh"
 #include "Gtk_DrawingArea.hh"
 #include "Gtk_GraphicsContext.hh"

@@ -99,7 +99,7 @@ MathMLFractionElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<Math
 }
 
 void
-MathMLFractionElement::Normalize()
+MathMLFractionElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -111,19 +111,19 @@ MathMLFractionElement::Normalize()
 	  unsigned n = children.get_length();
 
 	  if (n > 0)
-	    SetNumerator(MathMLElement::getRenderingInterface(children.item(0)));
+	    SetNumerator(doc->getFormattingNode(children.item(0)));
 	  else if (!numerator || !is_a<MathMLDummyElement>(numerator))
 	    SetNumerator(MathMLDummyElement::create());
 
 	  if (n > 1)
-	    SetDenominator(MathMLElement::getRenderingInterface(children.item(1)));
+	    SetDenominator(doc->getFormattingNode(children.item(1)));
 	  else if (!denominator || !is_a<MathMLDummyElement>(denominator))
 	    SetDenominator(MathMLDummyElement::create());
 	}
 #endif
 
-      if (numerator) numerator->Normalize();
-      if (denominator) denominator->Normalize();
+      if (numerator) numerator->Normalize(doc);
+      if (denominator) denominator->Normalize(doc);
 
       ResetDirtyStructure();
     }
@@ -136,6 +136,9 @@ MathMLFractionElement::Setup(RenderingEnvironment* env)
 
   if (DirtyAttribute())
     {
+      color = env->GetColor();
+      background = env->GetBackgroundColor();
+
       const Value* value = NULL;
 
 #ifdef TEXISH_MATHML

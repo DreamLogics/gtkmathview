@@ -51,7 +51,7 @@ MathMLLinearContainerElement::~MathMLLinearContainerElement()
 }
 
 void
-MathMLLinearContainerElement::Normalize()
+MathMLLinearContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -67,7 +67,7 @@ MathMLLinearContainerElement::Normalize()
 	      GMetaDOM::Node node = children.item(i);
 	      assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
 
-	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	      Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	      // it might be that we get a NULL. In that case it would probably make
 	      // sense to create a dummy element, because we filtered MathML
 	      // elements only
@@ -84,7 +84,7 @@ MathMLLinearContainerElement::Normalize()
       // it is better to normalize elements only after all the rendering
       // interfaces have been collected, because the structure might change
       // depending on the actual number of children
-      std::for_each(content.begin(), content.end(), NormalizeAdaptor());
+      std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
       ResetDirtyStructure();
     }
 }

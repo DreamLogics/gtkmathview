@@ -27,7 +27,6 @@
 #include "unidefs.h"
 #include "stringAux.hh"
 #include "Globals.hh"
-#include "Iterator.hh"
 #include "ChildList.hh"
 #include "StringUnicode.hh"
 #include "EntitiesTable.hh"
@@ -92,7 +91,7 @@ MathMLRadicalElement::SetIndex(const Ptr<MathMLElement>& elem)
 }
 
 void
-MathMLRadicalElement::Normalize()
+MathMLRadicalElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -106,7 +105,7 @@ MathMLRadicalElement::Normalize()
 		{
 		  GMetaDOM::Node node = children.item(0);
 		  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-		  SetRadicand(MathMLElement::getRenderingInterface(node));
+		  SetRadicand(doc->getFormattingNode(node));
 		}
 	      else
 		SetRadicand(MathMLRowElement::create(GetDOMElement()));
@@ -125,12 +124,12 @@ MathMLRadicalElement::Normalize()
 		  SetIndex(MathMLDummyElement::create());
 		  break;
 		case 1:
-		  SetRadicand(MathMLElement::getRenderingInterface(children.item(0)));
+		  SetRadicand(doc->getFormattingNode(children.item(0)));
 		  SetIndex(MathMLDummyElement::create());
 		  break;
 		default:
-		  SetRadicand(MathMLElement::getRenderingInterface(children.item(0)));
-		  SetIndex(MathMLElement::getRenderingInterface(children.item(1)));
+		  SetRadicand(doc->getFormattingNode(children.item(0)));
+		  SetIndex(doc->getFormattingNode(children.item(1)));
 		  break;
 		}
 	    }
@@ -141,8 +140,8 @@ MathMLRadicalElement::Normalize()
       assert(radical);
       radical->SetParent(this);
 
-      if (radicand) radicand->Normalize();
-      if (index) index->Normalize();			 
+      if (radicand) radicand->Normalize(doc);
+      if (index) index->Normalize(doc);
 
       ResetDirtyStructure();
     }

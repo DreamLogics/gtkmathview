@@ -52,7 +52,7 @@ public:
   virtual void SetParent(const Ptr<MathMLElement>&);
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Normalize(void) = 0;
+  virtual void Normalize(const Ptr<class MathMLDocument>&) = 0;
   virtual void Setup(class RenderingEnvironment*); // setup attributes
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);

@@ -27,7 +27,6 @@
 
 #include "Globals.hh"
 #include "Layout.hh"
-#include "Iterator.hh"
 #include "ChildList.hh"
 #include "ShapeFactory.hh"
 #include "RenderingEnvironment.hh"
@@ -50,7 +49,7 @@ MathMLBinContainerElement::~MathMLBinContainerElement()
 }
 
 void
-MathMLBinContainerElement::Normalize()
+MathMLBinContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -60,8 +59,7 @@ MathMLBinContainerElement::Normalize()
 	{
 	  GMetaDOM::Node node = children.item(0);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	  // it might be that we get a NULL. In that case it would probably make
 	  // sense to create a dummy element, because we filtered MathML
 	  // elements only
@@ -70,7 +68,7 @@ MathMLBinContainerElement::Normalize()
 	}
 #endif // HAVE_GMETADOM
 
-      if (child) child->Normalize();
+      if (child) child->Normalize(doc);
       ResetDirtyStructure();
     }
 }

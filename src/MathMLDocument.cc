@@ -24,8 +24,10 @@
 #include <assert.h>
 #include <stddef.h>
 
+#include "MathML.hh"
 #include "Globals.hh"
 #include "MathMLDocument.hh"
+#include "RenderingEnvironment.hh"
 
 MathMLDocument::MathMLDocument()
 #if defined(HAVE_GMETADOM)
@@ -88,16 +90,40 @@ MathMLDocument::Normalize()
       GMetaDOM::NodeList nodeList = GetDOMDocument().getElementsByTagNameNS(MATHML_NS_URI, "math");
       if (nodeList.get_length() > 0)
 	{
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(nodeList.item(0));
+	  Ptr<MathMLElement> elem = getFormattingNode(nodeList.item(0));
 	  assert(elem);
 	  SetChild(elem);
 	}	  
 #endif // HAVE_GMETADOM
 
-      if (child) child->Normalize();
+      if (child) child->Normalize(this);
 
       ResetDirtyStructure();
     }
+}
+
+void
+MathMLDocument::Setup(RenderingEnvironment* env)
+{
+  assert(env != 0);
+  if (DirtyAttributeP())
+    {
+      env->Push();
+      env->SetDocument(this);
+      MathMLBinContainerElement::Setup(env);
+      env->Drop();
+      ResetDirtyAttribute();
+    }
+}
+
+void
+MathMLDocument::SetDirtyAttribute()
+{
+  MathMLBinContainerElement::SetDirtyAttribute();
+  // changing an attribute at this level amounts at
+  // invalidating the whole tree. It is the notification
+  // of a change in the context, rather than in a real attribute
+  SetFlagDown(FDirtyAttribute);
 }
 
 #if defined(HAVE_GMETADOM)
@@ -139,5 +165,80 @@ MathMLDocument::UnregisterElement(const Ptr<MathMLElement>& elem)
   assert(res == 1);
 }
 #endif
+
+Ptr<MathMLElement>
+MathMLDocument::getFormattingNode(const GMetaDOM::Element& el) const
+{
+  assert(el);
+
+  DOMNodeMap::iterator p = nodeMap.find(el);
+  if (p != nodeMap.end()) return (*p).second;
+
+  std::string s_tag;
+  if (!el.get_namespaceURI().null())
+    s_tag = el.get_nodeName();
+  else
+    s_tag = el.get_localName();
+
+  TagId tag = TagIdOfName(s_tag.c_str());
+
+  if (tag == TAG_NOTVALID)
+    {
+      Globals::logger(LOG_WARNING, "skipping unrecognized element");
+      return 0;
+    }
+
+  static struct
+  {
+    TagId tag;
+    Ptr<MathMLElement> (*create)(const GMetaDOM::Element&);
+  } tab[] = {
+    { TAG_MATH,          &MathMLmathElement::create },
+    { TAG_MI,            &MathMLIdentifierElement::create },
+    { TAG_MN,            &MathMLTokenElement::create },
+    { TAG_MO,            &MathMLOperatorElement::create },
+    { TAG_MTEXT,         &MathMLTextElement::create },
+    { TAG_MSPACE,        &MathMLSpaceElement::create },
+    { TAG_MS,            &MathMLStringLitElement::create },
+    { TAG_MROW,          &MathMLRowElement::create },
+    { TAG_MFRAC,         &MathMLFractionElement::create },
+    { TAG_MSQRT,         &MathMLRadicalElement::create },
+    { TAG_MROOT,         &MathMLRadicalElement::create },
+    { TAG_MSTYLE,        &MathMLStyleElement::create },
+    { TAG_MERROR,        &MathMLErrorElement::create },
+    { TAG_MPADDED,       &MathMLPaddedElement::create },
+    { TAG_MPHANTOM,      &MathMLPhantomElement::create },
+    { TAG_MFENCED,       &MathMLFencedElement::create },
+    { TAG_MSUB,          &MathMLScriptElement::create },
+    { TAG_MSUP,          &MathMLScriptElement::create },
+    { TAG_MSUBSUP,       &MathMLScriptElement::create },
+    { TAG_MUNDER,        &MathMLUnderOverElement::create },
+    { TAG_MOVER,         &MathMLUnderOverElement::create },
+    { TAG_MUNDEROVER,    &MathMLUnderOverElement::create },
+    { TAG_MMULTISCRIPTS, &MathMLMultiScriptsElement::create },
+    { TAG_MTABLE,        &MathMLTableElement::create },
+    { TAG_MTR,           &MathMLTableRowElement::create },
+    { TAG_MLABELEDTR,    &MathMLTableRowElement::create },
+    { TAG_MTD,           &MathMLTableCellElement::create },
+    { TAG_MALIGNGROUP,   &MathMLAlignGroupElement::create },
+    { TAG_MALIGNMARK,    &MathMLAlignMarkElement::create },
+    { TAG_MACTION,       &MathMLActionElement::create },
+    { TAG_MENCLOSE,      &MathMLEncloseElement::create },
+    { TAG_SEMANTICS,     &MathMLSemanticsElement::create },
+
+    { TAG_NOTVALID,      0 }
+  };
+
+  unsigned i;
+  for (i = 0; tab[i].tag != TAG_NOTVALID && tab[i].tag != tag; i++) ;
+  assert(tab[i].create != 0);
+
+  Ptr<MathMLElement> res = tab[i].create(el);
+  assert(res);
+
+  nodeMap[el] = res;
+
+  return res;
+}
 
 #endif // HAVE_GMETADOM

@@ -133,7 +133,7 @@ MathMLScriptElement::Inside(scaled x, scaled y)
 }
 
 void
-MathMLScriptElement::Normalize()
+MathMLScriptElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -143,7 +143,7 @@ MathMLScriptElement::Normalize()
 	  assert(IsA() == TAG_MSUB || IsA() == TAG_MSUP || IsA() == TAG_MSUBSUP);
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  
-	  if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+	  if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(0)))
 	    SetBase(e);
 	  else if (!is_a<MathMLDummyElement>(GetBase()))
 	    SetBase(MathMLDummyElement::create());
@@ -151,7 +151,7 @@ MathMLScriptElement::Normalize()
 	  switch (IsA())
 	    {
 	    case TAG_MSUB:
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetSubScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetSubScript()))
 		SetSubScript(MathMLDummyElement::create());
@@ -159,17 +159,17 @@ MathMLScriptElement::Normalize()
 	      break;
 	    case TAG_MSUP:
 	      SetSubScript(0);
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetSuperScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetSuperScript()))
 		SetSuperScript(MathMLDummyElement::create());
 	      break;
 	    case TAG_MSUBSUP:
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetSubScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetSubScript()))
 		SetSubScript(MathMLDummyElement::create());
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetSuperScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetSuperScript()))
 		SetSuperScript(MathMLDummyElement::create());
@@ -180,9 +180,9 @@ MathMLScriptElement::Normalize()
 	}
 #endif
 
-      if (base) base->Normalize();
-      if (subScript) subScript->Normalize();
-      if (superScript) superScript->Normalize();
+      if (base) base->Normalize(doc);
+      if (subScript) subScript->Normalize(doc);
+      if (superScript) superScript->Normalize(doc);
 
       ResetDirtyStructure();
     }

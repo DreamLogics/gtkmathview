@@ -282,11 +282,6 @@ MathMLStyleElement::Setup(RenderingEnvironment* env)
   MathMLNormalizingContainerElement::Setup(env);
 
   env->Drop();
-
-  while (attributes.GetSize() > 0) {
-    MathMLAttribute* attr = attributes.RemoveFirst();
-    delete attr;
-  }
 }
 
 void

@@ -40,7 +40,7 @@ protected:
   virtual ~MathMLBinContainerElement();
 
 public:
-  virtual void Normalize(void);
+  virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(RenderingEnvironment*);
   virtual void DoLayout(const class FormattingContext&);
   virtual void DoStretchyLayout(void);

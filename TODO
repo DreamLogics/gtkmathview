@@ -1,8 +1,6 @@
-** add for_each_if.h to the repository
 
 EDIT branch TODO list and BUGS
 
-* use HasDirtyAttributes... etc consistently
 * use STL containers for font configuration
 * change font configuration and implement new mathvariant
 * match characters with variants

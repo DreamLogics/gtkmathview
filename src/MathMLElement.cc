@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "MathML.hh"
 #include "Layout.hh"
 #include "stringAux.hh"
 #include "Globals.hh"
@@ -35,6 +34,7 @@
 #include "ValueConversion.hh"
 #include "MathMLStyleElement.hh"
 #include "MathMLAttributeList.hh"
+#include "MathMLOperatorElement.hh"
 #include "RenderingEnvironment.hh"
 #include "FormattingContext.hh"
 
@@ -58,12 +58,6 @@ MathMLElement::MathMLElement()
 MathMLElement::MathMLElement(const GMetaDOM::Element& n)
   : node(n)
 {
-  if (node)
-    {
-      Ptr<MathMLElement> elem = ::getRenderingInterface(node);
-      if (!elem) ::setRenderingInterface(node, this);
-    }
-
   Init();
 }
 #endif
@@ -82,88 +76,8 @@ MathMLElement::Init()
 
 MathMLElement::~MathMLElement()
 {
-#if defined(HAVE_GMETADOM)
-  if (node)
-    {
-      Ptr<MathMLElement> elem = ::getRenderingInterface(node);
-      if (elem == this) ::setRenderingInterface(node, 0);
-    }
-#endif
-
   ReleaseGCs();
 }
-
-#if defined(HAVE_GMETADOM)
-Ptr<MathMLElement>
-MathMLElement::getRenderingInterface(const GMetaDOM::Element& el)
-{
-  assert(el);
-
-  Ptr<MathMLElement> elem = ::getRenderingInterface(el);
-  if (elem) return elem;
-
-  std::string s_tag;
-  if (!el.get_namespaceURI().null())
-    s_tag = el.get_nodeName();
-  else
-    s_tag = el.get_localName();
-
-  TagId tag = TagIdOfName(s_tag.c_str());
-
-  if (tag == TAG_NOTVALID)
-    {
-      Globals::logger(LOG_WARNING, "skipping unrecognized element");
-      return 0;
-    }
-
-  static struct
-  {
-    TagId tag;
-    Ptr<MathMLElement> (*create)(const GMetaDOM::Element&);
-  } tab[] = {
-    { TAG_MATH,          &MathMLmathElement::create },
-    { TAG_MI,            &MathMLIdentifierElement::create },
-    { TAG_MN,            &MathMLTokenElement::create },
-    { TAG_MO,            &MathMLOperatorElement::create },
-    { TAG_MTEXT,         &MathMLTextElement::create },
-    { TAG_MSPACE,        &MathMLSpaceElement::create },
-    { TAG_MS,            &MathMLStringLitElement::create },
-    { TAG_MROW,          &MathMLRowElement::create },
-    { TAG_MFRAC,         &MathMLFractionElement::create },
-    { TAG_MSQRT,         &MathMLRadicalElement::create },
-    { TAG_MROOT,         &MathMLRadicalElement::create },
-    { TAG_MSTYLE,        &MathMLStyleElement::create },
-    { TAG_MERROR,        &MathMLErrorElement::create },
-    { TAG_MPADDED,       &MathMLPaddedElement::create },
-    { TAG_MPHANTOM,      &MathMLPhantomElement::create },
-    { TAG_MFENCED,       &MathMLFencedElement::create },
-    { TAG_MSUB,          &MathMLScriptElement::create },
-    { TAG_MSUP,          &MathMLScriptElement::create },
-    { TAG_MSUBSUP,       &MathMLScriptElement::create },
-    { TAG_MUNDER,        &MathMLUnderOverElement::create },
-    { TAG_MOVER,         &MathMLUnderOverElement::create },
-    { TAG_MUNDEROVER,    &MathMLUnderOverElement::create },
-    { TAG_MMULTISCRIPTS, &MathMLMultiScriptsElement::create },
-    { TAG_MTABLE,        &MathMLTableElement::create },
-    { TAG_MTR,           &MathMLTableRowElement::create },
-    { TAG_MLABELEDTR,    &MathMLTableRowElement::create },
-    { TAG_MTD,           &MathMLTableCellElement::create },
-    { TAG_MALIGNGROUP,   &MathMLAlignGroupElement::create },
-    { TAG_MALIGNMARK,    &MathMLAlignMarkElement::create },
-    { TAG_MACTION,       &MathMLActionElement::create },
-    { TAG_MENCLOSE,      &MathMLEncloseElement::create },
-    { TAG_SEMANTICS,     &MathMLSemanticsElement::create },
-
-    { TAG_NOTVALID,      0 }
-  };
-
-  unsigned i;
-  for (i = 0; tab[i].tag != TAG_NOTVALID && tab[i].tag != tag; i++) ;
-  assert(tab[i].create != 0);
-
-  return tab[i].create(el);
-}
-#endif // HAVE_GMETADOM
 
 // GetAttributeSignatureAux: this is an auxiliary function used to retrieve
 // the signature of the attribute with id ID given an array of attribute
@@ -651,10 +565,10 @@ MathMLElement::SetParent(const Ptr<MathMLElement>& p)
   MathMLNode::SetParent(p);
   if (p)
     {
-      if (DirtyStructure()) p->SetFlagUp(FDirtyStructure);
-      if (DirtyAttribute()) p->SetFlagUp(FDirtyAttributeP);
-      if (DirtyLayout()) p->SetFlagUp(FDirtyLayout);
-      if (Dirty()) p->SetFlagUp(FDirty);
+      if (DirtyStructure()) SetFlagUp(FDirtyStructure);
+      if (DirtyAttribute()) SetFlagUp(FDirtyAttributeP);
+      if (DirtyLayout()) SetFlagUp(FDirtyLayout);
+      if (Dirty()) SetFlagUp(FDirty);
       if (p->DirtyLayout()) SetFlagDown(FDirtyLayout);
       if (p->Dirty()) SetFlagDown(FDirty);
       if (p->Selected()) SetFlagDown(FSelected);

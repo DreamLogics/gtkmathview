@@ -41,7 +41,7 @@ protected:
   virtual ~MathMLNormalizingContainerElement();
 
 public:
-  virtual void Normalize(void);
+  virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void DoLayout(const class FormattingContext&);
   virtual void Render(const DrawingArea&);
 

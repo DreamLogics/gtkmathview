@@ -32,6 +32,7 @@
 #include "Globals.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
+#include "MathMLDocument.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLTableElement.hh"
 #include "MathMLTableRowElement.hh"
@@ -74,7 +75,7 @@ MathMLTableRowElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLTableRowElement::Normalize()
+MathMLTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -87,7 +88,7 @@ MathMLTableRowElement::Normalize()
 	  for (unsigned i = 0; i < n; i++)
 	    {
 	      GMetaDOM::Node node = children.item(i);
-	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	      Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	      assert(elem);
 	      SetChild(i, elem);
 	    }
@@ -95,7 +96,7 @@ MathMLTableRowElement::Normalize()
 	}
 #endif
       
-      std::for_each(content.begin(), content.end(), NormalizeAdaptor());
+      std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
 
       ResetDirtyStructure();
     }

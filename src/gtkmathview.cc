@@ -333,7 +333,7 @@ gtk_math_view_init(GtkMathView* math_view)
 }
 
 extern "C" GtkWidget*
-gtk_math_view_new(GtkAdjustment* hadj, GtkAdjustment* vadj)
+gtk_math_view_new(GtkAdjustment*, GtkAdjustment*)
 {
   GtkMathView* math_view = (GtkMathView*) gtk_type_new(gtk_math_view_get_type());
   
@@ -359,9 +359,6 @@ gtk_math_view_destroy(GtkObject* object)
   math_view = GTK_MATH_VIEW(object);
   g_assert(math_view != NULL);
   g_return_if_fail(math_view->interface != NULL);
-
-  Ptr<MathMLElement> root = math_view->interface->GetRoot();
-  if (root) root->ReleaseGCs();
 
   Globals::logger(LOG_DEBUG, "destroying the widget");
 
@@ -594,6 +591,7 @@ gtk_math_view_load_doc(GtkMathView* math_view, GdomeDocument* doc)
   return TRUE;
 }
 
+#if 0
 extern "C" gboolean
 gtk_math_view_load_tree(GtkMathView* math_view, GdomeElement* elem)
 {
@@ -612,6 +610,7 @@ gtk_math_view_load_tree(GtkMathView* math_view, GdomeElement* elem)
 
   return TRUE;
 }
+#endif
 
 extern "C" void
 gtk_math_view_unload(GtkMathView* math_view)
@@ -749,7 +748,8 @@ gtk_math_view_set_selection(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
 
-  math_view->interface->SetSelected(findMathMLElement(GMetaDOM::Element(elem)));
+  math_view->interface->SetSelected(findMathMLElement(math_view->interface->GetDocument(),
+						      GMetaDOM::Element(elem)));
   paint_widget(math_view);
 }
 
@@ -760,7 +760,8 @@ gtk_math_view_reset_selection(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(math_view->interface != NULL);
   g_return_if_fail(elem != NULL);
 
-  math_view->interface->ResetSelected(findMathMLElement(GMetaDOM::Element(elem)));
+  math_view->interface->ResetSelected(findMathMLElement(math_view->interface->GetDocument(),
+							GMetaDOM::Element(elem)));
   paint_widget(math_view);
 }
 
@@ -771,7 +772,8 @@ gtk_math_view_is_selected(GtkMathView* math_view, GdomeElement* elem)
   g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(elem != NULL, FALSE);
 
-  Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
+  Ptr<MathMLElement> el = findMathMLElement(math_view->interface->GetDocument(),
+					    GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
   return el->Selected() ? TRUE : FALSE;
@@ -866,20 +868,27 @@ gtk_math_view_get_element_at(GtkMathView* math_view, gint x, gint y)
   Ptr<MathMLElement> at = math_view->interface->GetElementAt(math_view->hadjustment->value + px2sp(x),
 							     math_view->vadjustment->value + px2sp(y));
 
-  return gdome_cast_el(findDOMNode(at).gdome_object());
+  GdomeException exc = 0;
+  GdomeElement* res = gdome_cast_el(findDOMNode(at).gdome_object());
+  if (res != 0) gdome_el_ref(res, &exc);
+  assert(exc == 0);
+
+  return res;
 }
 
 extern "C" gboolean
 gtk_math_view_get_element_coords(GtkMathView* math_view, GdomeElement* elem, gint* x, gint* y)
 {
   g_return_val_if_fail(math_view != NULL, FALSE);
+  g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(elem != NULL, FALSE);
 
-  Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
+  Ptr<MathMLElement> el = findMathMLElement(math_view->interface->GetDocument(),
+					    GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
-  if (x != NULL) *x = sp2px(el->GetX());
-  if (y != NULL) *y = sp2px(el->GetY());
+  if (x != NULL) *x = static_cast<gint>(sp2px(el->GetX()));
+  if (y != NULL) *y = static_cast<gint>(sp2px(el->GetY()));
 
   return TRUE;
 }
@@ -888,10 +897,12 @@ extern "C" gboolean
 gtk_math_view_get_element_rectangle(GtkMathView* math_view, GdomeElement* elem, GdkRectangle* rect)
 {
   g_return_val_if_fail(math_view != NULL, FALSE);
+  g_return_val_if_fail(math_view->interface != NULL, FALSE);
   g_return_val_if_fail(elem != NULL, FALSE);
   g_return_val_if_fail(rect != NULL, FALSE);
 
-  Ptr<MathMLElement> el = findMathMLElement(GMetaDOM::Element(elem));
+  Ptr<MathMLElement> el = findMathMLElement(math_view->interface->GetDocument(),
+					    GMetaDOM::Element(elem));
   if (!el) return FALSE;
 
   const BoundingBox& box = el->GetBoundingBox();
@@ -934,13 +945,13 @@ gtk_math_view_set_top(GtkMathView* math_view, gint x, gint y)
 }
 
 extern "C" void
-gtk_math_view_set_log_verbosity(GtkMathView* math_view, gint level)
+gtk_math_view_set_log_verbosity(GtkMathView*, gint level)
 {
   Globals::SetVerbosity(level);
 }
 
 extern "C" gint
-gtk_math_view_get_log_verbosity(GtkMathView* math_view)
+gtk_math_view_get_log_verbosity(GtkMathView*)
 {
   return Globals::GetVerbosity();
 }
@@ -954,8 +965,8 @@ gtk_math_view_set_font_manager_type(GtkMathView* math_view, FontManagerId id)
 
   if (id == math_view->font_manager_id) return;
 
-  Ptr<MathMLElement> root = math_view->interface->GetRoot();
-  if (root) root->ReleaseGCs();
+  Ptr<MathMLDocument> document = math_view->interface->GetDocument();
+  if (document) document->ReleaseGCs();
 
   delete math_view->font_manager;
   delete math_view->drawing_area;
@@ -1038,24 +1049,24 @@ gtk_math_view_export_to_postscript(GtkMathView* math_view,
   area.SetSize(px2sp(w), px2sp(h));
   if (disable_colors) area.DisableColors();
 
-  Ptr<MathMLElement> root = math_view->interface->GetRoot();
-  if (!root) return;
+  if (Ptr<MathMLDocument> document = math_view->interface->GetDocument())
+    {
+      // the following invocations are needed just to mark the chars actually used :(
+      fm->ResetUsedChars();
+      area.SetOutputFile(NULL);
+      document->SetDirty();
+      document->Render(area);
+      area.SetOutputFile(f);
 
-  // the following invocations are needed just to mark the chars actually used :(
-  fm->ResetUsedChars();
-  area.SetOutputFile(NULL);
-  root->SetDirty();
-  root->Render(area);
-  area.SetOutputFile(f);
-
-  Rectangle rect;
-  math_view->interface->GetDocumentRectangle(rect);
-  area.DumpHeader(PACKAGE, "(no title)", rect);
-  fm->DumpFontDictionary(f);
-  area.DumpPreamble();
-  root->SetDirty();
-  root->Render(area);
-  area.DumpEpilogue();
+      Rectangle rect;
+      math_view->interface->GetDocumentRectangle(rect);
+      area.DumpHeader(PACKAGE, "(no title)", rect);
+      fm->DumpFontDictionary(f);
+      area.DumpPreamble();
+      document->SetDirty();
+      document->Render(area);
+      area.DumpEpilogue();
+    }
 #else
   g_assert_not_reached();
 #endif // HAVE_LIBT1
@@ -1065,10 +1076,12 @@ extern "C" guint
 gtk_math_view_action_get_selected(GtkMathView* math_view, GdomeElement* elem)
 {
   g_return_val_if_fail(math_view != NULL, 0);
+  g_return_val_if_fail(math_view->interface != NULL, 0);
   g_return_val_if_fail(elem != NULL, 0);
 
   Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(GMetaDOM::Element(elem)));
+    smart_cast<MathMLActionElement>(findMathMLElement(math_view->interface->GetDocument(),
+						      GMetaDOM::Element(elem)));
   if (!action_element) return 0;
 
   return action_element->GetSelectedIndex();
@@ -1082,7 +1095,8 @@ gtk_math_view_action_set_selected(GtkMathView* math_view, GdomeElement* elem, gu
   g_return_if_fail(elem != NULL);
 
   Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(GMetaDOM::Element(elem)));
+    smart_cast<MathMLActionElement>(findMathMLElement(math_view->interface->GetDocument(),
+						      GMetaDOM::Element(elem)));
   if (!action_element) return;
 
   action_element->SetSelectedIndex(idx);
@@ -1100,7 +1114,8 @@ gtk_math_view_action_toggle(GtkMathView* math_view, GdomeElement* elem)
   g_return_if_fail(elem != NULL);
 
   Ptr<MathMLActionElement> action_element =
-    smart_cast<MathMLActionElement>(findMathMLElement(GMetaDOM::Element(elem)));
+    smart_cast<MathMLActionElement>(findMathMLElement(math_view->interface->GetDocument(),
+						      GMetaDOM::Element(elem)));
   if (!action_element) return;
 
   guint idx = action_element->GetSelectedIndex();

@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "ChildList.hh"
+#include "MathMLDocument.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLOperatorElement.hh"
 #include "MathMLSemanticsElement.hh"
@@ -44,7 +45,7 @@ MathMLSemanticsElement::~MathMLSemanticsElement()
 }
 
 void
-MathMLSemanticsElement::Normalize()
+MathMLSemanticsElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -54,7 +55,7 @@ MathMLSemanticsElement::Normalize()
 	  assert(IsA() == TAG_SEMANTICS);
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 
-	  if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+	  if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(0)))
 	    SetChild(e);
 	  else
 	    {
@@ -66,7 +67,7 @@ MathMLSemanticsElement::Normalize()
 		  if (elem.getAttribute("encoding") == "MathML-Presentation")
 		    {
 		      ChildList children(elem, MATHML_NS_URI, "*");
-		      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+		      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(0)))
 			SetChild(e);
 		      else if (!is_a<MathMLDummyElement>(GetChild()))
 			SetChild(MathMLDummyElement::create());
@@ -79,7 +80,7 @@ MathMLSemanticsElement::Normalize()
 	}
 #endif
 
-      if (GetChild()) GetChild()->Normalize();
+      if (GetChild()) GetChild()->Normalize(doc);
 
       ResetDirtyStructure();
     }

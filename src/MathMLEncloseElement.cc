@@ -61,18 +61,17 @@ MathMLEncloseElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLEncloseElement::NormalizeRadicalElement()
+MathMLEncloseElement::NormalizeRadicalElement(const Ptr<MathMLDocument>& doc)
 {
   assert(child);
 
-  Ptr<MathMLRadicalElement> sqrt =
-    smart_cast<MathMLRadicalElement>(MathMLRadicalElement::create());
+  Ptr<MathMLRadicalElement> sqrt = smart_cast<MathMLRadicalElement>(MathMLRadicalElement::create());
   assert(sqrt);
 
   sqrt->SetRadicand(child);
   sqrt->SetParent(this);
   SetChild(sqrt);
-  sqrt->Normalize();
+  sqrt->Normalize(doc);
 }
 
 void
@@ -93,7 +92,7 @@ MathMLEncloseElement::Setup(RenderingEnvironment* env)
   color = env->GetColor();
 
   if (!normalized) {
-    if (notation == NOTATION_RADICAL) NormalizeRadicalElement();
+    if (notation == NOTATION_RADICAL) NormalizeRadicalElement(env->GetDocument());
     normalized = true;
   }
 

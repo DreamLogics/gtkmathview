@@ -47,11 +47,11 @@ public:
 #endif
 
   virtual const AttributeSignature* GetAttributeSignature(AttributeId) const;
-  virtual void Normalize(void);
+  virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual void Setup(RenderingEnvironment*);
 
 private:
-  void DelayedNormalize(void);
+  void DelayedNormalize(const Ptr<class MathMLDocument>&);
 
   bool normalized;
   const String* openFence;

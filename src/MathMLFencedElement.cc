@@ -34,6 +34,7 @@
 #include "MathMLStringNode.hh"
 #include "MathMLFencedElement.hh"
 #include "MathMLOperatorElement.hh"
+#include "RenderingEnvironment.hh"
 
 MathMLFencedElement::MathMLFencedElement()
 {
@@ -74,7 +75,7 @@ MathMLFencedElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLFencedElement::Normalize()
+MathMLFencedElement::Normalize(const Ptr<MathMLDocument>&)
 {
   if (DirtyStructure())
     {
@@ -110,13 +111,13 @@ MathMLFencedElement::Setup(RenderingEnvironment* env)
   else separators = NULL;
   delete value;
 
-  DelayedNormalize();
+  DelayedNormalize(env->GetDocument());
 
   MathMLBinContainerElement::Setup(env);
 }
 
 void
-MathMLFencedElement::DelayedNormalize()
+MathMLFencedElement::DelayedNormalize(const Ptr<MathMLDocument>& doc)
 {
   if (!normalized)
     {
@@ -128,7 +129,7 @@ MathMLFencedElement::DelayedNormalize()
 	{
 	  GMetaDOM::Node node = children.item(i);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	  assert(elem);
 	  // we detach the element from its parent, which can be an
 	  // element created by mfenced when it expanded
@@ -162,7 +163,7 @@ MathMLFencedElement::DelayedNormalize()
 	{
 	  GMetaDOM::Node node = children.item(i);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-	  Ptr<MathMLElement> arg = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> arg = doc->getFormattingNode(node);
 	  assert(arg);
 
 	  mrow->Append(arg);
@@ -194,7 +195,7 @@ MathMLFencedElement::DelayedNormalize()
 	  mainRow->Append(fence);
 	}
 
-      mainRow->Normalize();
+      mainRow->Normalize(doc);
       SetChild(mainRow);
 
       normalized = true;

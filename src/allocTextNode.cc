@@ -60,6 +60,7 @@ allocCombinedCharNode(Char ch, Char cch)
   return MathMLCombinedCharNode::create(ch, cch);
 }
 
+#if 0
 Ptr<MathMLTextNode>
 allocTextNode(const String** str)
 {
@@ -80,3 +81,4 @@ allocTextNode(const String** str)
 
   return node;
 }
+#endif

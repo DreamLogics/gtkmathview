@@ -42,7 +42,7 @@
 #endif
 
 MathMLRenderingEngine::MathMLRenderingEngine()
-  : document(0), root(0)
+  : document(0)
 {
   area = NULL;
   fontManager = NULL;
@@ -55,7 +55,6 @@ MathMLRenderingEngine::~MathMLRenderingEngine()
 {
   Unload();
   assert(!document);
-  assert(!root);
 
   delete charMapper;
   charMapper = NULL;
@@ -125,7 +124,7 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
 
   Unload();
 
-  Ptr<MathMLDocument> document = MathMLDocument::create(doc);
+  document = MathMLDocument::create(doc);
   assert(document);
 
   Clock perf;
@@ -133,15 +132,12 @@ MathMLRenderingEngine::Load(const GMetaDOM::Document& doc)
   document->Normalize();
   perf.Stop();
   Globals::logger(LOG_INFO, "normalization time: %dms", perf());
-    
-  root = document->GetRoot();
-  assert(root);
-
   Setup();
 
   return true;
 }
 
+#if 0
 bool
 MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
 {
@@ -166,54 +162,53 @@ MathMLRenderingEngine::Load(const GMetaDOM::Element& elem)
   return true;
 }
 #endif
+#endif
 
 void
 MathMLRenderingEngine::Unload()
 {
   document = 0;
-  root = 0;
 }
 
 void
 MathMLRenderingEngine::Setup()
 {
-  if (!root) return;
-
-  Clock perf;
-
-  UnitValue size;
-  size.Set(defaultFontSize, UNIT_PT);
-
-  assert(charMapper != NULL);
-  RenderingEnvironment env(*charMapper);
-  env.SetFontSize(size);
-  perf.Start();
-  root->Setup(&env);
-  perf.Stop();
-  Globals::logger(LOG_INFO, "setup time: %dms", perf());
-  // ?????? root->SetDirtyLayout(true);
-
-  MinMaxLayout();
+  if (document)
+    {
+      UnitValue size;
+      size.Set(defaultFontSize, UNIT_PT);
+      assert(charMapper != NULL);
+      RenderingEnvironment env(*charMapper);
+      env.SetFontSize(size);
+      Clock perf;
+      perf.Start();
+      document->Setup(&env);
+      perf.Stop();
+      Globals::logger(LOG_INFO, "setup time: %dms", perf());
+      // ?????? root->SetDirtyLayout(true);
+      MinMaxLayout();
+    }
 }
 
 void
 MathMLRenderingEngine::MinMaxLayout()
 {
-  if (!root) return;
+  if (document)
+    {
+      Clock perf;
 
-  Clock perf;
-
-  perf.Start();
-  root->DoLayout(FormattingContext(LAYOUT_MIN,0));
-  perf.Stop();
-  Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
+      perf.Start();
+      document->DoLayout(FormattingContext(LAYOUT_MIN,0));
+      perf.Stop();
+      Globals::logger(LOG_INFO, "minimum layout time: %dms", perf());
 
 #if 0
-  perf.Start();
-  root->DoLayout(FormattingContext(LAYOUT_MAX,0));
-  perf.Stop();
-  Globals::logger(LOG_INFO, "maximum layout time: %dms", perf());
+      perf.Start();
+      document->DoLayout(FormattingContext(LAYOUT_MAX,0));
+      perf.Stop();
+      Globals::logger(LOG_INFO, "maximum layout time: %dms", perf());
 #endif
+    }
 }
 
 void
@@ -221,23 +216,24 @@ MathMLRenderingEngine::Layout()
 {
   assert(area != NULL);
 
-  if (!root) return;
-
-  Clock perf;
-  perf.Start();
-  root->DoLayout(FormattingContext(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin())));
-  root->SetPosition(area->GetXMargin(), area->GetYMargin() + root->GetBoundingBox().ascent);
-  perf.Stop();
-  Globals::logger(LOG_INFO, "layout time: %dms", perf());
+  if (document)
+    {
+      Clock perf;
+      perf.Start();
+      document->DoLayout(FormattingContext(LAYOUT_AUTO, scaledMax(0, area->GetWidth() -  2 * area->GetXMargin())));
+      document->SetPosition(area->GetXMargin(), area->GetYMargin() + document->GetBoundingBox().ascent);
+      perf.Stop();
+      Globals::logger(LOG_INFO, "layout time: %dms", perf());
+    }
 }
 
 void
 MathMLRenderingEngine::SetDirty(const Rectangle* rect)
 {
-  if (root)
+  if (document)
     {
-      if (rect) root->SetDirty(*rect);
-      else root->SetDirty();
+      if (rect) document->SetDirty(*rect);
+      else document->SetDirty();
     }
 }
 
@@ -253,11 +249,11 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 {
   assert(area);
 
-  if (root)
+  if (document)
     {
       Clock perf;
       perf.Start();
-      root->Render(*area);
+      document->Render(*area);
       perf.Stop();
       Globals::logger(LOG_INFO, "rendering time: %dms", perf());
     }
@@ -269,23 +265,22 @@ MathMLRenderingEngine::Update(const Rectangle* rect)
 void
 MathMLRenderingEngine::GetDocumentBoundingBox(BoundingBox& box) const
 {
-  if (!root)
-    {
-      box.Null();
-      return;
-    }
-
-  box = root->GetBoundingBox();  
+  if (document)
+    box = document->GetBoundingBox();
+  else
+    box.Null();
 }
 
 void
 MathMLRenderingEngine::GetDocumentRectangle(Rectangle& rect) const
 {
-  if (root) {
-    BoundingBox box;
-    GetDocumentBoundingBox(box);
-    rect = box.GetRectangle(root->GetX(), root->GetY());
-  } else
+  if (document)
+    {
+      BoundingBox box;
+      GetDocumentBoundingBox(box);
+      rect = box.GetRectangle(document->GetX(), document->GetY());
+    }
+  else
     rect.Zero();
 }
 
@@ -293,8 +288,7 @@ void
 MathMLRenderingEngine::SetSelected(const Ptr<MathMLElement>& elem)
 {
   if (elem) elem->SetSelected();
-  else if (root) root->SetSelected();
-    
+  else if (document) document->SetSelected();
   Update();
 }
 
@@ -302,20 +296,19 @@ void
 MathMLRenderingEngine::ResetSelected(const Ptr<MathMLElement>& elem)
 {
   if (elem) elem->ResetSelected();
-  else if (root) root->ResetSelected();
-
+  else if (document) document->ResetSelected();
   Update();
 }
 
 Ptr<MathMLElement>
 MathMLRenderingEngine::GetElementAt(scaled x, scaled y) const
 {
-  if (!root) return root;
+  if (document) return document->Inside(x, y);
+  else return 0;
   // WARNING: x and y must be absolute coordinates w.r.t. the drawing area, because
   // at this level we do not known whether the drawing area is scrollable (as in
   // the case of Gtk_DrawingArea) or not (PS_DrawingArea). The caller must
   // properly adjust x and y before calling this method
-  return root->Inside(x, y);
 }
 
 void

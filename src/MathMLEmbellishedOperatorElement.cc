@@ -44,7 +44,7 @@ MathMLEmbellishedOperatorElement::~MathMLEmbellishedOperatorElement()
 }
 
 void
-MathMLEmbellishedOperatorElement::Normalize()
+MathMLEmbellishedOperatorElement::Normalize(const Ptr<class MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -57,7 +57,7 @@ MathMLEmbellishedOperatorElement::Normalize()
       assert(pContainer);
       pContainer->Replace(this, child);
 
-      child->Normalize();
+      child->Normalize(doc);
 
       ResetDirtyStructure();
     }

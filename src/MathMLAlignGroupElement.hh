@@ -59,7 +59,7 @@ public:
   const Ptr<class MathMLAlignMarkElement>& GetAlignmentMarkElement(void) const { return alignMarkElement; }
   const Ptr<class MathMLTokenElement>& GetDecimalPoint(void) const { return decimalPoint; }
 
-  virtual void Normalize(void);
+  virtual void Normalize(const Ptr<class MathMLDocument>&);
   virtual bool IsSpaceLike(void) const;
 
 private:

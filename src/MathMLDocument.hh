@@ -33,7 +33,7 @@
 
 #include "MathMLBinContainerElement.hh"
 
-class MathMLDocument: public MathMLBinContainerElement
+class MathMLDocument : public MathMLBinContainerElement
 {
 protected:
   MathMLDocument(void);
@@ -55,15 +55,21 @@ public:
 #endif
 
   virtual void Normalize(void);
+  virtual void Setup(class RenderingEnvironment*);
+  virtual void SetDirtyAttribute(void);
 
   Ptr<MathMLElement> GetRoot(void) const { return GetChild(); }
 
   //void RegisterElement(const Ptr<MathMLElement>&);
   //void UnregisterElement(const Ptr<MathMLElement>&);
 
+  Ptr<MathMLElement> getFormattingNode(const GMetaDOM::Element&) const;
+
 #if defined(HAVE_GMETADOM)
   const GMetaDOM::Document& GetDOMDocument(void) const { return DOMdoc; }
   const GMetaDOM::Element& GetDOMRoot(void) const { return DOMroot; }
+
+  //Ptr<MathMLElement> getFormattingNode(const GMetaDOM::Element&) const;
 
 protected:
 
@@ -85,7 +91,24 @@ protected:
   GMetaDOM::Document DOMdoc;  // can be 0
   GMetaDOM::Element  DOMroot; // can be 0
 
-  //std::hash_map< void*, Ptr<MathMLElement> > nodeMap;
+  void               setFormattingNode(const GMetaDOM::Element&, const Ptr<MathMLElement>&) const;
+
+  struct DOM_hash : public std::unary_function< GMetaDOM::Element, size_t >
+  {
+    size_t operator()(const GMetaDOM::Element& elem) const
+    {
+      assert(elem);
+      GdomeNode* node = elem.gdome_object();
+      assert(node);
+      GdomeException exc = 0;
+      gdome_n_unref(node, &exc);
+      assert(exc == 0);
+      return reinterpret_cast<size_t>(node);
+    }
+  };
+
+  typedef std::hash_map< GMetaDOM::Element, Ptr<MathMLElement>, DOM_hash > DOMNodeMap;
+  mutable DOMNodeMap nodeMap;
 #endif
 };
 

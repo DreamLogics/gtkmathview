@@ -223,7 +223,7 @@ MathMLMultiScriptsElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<
 }
 
 void
-MathMLMultiScriptsElement::Normalize()
+MathMLMultiScriptsElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -244,7 +244,7 @@ MathMLMultiScriptsElement::Normalize()
 	      Ptr<MathMLElement> elem;
 	      if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
 		{
-		  elem = MathMLElement::getRenderingInterface(node);
+		  elem = doc->getFormattingNode(node);
 		  i++;
 		}
 	      if (elem) SetBase(elem);
@@ -264,14 +264,14 @@ MathMLMultiScriptsElement::Normalize()
 	      Ptr<MathMLElement> sup;
 
 	      if (node.get_nodeName() != "none")
-		sub = MathMLElement::getRenderingInterface(node);
+		sub = doc->getFormattingNode(node);
 	      i++;
 	      
 	      if (i < n)
 		{
 		  node = children.item(i);
 		  if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
-		    sup = MathMLElement::getRenderingInterface(node);
+		    sup = doc->getFormattingNode(node);
 		  if (node.get_nodeName() != "mprescripts") i++;
 		}
 
@@ -288,14 +288,14 @@ MathMLMultiScriptsElement::Normalize()
 	      Ptr<MathMLElement> sup;
 
 	      if (node.get_nodeName() != "none")
-		sub = MathMLElement::getRenderingInterface(node);
+		sub = doc->getFormattingNode(node);
 	      i++;
 	      
 	      if (i < n)
 		{
 		  node = children.item(i);
 		  if (node.get_nodeName() != "none" && node.get_nodeName() != "mprescripts")
-		    sup = MathMLElement::getRenderingInterface(node);
+		    sup = doc->getFormattingNode(node);
 		  if (node.get_nodeName() != "mprescripts") i++;
 		}
 
@@ -313,11 +313,15 @@ MathMLMultiScriptsElement::Normalize()
       SetPreScriptsSize(nPreScripts);
 #endif // HAVE_GMETADOM
 
-      if (base) base->Normalize();
-      for_each_if(subScript.begin(), subScript.end(), NotNullPredicate(), NormalizeAdaptor());
-      for_each_if(superScript.begin(), superScript.end(), NotNullPredicate(), NormalizeAdaptor());
-      for_each_if(preSubScript.begin(), preSubScript.end(), NotNullPredicate(), NormalizeAdaptor());
-      for_each_if(preSuperScript.begin(), preSuperScript.end(), NotNullPredicate(), NormalizeAdaptor());
+      if (base) base->Normalize(doc);
+      for_each_if(subScript.begin(), subScript.end(),
+		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
+      for_each_if(superScript.begin(), superScript.end(),
+		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
+      for_each_if(preSubScript.begin(), preSubScript.end(),
+		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
+      for_each_if(preSuperScript.begin(), preSuperScript.end(),
+		  NotNullPredicate(), std::bind2nd(NormalizeAdaptor(), doc));
 
       ResetDirtyStructure();
     }

@@ -87,7 +87,7 @@ MathMLAlignGroupElement::SetAlignmentMark(const Ptr<class MathMLAlignMarkElement
 }
 
 void
-MathMLAlignGroupElement::Normalize()
+MathMLAlignGroupElement::Normalize(const Ptr<class MathMLDocument>&)
 {
   if (DirtyStructure()) ResetDirtyStructure();
 }

@@ -63,7 +63,6 @@ libgtkmathview_la_SOURCES = \
   Clock.cc \
   Configuration.cc \
   EntitiesTable.cc \
-  FontifiedString.cc \
   Logger.cc \
   Globals.cc \
   ChildList.cc \
@@ -111,7 +110,6 @@ libgtkmathview_la_SOURCES = \
   MathMLSpaceElement.cc \
   MathMLSpaceNode.cc \
   MathMLStringLitElement.cc \
-  MathMLStringNode.cc \
   MathMLStyleElement.cc \
   MathMLTableCellElement.cc \
   MathMLTableElement.cc \

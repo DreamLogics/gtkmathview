@@ -26,7 +26,6 @@
 #include <stdio.h>
 
 #include "AFont.hh"
-#include "Iterator.hh"
 #include "FontManager.hh"
 
 FontManager::FontManager()

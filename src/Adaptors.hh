@@ -29,10 +29,10 @@
 #include "MathMLElement.hh"
 
 struct NormalizeAdaptor
-  : public std::unary_function<Ptr<MathMLElement>,void>
+  : public std::binary_function< Ptr<MathMLElement>,Ptr<class MathMLDocument>,void>
 {
-  void operator()(const Ptr<MathMLElement>& elem) const
-  { elem->Normalize(); }
+  void operator()(const Ptr<MathMLElement>& elem, const Ptr<MathMLDocument>& doc) const
+  { elem->Normalize(doc); }
 };
 
 struct SetupAdaptor

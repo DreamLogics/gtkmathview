@@ -60,7 +60,7 @@ public:
   virtual void Render(const DrawingArea&);
 
 protected:
-  void NormalizeRadicalElement(void);
+  void NormalizeRadicalElement(const Ptr<class MathMLDocument>&);
 
   bool         normalized;
 

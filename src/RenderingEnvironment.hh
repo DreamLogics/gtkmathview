@@ -31,6 +31,7 @@
 #include "RGBValue.hh"
 #include "UnitValue.hh"
 #include "FontAttributes.hh"
+#include "MathMLDocument.hh"
 #include "MathMLAttribute.hh"
 #include "MathMLAttributeList.hh"
 
@@ -47,6 +48,10 @@ public:
   // levels
   void     Push(const MathMLAttributeList* = NULL);
   void     Drop(void);
+
+  // document
+  void     SetDocument(const Ptr<class MathMLDocument>&);
+  Ptr<class MathMLDocument> GetDocument(void) const;
 
   // attributes retrieving
   const MathMLAttribute* GetAttribute(AttributeId) const;
@@ -104,7 +109,7 @@ private:
     RGBValue  color;
     RGBValue  background;
     bool      transparentBackground;
-    
+    Ptr<class MathMLDocument> doc;
     const MathMLAttributeList* defaults;
   };
 

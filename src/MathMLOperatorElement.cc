@@ -25,7 +25,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "Iterator.hh"
 #include "Globals.hh"
 #include "operatorAux.hh"
 #include "traverseAux.hh"
@@ -97,7 +96,7 @@ MathMLOperatorElement::GetAttributeSignature(AttributeId id) const
 }
 
 void
-MathMLOperatorElement::Normalize()
+MathMLOperatorElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -123,7 +122,7 @@ MathMLOperatorElement::Normalize()
       pContainer->Replace(root, eOp);
       eOp->SetChild(root);
 
-      MathMLTokenElement::Normalize();
+      MathMLTokenElement::Normalize(doc);
     }
 }
 

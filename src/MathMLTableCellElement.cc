@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "Iterator.hh"
 #include "frameAux.hh"
 #include "Globals.hh"
 #include "operatorAux.hh"

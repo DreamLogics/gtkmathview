@@ -78,15 +78,13 @@ MathMLStringLitElement::Setup(RenderingEnvironment* env)
 
   s = GetAttribute(ATTR_LQUOTE, env);
   assert(s != NULL);
-  if (s->GetLength() == 1) lQuote = MathMLCharNode::create(s->GetChar(0));
-  else if (s->GetLength() > 1) lQuote = MathMLStringNode::create(s->Clone());
+  if (s->GetLength() >= 1) lQuote = MathMLCharNode::create(s->GetChar(0));
   assert(lQuote);
   InsertChild(0, lQuote);
 
   s = GetAttribute(ATTR_RQUOTE, env);
   assert(s != NULL);
-  if (s->GetLength() == 1) rQuote = MathMLCharNode::create(s->GetChar(0));
-  else if (s->GetLength() > 0) rQuote = MathMLStringNode::create(s->Clone());
+  if (s->GetLength() >= 1) rQuote = MathMLCharNode::create(s->GetChar(0));
   assert(rQuote);
   InsertChild(GetSize(), rQuote);
 

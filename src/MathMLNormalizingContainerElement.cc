@@ -26,6 +26,7 @@
 
 #include "Layout.hh"
 #include "ChildList.hh"
+#include "MathMLDocument.hh"
 #include "MathMLRowElement.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLOperatorElement.hh"
@@ -48,7 +49,7 @@ MathMLNormalizingContainerElement::~MathMLNormalizingContainerElement()
 }
 
 void
-MathMLNormalizingContainerElement::Normalize()
+MathMLNormalizingContainerElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -58,7 +59,7 @@ MathMLNormalizingContainerElement::Normalize()
 	{
 	  GMetaDOM::Node node = children.item(0);
 	  assert(node.get_nodeType() == GMetaDOM::Node::ELEMENT_NODE);
-	  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+	  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 	  assert(elem);
 	  SetChild(elem);
 	}
@@ -77,7 +78,7 @@ MathMLNormalizingContainerElement::Normalize()
 	}
 #endif
 
-      if (child) child->Normalize();
+      if (child) child->Normalize(doc);
       ResetDirtyStructure();
     }
 }

@@ -28,6 +28,7 @@
 #include "Globals.hh"
 #include "StringUnicode.hh"
 #include "ValueConversion.hh"
+#include "MathMLDocument.hh"
 #include "MathMLDummyElement.hh"
 #include "MathMLTableElement.hh"
 #include "MathMLTableRowElement.hh"
@@ -50,11 +51,11 @@ MathMLLabeledTableRowElement::~MathMLLabeledTableRowElement()
 }
 
 void
-MathMLLabeledTableRowElement::Normalize()
+MathMLLabeledTableRowElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
-      MathMLTableRowElement::Normalize();
+      MathMLTableRowElement::Normalize(doc);
 
 #if defined(HAVE_GMETADOM)
       if (GetDOMElement())
@@ -62,7 +63,7 @@ MathMLLabeledTableRowElement::Normalize()
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  if (children.item(0) && children.item(0).get_nodeName() != "mtr")
 	    {
-	      Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(children.item(0));
+	      Ptr<MathMLElement> elem = doc->getFormattingNode(children.item(0));
 	      assert(elem);
 	      SetLabel(elem);
 	    }
@@ -72,7 +73,7 @@ MathMLLabeledTableRowElement::Normalize()
 #endif // HAVE_GMETADOM
 
       if (!label) SetLabel(MathMLDummyElement::create());
-      label->Normalize();
+      label->Normalize(doc);
 
       ResetDirtyStructure();
     }

@@ -122,7 +122,7 @@ MathMLUnderOverElement::Replace(const Ptr<MathMLElement>& oldElem, const Ptr<Mat
 }
 
 void
-MathMLUnderOverElement::Normalize()
+MathMLUnderOverElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -132,7 +132,7 @@ MathMLUnderOverElement::Normalize()
 	  assert(IsA() == TAG_MUNDER || IsA() == TAG_MOVER || IsA() == TAG_MUNDEROVER);
 	  ChildList children(GetDOMElement(), MATHML_NS_URI, "*");
 	  
-	  if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(0)))
+	  if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(0)))
 	    SetBase(e);
 	  else if (!is_a<MathMLDummyElement>(GetBase()))
 	    SetBase(MathMLDummyElement::create());
@@ -140,7 +140,7 @@ MathMLUnderOverElement::Normalize()
 	  switch (IsA())
 	    {
 	    case TAG_MUNDER:
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetUnderScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetUnderScript()))
 		SetUnderScript(MathMLDummyElement::create());
@@ -148,17 +148,17 @@ MathMLUnderOverElement::Normalize()
 	      break;
 	    case TAG_MOVER:
 	      SetUnderScript(0);
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetOverScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetOverScript()))
 		SetOverScript(MathMLDummyElement::create());
 	      break;
 	    case TAG_MUNDEROVER:
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetUnderScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetUnderScript()))
 		SetUnderScript(MathMLDummyElement::create());
-	      if (Ptr<MathMLElement> e = MathMLElement::getRenderingInterface(children.item(1)))
+	      if (Ptr<MathMLElement> e = doc->getFormattingNode(children.item(1)))
 		SetOverScript(e);
 	      else if (!is_a<MathMLDummyElement>(GetOverScript()))
 		SetOverScript(MathMLDummyElement::create());
@@ -170,9 +170,9 @@ MathMLUnderOverElement::Normalize()
 #endif // HAVE_GMETADOM
 
       assert(base);
-      base->Normalize();
-      if (underScript) underScript->Normalize();
-      if (overScript) overScript->Normalize();
+      base->Normalize(doc);
+      if (underScript) underScript->Normalize(doc);
+      if (overScript) overScript->Normalize(doc);
 
       ResetDirtyStructure();
     }

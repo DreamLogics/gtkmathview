@@ -31,6 +31,7 @@
 #include "Adaptors.hh"
 #include "ChildList.hh"
 #include "StringUnicode.hh"
+#include "MathMLDocument.hh"
 #include "MathMLTableElement.hh"
 #include "MathMLTableCellElement.hh"
 
@@ -97,7 +98,7 @@ MathMLTableElement::~MathMLTableElement()
 }
 
 void
-MathMLTableElement::Normalize()
+MathMLTableElement::Normalize(const Ptr<MathMLDocument>& doc)
 {
   if (DirtyStructure())
     {
@@ -113,7 +114,7 @@ MathMLTableElement::Normalize()
 	      GMetaDOM::Node node = children.item(i);
 	      if (node.get_nodeName() == "mtr" || node.get_nodeName() == "mlabeledtr")
 		{
-		  Ptr<MathMLElement> elem = MathMLElement::getRenderingInterface(node);
+		  Ptr<MathMLElement> elem = doc->getFormattingNode(node);
 		  assert(elem);
 		  SetChild(idx++, elem);
 		}
@@ -130,7 +131,7 @@ MathMLTableElement::Normalize()
       if (content.size() == 0)
 	Append(smart_cast<MathMLTableRowElement>(MathMLTableRowElement::create()));
 
-      std::for_each(content.begin(), content.end(), NormalizeAdaptor());
+      std::for_each(content.begin(), content.end(), std::bind2nd(NormalizeAdaptor(), doc));
       
       ResetDirtyStructure();
     }
