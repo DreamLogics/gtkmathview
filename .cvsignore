@@ -2,6 +2,7 @@
 config.h
 config.h.in
 config.cache
+config.guess
 config.log
 config.status
 configure
@@ -17,3 +18,7 @@ aclocal.m4
 gtkmathview.spec
 gmon.out
 *.eps
+ltconfig
+ltmain.sh
+missing
+mkinstalldirs

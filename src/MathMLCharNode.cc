@@ -114,7 +114,9 @@ MathMLCharNode::DoLayout()
   fChar.GetBoundingBox(charBox);
   box = charBox;
 
+#ifdef DEBUG
   MathEngine::logger(LOG_DEBUG, "done char layout for %x resulting in %d height", fChar.nch, sp2ipx(box.GetHeight()));
+#endif // DEBUG
 
 #if 1
   if (box.descent > box.ascent && fChar.charMap->GetStretch() != STRETCH_NO) {
@@ -382,7 +384,9 @@ MathMLCharNode::RenderVerticalStretchyChar(const DrawingArea& area,
 
   if (layout->simple != NULLCHAR) {
     y -= charBox.descent;
+#ifdef DEBUG
     MathEngine::logger(LOG_DEBUG, "rendering vertical stretchy char %x", layout->simple);
+#endif // DEBUG
     area.DrawChar(gc, font, x, y, layout->simple);
     return;
   }
@@ -560,16 +564,12 @@ MathMLCharNode::CombineWith(const MathMLCharNode* cChar, scaled& shiftX, scaled&
 
   const BoundingBox& cBox = cChar->GetBoundingBox();
 
-  printf("overlay: %d below: %d above: %d\n", isCombiningOverlay(cch), isCombiningBelow(cch), isCombiningAbove(cch));
-
   if (isCombiningOverlay(cch)) {
     shiftX = box.lBearing - cBox.lBearing + (box.rBearing - box.lBearing - cBox.rBearing + cBox.lBearing) / 2;
     shiftY = 0;
   } else if (isCombiningBelow(cch)) {
     shiftX = 0;
     shiftY = - box.descent - cBox.ascent;
-
-    printf("in this case box.descent = %d cBox.ascent = %d, shift = %d\n", sp2ipx(box.descent), sp2ipx(cBox.ascent), sp2ipx(shiftY));
   } else {
     /*
     printf("italic angle of the base char is %f %f\n",
