@@ -63,7 +63,7 @@ MathMLMultiScriptsElement::Normalize()
     assert(elem() != NULL);
     if (elem()->IsA() == TAG_MPRESCRIPTS) {
       preScripts = true;
-      break;
+      continue;
     }
 
     if (elem()->IsA() != TAG_MPRESCRIPTS && elem()->IsA() != TAG_NONE)
@@ -85,6 +85,8 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
   assert(content.GetSize() > 0);
   assert(content.GetFirst() != NULL);
 
+  ScriptSetup(env);
+
   content.GetFirst()->Setup(env);
   
   env->Push();
@@ -98,8 +100,6 @@ MathMLMultiScriptsElement::Setup(RenderingEnvironment* env)
     elem()->Setup(env);
     elem.Next();
   }
-
-  ScriptSetup(env);
 
   env->Drop();
 }
@@ -134,7 +134,7 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
 
     elem()->DoBoxedLayout(id, BREAK_NO, availWidth / n);
 
-    if (!preScript && elem()->IsA() == TAG_MPRESCRIPTS) {
+    if (elem()->IsA() == TAG_MPRESCRIPTS) {
       preScript = true;
       i = 0;
     } else {
@@ -147,27 +147,32 @@ MathMLMultiScriptsElement::DoBoxedLayout(LayoutId id, BreakId, scaled availWidth
 	superScriptBox.Append(scriptBox);
 	totalWidth += scaledMax(subScriptWidth, scriptBox.width);
       }
-
+      
       i++;
     }
 
     elem.Next();
   }
 
-  DoScriptLayout(base->GetBoundingBox(), subScriptBox, superScriptBox,
+  const BoundingBox& baseBox = base->GetBoundingBox();
+  DoScriptLayout(baseBox, subScriptBox, superScriptBox,
 		 subShiftX, subShiftY, superShiftX, superShiftY);
 
-  box = base->GetBoundingBox();
+  box = baseBox;
   box.width = scaledMax(subShiftX, superShiftX) + totalWidth;
 
   if (!subScriptBox.IsNull()) {
     box.ascent  = scaledMax(box.ascent, subScriptBox.ascent - subShiftY);
+    box.tAscent  = scaledMax(box.tAscent, subScriptBox.tAscent - subShiftY);
     box.descent = scaledMax(box.descent, subScriptBox.descent + subShiftY);
+    box.tDescent = scaledMax(box.tDescent, subScriptBox.tDescent + subShiftY);
   }
 
   if (!superScriptBox.IsNull()) {
     box.ascent  = scaledMax(box.ascent, superScriptBox.ascent + superShiftY);
+    box.tAscent  = scaledMax(box.tAscent, superScriptBox.tAscent + superShiftY);
     box.descent = scaledMax(box.descent, superScriptBox.descent - superShiftY);
+    box.tDescent = scaledMax(box.tDescent, superScriptBox.tDescent - superShiftY);
   }
 
   ConfirmLayout(id);
@@ -186,32 +191,46 @@ MathMLMultiScriptsElement::SetPosition(scaled x, scaled y)
 
   scaled subScriptWidth = 0;
   bool preScript = false;
-  unsigned i = 0;
-
   if (nPre > 0) {
     while (elem.More()) {
       assert(elem() != NULL);
 
       if (preScript) {
-	if (i % 2 == 0) {
-	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	  subScriptWidth = scriptBox.width;
-	  elem()->SetPosition(x, y + subShiftY);
-	} else {
-	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
-	  elem()->SetPosition(x, y - superShiftY);
-	  x += scaledMax(subScriptWidth, scriptBox.width);
-	}
+	MathMLElement* subScript = elem();
+	elem.Next();
 
-	i++;
+	MathMLElement* superScript = 0;	
+	if (elem.More()) superScript = elem();
+
+	scaled subScriptWidth = subScript ? subScript->GetBoundingBox().width : 0;
+	scaled superScriptWidth = superScript ? superScript->GetBoundingBox().width : 0;
+	scaled scriptWidth = scaledMax(subScriptWidth, superScriptWidth);
+
+	if (subScript != 0)
+	  subScript->SetPosition(x + scriptWidth - subScriptWidth, y + subShiftY);
+	if (superScript != 0)
+	  superScript->SetPosition(x + scriptWidth - superScriptWidth, y - superShiftY);
+
+// 	if (i % 2 == 0) {
+// 	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
+// 	  subScriptWidth = scriptBox.width;
+// 	  elem()->SetPosition(x, y + subShiftY);
+// 	} else {
+// 	  const BoundingBox& scriptBox = elem()->GetBoundingBox();
+// 	  elem()->SetPosition(x, y - superShiftY);
+// 	  x += scaledMax(subScriptWidth, scriptBox.width);
+// 	}
+
+	x += scriptWidth;
       } else if (elem()->IsA() == TAG_MPRESCRIPTS) {
 	preScript = true;
-	i = 0;
       }
 
       elem.Next();
     }
   }
+
+  unsigned i = 0;
 
   base->SetPosition(x, y);
 
