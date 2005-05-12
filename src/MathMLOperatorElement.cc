@@ -314,19 +314,6 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 
   adjustedSize = scaledMax(0, adjustedSize);
 
-  assert(GetSize() == 1);
-  if (Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(GetChild(0)))
-    {
-      if (!cNode->IsStretchyChar())
-	{
-	  Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
-	  return;
-	}
-    }
-
-  Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(0));
-  assert(sNode);
-
   scaled adjustedHeight = 0;
   scaled adjustedDepth = 0;
 
@@ -343,7 +330,17 @@ MathMLOperatorElement::VerticalStretchTo(scaled ascent, scaled descent, bool str
 
   Globals::logger(LOG_DEBUG, "adjusted stretchy size %d", sp2ipx(adjustedSize));
 
-  sNode->DoVerticalStretchyLayout(adjustedHeight, adjustedDepth, axis, strict);
+  for (unsigned i = 0; i < GetSize(); i++)
+    {
+      if (Ptr<MathMLCharNode> cNode = smart_cast<MathMLCharNode>(GetChild(i)))
+        if (!cNode->IsStretchyChar())
+          Globals::logger(LOG_WARNING, "character `U+%04x' could not be stretched", cNode->GetChar());
+
+      Ptr<MathMLCharNode> sNode = smart_cast<MathMLCharNode>(GetChild(i));
+      assert(sNode);
+
+      sNode->DoVerticalStretchyLayout(adjustedHeight, adjustedDepth, axis, strict);
+    }
 
   // since the bounding box may have changed, we force dirtyLayout to true, so that
   // a DoBoxedLayout done on this operator will have effect
@@ -519,14 +516,21 @@ MathMLOperatorElement::GetStretch() const
 {
   if (!IsStretchy()) return STRETCH_NO;
 
-  //assert(GetSize() == 1);
-  if (!is_a<MathMLCharNode>(GetChild(0))) return STRETCH_NO;
-  Ptr<MathMLCharNode> sChar = smart_cast<MathMLCharNode>(GetChild(0));
-  assert(sChar);
+  StretchId id = STRETCH_NO;
+  for (std::vector< Ptr<MathMLTextNode> >::const_iterator p = GetContent().begin();
+       p != GetContent().end();
+       p++)
+    if (Ptr<MathMLCharNode> cp = smart_cast<MathMLCharNode>(*p))
+      if (cp->IsStretchyChar())
+	{
+	  if (id != STRETCH_NO &&
+	      cp->GetStretch() != STRETCH_NO &&
+	      cp->GetStretch() != id)
+	    return STRETCH_NO;
+	  id = cp->GetStretch();
+	}
 
-  if (!sChar->IsStretchyChar()) return STRETCH_NO;
-
-  return sChar->GetStretch();
+  return id;
 }
 
 Ptr<MathMLOperatorElement>
