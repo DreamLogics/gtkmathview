@@ -1,5 +1,5 @@
 <math>
-  <mtable>
+  <mtable frame="dashed" columnlines="dashed" rowlines="dashed">
     <mtr><mtd><mtext>normal table row</mtext></mtd></mtr>
     <mlabeledtr><mtd><mtext>labeled row... with no label!</mtext></mtd></mlabeledtr>
     <mlabeledtr columnalign="right center"
