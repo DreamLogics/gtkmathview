@@ -163,7 +163,7 @@ inline int Container<Type>::IndexOf(Type obj) const
 }
 
 template <class Type>
-Container<Type>::Wrapper* Container<Type>::Search(const Type obj, int* index) const
+typename Container<Type>::Wrapper* Container<Type>::Search(const Type obj, int* index) const
 {
   int i = -1;
   Wrapper* w = first;

@@ -34,7 +34,7 @@ public:
   void ResetFirst(void);
   void ResetLast(void);
 
-  bool More(void) const { return p != 0; }
+  bool More(void) const { return this->p != 0; }
   bool IsLast(void) const;
   bool IsFirst(void) const;
   void Next(void);
@@ -44,7 +44,7 @@ public:
 
 private:
   const Container<Type>& container;
-  const Container<Type>::Wrapper* p;
+  const typename Container<Type>::Wrapper* p;
 };
 
 template <class Type>

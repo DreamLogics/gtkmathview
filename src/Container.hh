@@ -59,7 +59,7 @@ private:
     Wrapper* prev;
   };
 
-  Wrapper* Search(const Type, int* = NULL) const;
+  Wrapper* Search(const Type, int* = 0) const;
 
   unsigned n;
   Wrapper* first;

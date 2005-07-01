@@ -29,8 +29,8 @@ template <class Type>
 class Stack : public Container<Type> {
 public:
   void Push(Type obj) { AddFirst(obj); }
-  Type Pop(void) { return RemoveFirst(); }
-  Type Top(void) const { return GetFirst(); }
+  Type Pop(void) { return this->RemoveFirst(); }
+  Type Top(void) const { return this->GetFirst(); }
   void Drop(void) { Pop(); }
 };
 
