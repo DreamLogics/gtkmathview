@@ -657,6 +657,9 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
       <simple index="0002 0150 0024 0042"/>
       <compound index="0062 -1 0064 0066"/>
     </stretchy>
+    <stretchy code="|" direction="vertical">
+      <compound index="-1 -1 -1 0066"/>
+    </stretchy>
     <stretchy code="]" direction="vertical">
       <simple index="0003 0151 0025 0043"/>
       <compound index="0063 -1 0065 0067"/>

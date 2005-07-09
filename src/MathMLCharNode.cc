@@ -177,8 +177,10 @@ MathMLCharNode::DoVerticalStretchyLayoutAux(scaled desiredSize, bool)
   layout->simple = NULLCHAR;
 
   // first of all let's see if the small, unstretchable char is enough
-  fChar.GetBoundingBox(charBox);
-  if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
+  if (IsFontified()) {
+    fChar.GetBoundingBox(charBox);
+    if (scaledGeq(charBox.GetHeight(), desiredSize)) return;
+  }
 
   // next let's see if there is some single large char large enough
   for (unsigned i = 0; i < MAX_SIMPLE_CHARS && nch[i] != NULLCHAR; i++) {
