@@ -25,6 +25,11 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 -->
 
 <font-configuration>
+  <font type="ps" mode="text" map="tex-cmti"
+	family="serif" style="normal" weight="normal" size="10pt"
+	ps-file="cmu10.pfb"
+	/>
+
   <font type="ps" mode="text" map="tex-cmr"
 	family="serif" style="normal" weight="normal" size="5pt"
 	ps-file="cmr5.pfb"
@@ -305,7 +310,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	/>
 
   <font type="ps" mode="math" map="tex-circle"
-        ps-file="lcircle1.pfb"
+	ps-file="lcircle1.pfb"
 	/>
 
   <map id="tex-cmr">
@@ -368,7 +373,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
     <multi first="0x0000" last="0x00ff" index="
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
-	   0x20 0x21   -1 0x23 0x24 0x25 0x26   -1 0x28 0x29 0x2a 0x2b 0x2c 0x2d 0x2e 0x2f 
+	   0x20 0x21   -1 0x23   -1 0x25 0x26   -1 0x28 0x29 0x2a 0x2b 0x2c 0x2d 0x2e 0x2f 
 	   0x30 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39 0x3a 0x3b   -1 0x3d   -1 0x3f 
 	   0x40 0x41 0x42 0x43 0x44 0x45 0x46 0x47 0x48 0x49 0x4a 0x4b 0x4c 0x4d 0x4e 0x4f 
 	   0x50 0x51 0x52 0x53 0x54 0x55 0x56 0x57 0x58 0x59 0x5a 0x5b   -1 0x5d 0x5e   -1 
@@ -376,7 +381,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	   0x70 0x71 0x72 0x73 0x74 0x75 0x76 0x77 0x78 0x79 0x7a   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
-	     -1 0x3c   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
+	     -1 0x3c   -1 0x24   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 0x3e 
 	     -1   -1   -1   -1   -1   -1 0xc0   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1 0xc2   -1   -1   -1   -1   -1   -1 0xbc 
@@ -582,7 +587,7 @@ http://cs.unibo.it/~lpadovan/mml-widget, or send a mail to
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 0x7b 0x7c 0x7d 0x7e   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
-	     -1 0xb1   -1 0x24   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
+	     -1 0xb1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1   -1 0xb2 
 	     -1   -1   -1   -1   -1   -1 0xc0   -1   -1   -1   -1   -1   -1   -1   -1   -1 
 	     -1   -1   -1   -1   -1   -1   -1   -1 0xc2   -1   -1   -1   -1   -1   -1 0xbc 
